@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova AI - استوديو الذكاء الاصطناعي</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- مكتبة الأيقونات FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+    <div class="app-container">
+        <!-- القائمة الجانبية (Sidebar) -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <button id="sidebarToggleBtn" class="toggle-btn" title="طي / فتح القائمة">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <h2 class="logo-text">Nova <span>AI</span></h2>
+            </div>
+            
+            <!-- زر محادثة جديدة -->
+            <button id="newChatBtn" class="new-chat-btn">
+                <i class="fa-solid fa-plus"></i>
+                <span class="btn-text">محادثة جديدة</span>
+            </button>
+
+            <!-- سجل المحادثات السابقة (Recents) -->
+            <div class="history-section">
+                <h3 class="history-title">Recents</h3>
+                <ul class="history-list" id="historyList">
+                    <!-- يتم توليد عناصر القوائم المنبثقة والخيار ديناميكياً بواسطة script.js -->
+                </ul>
+            </div>
+
+            <!-- زر الإعدادات في أسفل القائمة الجانبية -->
+            <div class="sidebar-footer-actions" style="margin-top: auto; padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                <button class="sidebar-icon-btn" id="settingsBtn" title="الإعدادات">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- المحتوى الرئيسي (Main Content) -->
+        <main class="main-content">
+            
+            <!-- قسم الدردشة الشامل مع أدوات الـ + -->
+            <section id="chat-section" class="content-section active">
+                <div class="section-header">
+                    <h2>الدردشة مع Nova</h2>
+                    <p>اسأل عن أي شيء، أو استخدم أدوات التوليد المرفقة بالأسفل من زر (+).</p>
+                </div>
+                
+                <div class="chat-box" id="chatBox">
+                    <div class="message bot-message">
+                        أهلاً بك! أنا Nova، مساعدك الذكي. كيف يمكنني مساعدتك اليوم؟
+                    </div>
+                </div>
+
+                <!-- منطقة الكتابة والأزرار -->
+                <div class="input-area">
+                    <!-- Input خفي لرفع الملفات -->
+                    <input type="file" id="fileInput" style="display: none;" multiple>
+
+                    <!-- زر المرفقات (+) الموحد مع القائمة المنبثقة -->
+                    <div class="attach-wrapper" style="position: relative; display: inline-block;">
+                        <button id="attachBtn" class="attach-btn" type="button" title="خيارات إضافية">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                        
+                        <!-- القائمة المنبثقة للتوليد والرفع -->
+                        <div id="attachDropdown" class="attach-dropdown">
+                            <div class="dropdown-item" id="optUpload">
+                                <i class="fa-solid fa-paperclip"></i>
+                                <span>رفع ملف</span>
+                            </div>
+                            <div class="dropdown-item" id="optImage">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                <span>توليد صورة</span>
+                            </div>
+                            <div class="dropdown-item" id="optVideo">
+                                <i class="fa-solid fa-video"></i>
+                                <span>توليد فيديو</span>
+                            </div>
+                            <div class="dropdown-item" id="optMusic">
+                                <i class="fa-solid fa-music"></i>
+                                <span>توليد صوت</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- حقل إدخال النص -->
+                    <input type="text" id="chatInput" placeholder="اكتب رسالتك هنا...">
+                    
+                    <!-- 🎤 زر الميكروفون العادي (يحول الكلام لنص داخل الشات) -->
+                    <button id="micBtn" type="button" title="تحويل الصوت لنص">
+                        <i class="fa-solid fa-microphone"></i>
+                    </button>
+                    
+                    <!-- 🔊 زر المحادثة الصوتية المباشرة (موجات صوتية - صوت لصوت بدون قراءة) -->
+                    <button id="liveVoiceBtn" class="mic-btn live-btn" type="button" title="محادثة صوتية مباشرة">
+                        <div class="wave-icon">
+                            <span class="bar"></span>
+                            <span class="bar"></span>
+                            <span class="bar"></span>
+                            <span class="bar"></span>
+                        </div>
+                    </button>
+                    
+                    <!-- زر الإرسال -->
+                    <button id="sendChatBtn" type="button" title="إرسال">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- واجهة المحادثة الصوتية المباشرة (Full-Screen Voice Overlay) -->
+    <div id="voiceOverlay" class="voice-overlay">
+        <!-- زر الإغلاق (X) -->
+        <button id="closeVoiceBtn" class="close-voice-btn" title="إغلاق المحادثة الصوتية">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <!-- اسم التطبيق في الأعلى -->
+        <div class="voice-header">
+            <span>Nova الصوت</span>
+        </div>
+
+        <!-- الكرة الصوتية المتحركة (Orb) -->
+        <div class="orb-container">
+            <div id="voiceOrb" class="voice-orb"></div>
+        </div>
+
+        <!-- أزرار التحكم في الأسفل -->
+        <div class="voice-controls">
+            <button id="toggleMuteBtn" class="voice-ctrl-btn" title="كتم الصوت">
+                <i class="fa-solid fa-microphone"></i>
+            </button>
+            <button id="endVoiceCallBtn" class="voice-ctrl-btn close-call" title="إنهاء المحادثة">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    </div>
+<!-- نافذة الإعدادات المنبثقة (Settings Modal) -->
+<div id="settingsModal" class="settings-modal-overlay">
+    <div class="settings-modal-content">
+        <div class="settings-header">
+            <h3>الإعدادات</h3>
+            <button id="closeSettingsBtn" class="close-settings-btn"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="settings-body">
+            <div class="setting-item"><i class="fa-solid fa-clock-rotate-left"></i> Activity</div>
+            <div class="setting-item"><i class="fa-solid fa-brain"></i> Personal Intelligence</div>
+            <div class="setting-item"><i class="fa-solid fa-file-import"></i> Import memory to Nova</div>
+            <div class="setting-item"><i class="fa-regular fa-face-smile"></i> Avatar</div>
+            <div class="setting-item"><i class="fa-solid fa-chart-pie"></i> Usage limits</div>
+            <div class="setting-item"><i class="fa-solid fa-gem"></i> Gems</div>
+            <div class="setting-item"><i class="fa-solid fa-link"></i> Your public links</div>
+            <div class="setting-item"><i class="fa-solid fa-sun"></i> Theme <i class="fa-solid fa-chevron-left arrow"></i></div>
+            <div class="setting-item"><i class="fa-solid fa-box-archive"></i> View subscriptions</div>
+            <div class="setting-item"><i class="fa-solid fa-book"></i> Nova Notebook</div>
+            <div class="setting-item"><i class="fa-solid fa-photo-film"></i> Media watermark <i class="fa-solid fa-chevron-left arrow"></i></div>
+            <div class="setting-item"><i class="fa-solid fa-comment-dots"></i> Send feedback</div>
+            <div class="setting-item"><i class="fa-solid fa-circle-question"></i> Help <i class="fa-solid fa-chevron-left arrow"></i></div>
+                <div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script src="script.js"></script>
+</body>
+</html>
