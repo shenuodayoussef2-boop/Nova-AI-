@@ -868,26 +868,52 @@ body {
     }
 
     /* تحسين شريط الإدخال ليلائم الشاشات الصغيرة السفلى */
-    .input-area {
-        padding: 6px;
-        gap: 6px;
-        border-radius: 12px;
-        background-color: #1e293b;
-        margin-bottom: env(safe-area-inset-bottom, 10px);
-    }
+.input-area {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 12px;
+    background-color: #1e293b;
+    border-radius: 16px;
+    width: 100%;
+    box-sizing: border-box;
+}
 
-    .input-area input[type="text"] {
-        font-size: 14px;
-        padding: 8px;
-    }
+.input-area input[type="text"] {
+    flex-grow: 1;
+    min-width: 0;
+    padding: 8px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    outline: none;
+    text-align: right;
+}
 
-    .input-area button, 
-    .attach-btn, 
-    #micBtn, 
-    .live-btn {
-        height: 38px;
-        width: 38px;
-        min-width: 38px;
-        font-size: 14px;
-    }
+/* حاوية للأيقونات اليمين عشان تفضل متناسقة وما تدخلش في بعضها */
+.input-actions-right, 
+.input-area .left-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.input-area button, 
+.attach-btn, 
+#micBtn, 
+.live-btn {
+    height: 38px !important;
+    width: 38px !important;
+    min-width: 38px !important;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
 }
