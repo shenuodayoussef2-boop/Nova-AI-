@@ -724,7 +724,7 @@ window.addEventListener('click', (e) => {
 });
 
 // ==========================================
-// 6. نظام تنبيهات الإدارة (Admin Notifications)
+// 6. نظام تنبيهات الإدارة وإعدادات التطبيق
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const settingItems = document.querySelectorAll('.setting-item');
@@ -742,21 +742,9 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (text.includes('Import memory')) {
                 alert('ميزة استيراد الذاكرة غير مفعلة حالياً');
             } 
-            else if (text.includes('Avatar') || text.includes('Admin') || text.includes('تنبيهات')) {
-                // فتح نافذة تنبيهات الأدمن أو إرسال إشعار
-                let adminMsg = prompt('أدخل نص تنبيه أو إشعار الإدارة الجديد (Admin Broadcast):');
-                if (adminMsg && adminMsg.trim() !== '') {
-                    localStorage.setItem('novaAdminAlert', adminMsg.trim());
-                    alert('🚨 تم إرسال وتحديث تنبيه الأدمن بنجاح لجميع المستخدمين!');
-                }
+            else {
+                alert('إعدادات عامة لتطبيق Nova AI');
             }
         });
     });
-
-    // جلب وعرض تنبيه الأدمن المحفوظ تلقائياً عند فتح التطبيق (إن وجد)
-    const savedAdminAlert = localStorage.getItem('novaAdminAlert');
-    if (savedAdminAlert) {
-        console.log("🚨 تنبيه الإدارة:", savedAdminAlert);
-        // يمكنك إظهار شريط تنبيهات علوي إذا أردت
-    }
 });
