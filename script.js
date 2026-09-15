@@ -1,750 +1,2945 @@
 // ==========================================
+// NOVA AI - MAIN SCRIPT
+// ==========================================
+
+// ==========================================
 // 1. نظام المحادثات المتعددة (History & Recents)
 // ==========================================
-let chatsArray = JSON.parse(localStorage.getItem('novaAllChats')) || [];
+
+let chatsArray = JSON.parse(localStorage.getItem("novaAllChats")) || [];
 let currentChatId = null;
 
-// متغير للتحكم في إلغاء طلب الـ API (Stop / Cancel)
+// التحكم في إلغاء طلب API
 let currentAbortController = null;
 
-const historyList = document.getElementById('historyList');
-const chatBox = document.getElementById('chatBox');
-const newChatBtn = document.getElementById('newChatBtn');
+// عناصر الصفحة
+const historyList = document.getElementById("historyList");
+const chatBox = document.getElementById("chatBox");
+const newChatBtn = document.getElementById("newChatBtn");
 
-// تهيئة التطبيق عند الفتح
-window.addEventListener('DOMContentLoaded', () => {
+
+// ==========================================
+// تهيئة التطبيق
+// ==========================================
+
+window.addEventListener("DOMContentLoaded", () => {
+
     renderHistoryList();
+
     if (chatsArray.length > 0) {
         loadChat(chatsArray[0].id);
     } else {
         startNewChat();
     }
+
 });
 
-// بدء محادثة جديدة
+
+// ==========================================
+// محادثة جديدة
+// ==========================================
+
 if (newChatBtn) {
-    newChatBtn.addEventListener('click', startNewChat);
+    newChatBtn.addEventListener("click", startNewChat);
 }
+
 
 function startNewChat() {
+
     currentChatId = Date.now().toString();
-    chatBox.innerHTML = `<div class="message bot-message">أهلاً بك! أنا Nova، مساعدك الذكي من تطوير البشمهندس يوسف شنودة. كيف يمكنني مساعدتك اليوم؟</div>`;
-    renderHistoryList();
-}
 
-// حفظ المحادثة الحالية
-function saveCurrentChat(firstUserMessage = "محادثة جديدة") {
-    let existingChat = chatsArray.find(c => c.id === currentChatId);
-    let chatHtml = chatBox.innerHTML;
-
-    if (existingChat) {
-        existingChat.html = chatHtml;
-        if (existingChat.title === "محادثة جديدة" && firstUserMessage !== "محادثة جديدة") {
-            existingChat.title = firstUserMessage.substring(0, 25) + "...";
-        }
-    } else {
-        chatsArray.unshift({
-            id: currentChatId,
-            title: firstUserMessage !== "محادثة جديدة" ? firstUserMessage.substring(0, 25) + "..." : "محادثة جديدة",
-            html: chatHtml
-        });
+    if (chatBox) {
+        chatBox.innerHTML = `
+            <div class="message bot-message nova-message">
+                <div class="nova-message-content">
+                    أهلاً بك! أنا Nova، مساعدك الذكي من تطوير البشمهندس يوسف شنودة. كيف يمكنني مساعدتك اليوم؟
+                </div>
+            </div>
+        `;
     }
 
-    localStorage.setItem('novaAllChats', JSON.stringify(chatsArray));
+    if (chatInput) {
+        chatInput.value = "";
+        chatInput.style.height = "auto";
+    }
+
+    renderHistoryList();
+
+    closeAllMenus();
+
+}
+
+
+// ==========================================
+// حفظ المحادثة الحالية
+// ==========================================
+
+function saveCurrentChat(firstUserMessage = "محادثة جديدة") {
+
+    if (!chatBox || !currentChatId) return;
+
+    let existingChat = chatsArray.find(
+        chat => chat.id === currentChatId
+    );
+
+    const chatHtml = chatBox.innerHTML;
+
+    if (existingChat) {
+
+        existingChat.html = chatHtml;
+
+        if (
+            existingChat.title === "محادثة جديدة" &&
+            firstUserMessage !== "محادثة جديدة"
+        ) {
+            existingChat.title =
+                firstUserMessage.substring(0, 25) + "...";
+        }
+
+    } else {
+
+        chatsArray.unshift({
+            id: currentChatId,
+            title:
+                firstUserMessage !== "محادثة جديدة"
+                    ? firstUserMessage.substring(0, 25) + "..."
+                    : "محادثة جديدة",
+
+            html: chatHtml,
+
+            pinned: false,
+
+            createdAt: Date.now()
+        });
+
+    }
+
+    localStorage.setItem(
+        "novaAllChats",
+        JSON.stringify(chatsArray)
+    );
+
     renderHistoryList();
 }
 
-// عرض قائمة المحادثات ديناميكياً مع القوائم المنبثقة
-function renderHistoryList() {
-    if (!historyList) return;
-    historyList.innerHTML = '';
 
-    chatsArray.forEach(chat => {
-        const li = document.createElement('li');
-        li.className = 'history-item';
-        if (chat.id === currentChatId) li.classList.add('active-chat');
+// ==========================================
+// عرض History
+// ==========================================
+
+function renderHistoryList() {
+
+    if (!historyList) return;
+
+    historyList.innerHTML = "";
+
+    // المحادثات المثبتة أولاً
+    const sortedChats = [...chatsArray].sort((a, b) => {
+
+        if (a.pinned && !b.pinned) return -1;
+        if (!a.pinned && b.pinned) return 1;
+
+        return 0;
+    });
+
+
+    sortedChats.forEach(chat => {
+
+        const li = document.createElement("li");
+
+        li.className = "history-item";
+
+        if (chat.id === currentChatId) {
+            li.classList.add("active-chat");
+        }
 
         li.innerHTML = `
-            <span class="history-title-text" title="${escapeHtml(chat.title)}">${escapeHtml(chat.title)}</span>
-            <button class="more-btn" title="Options">
+            <span
+                class="history-title-text"
+                title="${escapeHtml(chat.title)}"
+            >
+                ${chat.pinned ? "📌 " : ""}
+                ${escapeHtml(chat.title)}
+            </span>
+
+            <button
+                class="more-btn"
+                type="button"
+                title="Options"
+            >
                 <i class="fa-solid fa-ellipsis-vertical"></i>
             </button>
+
             <div class="chat-context-menu">
-                <div class="context-item opt-share"><i class="fa-solid fa-share-nodes"></i> Share</div>
-                <div class="context-item opt-pin"><i class="fa-solid fa-thumbtack"></i> Pin</div>
-                <div class="context-item opt-rename"><i class="fa-solid fa-pen"></i> Rename</div>
-                <div class="context-item opt-delete"><i class="fa-regular fa-trash-can"></i> Delete</div>
+
+                <div class="context-item opt-share">
+                    <i class="fa-solid fa-share-nodes"></i>
+                    <span>مشاركة</span>
+                </div>
+
+                <div class="context-item opt-pin">
+                    <i class="fa-solid fa-thumbtack"></i>
+                    <span>${chat.pinned ? "إلغاء التثبيت" : "تثبيت"}</span>
+                </div>
+
+                <div class="context-item opt-rename">
+                    <i class="fa-solid fa-pen"></i>
+                    <span>إعادة تسمية</span>
+                </div>
+
+                <div class="context-item opt-delete">
+                    <i class="fa-regular fa-trash-can"></i>
+                    <span>حذف</span>
+                </div>
+
             </div>
         `;
 
-        li.addEventListener('click', (e) => {
-            if (!e.target.closest('.more-btn') && !e.target.closest('.chat-context-menu')) {
+
+        // فتح المحادثة
+        li.addEventListener("click", (e) => {
+
+            if (
+                !e.target.closest(".more-btn") &&
+                !e.target.closest(".chat-context-menu")
+            ) {
                 loadChat(chat.id);
             }
+
         });
 
-        const moreBtn = li.querySelector('.more-btn');
-        const contextMenu = li.querySelector('.chat-context-menu');
 
-        moreBtn.addEventListener('click', (e) => {
+        const moreBtn = li.querySelector(".more-btn");
+        const contextMenu = li.querySelector(".chat-context-menu");
+
+
+        // القائمة
+        moreBtn.addEventListener("click", (e) => {
+
             e.stopPropagation();
-            document.querySelectorAll('.chat-context-menu').forEach(menu => {
-                if (menu !== contextMenu) menu.classList.remove('show');
-            });
-            contextMenu.classList.toggle('show');
+
+            document
+                .querySelectorAll(".chat-context-menu")
+                .forEach(menu => {
+
+                    if (menu !== contextMenu) {
+                        menu.classList.remove("show");
+                    }
+
+                });
+
+            contextMenu.classList.toggle("show");
+
         });
 
-        li.querySelector('.opt-share').addEventListener('click', (e) => {
-            e.stopPropagation();
-            contextMenu.classList.remove('show');
-            navigator.clipboard.writeText(window.location.href);
-            alert('تم نسخ رابط الصفحة بنجاح!');
-        });
 
-        li.querySelector('.opt-pin').addEventListener('click', (e) => {
-            e.stopPropagation();
-            contextMenu.classList.remove('show');
-            const index = chatsArray.findIndex(c => c.id === chat.id);
-            if (index > 0) {
-                const [pinnedChat] = chatsArray.splice(index, 1);
-                chatsArray.unshift(pinnedChat);
-                localStorage.setItem('novaAllChats', JSON.stringify(chatsArray));
-                renderHistoryList();
-            }
-        });
+        // مشاركة
+        li.querySelector(".opt-share")
+            .addEventListener("click", async (e) => {
 
-        li.querySelector('.opt-rename').addEventListener('click', (e) => {
-            e.stopPropagation();
-            contextMenu.classList.remove('show');
-            const newTitle = prompt('أدخل الاسم الجديد للمحادثة:', chat.title);
-            if (newTitle && newTitle.trim() !== '') {
-                chat.title = newTitle.trim();
-                localStorage.setItem('novaAllChats', JSON.stringify(chatsArray));
-                renderHistoryList();
-            }
-        });
+                e.stopPropagation();
 
-        li.querySelector('.opt-delete').addEventListener('click', (e) => {
-            e.stopPropagation();
-            contextMenu.classList.remove('show');
-            if (confirm('هل أنت متأكد من إزالة هذه المحادثة؟')) {
-                chatsArray = chatsArray.filter(c => c.id !== chat.id);
-                localStorage.setItem('novaAllChats', JSON.stringify(chatsArray));
-                if (currentChatId === chat.id) {
-                    if (chatsArray.length > 0) loadChat(chatsArray[0].id);
-                    else startNewChat();
-                } else {
-                    renderHistoryList();
+                contextMenu.classList.remove("show");
+
+                try {
+
+                    await navigator.clipboard.writeText(
+                        window.location.href
+                    );
+
+                    showToast("تم نسخ رابط الصفحة!");
+
+                } catch {
+
+                    alert("تعذر نسخ الرابط.");
+
                 }
-            }
-        });
+
+            });
+
+
+        // تثبيت
+        li.querySelector(".opt-pin")
+            .addEventListener("click", (e) => {
+
+                e.stopPropagation();
+
+                contextMenu.classList.remove("show");
+
+                const targetChat = chatsArray.find(
+                    c => c.id === chat.id
+                );
+
+                if (!targetChat) return;
+
+                targetChat.pinned = !targetChat.pinned;
+
+                localStorage.setItem(
+                    "novaAllChats",
+                    JSON.stringify(chatsArray)
+                );
+
+                renderHistoryList();
+
+            });
+
+
+        // إعادة تسمية
+        li.querySelector(".opt-rename")
+            .addEventListener("click", (e) => {
+
+                e.stopPropagation();
+
+                contextMenu.classList.remove("show");
+
+                const newTitle = prompt(
+                    "أدخل الاسم الجديد للمحادثة:",
+                    chat.title
+                );
+
+                if (
+                    newTitle &&
+                    newTitle.trim() !== ""
+                ) {
+
+                    chat.title = newTitle.trim();
+
+                    localStorage.setItem(
+                        "novaAllChats",
+                        JSON.stringify(chatsArray)
+                    );
+
+                    renderHistoryList();
+
+                }
+
+            });
+
+
+        // حذف
+        li.querySelector(".opt-delete")
+            .addEventListener("click", (e) => {
+
+                e.stopPropagation();
+
+                contextMenu.classList.remove("show");
+
+                const confirmed = confirm(
+                    "هل أنت متأكد من إزالة هذه المحادثة؟"
+                );
+
+                if (!confirmed) return;
+
+                chatsArray = chatsArray.filter(
+                    c => c.id !== chat.id
+                );
+
+                localStorage.setItem(
+                    "novaAllChats",
+                    JSON.stringify(chatsArray)
+                );
+
+
+                if (currentChatId === chat.id) {
+
+                    if (chatsArray.length > 0) {
+
+                        loadChat(chatsArray[0].id);
+
+                    } else {
+
+                        startNewChat();
+
+                    }
+
+                } else {
+
+                    renderHistoryList();
+
+                }
+
+            });
+
 
         historyList.appendChild(li);
+
     });
+
 }
+
+
+// ==========================================
+// تحميل محادثة
+// ==========================================
 
 function loadChat(id) {
+
     currentChatId = id;
-    const chat = chatsArray.find(c => c.id === id);
-    if (chat) {
-        chatBox.innerHTML = chat.html;
-        chatBox.scrollTop = chatBox.scrollHeight;
-        renderHistoryList();
-    }
+
+    const chat = chatsArray.find(
+        c => c.id === id
+    );
+
+    if (!chat || !chatBox) return;
+
+    chatBox.innerHTML = chat.html;
+
+    restoreMessageActions();
+
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    renderHistoryList();
+
+    closeAllMenus();
+
 }
 
+
 // ==========================================
-// 2. إعدادات الـ API وإرسال الرسائل (gemini-3.6-flash)
+// إغلاق القوائم
 // ==========================================
-const API_KEY = "AQ.Ab8RN6LsjPHq02tQ-3VUd8LPxHwxmeOdGbtVrwoXDNAaeNJRuQ";
-const sendChatBtn = document.getElementById('sendChatBtn');
-const chatInput = document.getElementById('chatInput');
+
+function closeAllMenus() {
+
+    document
+        .querySelectorAll(".chat-context-menu")
+        .forEach(menu => {
+            menu.classList.remove("show");
+        });
+
+    const dropdown =
+        document.getElementById("attachDropdown");
+
+    if (dropdown) {
+        dropdown.classList.remove("show");
+    }
+
+}
+
+
+// ==========================================
+// 2. API
+// ==========================================
+
+// ⚠️ لا تضع مفتاح API الحقيقي هنا عند النشر
+const API_KEY = "YOUR_GEMINI_API_KEY";
+
+
+const sendChatBtn =
+    document.getElementById("sendChatBtn");
+
+const chatInput =
+    document.getElementById("chatInput");
+
+
+// ==========================================
+// زر الإرسال / الإيقاف
+// ==========================================
 
 function updateSendButtonState(isGenerating) {
+
     if (!sendChatBtn) return;
-    
+
     if (isGenerating) {
-        sendChatBtn.innerHTML = `<i class="fa-solid fa-square" style="font-size: 13px;"></i>`;
+
+        sendChatBtn.innerHTML =
+            `<i class="fa-solid fa-square"></i>`;
+
         sendChatBtn.title = "إيقاف الرد";
-        sendChatBtn.style.background = "#ef4444";
+
+        sendChatBtn.classList.add("stop-generating");
+
     } else {
-        sendChatBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i>`;
+
+        sendChatBtn.innerHTML =
+            `<i class="fa-solid fa-paper-plane"></i>`;
+
         sendChatBtn.title = "إرسال";
-        sendChatBtn.style.background = "";
+
+        sendChatBtn.classList.remove(
+            "stop-generating"
+        );
+
     }
+
 }
+
+
+// ==========================================
+// إرسال / إيقاف
+// ==========================================
 
 if (sendChatBtn) {
-    sendChatBtn.addEventListener('click', () => {
+
+    sendChatBtn.addEventListener("click", () => {
+
         if (currentAbortController) {
+
             currentAbortController.abort();
+
             currentAbortController = null;
+
             updateSendButtonState(false);
+
             return;
         }
+
         sendMessage();
+
     });
+
 }
+
+
+// ==========================================
+// الكتابة
+// Enter = إرسال
+// Shift + Enter = سطر جديد
+// ==========================================
 
 if (chatInput) {
-    chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            if (currentAbortController) return;
-            sendMessage();
-        }
+
+    chatInput.addEventListener("input", () => {
+
+        chatInput.style.height = "auto";
+
+        const maxHeight = 130;
+
+        chatInput.style.height =
+            Math.min(
+                chatInput.scrollHeight,
+                maxHeight
+            ) + "px";
+
     });
+
+
+    chatInput.addEventListener("keydown", (e) => {
+
+        if (
+            e.key === "Enter" &&
+            !e.shiftKey
+        ) {
+
+            e.preventDefault();
+
+            if (currentAbortController) return;
+
+            sendMessage();
+
+        }
+
+    });
+
 }
 
+
+// ==========================================
+// إرسال الرسالة
+// ==========================================
+
 async function sendMessage(customText = null) {
-    let text = customText || chatInput.value.trim();
-    if (text === '') return;
 
-    if (!currentChatId) startNewChat();
+    if (!chatBox) return;
 
-    chatBox.innerHTML += `<div class="message user-message">${escapeHtml(text)}</div>`;
-    if (!customText) chatInput.value = '';
-    chatBox.scrollTop = chatBox.scrollHeight;
-    
+    let text =
+        customText !== null
+            ? customText
+            : chatInput
+                ? chatInput.value.trim()
+                : "";
+
+    if (!text) return;
+
+
+    if (!currentChatId) {
+        startNewChat();
+    }
+
+
+    // رسالة المستخدم
+    appendUserMessage(text);
+
+
+    if (
+        !customText &&
+        chatInput
+    ) {
+
+        chatInput.value = "";
+
+        chatInput.style.height = "auto";
+
+    }
+
+
+    chatBox.scrollTop =
+        chatBox.scrollHeight;
+
+
     saveCurrentChat(text);
 
-    const lowerText = text.toLowerCase();
 
-    // التحقق التلقائي للصور
-    if (lowerText.includes('صورة') || lowerText.includes('ارسم') || lowerText.includes('تخيلية') || lowerText.includes('generate image')) {
-        const loadingId = 'img-loading-' + Date.now();
-        chatBox.innerHTML += `<div class="message bot-message" id="${loadingId}">جاري إعداد الصورة التخيلية بناءً على طلبك... 🎨</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
+    const lowerText =
+        text.toLowerCase();
 
-        const translatedText = await translateToEnglishIfNeeded(text);
-        const loadingElem = document.getElementById(loadingId);
-        if (loadingElem) loadingElem.remove();
 
-        const cleanPrompt = encodeURIComponent(translatedText);
-        const randomSeed = Math.floor(Math.random() * 1000000);
-        const imgUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?seed=${randomSeed}&width=512&height=512&nologo=true`;
+    // ==========================================
+    // توليد صورة
+    // ==========================================
 
-        chatBox.innerHTML += `
-            <div class="message bot-message">
-                <p>إليك الصورة التخيلية المطلوبة: ✨</p>
-                <div style="position: relative; display: inline-block; max-width: 100%; border-radius: 12px; overflow: hidden; margin-top: 8px;">
-                    <img src="${imgUrl}" alt="${escapeHtml(text)}" style="display: block; max-width: 100%; max-height: 350px; border-radius: 12px;" />
-                    <div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0, 0, 0, 0.75); color: #fff; padding: 4px 10px; font-size: 12px; font-weight: bold; border-radius: 6px; backdrop-filter: blur(4px); font-family: sans-serif; letter-spacing: 0.5px; border: 1px solid rgba(255,255,255,0.2);">
-                        ✨ Nova AI
-                    </div>
-                </div>
-            </div>`;
+    if (
+        lowerText.includes("صورة") ||
+        lowerText.includes("ارسم") ||
+        lowerText.includes("تخيلية") ||
+        lowerText.includes("generate image")
+    ) {
 
-        saveCurrentChat();
-        chatBox.scrollTop = chatBox.scrollHeight;
-        return; 
-    }
+        await generateImage(text);
 
-    // التحقق التلقائي للفيديوهات
-    if (lowerText.includes('فيديو') || lowerText.includes('مشهد متحرك') || lowerText.includes('generate video')) {
-        const loadingId = 'vid-loading-' + Date.now();
-        chatBox.innerHTML += `<div class="message bot-message" id="${loadingId}">جاري إنشاء المشهد السينمائي بناءً على طلبك... 🎬</div>`;
-        chatBox.scrollTop = chatBox.scrollHeight;
-
-        const translatedText = await translateToEnglishIfNeeded(text);
-        const loadingElem = document.getElementById(loadingId);
-        if (loadingElem) loadingElem.remove();
-
-        const cleanPrompt = encodeURIComponent(translatedText);
-        const randomSeed = Math.floor(Math.random() * 1000000);
-        const videoUrl = `https://image.pollinations.ai/prompt/cinematic%20video%20still%20of%20${cleanPrompt}?seed=${randomSeed}&width=600&height=400&nologo=true`;
-
-        chatBox.innerHTML += `
-            <div class="message bot-message">
-                <p>إليك المشهد المطلوب: 🎥</p>
-                <div style="position: relative; display: inline-block; max-width: 100%; border-radius: 12px; overflow: hidden; margin-top: 8px;">
-                    <img src="${videoUrl}" alt="${escapeHtml(text)}" style="display: block; max-width: 100%; max-height: 350px; border-radius: 12px;" />
-                    <div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0, 0, 0, 0.75); color: #fff; padding: 4px 10px; font-size: 12px; font-weight: bold; border-radius: 6px; backdrop-filter: blur(4px); font-family: sans-serif; letter-spacing: 0.5px; border: 1px solid rgba(255,255,255,0.2);">
-                        🎬 Nova AI
-                    </div>
-                </div>
-            </div>`;
-
-        saveCurrentChat();
-        chatBox.scrollTop = chatBox.scrollHeight;
         return;
+
     }
 
-    // الدردشة النصية باستخدام نموذج gemini-3.6-flash
-    const loadingId = 'loading-' + Date.now();
-    chatBox.innerHTML += `<div class="message bot-message" id="${loadingId}">Nova يفكر... 🤔</div>`;
-    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // ==========================================
+    // توليد فيديو
+    // ==========================================
+
+    if (
+        lowerText.includes("فيديو") ||
+        lowerText.includes("مشهد متحرك") ||
+        lowerText.includes("generate video")
+    ) {
+
+        await generateVideo(text);
+
+        return;
+
+    }
+
+
+    // ==========================================
+    // Chat
+    // ==========================================
+
+    const loadingId =
+        "loading-" + Date.now();
+
+
+    chatBox.insertAdjacentHTML(
+        "beforeend",
+        `
+        <div
+            class="message bot-message nova-message"
+            id="${loadingId}"
+        >
+            <div class="nova-loading">
+                <span>Nova يفكر</span>
+                <span class="loading-dots">
+                    <i></i>
+                    <i></i>
+                    <i></i>
+                </span>
+            </div>
+        </div>
+        `
+    );
+
+
+    chatBox.scrollTop =
+        chatBox.scrollHeight;
+
 
     updateSendButtonState(true);
-    currentAbortController = new AbortController();
+
+    currentAbortController =
+        new AbortController();
+
 
     let success = false;
     let data = null;
 
+
     try {
-        for (let attempt = 1; attempt <= 3; attempt++) {
+
+        for (
+            let attempt = 1;
+            attempt <= 3;
+            attempt++
+        ) {
+
             try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${API_KEY}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    signal: currentAbortController.signal,
-                    body: JSON.stringify({ 
-                        contents: [{ parts: [{ text: text }] }] 
-                    })
-                });
 
-                data = await response.json();
-                
-                if (data.error && data.error.message && data.error.message.includes('high demand') && attempt < 3) {
-                    await new Promise(resolve => setTimeout(resolve, 1500));
+                const response = await fetch(
+                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${API_KEY}`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        signal:
+                            currentAbortController.signal,
+
+                        body: JSON.stringify({
+                            contents: [
+                                {
+                                    parts: [
+                                        {
+                                            text: text
+                                        }
+                                    ]
+                                }
+                            ]
+                        })
+                    }
+                );
+
+
+                data =
+                    await response.json();
+
+
+                if (
+                    data.error &&
+                    data.error.message &&
+                    data.error.message.includes(
+                        "high demand"
+                    ) &&
+                    attempt < 3
+                ) {
+
+                    await delay(1500);
+
                     continue;
+
                 }
-                
-                success = true;
+
+
+                success = response.ok;
+
                 break;
+
+
             } catch (netErr) {
-                if (netErr.name === 'AbortError') throw netErr;
-                if (attempt === 3) throw netErr;
-                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                if (
+                    netErr.name ===
+                    "AbortError"
+                ) {
+
+                    throw netErr;
+
+                }
+
+
+                if (attempt === 3) {
+                    throw netErr;
+                }
+
+
+                await delay(1500);
+
             }
+
         }
 
-        const loadingElem = document.getElementById(loadingId);
-        if (loadingElem) loadingElem.remove();
 
-        if (success && data && data.candidates && data.candidates[0].content) {
-            let reply = data.candidates[0].content.parts[0].text;
-            chatBox.innerHTML += `<div class="message bot-message">${escapeHtml(reply)}</div>`;
-        } else if (data && data.error) {
-            chatBox.innerHTML += `<div class="message bot-message">خطأ من الخادم: ${escapeHtml(data.error.message || 'غير معروف')}</div>`;
+        const loadingElem =
+            document.getElementById(
+                loadingId
+            );
+
+        if (loadingElem) {
+            loadingElem.remove();
+        }
+
+
+        if (
+            success &&
+            data &&
+            data.candidates &&
+            data.candidates[0] &&
+            data.candidates[0].content
+        ) {
+
+            const parts =
+                data.candidates[0].content.parts || [];
+
+            const reply =
+                parts
+                    .map(part => part.text || "")
+                    .join("\n");
+
+
+            const message =
+                createAssistantMessage(reply);
+
+
+            chatBox.appendChild(message);
+
+
+        } else if (
+            data &&
+            data.error
+        ) {
+
+            const message =
+                createAssistantMessage(
+                    `خطأ من الخادم: ${
+                        data.error.message ||
+                        "غير معروف"
+                    }`
+                );
+
+            chatBox.appendChild(message);
+
+
         } else {
-            chatBox.innerHTML += `<div class="message bot-message">عذراً، لم يتم استلام رد صحيح من الخادم.</div>`;
+
+            const message =
+                createAssistantMessage(
+                    "عذراً، لم يتم استلام رد صحيح من الخادم."
+                );
+
+            chatBox.appendChild(message);
+
         }
+
+
     } catch (error) {
-        const loadingElem = document.getElementById(loadingId);
-        if (loadingElem) loadingElem.remove();
 
-        if (error.name === 'AbortError') {
-            chatBox.innerHTML += `<div class="message bot-message" style="opacity: 0.7;">تم إلغاء الرد بواسطة المستخدم.</div>`;
-        } else {
-            chatBox.innerHTML += `<div class="message bot-message">خطأ في الاتصال بالإنترنت أو الخادم (ضغط عالٍ مؤقت).</div>`;
+        const loadingElem =
+            document.getElementById(
+                loadingId
+            );
+
+        if (loadingElem) {
+            loadingElem.remove();
         }
+
+
+        if (
+            error.name ===
+            "AbortError"
+        ) {
+
+            chatBox.insertAdjacentHTML(
+                "beforeend",
+                `
+                <div class="message bot-message nova-message muted-message">
+                    تم إلغاء الرد بواسطة المستخدم.
+                </div>
+                `
+            );
+
+        } else {
+
+            chatBox.insertAdjacentHTML(
+                "beforeend",
+                `
+                <div class="message bot-message nova-message">
+                    حدث خطأ في الاتصال بالإنترنت أو الخادم.
+                </div>
+                `
+            );
+
+        }
+
     }
+
 
     updateSendButtonState(false);
+
     currentAbortController = null;
-    chatBox.scrollTop = chatBox.scrollHeight;
+
+    chatBox.scrollTop =
+        chatBox.scrollHeight;
+
     saveCurrentChat();
+
 }
 
-function escapeHtml(text) {
-    return text.replace(/&/g, "&amp;")
-               .replace(/</g, "&lt;")
-               .replace(/>/g, "&gt;")
-               .replace(/"/g, "&quot;")
-               .replace(/'/g, '&#039;')
-               .replace(/\n/g, '<br>');
+
+// ==========================================
+// رسالة المستخدم
+// ==========================================
+
+function appendUserMessage(text) {
+
+    const message =
+        document.createElement("div");
+
+    message.className =
+        "message user-message";
+
+    message.innerHTML =
+        escapeHtml(text);
+
+    chatBox.appendChild(message);
+
 }
 
-async function translateToEnglishIfNeeded(text) {
-    const dictionary = {
-        "سبونج بوب": "Spongebob Squarepants",
-        "سبونجبوب": "Spongebob Squarepants",
-        "شفيق": "Squidward Tentacles",
-        "بسيط": "Patrick Star",
-        "مستر سلطع": "Mr. Krabs",
-        "قاع الهامور": "Bikini Bottom",
-        "باتمان": "Batman",
-        "سوبرمان": "Superman"
-    };
 
-    let cleanedText = text.trim();
+// ==========================================
+// رسالة Nova
+// ==========================================
 
-    for (const [key, value] of Object.entries(dictionary)) {
-        if (cleanedText.includes(key)) {
-            cleanedText = cleanedText.replace(new RegExp(key, 'g'), value);
+function createAssistantMessage(text) {
+
+    const messageDiv =
+        document.createElement("div");
+
+    messageDiv.className =
+        "message bot-message nova-message";
+
+
+    messageDiv.innerHTML = `
+
+        <div class="nova-message-content">
+            ${escapeHtml(text)}
+        </div>
+
+        <div class="message-actions">
+
+            <button
+                type="button"
+                class="message-action copy-message"
+                title="نسخ"
+            >
+                <i class="fa-regular fa-copy"></i>
+            </button>
+
+            <button
+                type="button"
+                class="message-action regenerate-message"
+                title="إعادة التوليد"
+            >
+                <i class="fa-solid fa-rotate"></i>
+            </button>
+
+            <button
+                type="button"
+                class="message-action like-message"
+                title="مفيد"
+            >
+                <i class="fa-regular fa-thumbs-up"></i>
+            </button>
+
+            <button
+                type="button"
+                class="message-action dislike-message"
+                title="غير مفيد"
+            >
+                <i class="fa-regular fa-thumbs-down"></i>
+            </button>
+
+        </div>
+
+    `;
+
+
+    setupMessageActions(
+        messageDiv,
+        text
+    );
+
+
+    return messageDiv;
+
+}
+
+
+// ==========================================
+// أزرار رسالة Nova
+// ==========================================
+
+function setupMessageActions(
+    messageDiv,
+    originalText
+) {
+
+    if (!messageDiv) return;
+
+
+    const copyBtn =
+        messageDiv.querySelector(
+            ".copy-message"
+        );
+
+    const regenerateBtn =
+        messageDiv.querySelector(
+            ".regenerate-message"
+        );
+
+    const likeBtn =
+        messageDiv.querySelector(
+            ".like-message"
+        );
+
+    const dislikeBtn =
+        messageDiv.querySelector(
+            ".dislike-message"
+        );
+
+
+    // نسخ
+    copyBtn?.addEventListener(
+        "click",
+        async () => {
+
+            try {
+
+                await navigator.clipboard.writeText(
+                    originalText
+                );
+
+                copyBtn.innerHTML =
+                    `<i class="fa-solid fa-check"></i>`;
+
+                showToast(
+                    "تم نسخ الرد"
+                );
+
+
+                setTimeout(() => {
+
+                    copyBtn.innerHTML =
+                        `<i class="fa-regular fa-copy"></i>`;
+
+                }, 1500);
+
+
+            } catch {
+
+                alert("تعذر نسخ النص.");
+
+            }
+
         }
-    }
+    );
 
-    const hasArabic = /[\u0600-\u06FF]/.test(cleanedText);
-    if (!hasArabic) return cleanedText;
 
-    try {
-        const res = await fetch(`https://translate.googleapis.com/translate_a/single?client=gtx&sl=ar&tl=en&dt=t&q=${encodeURIComponent(cleanedText)}`);
-        const data = await res.json();
-        if (data && data[0] && data[0][0] && data[0][0][0]) {
-            return data[0][0][0];
+    // إعادة توليد
+    regenerateBtn?.addEventListener(
+        "click",
+        () => {
+
+            const messages =
+                [
+                    ...chatBox.querySelectorAll(
+                        ".message"
+                    )
+                ];
+
+            const messageIndex =
+                messages.indexOf(messageDiv);
+
+
+            if (messageIndex <= 0) return;
+
+
+            const previousUserMessage =
+                messages
+                    .slice(0, messageIndex)
+                    .reverse()
+                    .find(msg =>
+                        msg.classList.contains(
+                            "user-message"
+                        )
+                    );
+
+
+            if (!previousUserMessage) return;
+
+
+            const text =
+                previousUserMessage.innerText.trim();
+
+
+            messageDiv.remove();
+
+            sendMessage(text);
+
         }
-    } catch (err) {
-        console.log("تعذرت الترجمة:", err);
-    }
+    );
 
-    return cleanedText;
+
+    // Like
+    likeBtn?.addEventListener(
+        "click",
+        () => {
+
+            likeBtn.classList.toggle(
+                "active"
+            );
+
+            dislikeBtn?.classList.remove(
+                "active"
+            );
+
+        }
+    );
+
+
+    // Dislike
+    dislikeBtn?.addEventListener(
+        "click",
+        () => {
+
+            dislikeBtn.classList.toggle(
+                "active"
+            );
+
+            likeBtn?.classList.remove(
+                "active"
+            );
+
+        }
+    );
+
 }
 
-// دالة عرض الصورة مع أزرار الـ Vision Chips
-function appendImageMessageWithVisionChips(imageSrc) {
-    const chatBox = document.getElementById('chatBox');
+
+// ==========================================
+// إعادة تفعيل أزرار الرسائل بعد تحميل History
+// ==========================================
+
+function restoreMessageActions() {
+
     if (!chatBox) return;
 
-    const messageDiv = document.createElement('div');
-    messageDiv.className = 'message user-message';
-    messageDiv.innerHTML = `
-        <div style="margin-bottom: 6px;">📷 تم إرفاق السكرين شوت:</div>
-        <img src="${imageSrc}" alt="Uploaded Screenshot" style="max-width: 100%; max-height: 250px; border-radius: 10px; display: block; margin-bottom: 10px; object-fit: contain;">
-        <div class="vision-actions-chips" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 8px;">
-            <button class="vision-chip-btn" onclick="triggerVisionAction('حلّل الصورة أو السكرين شوت ده', '${imageSrc}')" style="background: #334155; color: #fff; border: 1px solid #475569; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;">🔍 حلّل السكرين</button>
-            <button class="vision-chip-btn" onclick="triggerVisionAction('استخرج الكلام الموجود في الصورة', '${imageSrc}')" style="background: #334155; color: #fff; border: 1px solid #475569; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;">📝 استخرج الكلام</button>
-            <button class="vision-chip-btn" onclick="triggerVisionAction('اشرح لي المشكلة أو المحتوى الظاهر في هذه الصورة', '${imageSrc}')" style="background: #334155; color: #fff; border: 1px solid #475569; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;">💡 اشرح المحتوى</button>
-        </div>
-    `;
-    chatBox.appendChild(messageDiv);
+    chatBox
+        .querySelectorAll(
+            ".nova-message"
+        )
+        .forEach(message => {
+
+            const content =
+                message.querySelector(
+                    ".nova-message-content"
+                );
+
+            if (!content) return;
+
+            const text =
+                content.innerText;
+
+            setupMessageActions(
+                message,
+                text
+            );
+
+        });
+
 }
 
-window.triggerVisionAction = function(actionType, imageSrc) {
-    let promptText = `بخصوص السكرين شوت المرفق، من فضلك قم بـ: ${actionType}`;
-    if (typeof sendMessage === 'function') {
-        sendMessage(promptText);
-    } else {
-        console.log(promptText);
-    }
-};
 
 // ==========================================
-// 3. تفعيل الأزرار والقوائم المرفقة (+)
+// escape HTML
 // ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-    const sidebar = document.getElementById('sidebar');
-    const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
 
-    if (sidebarToggleBtn && sidebar) {
-        sidebarToggleBtn.addEventListener('click', () => {
-            sidebar.classList.toggle('collapsed');
-        });
+function escapeHtml(text) {
+
+    if (text === null || text === undefined) {
+        return "";
     }
 
-    const attachBtn = document.getElementById('attachBtn');
-    const attachDropdown = document.getElementById('attachDropdown');
-    const fileInput = document.getElementById('fileInput');
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;")
+        .replace(/\n/g, "<br>");
 
-    if (attachBtn && attachDropdown) {
-        attachBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            attachDropdown.classList.toggle('show');
-        });
+}
+
+
+// ==========================================
+// Delay
+// ==========================================
+
+function delay(ms) {
+
+    return new Promise(
+        resolve => setTimeout(resolve, ms)
+    );
+
+}
+
+
+// ==========================================
+// Toast
+// ==========================================
+
+function showToast(message) {
+
+    let toast =
+        document.getElementById(
+            "novaToast"
+        );
+
+
+    if (!toast) {
+
+        toast =
+            document.createElement("div");
+
+        toast.id =
+            "novaToast";
+
+        toast.className =
+            "nova-toast";
+
+        document.body.appendChild(
+            toast
+        );
+
     }
 
-    document.addEventListener('click', () => {
-        if (attachDropdown) attachDropdown.classList.remove('show');
-        document.querySelectorAll('.chat-context-menu').forEach(menu => menu.classList.remove('show'));
-    });
 
-    const optUpload = document.getElementById('optUpload');
-    if (optUpload && fileInput) {
-        optUpload.addEventListener('click', () => {
-            fileInput.click();
-        });
+    toast.textContent =
+        message;
 
-        fileInput.addEventListener('change', () => {
-            if (fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                const fileName = file.name;
-                const fileReader = new FileReader();
+    toast.classList.add(
+        "show"
+    );
 
-                fileReader.onload = function(e) {
-                    const fileResult = e.target.result;
-                    if (file.type.startsWith('image/')) {
-                        appendImageMessageWithVisionChips(fileResult);
-                    } else {
-                        chatBox.innerHTML += `<div class="message user-message">📎 تم إرفاق الملف: <b>${escapeHtml(fileName)}</b></div>`;
-                    }
-                    saveCurrentChat();
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                    fileInput.value = '';
-                };
 
-                if (file.type.startsWith('image/')) {
-                    fileReader.readAsDataURL(file);
-                } else {
-                    chatBox.innerHTML += `<div class="message user-message">📎 تم إرفاق الملف: <b>${escapeHtml(fileName)}</b></div>`;
-                    saveCurrentChat();
-                    chatBox.scrollTop = chatBox.scrollHeight;
-                    fileInput.value = '';
+    clearTimeout(
+        toast._timer
+    );
+
+
+    toast._timer =
+        setTimeout(() => {
+
+            toast.classList.remove(
+                "show"
+            );
+
+        }, 1800);
+
+}
+
+
+// ==========================================
+// 3. ترجمة النصوص للصور
+// ==========================================
+
+async function translateToEnglishIfNeeded(text) {
+
+    const dictionary = {
+
+        "سبونج بوب":
+            "Spongebob Squarepants",
+
+        "سبونجبوب":
+            "Spongebob Squarepants",
+
+        "شفيق":
+            "Squidward Tentacles",
+
+        "بسيط":
+            "Patrick Star",
+
+        "مستر سلطع":
+            "Mr. Krabs",
+
+        "قاع الهامور":
+            "Bikini Bottom",
+
+        "باتمان":
+            "Batman",
+
+        "سوبرمان":
+            "Superman"
+
+    };
+
+
+    let cleanedText =
+        text.trim();
+
+
+    for (
+        const [key, value]
+        of Object.entries(dictionary)
+    ) {
+
+        cleanedText =
+            cleanedText.replace(
+                new RegExp(
+                    key,
+                    "g"
+                ),
+                value
+            );
+
+    }
+
+
+    const hasArabic =
+        /[\u0600-\u06FF]/.test(
+            cleanedText
+        );
+
+
+    if (!hasArabic) {
+        return cleanedText;
+    }
+
+
+    try {
+
+        const res =
+            await fetch(
+                `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ar&tl=en&dt=t&q=${encodeURIComponent(cleanedText)}`
+            );
+
+
+        const data =
+            await res.json();
+
+
+        if (
+            data &&
+            data[0] &&
+            data[0][0] &&
+            data[0][0][0]
+        ) {
+
+            return data[0][0][0];
+
+        }
+
+
+    } catch (err) {
+
+        console.log(
+            "تعذرت الترجمة:",
+            err
+        );
+
+    }
+
+
+    return cleanedText;
+
+}
+
+
+// ==========================================
+// 4. توليد الصور
+// ==========================================
+
+async function generateImage(text) {
+
+    const loadingId =
+        "img-loading-" + Date.now();
+
+
+    chatBox.insertAdjacentHTML(
+        "beforeend",
+        `
+        <div
+            class="message bot-message nova-message"
+            id="${loadingId}"
+        >
+            جاري إعداد الصورة التخيلية... 🎨
+        </div>
+        `
+    );
+
+
+    chatBox.scrollTop =
+        chatBox.scrollHeight;
+
+
+    const translatedText =
+        await translateToEnglishIfNeeded(
+            text
+        );
+
+
+    document
+        .getElementById(loadingId)
+        ?.remove();
+
+
+    const cleanPrompt =
+        encodeURIComponent(
+            translatedText
+        );
+
+
+    const randomSeed =
+        Math.floor(
+            Math.random() * 1000000
+        );
+
+
+    const imgUrl =
+        `https://image.pollinations.ai/prompt/${cleanPrompt}?seed=${randomSeed}&width=512&height=512&nologo=true`;
+
+
+    appendMediaMessage(
+        "إليك الصورة التخيلية المطلوبة: ✨",
+        imgUrl,
+        text,
+        "image"
+    );
+
+
+    saveCurrentChat();
+
+    chatBox.scrollTop =
+        chatBox.scrollHeight;
+
+}
+
+
+// ==========================================
+// 5. توليد الفيديو
+// ==========================================
+
+async function generateVideo(text) {
+
+    const loadingId =
+        "vid-loading-" + Date.now();
+
+
+    chatBox.insertAdjacentHTML(
+        "beforeend",
+        `
+        <div
+            class="message bot-message nova-message"
+            id="${loadingId}"
+        >
+            جاري إنشاء المشهد السينمائي... 🎬
+        </div>
+        `
+    );
+
+
+    chatBox.scrollTop =
+        chatBox.scrollHeight;
+
+
+    const translatedText =
+        await translateToEnglishIfNeeded(
+            text
+        );
+
+
+    document
+        .getElementById(loadingId)
+        ?.remove();
+
+
+    const cleanPrompt =
+        encodeURIComponent(
+            translatedText
+        );
+
+
+    const randomSeed =
+        Math.floor(
+            Math.random() * 1000000
+        );
+
+
+    const videoUrl =
+        `https://image.pollinations.ai/prompt/cinematic%20video%20still%20of%20${cleanPrompt}?seed=${randomSeed}&width=600&height=400&nologo=true`;
+
+
+    appendMediaMessage(
+        "إليك المشهد المطلوب: 🎥",
+        videoUrl,
+        text,
+        "video"
+    );
+
+
+    saveCurrentChat();
+
+    chatBox.scrollTop =
+        chatBox.scrollHeight;
+
+}
+
+
+// ==========================================
+// عرض Media
+// ==========================================
+
+function appendMediaMessage(
+    title,
+    src,
+    altText,
+    type
+) {
+
+    const message =
+        document.createElement(
+            "div"
+        );
+
+    message.className =
+        "message bot-message nova-message";
+
+
+    const icon =
+        type === "video"
+            ? "🎬"
+            : "✨";
+
+
+    message.innerHTML = `
+
+        <div class="nova-message-content">
+
+            <p>
+                ${title}
+            </p>
+
+            <div
+                style="
+                    position:relative;
+                    display:inline-block;
+                    max-width:100%;
+                    border-radius:12px;
+                    overflow:hidden;
+                    margin-top:8px;
+                "
+            >
+
+                <img
+                    src="${src}"
+                    alt="${escapeHtml(altText)}"
+                    style="
+                        display:block;
+                        max-width:100%;
+                        max-height:350px;
+                        border-radius:12px;
+                    "
+                >
+
+                <div
+                    style="
+                        position:absolute;
+                        bottom:8px;
+                        right:8px;
+                        background:rgba(0,0,0,.75);
+                        color:#fff;
+                        padding:4px 10px;
+                        font-size:12px;
+                        font-weight:bold;
+                        border-radius:6px;
+                        backdrop-filter:blur(4px);
+                    "
+                >
+                    ${icon} Nova AI
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    chatBox.appendChild(
+        message
+    );
+
+}
+
+
+// ==========================================
+// 6. Vision / رفع الصور
+// ==========================================
+
+function appendImageMessageWithVisionChips(
+    imageSrc
+) {
+
+    if (!chatBox) return;
+
+
+    const messageDiv =
+        document.createElement(
+            "div"
+        );
+
+
+    messageDiv.className =
+        "message user-message";
+
+
+    messageDiv.innerHTML = `
+
+        <div style="margin-bottom:6px;">
+            📷 تم إرفاق الصورة:
+        </div>
+
+        <img
+            src="${imageSrc}"
+            alt="Uploaded Image"
+            style="
+                max-width:100%;
+                max-height:250px;
+                border-radius:10px;
+                display:block;
+                margin-bottom:10px;
+                object-fit:contain;
+            "
+        >
+
+        <div
+            class="vision-actions-chips"
+            style="
+                display:flex;
+                flex-wrap:wrap;
+                gap:6px;
+                margin-top:8px;
+                border-top:1px solid rgba(255,255,255,.15);
+                padding-top:8px;
+            "
+        >
+
+            <button
+                class="vision-chip-btn"
+                type="button"
+                data-action="حلّل الصورة أو السكرين شوت ده"
+            >
+                🔍 حلّل الصورة
+            </button>
+
+            <button
+                class="vision-chip-btn"
+                type="button"
+                data-action="استخرج الكلام الموجود في الصورة"
+            >
+                📝 استخرج الكلام
+            </button>
+
+            <button
+                class="vision-chip-btn"
+                type="button"
+                data-action="اشرح لي المشكلة أو المحتوى الظاهر في هذه الصورة"
+            >
+                💡 اشرح المحتوى
+            </button>
+
+        </div>
+
+    `;
+
+
+    messageDiv
+        .querySelectorAll(
+            ".vision-chip-btn"
+        )
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const action =
+                        button.dataset.action;
+
+                    triggerVisionAction(
+                        action,
+                        imageSrc
+                    );
+
                 }
-            }
+            );
+
         });
-    }
 
-    const optImage = document.getElementById('optImage');
-    if (optImage) {
-        optImage.addEventListener('click', async () => {
-            let promptText = prompt("اكتب وصف الصورة (بالعربي أو الإنجليزي):");
-            if (promptText && promptText.trim() !== '') {
-                const userPrompt = promptText.trim();
-                chatBox.innerHTML += `<div class="message user-message">رسم صورة: ${escapeHtml(userPrompt)}</div>`;
-                
-                const loadingId = 'img-loading-' + Date.now();
-                chatBox.innerHTML += `<div class="message bot-message" id="${loadingId}">جاري إعداد الصورة... 🎨</div>`;
-                chatBox.scrollTop = chatBox.scrollHeight;
 
-                const translatedText = await translateToEnglishIfNeeded(userPrompt);
-                
-                const loadingElem = document.getElementById(loadingId);
-                if (loadingElem) loadingElem.remove();
+    chatBox.appendChild(
+        messageDiv
+    );
 
-                const cleanPrompt = encodeURIComponent(translatedText);
-                const randomSeed = Math.floor(Math.random() * 1000000);
-                const imgUrl = `https://image.pollinations.ai/prompt/${cleanPrompt}?seed=${randomSeed}&width=512&height=512&nologo=true`;
+}
 
-                chatBox.innerHTML += `
-                    <div class="message bot-message">
-                        <p>إليك الصورة المطلوبة: ✨</p>
-                        <div style="position: relative; display: inline-block; max-width: 100%; border-radius: 12px; overflow: hidden; margin-top: 8px;">
-                            <img src="${imgUrl}" alt="${escapeHtml(userPrompt)}" style="display: block; max-width: 100%; max-height: 350px; border-radius: 12px;" />
-                            <div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0, 0, 0, 0.75); color: #fff; padding: 4px 10px; font-size: 12px; font-weight: bold; border-radius: 6px; backdrop-filter: blur(4px); font-family: sans-serif; letter-spacing: 0.5px; border: 1px solid rgba(255,255,255,0.2);">
-                                ✨ Nova AI
-                            </div>
-                        </div>
-                    </div>`;
-
-                saveCurrentChat();
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }
-        });
-    }
-
-    const optVideo = document.getElementById('optVideo');
-    if (optVideo) {
-        optVideo.addEventListener('click', async () => {
-            let promptText = prompt("اكتب وصف الفيديو (بالعربي أو الإنجليزي):");
-            if (promptText && promptText.trim() !== '') {
-                const userPrompt = promptText.trim();
-                chatBox.innerHTML += `<div class="message user-message">توليد فيديو: ${escapeHtml(userPrompt)}</div>`;
-                
-                const loadingId = 'vid-loading-' + Date.now();
-                chatBox.innerHTML += `<div class="message bot-message" id="${loadingId}">جاري إنشاء الفيديو... 🎬</div>`;
-                chatBox.scrollTop = chatBox.scrollHeight;
-
-                const translatedText = await translateToEnglishIfNeeded(userPrompt);
-
-                const loadingElem = document.getElementById(loadingId);
-                if (loadingElem) loadingElem.remove();
-
-                const cleanPrompt = encodeURIComponent(translatedText);
-                const randomSeed = Math.floor(Math.random() * 1000000);
-                const videoUrl = `https://image.pollinations.ai/prompt/cinematic%20video%20still%20of%20${cleanPrompt}?seed=${randomSeed}&width=600&height=400&nologo=true`;
-
-                chatBox.innerHTML += `
-                    <div class="message bot-message">
-                        <p>إليك المشهد المطلوب: 🎥</p>
-                        <div style="position: relative; display: inline-block; max-width: 100%; border-radius: 12px; overflow: hidden; margin-top: 8px;">
-                            <img src="${videoUrl}" alt="${escapeHtml(userPrompt)}" style="display: block; max-width: 100%; max-height: 350px; border-radius: 12px;" />
-                            <div style="position: absolute; bottom: 8px; right: 8px; background: rgba(0, 0, 0, 0.75); color: #fff; padding: 4px 10px; font-size: 12px; font-weight: bold; border-radius: 6px; backdrop-filter: blur(4px); font-family: sans-serif; letter-spacing: 0.5px; border: 1px solid rgba(255,255,255,0.2);">
-                                🎬 Nova AI
-                            </div>
-                        </div>
-                    </div>`;
-
-                saveCurrentChat();
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }
-        });
-    }
-
-    const optMusic = document.getElementById('optMusic');
-    if (optMusic) {
-        optMusic.addEventListener('click', () => {
-            let text = prompt("اكتب النص المراد تحويله إلى صوت:");
-            if (text && text.trim() !== '') {
-                chatBox.innerHTML += `<div class="message user-message">توليد صوت: ${escapeHtml(text)}</div>`;
-                const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(text)}&tl=ar&client=tw-ob`;
-                chatBox.innerHTML += `
-                    <div class="message bot-message">
-                        <p>🎵 تم إنشاء المقطع الصوتي بنجاح:</p>
-                        <audio controls autoplay src="${audioUrl}" style="margin-top: 10px; width: 100%;"></audio>
-                    </div>`;
-                saveCurrentChat();
-                chatBox.scrollTop = chatBox.scrollHeight;
-            }
-        });
-    }
-});
 
 // ==========================================
-// 4. ميزات الصوت والتعرف على الكلام (Voice Chat)
+// Vision Action
 // ==========================================
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-const voiceOverlay = document.getElementById('voiceOverlay');
-const closeVoiceBtn = document.getElementById('closeVoiceBtn');
-const endVoiceCallBtn = document.getElementById('endVoiceCallBtn');
-const voiceOrb = document.getElementById('voiceOrb');
-const liveVoiceBtn = document.getElementById('liveVoiceBtn');
-const micBtn = document.getElementById('micBtn');
+window.triggerVisionAction =
+    function (
+        actionType,
+        imageSrc
+    ) {
+
+        const promptText =
+            `بخصوص الصورة المرفقة، من فضلك قم بـ: ${actionType}`;
+
+        sendMessage(
+            promptText
+        );
+
+    };
+
+
+// ==========================================
+// 7. Sidebar + Attachments
+// ==========================================
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        const sidebar =
+            document.getElementById(
+                "sidebar"
+            );
+
+        const sidebarToggleBtn =
+            document.getElementById(
+                "sidebarToggleBtn"
+            );
+
+
+        // Sidebar
+        if (
+            sidebarToggleBtn &&
+            sidebar
+        ) {
+
+            sidebarToggleBtn.addEventListener(
+                "click",
+                () => {
+
+                    if (
+                        window.innerWidth <= 768
+                    ) {
+
+                        sidebar.classList.toggle(
+                            "mobile-open"
+                        );
+
+                    } else {
+
+                        sidebar.classList.toggle(
+                            "collapsed"
+                        );
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        // Attach
+        const attachBtn =
+            document.getElementById(
+                "attachBtn"
+            );
+
+        const attachDropdown =
+            document.getElementById(
+                "attachDropdown"
+            );
+
+        const fileInput =
+            document.getElementById(
+                "fileInput"
+            );
+
+
+        if (
+            attachBtn &&
+            attachDropdown
+        ) {
+
+            attachBtn.addEventListener(
+                "click",
+                (e) => {
+
+                    e.stopPropagation();
+
+                    attachDropdown.classList.toggle(
+                        "show"
+                    );
+
+                }
+            );
+
+        }
+
+
+        // إغلاق القوائم
+        document.addEventListener(
+            "click",
+            () => {
+
+                closeAllMenus();
+
+            }
+        );
+
+
+        // ==========================================
+        // رفع الملفات
+        // ==========================================
+
+        const optUpload =
+            document.getElementById(
+                "optUpload"
+            );
+
+
+        if (
+            optUpload &&
+            fileInput
+        ) {
+
+            optUpload.addEventListener(
+                "click",
+                (e) => {
+
+                    e.stopPropagation();
+
+                    attachDropdown?.classList.remove(
+                        "show"
+                    );
+
+                    fileInput.click();
+
+                }
+            );
+
+
+            fileInput.addEventListener(
+                "change",
+                () => {
+
+                    if (
+                        !fileInput.files ||
+                        !fileInput.files.length
+                    ) {
+                        return;
+                    }
+
+
+                    const file =
+                        fileInput.files[0];
+
+
+                    const fileName =
+                        file.name;
+
+
+                    const fileReader =
+                        new FileReader();
+
+
+                    fileReader.onload =
+                        function (e) {
+
+                            const fileResult =
+                                e.target.result;
+
+
+                            if (
+                                file.type.startsWith(
+                                    "image/"
+                                )
+                            ) {
+
+                                appendImageMessageWithVisionChips(
+                                    fileResult
+                                );
+
+                            } else {
+
+                                chatBox.insertAdjacentHTML(
+                                    "beforeend",
+                                    `
+                                    <div class="message user-message">
+                                        📎 تم إرفاق الملف:
+                                        <b>
+                                            ${escapeHtml(fileName)}
+                                        </b>
+                                    </div>
+                                    `
+                                );
+
+                            }
+
+
+                            saveCurrentChat();
+
+                            chatBox.scrollTop =
+                                chatBox.scrollHeight;
+
+
+                            fileInput.value = "";
+
+                        };
+
+
+                    if (
+                        file.type.startsWith(
+                            "image/"
+                        )
+                    ) {
+
+                        fileReader.readAsDataURL(
+                            file
+                        );
+
+                    } else {
+
+                        chatBox.insertAdjacentHTML(
+                            "beforeend",
+                            `
+                            <div class="message user-message">
+                                📎 تم إرفاق الملف:
+                                <b>
+                                    ${escapeHtml(fileName)}
+                                </b>
+                            </div>
+                            `
+                        );
+
+                        saveCurrentChat();
+
+                        chatBox.scrollTop =
+                            chatBox.scrollHeight;
+
+                        fileInput.value = "";
+
+                    }
+
+                }
+            );
+
+        }
+
+
+        // ==========================================
+        // توليد صورة يدوي
+        // ==========================================
+
+        const optImage =
+            document.getElementById(
+                "optImage"
+            );
+
+
+        if (optImage) {
+
+            optImage.addEventListener(
+                "click",
+                async (e) => {
+
+                    e.stopPropagation();
+
+                    attachDropdown?.classList.remove(
+                        "show"
+                    );
+
+
+                    const promptText =
+                        prompt(
+                            "اكتب وصف الصورة (بالعربي أو الإنجليزي):"
+                        );
+
+
+                    if (
+                        !promptText ||
+                        !promptText.trim()
+                    ) {
+                        return;
+                    }
+
+
+                    const userPrompt =
+                        promptText.trim();
+
+
+                    appendUserMessage(
+                        `رسم صورة: ${userPrompt}`
+                    );
+
+
+                    await generateImage(
+                        userPrompt
+                    );
+
+                }
+            );
+
+        }
+
+
+        // ==========================================
+        // توليد فيديو يدوي
+        // ==========================================
+
+        const optVideo =
+            document.getElementById(
+                "optVideo"
+            );
+
+
+        if (optVideo) {
+
+            optVideo.addEventListener(
+                "click",
+                async (e) => {
+
+                    e.stopPropagation();
+
+                    attachDropdown?.classList.remove(
+                        "show"
+                    );
+
+
+                    const promptText =
+                        prompt(
+                            "اكتب وصف الفيديو (بالعربي أو الإنجليزي):"
+                        );
+
+
+                    if (
+                        !promptText ||
+                        !promptText.trim()
+                    ) {
+                        return;
+                    }
+
+
+                    const userPrompt =
+                        promptText.trim();
+
+
+                    appendUserMessage(
+                        `توليد فيديو: ${userPrompt}`
+                    );
+
+
+                    await generateVideo(
+                        userPrompt
+                    );
+
+                }
+            );
+
+        }
+
+
+        // ==========================================
+        // توليد صوت
+        // ==========================================
+
+        const optMusic =
+            document.getElementById(
+                "optMusic"
+            );
+
+
+        if (optMusic) {
+
+            optMusic.addEventListener(
+                "click",
+                (e) => {
+
+                    e.stopPropagation();
+
+                    attachDropdown?.classList.remove(
+                        "show"
+                    );
+
+
+                    const text =
+                        prompt(
+                            "اكتب النص المراد تحويله إلى صوت:"
+                        );
+
+
+                    if (
+                        !text ||
+                        !text.trim()
+                    ) {
+                        return;
+                    }
+
+
+                    const cleanText =
+                        text.trim();
+
+
+                    appendUserMessage(
+                        `توليد صوت: ${cleanText}`
+                    );
+
+
+                    const audioUrl =
+                        `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(cleanText)}&tl=ar&client=tw-ob`;
+
+
+                    chatBox.insertAdjacentHTML(
+                        "beforeend",
+                        `
+                        <div class="message bot-message nova-message">
+
+                            <div class="nova-message-content">
+
+                                <p>
+                                    🎵 تم إنشاء المقطع الصوتي:
+                                </p>
+
+                                <audio
+                                    controls
+                                    autoplay
+                                    src="${audioUrl}"
+                                    style="
+                                        margin-top:10px;
+                                        width:100%;
+                                    "
+                                ></audio>
+
+                            </div>
+
+                        </div>
+                        `
+                    );
+
+
+                    saveCurrentChat();
+
+                    chatBox.scrollTop =
+                        chatBox.scrollHeight;
+
+                }
+            );
+
+        }
+
+    }
+);
+
+
+// ==========================================
+// 8. Voice Recognition
+// ==========================================
+
+const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+
+const voiceOverlay =
+    document.getElementById(
+        "voiceOverlay"
+    );
+
+const closeVoiceBtn =
+    document.getElementById(
+        "closeVoiceBtn"
+    );
+
+const endVoiceCallBtn =
+    document.getElementById(
+        "endVoiceCallBtn"
+    );
+
+const voiceOrb =
+    document.getElementById(
+        "voiceOrb"
+    );
+
+const liveVoiceBtn =
+    document.getElementById(
+        "liveVoiceBtn"
+    );
+
+const micBtn =
+    document.getElementById(
+        "micBtn"
+    );
+
 
 let isLiveMode = false;
 let recognition = null;
 
+
+// ==========================================
+// Speech Recognition
+// ==========================================
+
 if (SpeechRecognition) {
-    recognition = new SpeechRecognition();
-    recognition.lang = 'ar-SA';
-    recognition.continuous = false;
-    recognition.interimResults = false;
 
+    recognition =
+        new SpeechRecognition();
+
+
+    recognition.lang =
+        "ar-SA";
+
+
+    recognition.continuous =
+        false;
+
+
+    recognition.interimResults =
+        false;
+
+
+    // Mic
     if (micBtn) {
-        micBtn.addEventListener('click', () => {
-            isLiveMode = false;
-            recognition.start();
-            micBtn.classList.add('recording');
-        });
+
+        micBtn.addEventListener(
+            "click",
+            () => {
+
+                isLiveMode = false;
+
+                try {
+
+                    recognition.start();
+
+                    micBtn.classList.add(
+                        "recording"
+                    );
+
+                } catch (error) {
+
+                    console.log(
+                        "Recognition already running."
+                    );
+
+                }
+
+            }
+        );
+
     }
 
+
+    // Live Voice
     if (liveVoiceBtn) {
-        liveVoiceBtn.addEventListener('click', () => {
-            isLiveMode = true;
-            if (voiceOverlay) voiceOverlay.classList.add('active');
-            if (voiceOrb) voiceOrb.className = 'voice-orb listening';
-            recognition.start();
-        });
+
+        liveVoiceBtn.addEventListener(
+            "click",
+            () => {
+
+                isLiveMode = true;
+
+                if (voiceOverlay) {
+                    voiceOverlay.classList.add(
+                        "active"
+                    );
+                }
+
+                if (voiceOrb) {
+                    voiceOrb.className =
+                        "voice-orb listening";
+                }
+
+
+                try {
+
+                    recognition.start();
+
+                } catch (error) {
+
+                    console.log(
+                        "Recognition already running."
+                    );
+
+                }
+
+            }
+        );
+
     }
 
-    recognition.onresult = async (event) => {
-        const transcript = event.results[0][0].transcript;
-        
-        if (micBtn) micBtn.classList.remove('recording');
 
-        if (isLiveMode) {
-            if (voiceOrb) voiceOrb.className = 'voice-orb speaking';
-            await sendVoiceMessageAndReply(transcript);
-        } else {
-            chatInput.value = transcript;
-            chatInput.focus();
-        }
-    };
+    recognition.onresult =
+        async (event) => {
 
-    recognition.onerror = (event) => {
-        console.error("خطأ في التعرف على الصوت:", event.error);
-        if (micBtn) micBtn.classList.remove('recording');
-        if (voiceOrb) voiceOrb.className = 'voice-orb';
-    };
+            const transcript =
+                event.results[0][0].transcript;
+
+
+            micBtn?.classList.remove(
+                "recording"
+            );
+
+
+            if (isLiveMode) {
+
+                if (voiceOrb) {
+                    voiceOrb.className =
+                        "voice-orb speaking";
+                }
+
+                await sendVoiceMessageAndReply(
+                    transcript
+                );
+
+            } else {
+
+                if (chatInput) {
+
+                    chatInput.value =
+                        transcript;
+
+                    chatInput.focus();
+
+                    chatInput.dispatchEvent(
+                        new Event("input")
+                    );
+
+                }
+
+            }
+
+        };
+
+
+    recognition.onerror =
+        (event) => {
+
+            console.error(
+                "خطأ في التعرف على الصوت:",
+                event.error
+            );
+
+
+            micBtn?.classList.remove(
+                "recording"
+            );
+
+
+            if (voiceOrb) {
+
+                voiceOrb.className =
+                    "voice-orb";
+
+            }
+
+        };
+
+
+    recognition.onend =
+        () => {
+
+            micBtn?.classList.remove(
+                "recording"
+            );
+
+        };
+
 } else {
-    console.log("المتصفح لا يدعم ميزة التعرف على الصوت المباشر.");
+
+    console.log(
+        "المتصفح لا يدعم ميزة التعرف على الصوت."
+    );
+
 }
+
+
+// ==========================================
+// إغلاق Voice
+// ==========================================
 
 function closeVoiceOverlay() {
-    if (voiceOverlay) voiceOverlay.classList.remove('active');
-    if (recognition) recognition.stop();
-    if (voiceOrb) voiceOrb.className = 'voice-orb';
-}
 
-if (closeVoiceBtn) closeVoiceBtn.addEventListener('click', closeVoiceOverlay);
-if (endVoiceCallBtn) endVoiceCallBtn.addEventListener('click', closeVoiceOverlay);
+    if (voiceOverlay) {
 
-async function sendVoiceMessageAndReply(text) {
-    if (!currentChatId) startNewChat();
+        voiceOverlay.classList.remove(
+            "active"
+        );
 
-    chatBox.innerHTML += `<div class="message user-message">🎙️ ${escapeHtml(text)}</div>`;
-    chatInput.value = '';
-    chatBox.scrollTop = chatBox.scrollHeight;
-    saveCurrentChat(text);
+    }
 
-    const loadingId = 'loading-' + Date.now();
-    chatBox.innerHTML += `<div class="message bot-message" id="${loadingId}">Nova يستمع ويرد... 🎧</div>`;
-    chatBox.scrollTop = chatBox.scrollHeight;
 
     try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${API_KEY}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                contents: [{ parts: [{ text: text }] }] 
-            })
-        });
 
-        const data = await response.json();
-        const loadingElem = document.getElementById(loadingId);
-        if (loadingElem) loadingElem.remove();
+        recognition?.stop();
 
-        if (data.candidates && data.candidates[0].content) {
-            let reply = data.candidates[0].content.parts[0].text;
-            const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(reply.substring(0, 200))}&tl=ar&client=tw-ob`;
+    } catch {}
 
-            chatBox.innerHTML += `
-                <div class="message bot-message">
-                    <p>${escapeHtml(reply)}</p>
-                    <audio controls autoplay src="${audioUrl}" style="margin-top: 8px; width: 100%;"></audio>
-                </div>`;
 
-            const audio = new Audio(audioUrl);
-            audio.play();
-            audio.onended = () => {
-                if (voiceOverlay && voiceOverlay.classList.contains('active')) {
-                    if (voiceOrb) voiceOrb.className = 'voice-orb listening';
-                    if (recognition) recognition.start();
+    if (voiceOrb) {
+
+        voiceOrb.className =
+            "voice-orb";
+
+    }
+
+
+    isLiveMode = false;
+
+}
+
+
+if (closeVoiceBtn) {
+
+    closeVoiceBtn.addEventListener(
+        "click",
+        closeVoiceOverlay
+    );
+
+}
+
+
+if (endVoiceCallBtn) {
+
+    endVoiceCallBtn.addEventListener(
+        "click",
+        closeVoiceOverlay
+    );
+
+}
+
+
+// ==========================================
+// Voice Reply
+// ==========================================
+
+async function sendVoiceMessageAndReply(text) {
+
+    if (!currentChatId) {
+        startNewChat();
+    }
+
+
+    appendUserMessage(
+        `🎙️ ${text}`
+    );
+
+
+    if (chatInput) {
+
+        chatInput.value = "";
+
+        chatInput.style.height =
+            "auto";
+
+    }
+
+
+    chatBox.scrollTop =
+        chatBox.scrollHeight;
+
+
+    saveCurrentChat(text);
+
+
+    const loadingId =
+        "voice-loading-" +
+        Date.now();
+
+
+    chatBox.insertAdjacentHTML(
+        "beforeend",
+        `
+        <div
+            class="message bot-message nova-message"
+            id="${loadingId}"
+        >
+            Nova يستمع ويرد... 🎧
+        </div>
+        `
+    );
+
+
+    chatBox.scrollTop =
+        chatBox.scrollHeight;
+
+
+    try {
+
+        const response =
+            await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${API_KEY}`,
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        contents: [
+                            {
+                                parts: [
+                                    {
+                                        text: text
+                                    }
+                                ]
+                            }
+                        ]
+                    })
                 }
-            };
+            );
+
+
+        const data =
+            await response.json();
+
+
+        document
+            .getElementById(
+                loadingId
+            )
+            ?.remove();
+
+
+        if (
+            data.candidates &&
+            data.candidates[0] &&
+            data.candidates[0].content
+        ) {
+
+            const reply =
+                data
+                    .candidates[0]
+                    .content
+                    .parts
+                    .map(part => part.text || "")
+                    .join("\n");
+
+
+            const audioUrl =
+                `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(reply.substring(0, 200))}&tl=ar&client=tw-ob`;
+
+
+            const message =
+                document.createElement(
+                    "div"
+                );
+
+
+            message.className =
+                "message bot-message nova-message";
+
+
+            message.innerHTML = `
+
+                <div class="nova-message-content">
+
+                    <p>
+                        ${escapeHtml(reply)}
+                    </p>
+
+                    <audio
+                        controls
+                        autoplay
+                        src="${audioUrl}"
+                        style="
+                            margin-top:8px;
+                            width:100%;
+                        "
+                    ></audio>
+
+                </div>
+
+            `;
+
+
+            chatBox.appendChild(
+                message
+            );
+
+
+            const audio =
+                new Audio(
+                    audioUrl
+                );
+
+
+            try {
+
+                await audio.play();
+
+            } catch {}
+
+
+            audio.onended =
+                () => {
+
+                    if (
+                        voiceOverlay &&
+                        voiceOverlay.classList.contains(
+                            "active"
+                        )
+                    ) {
+
+                        if (voiceOrb) {
+
+                            voiceOrb.className =
+                                "voice-orb listening";
+
+                        }
+
+
+                        try {
+
+                            recognition?.start();
+
+                        } catch {}
+
+                    }
+
+                };
+
+
         } else {
-            chatBox.innerHTML += `<div class="message bot-message">عذراً، لم أستطع فهم المقطع الصوتي.</div>`;
-            if (voiceOrb) voiceOrb.className = 'voice-orb';
-        }
-    } catch (error) {
-        const loadingElem = document.getElementById(loadingId);
-        if (loadingElem) loadingElem.remove();
-        chatBox.innerHTML += `<div class="message bot-message">خطأ في الاتصال بالشبكة.</div>`;
-        if (voiceOrb) voiceOrb.className = 'voice-orb';
-    }
 
-    chatBox.scrollTop = chatBox.scrollHeight;
-    saveCurrentChat();
-}
+            chatBox.insertAdjacentHTML(
+                "beforeend",
+                `
+                <div class="message bot-message nova-message">
+                    عذراً، لم أستطع فهم المقطع الصوتي.
+                </div>
+                `
+            );
 
-// ==========================================
-// 5. التحكم بنافذة الإعدادات (Settings Modal)
-// ==========================================
-const settingsBtn = document.getElementById('settingsBtn');
-const settingsModal = document.getElementById('settingsModal');
-const closeSettingsBtn = document.getElementById('closeSettingsBtn');
 
-if (settingsBtn && settingsModal) {
-    settingsBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        settingsModal.classList.add('active');
-    });
-}
+            if (voiceOrb) {
 
-if (closeSettingsBtn && settingsModal) {
-    closeSettingsBtn.addEventListener('click', () => {
-        settingsModal.classList.remove('active');
-    });
-}
+                voiceOrb.className =
+                    "voice-orb";
 
-window.addEventListener('click', (e) => {
-    if (settingsModal && e.target === settingsModal) {
-        settingsModal.classList.remove('active');
-    }
-});
-
-// ==========================================
-// 6. نظام تنبيهات الإدارة وإعدادات التطبيق
-// ==========================================
-document.addEventListener('DOMContentLoaded', () => {
-    const settingItems = document.querySelectorAll('.setting-item');
-
-    settingItems.forEach(item => {
-        item.addEventListener('click', () => {
-            const text = item.textContent.trim();
-
-            if (text.includes('Activity')) {
-                alert('عرض سجل النشاطات (Activity History)');
-            } 
-            else if (text.includes('Personal Intelligence')) {
-                alert('إعدادات الذكاء الشخصي والبيانات');
-            } 
-            else if (text.includes('Import memory')) {
-                alert('ميزة استيراد الذاكرة غير مفعلة حالياً');
-            } 
-            else {
-                alert('إعدادات عامة لتطبيق Nova AI');
             }
-        });
-    });
-});
+
+        }
+
+
+    } catch (error) {
+
+        console.error(error);
+
+
+        document
+            .getElementById(
+                loadingId
+            )
+            ?.remove();
+
+
+        chatBox.insertAdjacentHTML(
+            "beforeend",
+            `
+            <div class="message bot-message nova-message">
+                خطأ في الاتصال بالشبكة.
+            </div>
+            `
+        );
+
+
+        if (voiceOrb) {
+
+            voiceOrb.className =
+                "voice-orb";
+
+        }
+
+    }
+
+
+    chatBox.scrollTop =
+        chatBox.scrollHeight;
+
+
+    saveCurrentChat();
+
+}
+
+
+// ==========================================
+// 9. Settings Modal
+// ==========================================
+
+const settingsBtn =
+    document.getElementById(
+        "settingsBtn"
+    );
+
+const settingsModal =
+    document.getElementById(
+        "settingsModal"
+    );
+
+const closeSettingsBtn =
+    document.getElementById(
+        "closeSettingsBtn"
+    );
+
+
+if (
+    settingsBtn &&
+    settingsModal
+) {
+
+    settingsBtn.addEventListener(
+        "click",
+        (e) => {
+
+            e.stopPropagation();
+
+            settingsModal.classList.add(
+                "active"
+            );
+
+        }
+    );
+
+}
+
+
+if (
+    closeSettingsBtn &&
+    settingsModal
+) {
+
+    closeSettingsBtn.addEventListener(
+        "click",
+        () => {
+
+            settingsModal.classList.remove(
+                "active"
+            );
+
+        }
+    );
+
+}
+
+
+window.addEventListener(
+    "click",
+    (e) => {
+
+        if (
+            settingsModal &&
+            e.target === settingsModal
+        ) {
+
+            settingsModal.classList.remove(
+                "active"
+            );
+
+        }
+
+    }
+);
+
+
+// ==========================================
+// 10. Settings Items
+// ==========================================
+
+document.addEventListener(
+    "DOMContentLoaded",
+    () => {
+
+        const settingItems =
+            document.querySelectorAll(
+                ".setting-item"
+            );
+
+
+        settingItems.forEach(
+            item => {
+
+                item.addEventListener(
+                    "click",
+                    () => {
+
+                        const text =
+                            item.textContent
+                                .trim();
+
+
+                        if (
+                            text.includes(
+                                "Activity"
+                            )
+                        ) {
+
+                            alert(
+                                "عرض سجل النشاطات (Activity History)"
+                            );
+
+                        }
+
+                        else if (
+                            text.includes(
+                                "Personal Intelligence"
+                            )
+                        ) {
+
+                            alert(
+                                "إعدادات الذكاء الشخصي والبيانات"
+                            );
+
+                        }
+
+                        else if (
+                            text.includes(
+                                "Import memory"
+                            )
+                        ) {
+
+                            alert(
+                                "ميزة استيراد الذاكرة غير مفعلة حالياً"
+                            );
+
+                        }
+
+                        else {
+
+                            alert(
+                                "إعدادات عامة لتطبيق Nova AI"
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+    }
+);
+
+
+// ==========================================
+// 11. إغلاق Sidebar على الموبايل
+// ==========================================
+
+document.addEventListener(
+    "click",
+    (e) => {
+
+        if (
+            window.innerWidth > 768
+        ) {
+            return;
+        }
+
+
+        const sidebar =
+            document.getElementById(
+                "sidebar"
+            );
+
+
+        const toggleBtn =
+            document.getElementById(
+                "sidebarToggleBtn"
+            );
+
+
+        if (!sidebar) return;
+
+
+        if (
+            sidebar.classList.contains(
+                "mobile-open"
+            ) &&
+            !sidebar.contains(e.target) &&
+            !toggleBtn?.contains(e.target)
+        ) {
+
+            sidebar.classList.remove(
+                "mobile-open"
+            );
+
+        }
+
+    }
+);
+
+
+// ==========================================
+// إغلاق Sidebar بعد اختيار محادثة
+// ==========================================
+
+document.addEventListener(
+    "click",
+    (e) => {
+
+        const historyItem =
+            e.target.closest(
+                ".history-item"
+            );
+
+
+        if (
+            historyItem &&
+            window.innerWidth <= 768
+        ) {
+
+            setTimeout(() => {
+
+                document
+                    .getElementById(
+                        "sidebar"
+                    )
+                    ?.classList.remove(
+                        "mobile-open"
+                    );
+
+            }, 150);
+
+        }
+
+    }
+);
+
+
+// ==========================================
+// منع مشاكل resize
+// ==========================================
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        const sidebar =
+            document.getElementById(
+                "sidebar"
+            );
+
+
+        if (
+            sidebar &&
+            window.innerWidth > 768
+        ) {
+
+            sidebar.classList.remove(
+                "mobile-open"
+            );
+
+        }
+
+    }
+);
+
+
+// ==========================================
+// نهاية Nova AI Script
+// ==========================================
