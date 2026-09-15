@@ -677,3 +677,27 @@ body.light-theme .message.bot-message {
     70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
     100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
+/* تنسيقات الشاشات الصغيرة (الموبايل) */
+@media (max-width: 768px) {
+    /* جعل القائمة الجانبية مخفية تماماً بافتراضي على الموبايل */
+    .sidebar {
+        position: fixed;
+        right: -280px; /* أو left حسب اتجاه موقعك (RTL هنا right) */
+        top: 0;
+        height: 100%;
+        width: 260px;
+        z-index: 1000;
+        transition: right 0.3s ease-in-out;
+    }
+
+    /* عندما تكون القائمة مفعلة/مفتوحة */
+    .sidebar.mobile-open {
+        right: 0;
+    }
+
+    /* ضمان ألا يتأثر محتوى الشات ويأخذ عرض الشاشة بالكامل */
+    .chat-container, .main-content {
+        width: 100% !important;
+        margin-right: 0 !important;
+    }
+}
