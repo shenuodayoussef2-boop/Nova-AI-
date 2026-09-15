@@ -308,7 +308,7 @@ body.light-theme .message.bot-message {
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
-/* رسالة البوت (تظهر على اليمين مع اتجاه الـ RTL) */
+/* رسالة البوت (تظهر على اليمين في واجهة الـ RTL) */
 .bot-message {
     align-self: flex-start;
     background-color: #334155;
