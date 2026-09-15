@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>تسجيل الدخول - Nova AI</title>
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    >
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --cyan: #00e5ff;
+            --cyan-dark: #00bfd6;
+            --bg: #05090b;
+            --card: rgba(12, 21, 25, 0.92);
+            --border: rgba(0, 229, 255, 0.16);
+            --text: #ffffff;
+            --muted: #91a5aa;
+            --input: #081316;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: Arial, Tahoma, sans-serif;
+            color: var(--text);
+
+            background:
+                radial-gradient(
+                    circle at 50% -10%,
+                    rgba(0, 229, 255, 0.16),
+                    transparent 35%
+                ),
+                radial-gradient(
+                    circle at 10% 90%,
+                    rgba(0, 170, 190, 0.08),
+                    transparent 30%
+                ),
+                var(--bg);
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            padding: 24px;
+        }
+
+        .page {
+            width: 100%;
+            max-width: 430px;
+        }
+
+        /* ================= LOGO ================= */
+
+        .logo {
+            text-align: center;
+            margin-bottom: 26px;
+        }
+
+        .logo-title {
+            font-size: 43px;
+            font-weight: 800;
+            letter-spacing: -1.5px;
+        }
+
+        .logo-title span {
+            color: var(--cyan);
+        }
+
+        .logo-subtitle {
+            margin-top: 8px;
+            color: var(--muted);
+            font-size: 14px;
+        }
+
+        /* ================= CARD ================= */
+
+        .card {
+            background: var(--card);
+
+            border: 1px solid var(--border);
+            border-radius: 24px;
+
+            padding: 32px;
+
+            box-shadow:
+                0 25px 70px rgba(0, 0, 0, 0.55),
+                0 0 40px rgba(0, 229, 255, 0.035);
+
+            backdrop-filter: blur(20px);
+        }
+
+        .card-title {
+            text-align: center;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .card-subtitle {
+            text-align: center;
+            color: var(--muted);
+            font-size: 14px;
+            margin-bottom: 26px;
+        }
+
+        /* ================= MESSAGE ================= */
+
+        .message {
+            display: none;
+
+            padding: 12px 14px;
+            margin-bottom: 18px;
+
+            border-radius: 11px;
+
+            font-size: 14px;
+            line-height: 1.6;
+
+            text-align: center;
+        }
+
+        .message.error {
+            display: block;
+
+            color: #ff9c9c;
+
+            background: rgba(255, 70, 70, 0.08);
+            border: 1px solid rgba(255, 70, 70, 0.2);
+        }
+
+        .message.success {
+            display: block;
+
+            color: #75efff;
+
+            background: rgba(0, 229, 255, 0.07);
+            border: 1px solid rgba(0, 229, 255, 0.18);
+        }
+
+        /* ================= SOCIAL BUTTONS ================= */
+
+        .social-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 11px;
+        }
+
+        .social-btn {
+            width: 100%;
+            height: 50px;
+
+            border-radius: 12px;
+
+            border: 1px solid #27383c;
+
+            background: #0a1518;
+            color: #fff;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            gap: 11px;
+
+            font-size: 14px;
+            font-weight: 600;
+
+            cursor: pointer;
+
+            transition: 0.2s ease;
+        }
+
+        .social-btn:hover {
+            border-color: rgba(0, 229, 255, 0.35);
+            background: #0d1c20;
+            transform: translateY(-1px);
+        }
+
+        .google-icon {
+            color: #4285f4;
+            font-size: 18px;
+        }
+
+        .facebook-icon {
+            color: #1877f2;
+            font-size: 18px;
+        }
+
+        /* ================= DIVIDER ================= */
+
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+
+            margin: 24px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #253438;
+        }
+
+        .divider span {
+            color: #71858a;
+            font-size: 12px;
+        }
+
+        /* ================= FORM ================= */
+
+        .form-group {
+            margin-bottom: 17px;
+        }
+
+        .form-group label {
+            display: block;
+
+            color: #d8e2e5;
+
+            font-size: 14px;
+
+            margin-bottom: 8px;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+
+            right: 15px;
+            top: 50%;
+
+            transform: translateY(-50%);
+
+            color: #62777c;
+
+            pointer-events: none;
+        }
+
+        .input-wrapper input {
+            width: 100%;
+            height: 50px;
+
+            border-radius: 12px;
+
+            border: 1px solid #26383c;
+
+            background: var(--input);
+            color: white;
+
+            outline: none;
+
+            padding: 0 45px 0 15px;
+
+            font-size: 14px;
+
+            transition: 0.2s;
+        }
+
+        .input-wrapper input:focus {
+            border-color: var(--cyan);
+
+            box-shadow:
+                0 0 0 3px rgba(0, 229, 255, 0.07);
+        }
+
+        .input-wrapper input::placeholder {
+            color: #52666b;
+        }
+
+        /* ================= LOGIN BUTTON ================= */
+
+        .login-btn {
+            width: 100%;
+            height: 51px;
+
+            margin-top: 5px;
+
+            border: none;
+            border-radius: 12px;
+
+            background: var(--cyan);
+
+            color: #001215;
+
+            font-size: 15px;
+            font-weight: 800;
+
+            cursor: pointer;
+
+            transition: 0.2s ease;
+        }
+
+        .login-btn:hover {
+            background: #1be8ff;
+            transform: translateY(-1px);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* ================= REGISTER ================= */
+
+        .register-text {
+            text-align: center;
+
+            margin-top: 23px;
+
+            color: var(--muted);
+
+            font-size: 14px;
+        }
+
+        .register-text a {
+            color: var(--cyan);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .register-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* ================= FOOTER ================= */
+
+        .footer {
+            text-align: center;
+
+            margin-top: 20px;
+
+            color: #52666b;
+
+            font-size: 11px;
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 16px;
+            }
+
+            .card {
+                padding: 25px 20px;
+            }
+
+            .logo-title {
+                font-size: 37px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <!-- LOGO -->
+
+    <div class="logo">
+        <div class="logo-title">
+            Nova <span>AI</span>
+        </div>
+
+        <div class="logo-subtitle">
+            استوديو الذكاء الاصطناعي
+        </div>
+    </div>
+
+
+    <!-- LOGIN CARD -->
+
+    <div class="card">
+
+        <h1 class="card-title">
+            تسجيل الدخول
+        </h1>
+
+        <p class="card-subtitle">
+            سجّل دخولك للمتابعة إلى Nova
+        </p>
+
+
+        <!-- MESSAGE -->
+
+        <div id="message" class="message"></div>
+
+
+        <!-- SOCIAL LOGIN -->
+
+        <div class="social-buttons">
+
+            <button
+                type="button"
+                class="social-btn"
+                id="googleLoginBtn"
+            >
+                <i class="fa-brands fa-google google-icon"></i>
+
+                <span>
+                    المتابعة باستخدام Google
+                </span>
+            </button>
+
+
+            <button
+                type="button"
+                class="social-btn"
+                id="facebookLoginBtn"
+            >
+                <i class="fa-brands fa-facebook facebook-icon"></i>
+
+                <span>
+                    المتابعة باستخدام Facebook
+                </span>
+            </button>
+
+        </div>
+
+
+        <!-- DIVIDER -->
+
+        <div class="divider">
+            <span>أو</span>
+        </div>
+
+
+        <!-- EMAIL LOGIN -->
+
+        <form id="loginForm">
+
+            <div class="form-group">
+
+                <label for="email">
+                    البريد الإلكتروني
+                </label>
+
+                <div class="input-wrapper">
+
+                    <i class="fa-solid fa-envelope input-icon"></i>
+
+                    <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        placeholder="example@email.com"
+                        autocomplete="email"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="password">
+                    كلمة المرور
+                </label>
+
+                <div class="input-wrapper">
+
+                    <i class="fa-solid fa-lock input-icon"></i>
+
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="أدخل كلمة المرور"
+                        autocomplete="current-password"
+                        required
+                    >
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="login-btn"
+                id="loginBtn"
+            >
+                تسجيل الدخول
+            </button>
+
+        </form>
+
+
+        <!-- REGISTER -->
+
+        <div class="register-text">
+
+            ليس لديك حساب؟
+
+            <a href="#">
+                إنشاء حساب
+            </a>
+
+        </div>
+
+    </div>
+
+
+    <div class="footer">
+        © 2026 Nova AI
+    </div>
+
+</div>
+
+
+<script>
+
+    const loginForm =
+        document.getElementById("loginForm");
+
+    const loginBtn =
+        document.getElementById("loginBtn");
+
+    const message =
+        document.getElementById("message");
+
+    const googleLoginBtn =
+        document.getElementById("googleLoginBtn");
+
+    const facebookLoginBtn =
+        document.getElementById("facebookLoginBtn");
+
+
+    function showMessage(text, type) {
+
+        message.textContent = text;
+
+        message.className =
+            "message " + type;
+    }
+
+
+    function clearMessage() {
+
+        message.textContent = "";
+
+        message.className =
+            "message";
+    }
+
+
+    /* ================= EMAIL LOGIN ================= */
+
+    loginForm.addEventListener("submit", async (event) => {
+
+        event.preventDefault();
+
+        clearMessage();
+
+        loginBtn.disabled = true;
+
+        loginBtn.textContent =
+            "جاري تسجيل الدخول...";
+
+
+        const formData =
+            new FormData(loginForm);
+
+
+        try {
+
+            const response =
+                await fetch("api/login.php", {
+                    method: "POST",
+                    body: formData
+                });
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok || !data.success) {
+
+                throw new Error(
+                    data.message ||
+                    "فشل تسجيل الدخول."
+                );
+
+            }
+
+
+            showMessage(
+                "تم تسجيل الدخول بنجاح!",
+                "success"
+            );
+
+
+            /*
+                لاحقًا هنخلي هنا:
+                حفظ Session / Token
+                ثم الانتقال إلى Nova.
+            */
+
+            setTimeout(() => {
+
+                window.location.href =
+                    "index.html";
+
+            }, 700);
+
+
+        } catch (error) {
+
+            showMessage(
+                error.message,
+                "error"
+            );
+
+        } finally {
+
+            loginBtn.disabled = false;
+
+            loginBtn.textContent =
+                "تسجيل الدخول";
+        }
+
+    });
+
+
+    /* ================= GOOGLE ================= */
+
+    googleLoginBtn.addEventListener(
+        "click",
+        () => {
+
+            showMessage(
+                "تسجيل الدخول باستخدام Google سيتم تفعيله بعد إعداد OAuth.",
+                "error"
+            );
+
+        }
+    );
+
+
+    /* ================= FACEBOOK ================= */
+
+    facebookLoginBtn.addEventListener(
+        "click",
+        () => {
+
+            showMessage(
+                "تسجيل الدخول باستخدام Facebook سيتم تفعيله بعد إعداد OAuth.",
+                "error"
+            );
+
+        }
+    );
+
+</script>
+
+</body>
+</html>
