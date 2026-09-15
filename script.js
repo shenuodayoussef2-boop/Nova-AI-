@@ -6,16 +6,29 @@
 // 1. نظام المحادثات المتعددة (History & Recents)
 // ==========================================
 
-let chatsArray = JSON.parse(localStorage.getItem("novaAllChats")) || [];
+let chatsArray =
+    JSON.parse(localStorage.getItem("novaAllChats")) || [];
+
 let currentChatId = null;
 
 // التحكم في إلغاء طلب API
 let currentAbortController = null;
 
 // عناصر الصفحة
-const historyList = document.getElementById("historyList");
-const chatBox = document.getElementById("chatBox");
-const newChatBtn = document.getElementById("newChatBtn");
+const historyList =
+    document.getElementById("historyList");
+
+const chatBox =
+    document.getElementById("chatBox");
+
+const newChatBtn =
+    document.getElementById("newChatBtn");
+
+const sendChatBtn =
+    document.getElementById("sendChatBtn");
+
+const chatInput =
+    document.getElementById("chatInput");
 
 
 // ==========================================
@@ -40,15 +53,22 @@ window.addEventListener("DOMContentLoaded", () => {
 // ==========================================
 
 if (newChatBtn) {
-    newChatBtn.addEventListener("click", startNewChat);
+
+    newChatBtn.addEventListener(
+        "click",
+        startNewChat
+    );
+
 }
 
 
 function startNewChat() {
 
-    currentChatId = Date.now().toString();
+    currentChatId =
+        Date.now().toString();
 
     if (chatBox) {
+
         chatBox.innerHTML = `
             <div class="message bot-message nova-message">
                 <div class="nova-message-content">
@@ -56,11 +76,16 @@ function startNewChat() {
                 </div>
             </div>
         `;
+
     }
 
     if (chatInput) {
+
         chatInput.value = "";
-        chatInput.style.height = "auto";
+
+        chatInput.style.height =
+            "auto";
+
     }
 
     renderHistoryList();
@@ -74,52 +99,87 @@ function startNewChat() {
 // حفظ المحادثة الحالية
 // ==========================================
 
-function saveCurrentChat(firstUserMessage = "محادثة جديدة") {
+function saveCurrentChat(
+    firstUserMessage = "محادثة جديدة"
+) {
 
-    if (!chatBox || !currentChatId) return;
+    if (
+        !chatBox ||
+        !currentChatId
+    ) {
+        return;
+    }
 
-    let existingChat = chatsArray.find(
-        chat => chat.id === currentChatId
-    );
+    let existingChat =
+        chatsArray.find(
+            chat =>
+                chat.id === currentChatId
+        );
 
-    const chatHtml = chatBox.innerHTML;
+
+    const chatHtml =
+        chatBox.innerHTML;
+
 
     if (existingChat) {
 
-        existingChat.html = chatHtml;
+        existingChat.html =
+            chatHtml;
+
 
         if (
-            existingChat.title === "محادثة جديدة" &&
-            firstUserMessage !== "محادثة جديدة"
+            existingChat.title ===
+                "محادثة جديدة" &&
+            firstUserMessage !==
+                "محادثة جديدة"
         ) {
+
             existingChat.title =
-                firstUserMessage.substring(0, 25) + "...";
+                firstUserMessage.substring(
+                    0,
+                    25
+                ) + "...";
+
         }
 
     } else {
 
         chatsArray.unshift({
-            id: currentChatId,
+
+            id:
+                currentChatId,
+
             title:
-                firstUserMessage !== "محادثة جديدة"
-                    ? firstUserMessage.substring(0, 25) + "..."
+                firstUserMessage !==
+                "محادثة جديدة"
+                    ? firstUserMessage.substring(
+                          0,
+                          25
+                      ) + "..."
                     : "محادثة جديدة",
 
-            html: chatHtml,
+            html:
+                chatHtml,
 
-            pinned: false,
+            pinned:
+                false,
 
-            createdAt: Date.now()
+            createdAt:
+                Date.now()
+
         });
 
     }
+
 
     localStorage.setItem(
         "novaAllChats",
         JSON.stringify(chatsArray)
     );
 
+
     renderHistoryList();
+
 }
 
 
@@ -129,241 +189,393 @@ function saveCurrentChat(firstUserMessage = "محادثة جديدة") {
 
 function renderHistoryList() {
 
-    if (!historyList) return;
+    if (!historyList) {
+        return;
+    }
+
 
     historyList.innerHTML = "";
 
-    // المحادثات المثبتة أولاً
-    const sortedChats = [...chatsArray].sort((a, b) => {
 
-        if (a.pinned && !b.pinned) return -1;
-        if (!a.pinned && b.pinned) return 1;
-
-        return 0;
-    });
-
-
-    sortedChats.forEach(chat => {
-
-        const li = document.createElement("li");
-
-        li.className = "history-item";
-
-        if (chat.id === currentChatId) {
-            li.classList.add("active-chat");
-        }
-
-        li.innerHTML = `
-            <span
-                class="history-title-text"
-                title="${escapeHtml(chat.title)}"
-            >
-                ${chat.pinned ? "📌 " : ""}
-                ${escapeHtml(chat.title)}
-            </span>
-
-            <button
-                class="more-btn"
-                type="button"
-                title="Options"
-            >
-                <i class="fa-solid fa-ellipsis-vertical"></i>
-            </button>
-
-            <div class="chat-context-menu">
-
-                <div class="context-item opt-share">
-                    <i class="fa-solid fa-share-nodes"></i>
-                    <span>مشاركة</span>
-                </div>
-
-                <div class="context-item opt-pin">
-                    <i class="fa-solid fa-thumbtack"></i>
-                    <span>${chat.pinned ? "إلغاء التثبيت" : "تثبيت"}</span>
-                </div>
-
-                <div class="context-item opt-rename">
-                    <i class="fa-solid fa-pen"></i>
-                    <span>إعادة تسمية</span>
-                </div>
-
-                <div class="context-item opt-delete">
-                    <i class="fa-regular fa-trash-can"></i>
-                    <span>حذف</span>
-                </div>
-
-            </div>
-        `;
-
-
-        // فتح المحادثة
-        li.addEventListener("click", (e) => {
-
-            if (
-                !e.target.closest(".more-btn") &&
-                !e.target.closest(".chat-context-menu")
-            ) {
-                loadChat(chat.id);
-            }
-
-        });
-
-
-        const moreBtn = li.querySelector(".more-btn");
-        const contextMenu = li.querySelector(".chat-context-menu");
-
-
-        // القائمة
-        moreBtn.addEventListener("click", (e) => {
-
-            e.stopPropagation();
-
-            document
-                .querySelectorAll(".chat-context-menu")
-                .forEach(menu => {
-
-                    if (menu !== contextMenu) {
-                        menu.classList.remove("show");
-                    }
-
-                });
-
-            contextMenu.classList.toggle("show");
-
-        });
-
-
-        // مشاركة
-        li.querySelector(".opt-share")
-            .addEventListener("click", async (e) => {
-
-                e.stopPropagation();
-
-                contextMenu.classList.remove("show");
-
-                try {
-
-                    await navigator.clipboard.writeText(
-                        window.location.href
-                    );
-
-                    showToast("تم نسخ رابط الصفحة!");
-
-                } catch {
-
-                    alert("تعذر نسخ الرابط.");
-
-                }
-
-            });
-
-
-        // تثبيت
-        li.querySelector(".opt-pin")
-            .addEventListener("click", (e) => {
-
-                e.stopPropagation();
-
-                contextMenu.classList.remove("show");
-
-                const targetChat = chatsArray.find(
-                    c => c.id === chat.id
-                );
-
-                if (!targetChat) return;
-
-                targetChat.pinned = !targetChat.pinned;
-
-                localStorage.setItem(
-                    "novaAllChats",
-                    JSON.stringify(chatsArray)
-                );
-
-                renderHistoryList();
-
-            });
-
-
-        // إعادة تسمية
-        li.querySelector(".opt-rename")
-            .addEventListener("click", (e) => {
-
-                e.stopPropagation();
-
-                contextMenu.classList.remove("show");
-
-                const newTitle = prompt(
-                    "أدخل الاسم الجديد للمحادثة:",
-                    chat.title
-                );
+    const sortedChats =
+        [...chatsArray].sort(
+            (a, b) => {
 
                 if (
-                    newTitle &&
-                    newTitle.trim() !== ""
+                    a.pinned &&
+                    !b.pinned
                 ) {
+                    return -1;
+                }
 
-                    chat.title = newTitle.trim();
+                if (
+                    !a.pinned &&
+                    b.pinned
+                ) {
+                    return 1;
+                }
+
+                return 0;
+
+            }
+        );
+
+
+    sortedChats.forEach(
+        chat => {
+
+            const li =
+                document.createElement(
+                    "li"
+                );
+
+
+            li.className =
+                "history-item";
+
+
+            if (
+                chat.id ===
+                currentChatId
+            ) {
+
+                li.classList.add(
+                    "active-chat"
+                );
+
+            }
+
+
+            li.innerHTML = `
+
+                <span
+                    class="history-title-text"
+                    title="${escapeHtml(chat.title)}"
+                >
+                    ${chat.pinned ? "📌 " : ""}
+                    ${escapeHtml(chat.title)}
+                </span>
+
+                <button
+                    class="more-btn"
+                    type="button"
+                    title="Options"
+                >
+                    <i class="fa-solid fa-ellipsis-vertical"></i>
+                </button>
+
+                <div class="chat-context-menu">
+
+                    <div class="context-item opt-share">
+                        <i class="fa-solid fa-share-nodes"></i>
+                        <span>مشاركة</span>
+                    </div>
+
+                    <div class="context-item opt-pin">
+                        <i class="fa-solid fa-thumbtack"></i>
+                        <span>
+                            ${
+                                chat.pinned
+                                    ? "إلغاء التثبيت"
+                                    : "تثبيت"
+                            }
+                        </span>
+                    </div>
+
+                    <div class="context-item opt-rename">
+                        <i class="fa-solid fa-pen"></i>
+                        <span>إعادة تسمية</span>
+                    </div>
+
+                    <div class="context-item opt-delete">
+                        <i class="fa-regular fa-trash-can"></i>
+                        <span>حذف</span>
+                    </div>
+
+                </div>
+
+            `;
+
+
+            // فتح المحادثة
+            li.addEventListener(
+                "click",
+                e => {
+
+                    if (
+                        !e.target.closest(
+                            ".more-btn"
+                        ) &&
+                        !e.target.closest(
+                            ".chat-context-menu"
+                        )
+                    ) {
+
+                        loadChat(
+                            chat.id
+                        );
+
+                    }
+
+                }
+            );
+
+
+            const moreBtn =
+                li.querySelector(
+                    ".more-btn"
+                );
+
+
+            const contextMenu =
+                li.querySelector(
+                    ".chat-context-menu"
+                );
+
+
+            // القائمة
+            moreBtn.addEventListener(
+                "click",
+                e => {
+
+                    e.stopPropagation();
+
+
+                    document
+                        .querySelectorAll(
+                            ".chat-context-menu"
+                        )
+                        .forEach(
+                            menu => {
+
+                                if (
+                                    menu !==
+                                    contextMenu
+                                ) {
+
+                                    menu.classList.remove(
+                                        "show"
+                                    );
+
+                                }
+
+                            }
+                        );
+
+
+                    contextMenu.classList.toggle(
+                        "show"
+                    );
+
+                }
+            );
+
+
+            // مشاركة
+            li.querySelector(
+                ".opt-share"
+            )?.addEventListener(
+                "click",
+                async e => {
+
+                    e.stopPropagation();
+
+                    contextMenu.classList.remove(
+                        "show"
+                    );
+
+
+                    try {
+
+                        await navigator.clipboard.writeText(
+                            window.location.href
+                        );
+
+                        showToast(
+                            "تم نسخ رابط الصفحة!"
+                        );
+
+                    } catch {
+
+                        alert(
+                            "تعذر نسخ الرابط."
+                        );
+
+                    }
+
+                }
+            );
+
+
+            // تثبيت
+            li.querySelector(
+                ".opt-pin"
+            )?.addEventListener(
+                "click",
+                e => {
+
+                    e.stopPropagation();
+
+                    contextMenu.classList.remove(
+                        "show"
+                    );
+
+
+                    const targetChat =
+                        chatsArray.find(
+                            c =>
+                                c.id ===
+                                chat.id
+                        );
+
+
+                    if (!targetChat) {
+                        return;
+                    }
+
+
+                    targetChat.pinned =
+                        !targetChat.pinned;
+
 
                     localStorage.setItem(
                         "novaAllChats",
-                        JSON.stringify(chatsArray)
+                        JSON.stringify(
+                            chatsArray
+                        )
                     );
+
 
                     renderHistoryList();
 
                 }
-
-            });
-
-
-        // حذف
-        li.querySelector(".opt-delete")
-            .addEventListener("click", (e) => {
-
-                e.stopPropagation();
-
-                contextMenu.classList.remove("show");
-
-                const confirmed = confirm(
-                    "هل أنت متأكد من إزالة هذه المحادثة؟"
-                );
-
-                if (!confirmed) return;
-
-                chatsArray = chatsArray.filter(
-                    c => c.id !== chat.id
-                );
-
-                localStorage.setItem(
-                    "novaAllChats",
-                    JSON.stringify(chatsArray)
-                );
+            );
 
 
-                if (currentChatId === chat.id) {
+            // إعادة تسمية
+            li.querySelector(
+                ".opt-rename"
+            )?.addEventListener(
+                "click",
+                e => {
 
-                    if (chatsArray.length > 0) {
+                    e.stopPropagation();
 
-                        loadChat(chatsArray[0].id);
+                    contextMenu.classList.remove(
+                        "show"
+                    );
 
-                    } else {
 
-                        startNewChat();
+                    const newTitle =
+                        prompt(
+                            "أدخل الاسم الجديد للمحادثة:",
+                            chat.title
+                        );
+
+
+                    if (
+                        newTitle &&
+                        newTitle.trim() !== ""
+                    ) {
+
+                        chat.title =
+                            newTitle.trim();
+
+
+                        localStorage.setItem(
+                            "novaAllChats",
+                            JSON.stringify(
+                                chatsArray
+                            )
+                        );
+
+
+                        renderHistoryList();
 
                     }
 
-                } else {
+                }
+            );
 
-                    renderHistoryList();
+
+            // حذف
+            li.querySelector(
+                ".opt-delete"
+            )?.addEventListener(
+                "click",
+                e => {
+
+                    e.stopPropagation();
+
+                    contextMenu.classList.remove(
+                        "show"
+                    );
+
+
+                    const confirmed =
+                        confirm(
+                            "هل أنت متأكد من إزالة هذه المحادثة؟"
+                        );
+
+
+                    if (!confirmed) {
+                        return;
+                    }
+
+
+                    chatsArray =
+                        chatsArray.filter(
+                            c =>
+                                c.id !==
+                                chat.id
+                        );
+
+
+                    localStorage.setItem(
+                        "novaAllChats",
+                        JSON.stringify(
+                            chatsArray
+                        )
+                    );
+
+
+                    if (
+                        currentChatId ===
+                        chat.id
+                    ) {
+
+                        if (
+                            chatsArray.length >
+                            0
+                        ) {
+
+                            loadChat(
+                                chatsArray[0]
+                                    .id
+                            );
+
+                        } else {
+
+                            startNewChat();
+
+                        }
+
+                    } else {
+
+                        renderHistoryList();
+
+                    }
 
                 }
+            );
 
-            });
 
+            historyList.appendChild(
+                li
+            );
 
-        historyList.appendChild(li);
-
-    });
+        }
+    );
 
 }
 
@@ -374,21 +586,37 @@ function renderHistoryList() {
 
 function loadChat(id) {
 
-    currentChatId = id;
+    currentChatId =
+        id;
 
-    const chat = chatsArray.find(
-        c => c.id === id
-    );
 
-    if (!chat || !chatBox) return;
+    const chat =
+        chatsArray.find(
+            c => c.id === id
+        );
 
-    chatBox.innerHTML = chat.html;
+
+    if (
+        !chat ||
+        !chatBox
+    ) {
+        return;
+    }
+
+
+    chatBox.innerHTML =
+        chat.html;
+
 
     restoreMessageActions();
 
-    chatBox.scrollTop = chatBox.scrollHeight;
+
+    chatBox.scrollTop =
+        chatBox.scrollHeight;
+
 
     renderHistoryList();
+
 
     closeAllMenus();
 
@@ -402,16 +630,32 @@ function loadChat(id) {
 function closeAllMenus() {
 
     document
-        .querySelectorAll(".chat-context-menu")
-        .forEach(menu => {
-            menu.classList.remove("show");
-        });
+        .querySelectorAll(
+            ".chat-context-menu"
+        )
+        .forEach(
+            menu => {
+
+                menu.classList.remove(
+                    "show"
+                );
+
+            }
+        );
+
 
     const dropdown =
-        document.getElementById("attachDropdown");
+        document.getElementById(
+            "attachDropdown"
+        );
+
 
     if (dropdown) {
-        dropdown.classList.remove("show");
+
+        dropdown.classList.remove(
+            "show"
+        );
+
     }
 
 }
@@ -421,40 +665,44 @@ function closeAllMenus() {
 // 2. API
 // ==========================================
 
-// ⚠️ لا تضع مفتاح API الحقيقي هنا عند النشر
-const API_KEY = "YOUR_GEMINI_API_KEY";
-
-
-const sendChatBtn =
-    document.getElementById("sendChatBtn");
-
-const chatInput =
-    document.getElementById("chatInput");
+// 🔐 مفتاح Gemini لم يعد موجودًا هنا.
+// JavaScript يتعامل مع api/chat.php فقط.
 
 
 // ==========================================
 // زر الإرسال / الإيقاف
 // ==========================================
 
-function updateSendButtonState(isGenerating) {
+function updateSendButtonState(
+    isGenerating
+) {
 
-    if (!sendChatBtn) return;
+    if (!sendChatBtn) {
+        return;
+    }
+
 
     if (isGenerating) {
 
         sendChatBtn.innerHTML =
             `<i class="fa-solid fa-square"></i>`;
 
-        sendChatBtn.title = "إيقاف الرد";
+        sendChatBtn.title =
+            "إيقاف الرد";
 
-        sendChatBtn.classList.add("stop-generating");
+
+        sendChatBtn.classList.add(
+            "stop-generating"
+        );
 
     } else {
 
         sendChatBtn.innerHTML =
             `<i class="fa-solid fa-paper-plane"></i>`;
 
-        sendChatBtn.title = "إرسال";
+        sendChatBtn.title =
+            "إرسال";
+
 
         sendChatBtn.classList.remove(
             "stop-generating"
@@ -466,27 +714,37 @@ function updateSendButtonState(isGenerating) {
 
 
 // ==========================================
-// إرسال / إيقاف
+// زر الإرسال
 // ==========================================
 
 if (sendChatBtn) {
 
-    sendChatBtn.addEventListener("click", () => {
+    sendChatBtn.addEventListener(
+        "click",
+        () => {
 
-        if (currentAbortController) {
+            if (
+                currentAbortController
+            ) {
 
-            currentAbortController.abort();
+                currentAbortController.abort();
 
-            currentAbortController = null;
+                currentAbortController =
+                    null;
 
-            updateSendButtonState(false);
+                updateSendButtonState(
+                    false
+                );
 
-            return;
+                return;
+
+            }
+
+
+            sendMessage();
+
         }
-
-        sendMessage();
-
-    });
+    );
 
 }
 
@@ -499,37 +757,53 @@ if (sendChatBtn) {
 
 if (chatInput) {
 
-    chatInput.addEventListener("input", () => {
+    chatInput.addEventListener(
+        "input",
+        () => {
 
-        chatInput.style.height = "auto";
-
-        const maxHeight = 130;
-
-        chatInput.style.height =
-            Math.min(
-                chatInput.scrollHeight,
-                maxHeight
-            ) + "px";
-
-    });
+            chatInput.style.height =
+                "auto";
 
 
-    chatInput.addEventListener("keydown", (e) => {
+            const maxHeight =
+                130;
 
-        if (
-            e.key === "Enter" &&
-            !e.shiftKey
-        ) {
 
-            e.preventDefault();
-
-            if (currentAbortController) return;
-
-            sendMessage();
+            chatInput.style.height =
+                Math.min(
+                    chatInput.scrollHeight,
+                    maxHeight
+                ) + "px";
 
         }
+    );
 
-    });
+
+    chatInput.addEventListener(
+        "keydown",
+        e => {
+
+            if (
+                e.key === "Enter" &&
+                !e.shiftKey
+            ) {
+
+                e.preventDefault();
+
+
+                if (
+                    currentAbortController
+                ) {
+                    return;
+                }
+
+
+                sendMessage();
+
+            }
+
+        }
+    );
 
 }
 
@@ -538,9 +812,14 @@ if (chatInput) {
 // إرسال الرسالة
 // ==========================================
 
-async function sendMessage(customText = null) {
+async function sendMessage(
+    customText = null
+) {
 
-    if (!chatBox) return;
+    if (!chatBox) {
+        return;
+    }
+
 
     let text =
         customText !== null
@@ -549,7 +828,10 @@ async function sendMessage(customText = null) {
                 ? chatInput.value.trim()
                 : "";
 
-    if (!text) return;
+
+    if (!text) {
+        return;
+    }
 
 
     if (!currentChatId) {
@@ -558,7 +840,9 @@ async function sendMessage(customText = null) {
 
 
     // رسالة المستخدم
-    appendUserMessage(text);
+    appendUserMessage(
+        text
+    );
 
 
     if (
@@ -566,9 +850,12 @@ async function sendMessage(customText = null) {
         chatInput
     ) {
 
-        chatInput.value = "";
+        chatInput.value =
+            "";
 
-        chatInput.style.height = "auto";
+
+        chatInput.style.height =
+            "auto";
 
     }
 
@@ -577,7 +864,9 @@ async function sendMessage(customText = null) {
         chatBox.scrollHeight;
 
 
-    saveCurrentChat(text);
+    saveCurrentChat(
+        text
+    );
 
 
     const lowerText =
@@ -592,10 +881,14 @@ async function sendMessage(customText = null) {
         lowerText.includes("صورة") ||
         lowerText.includes("ارسم") ||
         lowerText.includes("تخيلية") ||
-        lowerText.includes("generate image")
+        lowerText.includes(
+            "generate image"
+        )
     ) {
 
-        await generateImage(text);
+        await generateImage(
+            text
+        );
 
         return;
 
@@ -609,10 +902,14 @@ async function sendMessage(customText = null) {
     if (
         lowerText.includes("فيديو") ||
         lowerText.includes("مشهد متحرك") ||
-        lowerText.includes("generate video")
+        lowerText.includes(
+            "generate video"
+        )
     ) {
 
-        await generateVideo(text);
+        await generateVideo(
+            text
+        );
 
         return;
 
@@ -624,7 +921,8 @@ async function sendMessage(customText = null) {
     // ==========================================
 
     const loadingId =
-        "loading-" + Date.now();
+        "loading-" +
+        Date.now();
 
 
     chatBox.insertAdjacentHTML(
@@ -636,6 +934,7 @@ async function sendMessage(customText = null) {
         >
             <div class="nova-loading">
                 <span>Nova يفكر</span>
+
                 <span class="loading-dots">
                     <i></i>
                     <i></i>
@@ -651,14 +950,20 @@ async function sendMessage(customText = null) {
         chatBox.scrollHeight;
 
 
-    updateSendButtonState(true);
+    updateSendButtonState(
+        true
+    );
+
 
     currentAbortController =
         new AbortController();
 
 
-    let success = false;
-    let data = null;
+    let success =
+        false;
+
+    let data =
+        null;
 
 
     try {
@@ -671,32 +976,32 @@ async function sendMessage(customText = null) {
 
             try {
 
-                const response = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${API_KEY}`,
-                    {
-                        method: "POST",
+                // 🔐 الطلب يذهب إلى PHP
+                // وليس إلى Gemini مباشرة.
+                const response =
+                    await fetch(
+                        "api/chat.php",
+                        {
+                            method:
+                                "POST",
 
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
 
-                        signal:
-                            currentAbortController.signal,
+                            signal:
+                                currentAbortController
+                                    .signal,
 
-                        body: JSON.stringify({
-                            contents: [
-                                {
-                                    parts: [
-                                        {
-                                            text: text
-                                        }
-                                    ]
-                                }
-                            ]
-                        })
-                    }
-                );
+                            body:
+                                JSON.stringify({
+                                    message:
+                                        text
+                                })
+
+                        }
+                    );
 
 
                 data =
@@ -712,14 +1017,18 @@ async function sendMessage(customText = null) {
                     attempt < 3
                 ) {
 
-                    await delay(1500);
+                    await delay(
+                        1500
+                    );
 
                     continue;
 
                 }
 
 
-                success = response.ok;
+                success =
+                    response.ok;
+
 
                 break;
 
@@ -736,12 +1045,18 @@ async function sendMessage(customText = null) {
                 }
 
 
-                if (attempt === 3) {
+                if (
+                    attempt === 3
+                ) {
+
                     throw netErr;
+
                 }
 
 
-                await delay(1500);
+                await delay(
+                    1500
+                );
 
             }
 
@@ -752,6 +1067,7 @@ async function sendMessage(customText = null) {
             document.getElementById(
                 loadingId
             );
+
 
         if (loadingElem) {
             loadingElem.remove();
@@ -767,19 +1083,30 @@ async function sendMessage(customText = null) {
         ) {
 
             const parts =
-                data.candidates[0].content.parts || [];
+                data
+                    .candidates[0]
+                    .content
+                    .parts || [];
+
 
             const reply =
                 parts
-                    .map(part => part.text || "")
+                    .map(
+                        part =>
+                            part.text || ""
+                    )
                     .join("\n");
 
 
             const message =
-                createAssistantMessage(reply);
+                createAssistantMessage(
+                    reply
+                );
 
 
-            chatBox.appendChild(message);
+            chatBox.appendChild(
+                message
+            );
 
 
         } else if (
@@ -787,15 +1114,20 @@ async function sendMessage(customText = null) {
             data.error
         ) {
 
+            const errorMessage =
+                data.error.message ||
+                "غير معروف";
+
+
             const message =
                 createAssistantMessage(
-                    `خطأ من الخادم: ${
-                        data.error.message ||
-                        "غير معروف"
-                    }`
+                    `خطأ من الخادم: ${errorMessage}`
                 );
 
-            chatBox.appendChild(message);
+
+            chatBox.appendChild(
+                message
+            );
 
 
         } else {
@@ -805,7 +1137,10 @@ async function sendMessage(customText = null) {
                     "عذراً، لم يتم استلام رد صحيح من الخادم."
                 );
 
-            chatBox.appendChild(message);
+
+            chatBox.appendChild(
+                message
+            );
 
         }
 
@@ -816,6 +1151,7 @@ async function sendMessage(customText = null) {
             document.getElementById(
                 loadingId
             );
+
 
         if (loadingElem) {
             loadingElem.remove();
@@ -838,11 +1174,17 @@ async function sendMessage(customText = null) {
 
         } else {
 
+            console.error(
+                "Nova API Error:",
+                error
+            );
+
+
             chatBox.insertAdjacentHTML(
                 "beforeend",
                 `
                 <div class="message bot-message nova-message">
-                    حدث خطأ في الاتصال بالإنترنت أو الخادم.
+                    حدث خطأ في الاتصال بالخادم.
                 </div>
                 `
             );
@@ -852,12 +1194,18 @@ async function sendMessage(customText = null) {
     }
 
 
-    updateSendButtonState(false);
+    updateSendButtonState(
+        false
+    );
 
-    currentAbortController = null;
+
+    currentAbortController =
+        null;
+
 
     chatBox.scrollTop =
         chatBox.scrollHeight;
+
 
     saveCurrentChat();
 
@@ -868,18 +1216,29 @@ async function sendMessage(customText = null) {
 // رسالة المستخدم
 // ==========================================
 
-function appendUserMessage(text) {
+function appendUserMessage(
+    text
+) {
 
     const message =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     message.className =
         "message user-message";
 
-    message.innerHTML =
-        escapeHtml(text);
 
-    chatBox.appendChild(message);
+    message.innerHTML =
+        escapeHtml(
+            text
+        );
+
+
+    chatBox.appendChild(
+        message
+    );
 
 }
 
@@ -888,10 +1247,15 @@ function appendUserMessage(text) {
 // رسالة Nova
 // ==========================================
 
-function createAssistantMessage(text) {
+function createAssistantMessage(
+    text
+) {
 
     const messageDiv =
-        document.createElement("div");
+        document.createElement(
+            "div"
+        );
+
 
     messageDiv.className =
         "message bot-message nova-message";
@@ -962,7 +1326,9 @@ function setupMessageActions(
     originalText
 ) {
 
-    if (!messageDiv) return;
+    if (!messageDiv) {
+        return;
+    }
 
 
     const copyBtn =
@@ -970,15 +1336,18 @@ function setupMessageActions(
             ".copy-message"
         );
 
+
     const regenerateBtn =
         messageDiv.querySelector(
             ".regenerate-message"
         );
 
+
     const likeBtn =
         messageDiv.querySelector(
             ".like-message"
         );
+
 
     const dislikeBtn =
         messageDiv.querySelector(
@@ -997,25 +1366,32 @@ function setupMessageActions(
                     originalText
                 );
 
+
                 copyBtn.innerHTML =
                     `<i class="fa-solid fa-check"></i>`;
+
 
                 showToast(
                     "تم نسخ الرد"
                 );
 
 
-                setTimeout(() => {
+                setTimeout(
+                    () => {
 
-                    copyBtn.innerHTML =
-                        `<i class="fa-regular fa-copy"></i>`;
+                        copyBtn.innerHTML =
+                            `<i class="fa-regular fa-copy"></i>`;
 
-                }, 1500);
+                    },
+                    1500
+                );
 
 
             } catch {
 
-                alert("تعذر نسخ النص.");
+                alert(
+                    "تعذر نسخ النص."
+                );
 
             }
 
@@ -1035,34 +1411,54 @@ function setupMessageActions(
                     )
                 ];
 
+
             const messageIndex =
-                messages.indexOf(messageDiv);
+                messages.indexOf(
+                    messageDiv
+                );
 
 
-            if (messageIndex <= 0) return;
+            if (
+                messageIndex <= 0
+            ) {
+                return;
+            }
 
 
             const previousUserMessage =
                 messages
-                    .slice(0, messageIndex)
+                    .slice(
+                        0,
+                        messageIndex
+                    )
                     .reverse()
-                    .find(msg =>
-                        msg.classList.contains(
-                            "user-message"
-                        )
+                    .find(
+                        msg =>
+                            msg.classList.contains(
+                                "user-message"
+                            )
                     );
 
 
-            if (!previousUserMessage) return;
+            if (
+                !previousUserMessage
+            ) {
+                return;
+            }
 
 
             const text =
-                previousUserMessage.innerText.trim();
+                previousUserMessage
+                    .innerText
+                    .trim();
 
 
             messageDiv.remove();
 
-            sendMessage(text);
+
+            sendMessage(
+                text
+            );
 
         }
     );
@@ -1076,6 +1472,7 @@ function setupMessageActions(
             likeBtn.classList.toggle(
                 "active"
             );
+
 
             dislikeBtn?.classList.remove(
                 "active"
@@ -1094,6 +1491,7 @@ function setupMessageActions(
                 "active"
             );
 
+
             likeBtn?.classList.remove(
                 "active"
             );
@@ -1105,35 +1503,45 @@ function setupMessageActions(
 
 
 // ==========================================
-// إعادة تفعيل أزرار الرسائل بعد تحميل History
+// إعادة تفعيل أزرار الرسائل
 // ==========================================
 
 function restoreMessageActions() {
 
-    if (!chatBox) return;
+    if (!chatBox) {
+        return;
+    }
+
 
     chatBox
         .querySelectorAll(
             ".nova-message"
         )
-        .forEach(message => {
+        .forEach(
+            message => {
 
-            const content =
-                message.querySelector(
-                    ".nova-message-content"
+                const content =
+                    message.querySelector(
+                        ".nova-message-content"
+                    );
+
+
+                if (!content) {
+                    return;
+                }
+
+
+                const text =
+                    content.innerText;
+
+
+                setupMessageActions(
+                    message,
+                    text
                 );
 
-            if (!content) return;
-
-            const text =
-                content.innerText;
-
-            setupMessageActions(
-                message,
-                text
-            );
-
-        });
+            }
+        );
 
 }
 
@@ -1142,19 +1550,45 @@ function restoreMessageActions() {
 // escape HTML
 // ==========================================
 
-function escapeHtml(text) {
+function escapeHtml(
+    text
+) {
 
-    if (text === null || text === undefined) {
+    if (
+        text === null ||
+        text === undefined
+    ) {
+
         return "";
+
     }
 
+
     return String(text)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;")
-        .replace(/\n/g, "<br>");
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        )
+        .replace(
+            /\n/g,
+            "<br>"
+        );
 
 }
 
@@ -1163,10 +1597,16 @@ function escapeHtml(text) {
 // Delay
 // ==========================================
 
-function delay(ms) {
+function delay(
+    ms
+) {
 
     return new Promise(
-        resolve => setTimeout(resolve, ms)
+        resolve =>
+            setTimeout(
+                resolve,
+                ms
+            )
     );
 
 }
@@ -1176,7 +1616,9 @@ function delay(ms) {
 // Toast
 // ==========================================
 
-function showToast(message) {
+function showToast(
+    message
+) {
 
     let toast =
         document.getElementById(
@@ -1187,13 +1629,18 @@ function showToast(message) {
     if (!toast) {
 
         toast =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
+
 
         toast.id =
             "novaToast";
 
+
         toast.className =
             "nova-toast";
+
 
         document.body.appendChild(
             toast
@@ -1204,6 +1651,7 @@ function showToast(message) {
 
     toast.textContent =
         message;
+
 
     toast.classList.add(
         "show"
@@ -1216,13 +1664,16 @@ function showToast(message) {
 
 
     toast._timer =
-        setTimeout(() => {
+        setTimeout(
+            () => {
 
-            toast.classList.remove(
-                "show"
-            );
+                toast.classList.remove(
+                    "show"
+                );
 
-        }, 1800);
+            },
+            1800
+        );
 
 }
 
@@ -1231,7 +1682,9 @@ function showToast(message) {
 // 3. ترجمة النصوص للصور
 // ==========================================
 
-async function translateToEnglishIfNeeded(text) {
+async function translateToEnglishIfNeeded(
+    text
+) {
 
     const dictionary = {
 
@@ -1268,7 +1721,9 @@ async function translateToEnglishIfNeeded(text) {
 
     for (
         const [key, value]
-        of Object.entries(dictionary)
+        of Object.entries(
+            dictionary
+        )
     ) {
 
         cleanedText =
@@ -1298,7 +1753,9 @@ async function translateToEnglishIfNeeded(text) {
 
         const res =
             await fetch(
-                `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ar&tl=en&dt=t&q=${encodeURIComponent(cleanedText)}`
+                `https://translate.googleapis.com/translate_a/single?client=gtx&sl=ar&tl=en&dt=t&q=${encodeURIComponent(
+                    cleanedText
+                )}`
             );
 
 
@@ -1337,10 +1794,13 @@ async function translateToEnglishIfNeeded(text) {
 // 4. توليد الصور
 // ==========================================
 
-async function generateImage(text) {
+async function generateImage(
+    text
+) {
 
     const loadingId =
-        "img-loading-" + Date.now();
+        "img-loading-" +
+        Date.now();
 
 
     chatBox.insertAdjacentHTML(
@@ -1367,7 +1827,9 @@ async function generateImage(text) {
 
 
     document
-        .getElementById(loadingId)
+        .getElementById(
+            loadingId
+        )
         ?.remove();
 
 
@@ -1379,7 +1841,8 @@ async function generateImage(text) {
 
     const randomSeed =
         Math.floor(
-            Math.random() * 1000000
+            Math.random() *
+                1000000
         );
 
 
@@ -1397,6 +1860,7 @@ async function generateImage(text) {
 
     saveCurrentChat();
 
+
     chatBox.scrollTop =
         chatBox.scrollHeight;
 
@@ -1407,10 +1871,13 @@ async function generateImage(text) {
 // 5. توليد الفيديو
 // ==========================================
 
-async function generateVideo(text) {
+async function generateVideo(
+    text
+) {
 
     const loadingId =
-        "vid-loading-" + Date.now();
+        "vid-loading-" +
+        Date.now();
 
 
     chatBox.insertAdjacentHTML(
@@ -1437,7 +1904,9 @@ async function generateVideo(text) {
 
 
     document
-        .getElementById(loadingId)
+        .getElementById(
+            loadingId
+        )
         ?.remove();
 
 
@@ -1449,7 +1918,8 @@ async function generateVideo(text) {
 
     const randomSeed =
         Math.floor(
-            Math.random() * 1000000
+            Math.random() *
+                1000000
         );
 
 
@@ -1466,6 +1936,7 @@ async function generateVideo(text) {
 
 
     saveCurrentChat();
+
 
     chatBox.scrollTop =
         chatBox.scrollHeight;
@@ -1489,6 +1960,7 @@ function appendMediaMessage(
             "div"
         );
 
+
     message.className =
         "message bot-message nova-message";
 
@@ -1504,7 +1976,7 @@ function appendMediaMessage(
         <div class="nova-message-content">
 
             <p>
-                ${title}
+                ${escapeHtml(title)}
             </p>
 
             <div
@@ -1568,7 +2040,9 @@ function appendImageMessageWithVisionChips(
     imageSrc
 ) {
 
-    if (!chatBox) return;
+    if (!chatBox) {
+        return;
+    }
 
 
     const messageDiv =
@@ -1645,24 +2119,27 @@ function appendImageMessageWithVisionChips(
         .querySelectorAll(
             ".vision-chip-btn"
         )
-        .forEach(button => {
+        .forEach(
+            button => {
 
-            button.addEventListener(
-                "click",
-                () => {
+                button.addEventListener(
+                    "click",
+                    () => {
 
-                    const action =
-                        button.dataset.action;
+                        const action =
+                            button.dataset.action;
 
-                    triggerVisionAction(
-                        action,
-                        imageSrc
-                    );
 
-                }
-            );
+                        triggerVisionAction(
+                            action,
+                            imageSrc
+                        );
 
-        });
+                    }
+                );
+
+            }
+        );
 
 
     chatBox.appendChild(
@@ -1685,6 +2162,7 @@ window.triggerVisionAction =
         const promptText =
             `بخصوص الصورة المرفقة، من فضلك قم بـ: ${actionType}`;
 
+
         sendMessage(
             promptText
         );
@@ -1705,6 +2183,7 @@ document.addEventListener(
                 "sidebar"
             );
 
+
         const sidebarToggleBtn =
             document.getElementById(
                 "sidebarToggleBtn"
@@ -1722,7 +2201,8 @@ document.addEventListener(
                 () => {
 
                     if (
-                        window.innerWidth <= 768
+                        window.innerWidth <=
+                        768
                     ) {
 
                         sidebar.classList.toggle(
@@ -1749,10 +2229,12 @@ document.addEventListener(
                 "attachBtn"
             );
 
+
         const attachDropdown =
             document.getElementById(
                 "attachDropdown"
             );
+
 
         const fileInput =
             document.getElementById(
@@ -1767,9 +2249,10 @@ document.addEventListener(
 
             attachBtn.addEventListener(
                 "click",
-                (e) => {
+                e => {
 
                     e.stopPropagation();
+
 
                     attachDropdown.classList.toggle(
                         "show"
@@ -1809,13 +2292,15 @@ document.addEventListener(
 
             optUpload.addEventListener(
                 "click",
-                (e) => {
+                e => {
 
                     e.stopPropagation();
+
 
                     attachDropdown?.classList.remove(
                         "show"
                     );
+
 
                     fileInput.click();
 
@@ -1872,7 +2357,9 @@ document.addEventListener(
                                     <div class="message user-message">
                                         📎 تم إرفاق الملف:
                                         <b>
-                                            ${escapeHtml(fileName)}
+                                            ${escapeHtml(
+                                                fileName
+                                            )}
                                         </b>
                                     </div>
                                     `
@@ -1883,11 +2370,13 @@ document.addEventListener(
 
                             saveCurrentChat();
 
+
                             chatBox.scrollTop =
                                 chatBox.scrollHeight;
 
 
-                            fileInput.value = "";
+                            fileInput.value =
+                                "";
 
                         };
 
@@ -1910,18 +2399,24 @@ document.addEventListener(
                             <div class="message user-message">
                                 📎 تم إرفاق الملف:
                                 <b>
-                                    ${escapeHtml(fileName)}
+                                    ${escapeHtml(
+                                        fileName
+                                    )}
                                 </b>
                             </div>
                             `
                         );
 
+
                         saveCurrentChat();
+
 
                         chatBox.scrollTop =
                             chatBox.scrollHeight;
 
-                        fileInput.value = "";
+
+                        fileInput.value =
+                            "";
 
                     }
 
@@ -1945,9 +2440,10 @@ document.addEventListener(
 
             optImage.addEventListener(
                 "click",
-                async (e) => {
+                async e => {
 
                     e.stopPropagation();
+
 
                     attachDropdown?.classList.remove(
                         "show"
@@ -2001,9 +2497,10 @@ document.addEventListener(
 
             optVideo.addEventListener(
                 "click",
-                async (e) => {
+                async e => {
 
                     e.stopPropagation();
+
 
                     attachDropdown?.classList.remove(
                         "show"
@@ -2057,9 +2554,10 @@ document.addEventListener(
 
             optMusic.addEventListener(
                 "click",
-                (e) => {
+                e => {
 
                     e.stopPropagation();
+
 
                     attachDropdown?.classList.remove(
                         "show"
@@ -2090,7 +2588,9 @@ document.addEventListener(
 
 
                     const audioUrl =
-                        `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(cleanText)}&tl=ar&client=tw-ob`;
+                        `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
+                            cleanText
+                        )}&tl=ar&client=tw-ob`;
 
 
                     chatBox.insertAdjacentHTML(
@@ -2123,6 +2623,7 @@ document.addEventListener(
 
                     saveCurrentChat();
 
+
                     chatBox.scrollTop =
                         chatBox.scrollHeight;
 
@@ -2149,25 +2650,30 @@ const voiceOverlay =
         "voiceOverlay"
     );
 
+
 const closeVoiceBtn =
     document.getElementById(
         "closeVoiceBtn"
     );
+
 
 const endVoiceCallBtn =
     document.getElementById(
         "endVoiceCallBtn"
     );
 
+
 const voiceOrb =
     document.getElementById(
         "voiceOrb"
     );
 
+
 const liveVoiceBtn =
     document.getElementById(
         "liveVoiceBtn"
     );
+
 
 const micBtn =
     document.getElementById(
@@ -2175,8 +2681,12 @@ const micBtn =
     );
 
 
-let isLiveMode = false;
-let recognition = null;
+let isLiveMode =
+    false;
+
+
+let recognition =
+    null;
 
 
 // ==========================================
@@ -2208,11 +2718,14 @@ if (SpeechRecognition) {
             "click",
             () => {
 
-                isLiveMode = false;
+                isLiveMode =
+                    false;
+
 
                 try {
 
                     recognition.start();
+
 
                     micBtn.classList.add(
                         "recording"
@@ -2239,17 +2752,24 @@ if (SpeechRecognition) {
             "click",
             () => {
 
-                isLiveMode = true;
+                isLiveMode =
+                    true;
+
 
                 if (voiceOverlay) {
+
                     voiceOverlay.classList.add(
                         "active"
                     );
+
                 }
 
+
                 if (voiceOrb) {
+
                     voiceOrb.className =
                         "voice-orb listening";
+
                 }
 
 
@@ -2272,10 +2792,12 @@ if (SpeechRecognition) {
 
 
     recognition.onresult =
-        async (event) => {
+        async event => {
 
             const transcript =
-                event.results[0][0].transcript;
+                event
+                    .results[0][0]
+                    .transcript;
 
 
             micBtn?.classList.remove(
@@ -2286,9 +2808,12 @@ if (SpeechRecognition) {
             if (isLiveMode) {
 
                 if (voiceOrb) {
+
                     voiceOrb.className =
                         "voice-orb speaking";
+
                 }
+
 
                 await sendVoiceMessageAndReply(
                     transcript
@@ -2301,10 +2826,14 @@ if (SpeechRecognition) {
                     chatInput.value =
                         transcript;
 
+
                     chatInput.focus();
 
+
                     chatInput.dispatchEvent(
-                        new Event("input")
+                        new Event(
+                            "input"
+                        )
                     );
 
                 }
@@ -2315,7 +2844,7 @@ if (SpeechRecognition) {
 
 
     recognition.onerror =
-        (event) => {
+        event => {
 
             console.error(
                 "خطأ في التعرف على الصوت:",
@@ -2386,7 +2915,8 @@ function closeVoiceOverlay() {
     }
 
 
-    isLiveMode = false;
+    isLiveMode =
+        false;
 
 }
 
@@ -2415,7 +2945,9 @@ if (endVoiceCallBtn) {
 // Voice Reply
 // ==========================================
 
-async function sendVoiceMessageAndReply(text) {
+async function sendVoiceMessageAndReply(
+    text
+) {
 
     if (!currentChatId) {
         startNewChat();
@@ -2429,7 +2961,9 @@ async function sendVoiceMessageAndReply(text) {
 
     if (chatInput) {
 
-        chatInput.value = "";
+        chatInput.value =
+            "";
+
 
         chatInput.style.height =
             "auto";
@@ -2441,7 +2975,9 @@ async function sendVoiceMessageAndReply(text) {
         chatBox.scrollHeight;
 
 
-    saveCurrentChat(text);
+    saveCurrentChat(
+        text
+    );
 
 
     const loadingId =
@@ -2468,28 +3004,24 @@ async function sendVoiceMessageAndReply(text) {
 
     try {
 
+        // 🔐 Voice أيضًا يمر عبر PHP
         const response =
             await fetch(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${API_KEY}`,
+                "api/chat.php",
                 {
-                    method: "POST",
+                    method:
+                        "POST",
 
                     headers: {
                         "Content-Type":
                             "application/json"
                     },
 
-                    body: JSON.stringify({
-                        contents: [
-                            {
-                                parts: [
-                                    {
-                                        text: text
-                                    }
-                                ]
-                            }
-                        ]
-                    })
+                    body:
+                        JSON.stringify({
+                            message:
+                                text
+                        })
                 }
             );
 
@@ -2506,6 +3038,7 @@ async function sendVoiceMessageAndReply(text) {
 
 
         if (
+            response.ok &&
             data.candidates &&
             data.candidates[0] &&
             data.candidates[0].content
@@ -2516,12 +3049,20 @@ async function sendVoiceMessageAndReply(text) {
                     .candidates[0]
                     .content
                     .parts
-                    .map(part => part.text || "")
+                    .map(
+                        part =>
+                            part.text || ""
+                    )
                     .join("\n");
 
 
             const audioUrl =
-                `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(reply.substring(0, 200))}&tl=ar&client=tw-ob`;
+                `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
+                    reply.substring(
+                        0,
+                        200
+                    )
+                )}&tl=ar&client=tw-ob`;
 
 
             const message =
@@ -2606,11 +3147,16 @@ async function sendVoiceMessageAndReply(text) {
 
         } else {
 
+            const errorMessage =
+                data?.error?.message ||
+                "عذراً، لم أستطع فهم المقطع الصوتي.";
+
+
             chatBox.insertAdjacentHTML(
                 "beforeend",
                 `
                 <div class="message bot-message nova-message">
-                    عذراً، لم أستطع فهم المقطع الصوتي.
+                    ${escapeHtml(errorMessage)}
                 </div>
                 `
             );
@@ -2628,7 +3174,10 @@ async function sendVoiceMessageAndReply(text) {
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "Voice API Error:",
+            error
+        );
 
 
         document
@@ -2642,7 +3191,7 @@ async function sendVoiceMessageAndReply(text) {
             "beforeend",
             `
             <div class="message bot-message nova-message">
-                خطأ في الاتصال بالشبكة.
+                خطأ في الاتصال بالخادم.
             </div>
             `
         );
@@ -2676,10 +3225,12 @@ const settingsBtn =
         "settingsBtn"
     );
 
+
 const settingsModal =
     document.getElementById(
         "settingsModal"
     );
+
 
 const closeSettingsBtn =
     document.getElementById(
@@ -2694,9 +3245,10 @@ if (
 
     settingsBtn.addEventListener(
         "click",
-        (e) => {
+        e => {
 
             e.stopPropagation();
+
 
             settingsModal.classList.add(
                 "active"
@@ -2729,7 +3281,7 @@ if (
 
 window.addEventListener(
     "click",
-    (e) => {
+    e => {
 
         if (
             settingsModal &&
@@ -2832,10 +3384,11 @@ document.addEventListener(
 
 document.addEventListener(
     "click",
-    (e) => {
+    e => {
 
         if (
-            window.innerWidth > 768
+            window.innerWidth >
+            768
         ) {
             return;
         }
@@ -2853,15 +3406,21 @@ document.addEventListener(
             );
 
 
-        if (!sidebar) return;
+        if (!sidebar) {
+            return;
+        }
 
 
         if (
             sidebar.classList.contains(
                 "mobile-open"
             ) &&
-            !sidebar.contains(e.target) &&
-            !toggleBtn?.contains(e.target)
+            !sidebar.contains(
+                e.target
+            ) &&
+            !toggleBtn?.contains(
+                e.target
+            )
         ) {
 
             sidebar.classList.remove(
@@ -2880,7 +3439,7 @@ document.addEventListener(
 
 document.addEventListener(
     "click",
-    (e) => {
+    e => {
 
         const historyItem =
             e.target.closest(
@@ -2890,20 +3449,24 @@ document.addEventListener(
 
         if (
             historyItem &&
-            window.innerWidth <= 768
+            window.innerWidth <=
+                768
         ) {
 
-            setTimeout(() => {
+            setTimeout(
+                () => {
 
-                document
-                    .getElementById(
-                        "sidebar"
-                    )
-                    ?.classList.remove(
-                        "mobile-open"
-                    );
+                    document
+                        .getElementById(
+                            "sidebar"
+                        )
+                        ?.classList.remove(
+                            "mobile-open"
+                        );
 
-            }, 150);
+                },
+                150
+            );
 
         }
 
@@ -2927,7 +3490,8 @@ window.addEventListener(
 
         if (
             sidebar &&
-            window.innerWidth > 768
+            window.innerWidth >
+                768
         ) {
 
             sidebar.classList.remove(
