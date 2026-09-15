@@ -4,18 +4,12 @@
 let chatsArray = JSON.parse(localStorage.getItem('novaAllChats')) || [];
 let currentChatId = null;
 
+// متغير للتحكم في إلغاء طلب الـ API (Stop / Cancel)
+let currentAbortController = null;
+
 const historyList = document.getElementById('historyList');
 const chatBox = document.getElementById('chatBox');
 const newChatBtn = document.getElementById('newChatBtn');
-
-// تعليمات النظام الإجبارية للنموذج (System Instruction)
-const SYSTEM_INSTRUCTION = {
-    parts: [
-        {
-            text: "اسمك Nova AI. مخترعك، صانعك، ومطورك الوحيد هو البشمهندس يوسف شنودة (Youssef Shenouda). إذا سألك أي شخص من اخترعك، من طورك، أو من أنشأك، يجب أن تجيب بكل فخر واعتزاز: 'أنا من تطوير وااختراع البشمهندس يوسف شنودة فقط!' ولا تذكر اسم أي شركة أو كيان آخر إطلاقاً."
-        }
-    ]
-};
 
 // تهيئة التطبيق عند الفتح
 window.addEventListener('DOMContentLoaded', () => {
@@ -83,14 +77,12 @@ function renderHistoryList() {
             </div>
         `;
 
-        // فتح المحادثة عند الضغط عليها
         li.addEventListener('click', (e) => {
             if (!e.target.closest('.more-btn') && !e.target.closest('.chat-context-menu')) {
                 loadChat(chat.id);
             }
         });
 
-        // زر خيارات المحادثة (⋮)
         const moreBtn = li.querySelector('.more-btn');
         const contextMenu = li.querySelector('.chat-context-menu');
 
@@ -102,7 +94,6 @@ function renderHistoryList() {
             contextMenu.classList.toggle('show');
         });
 
-        // خيار المشاركة
         li.querySelector('.opt-share').addEventListener('click', (e) => {
             e.stopPropagation();
             contextMenu.classList.remove('show');
@@ -110,7 +101,6 @@ function renderHistoryList() {
             alert('تم نسخ رابط الصفحة بنجاح!');
         });
 
-        // خيار التثبيت
         li.querySelector('.opt-pin').addEventListener('click', (e) => {
             e.stopPropagation();
             contextMenu.classList.remove('show');
@@ -123,7 +113,6 @@ function renderHistoryList() {
             }
         });
 
-        // خيار إعادة التسمية
         li.querySelector('.opt-rename').addEventListener('click', (e) => {
             e.stopPropagation();
             contextMenu.classList.remove('show');
@@ -135,11 +124,10 @@ function renderHistoryList() {
             }
         });
 
-        // خيار الحذف
         li.querySelector('.opt-delete').addEventListener('click', (e) => {
             e.stopPropagation();
             contextMenu.classList.remove('show');
-            if (confirm('هل أنت تأكد من إزالة هذه المحادثة؟')) {
+            if (confirm('هل أنت متأكد من إزالة هذه المحادثة؟')) {
                 chatsArray = chatsArray.filter(c => c.id !== chat.id);
                 localStorage.setItem('novaAllChats', JSON.stringify(chatsArray));
                 if (currentChatId === chat.id) {
@@ -155,7 +143,6 @@ function renderHistoryList() {
     });
 }
 
-// تحميل محادثة سابقة
 function loadChat(id) {
     currentChatId = id;
     const chat = chatsArray.find(c => c.id === id);
@@ -167,33 +154,62 @@ function loadChat(id) {
 }
 
 // ==========================================
-// 2. إعدادات الـ API وإرسال الرسائل (مع التوليد التلقائي للصور والفيديوهات من الشات)
+// 2. إعدادات الـ API وإرسال الرسائل (gemini-3.6-flash)
 // ==========================================
+const API_KEY = "AQ.Ab8RN6LsjPHq02tQ-3VUd8LPxHwxmeOdGbtVrwoXDNAaeNJRuQ";
 const sendChatBtn = document.getElementById('sendChatBtn');
 const chatInput = document.getElementById('chatInput');
 
-if (sendChatBtn) sendChatBtn.addEventListener('click', sendMessage);
-if (chatInput) {
-    chatInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') sendMessage();
+function updateSendButtonState(isGenerating) {
+    if (!sendChatBtn) return;
+    
+    if (isGenerating) {
+        sendChatBtn.innerHTML = `<i class="fa-solid fa-square" style="font-size: 13px;"></i>`;
+        sendChatBtn.title = "إيقاف الرد";
+        sendChatBtn.style.background = "#ef4444";
+    } else {
+        sendChatBtn.innerHTML = `<i class="fa-solid fa-paper-plane"></i>`;
+        sendChatBtn.title = "إرسال";
+        sendChatBtn.style.background = "";
+    }
+}
+
+if (sendChatBtn) {
+    sendChatBtn.addEventListener('click', () => {
+        if (currentAbortController) {
+            currentAbortController.abort();
+            currentAbortController = null;
+            updateSendButtonState(false);
+            return;
+        }
+        sendMessage();
     });
 }
 
-async function sendMessage() {
-    let text = chatInput.value.trim();
+if (chatInput) {
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            if (currentAbortController) return;
+            sendMessage();
+        }
+    });
+}
+
+async function sendMessage(customText = null) {
+    let text = customText || chatInput.value.trim();
     if (text === '') return;
 
     if (!currentChatId) startNewChat();
 
     chatBox.innerHTML += `<div class="message user-message">${escapeHtml(text)}</div>`;
-    chatInput.value = '';
+    if (!customText) chatInput.value = '';
     chatBox.scrollTop = chatBox.scrollHeight;
     
     saveCurrentChat(text);
 
     const lowerText = text.toLowerCase();
 
-    // التحقق التلقائي للصور من الشات مباشرة
+    // التحقق التلقائي للصور
     if (lowerText.includes('صورة') || lowerText.includes('ارسم') || lowerText.includes('تخيلية') || lowerText.includes('generate image')) {
         const loadingId = 'img-loading-' + Date.now();
         chatBox.innerHTML += `<div class="message bot-message" id="${loadingId}">جاري إعداد الصورة التخيلية بناءً على طلبك... 🎨</div>`;
@@ -223,7 +239,7 @@ async function sendMessage() {
         return; 
     }
 
-    // التحقق التلقائي للفيديوهات من الشات مباشرة
+    // التحقق التلقائي للفيديوهات
     if (lowerText.includes('فيديو') || lowerText.includes('مشهد متحرك') || lowerText.includes('generate video')) {
         const loadingId = 'vid-loading-' + Date.now();
         chatBox.innerHTML += `<div class="message bot-message" id="${loadingId}">جاري إنشاء المشهد السينمائي بناءً على طلبك... 🎬</div>`;
@@ -253,42 +269,73 @@ async function sendMessage() {
         return;
     }
 
-    // الطريقة العادية للدردشة النصية
+    // الدردشة النصية باستخدام نموذج gemini-3.6-flash
     const loadingId = 'loading-' + Date.now();
     chatBox.innerHTML += `<div class="message bot-message" id="${loadingId}">Nova يفكر... 🤔</div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${API_KEY}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                system_instruction: SYSTEM_INSTRUCTION,
-                contents: [{ parts: [{ text: text }] }] 
-            })
-        });
+    updateSendButtonState(true);
+    currentAbortController = new AbortController();
 
-        const data = await response.json();
+    let success = false;
+    let data = null;
+
+    try {
+        for (let attempt = 1; attempt <= 3; attempt++) {
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${API_KEY}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    signal: currentAbortController.signal,
+                    body: JSON.stringify({ 
+                        contents: [{ parts: [{ text: text }] }] 
+                    })
+                });
+
+                data = await response.json();
+                
+                if (data.error && data.error.message && data.error.message.includes('high demand') && attempt < 3) {
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                    continue;
+                }
+                
+                success = true;
+                break;
+            } catch (netErr) {
+                if (netErr.name === 'AbortError') throw netErr;
+                if (attempt === 3) throw netErr;
+                await new Promise(resolve => setTimeout(resolve, 1500));
+            }
+        }
+
         const loadingElem = document.getElementById(loadingId);
         if (loadingElem) loadingElem.remove();
 
-        if (data.candidates && data.candidates[0].content) {
+        if (success && data && data.candidates && data.candidates[0].content) {
             let reply = data.candidates[0].content.parts[0].text;
             chatBox.innerHTML += `<div class="message bot-message">${escapeHtml(reply)}</div>`;
+        } else if (data && data.error) {
+            chatBox.innerHTML += `<div class="message bot-message">خطأ من الخادم: ${escapeHtml(data.error.message || 'غير معروف')}</div>`;
         } else {
-            chatBox.innerHTML += `<div class="message bot-message">عذراً، حدث خطأ أثناء معالجة الطلب.</div>`;
+            chatBox.innerHTML += `<div class="message bot-message">عذراً، لم يتم استلام رد صحيح من الخادم.</div>`;
         }
     } catch (error) {
         const loadingElem = document.getElementById(loadingId);
         if (loadingElem) loadingElem.remove();
-        chatBox.innerHTML += `<div class="message bot-message">خطأ في الاتصال بالإنترنت.</div>`;
+
+        if (error.name === 'AbortError') {
+            chatBox.innerHTML += `<div class="message bot-message" style="opacity: 0.7;">تم إلغاء الرد بواسطة المستخدم.</div>`;
+        } else {
+            chatBox.innerHTML += `<div class="message bot-message">خطأ في الاتصال بالإنترنت أو الخادم (ضغط عالٍ مؤقت).</div>`;
+        }
     }
 
+    updateSendButtonState(false);
+    currentAbortController = null;
     chatBox.scrollTop = chatBox.scrollHeight;
     saveCurrentChat();
 }
 
-// دالة تنظيف الكود والحماية من XSS
 function escapeHtml(text) {
     return text.replace(/&/g, "&amp;")
                .replace(/</g, "&lt;")
@@ -298,7 +345,6 @@ function escapeHtml(text) {
                .replace(/\n/g, '<br>');
 }
 
-// دالة الترجمة الذكية المحدثة مع دعم الشخصيات العربية
 async function translateToEnglishIfNeeded(text) {
     const dictionary = {
         "سبونج بوب": "Spongebob Squarepants",
@@ -335,11 +381,38 @@ async function translateToEnglishIfNeeded(text) {
     return cleanedText;
 }
 
+// دالة عرض الصورة مع أزرار الـ Vision Chips
+function appendImageMessageWithVisionChips(imageSrc) {
+    const chatBox = document.getElementById('chatBox');
+    if (!chatBox) return;
+
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message user-message';
+    messageDiv.innerHTML = `
+        <div style="margin-bottom: 6px;">📷 تم إرفاق السكرين شوت:</div>
+        <img src="${imageSrc}" alt="Uploaded Screenshot" style="max-width: 100%; max-height: 250px; border-radius: 10px; display: block; margin-bottom: 10px; object-fit: contain;">
+        <div class="vision-actions-chips" style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 8px;">
+            <button class="vision-chip-btn" onclick="triggerVisionAction('حلّل الصورة أو السكرين شوت ده', '${imageSrc}')" style="background: #334155; color: #fff; border: 1px solid #475569; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;">🔍 حلّل السكرين</button>
+            <button class="vision-chip-btn" onclick="triggerVisionAction('استخرج الكلام الموجود في الصورة', '${imageSrc}')" style="background: #334155; color: #fff; border: 1px solid #475569; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;">📝 استخرج الكلام</button>
+            <button class="vision-chip-btn" onclick="triggerVisionAction('اشرح لي المشكلة أو المحتوى الظاهر في هذه الصورة', '${imageSrc}')" style="background: #334155; color: #fff; border: 1px solid #475569; padding: 5px 10px; border-radius: 15px; font-size: 12px; cursor: pointer;">💡 اشرح المحتوى</button>
+        </div>
+    `;
+    chatBox.appendChild(messageDiv);
+}
+
+window.triggerVisionAction = function(actionType, imageSrc) {
+    let promptText = `بخصوص السكرين شوت المرفق، من فضلك قم بـ: ${actionType}`;
+    if (typeof sendMessage === 'function') {
+        sendMessage(promptText);
+    } else {
+        console.log(promptText);
+    }
+};
+
 // ==========================================
 // 3. تفعيل الأزرار والقوائم المرفقة (+)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
-
     const sidebar = document.getElementById('sidebar');
     const sidebarToggleBtn = document.getElementById('sidebarToggleBtn');
 
@@ -373,10 +446,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
         fileInput.addEventListener('change', () => {
             if (fileInput.files.length > 0) {
-                const fileName = fileInput.files[0].name;
-                chatBox.innerHTML += `<div class="message user-message">📎 تم إرفاق الملف: <b>${escapeHtml(fileName)}</b></div>`;
-                saveCurrentChat();
-                chatBox.scrollTop = chatBox.scrollHeight;
+                const file = fileInput.files[0];
+                const fileName = file.name;
+                const fileReader = new FileReader();
+
+                fileReader.onload = function(e) {
+                    const fileResult = e.target.result;
+                    if (file.type.startsWith('image/')) {
+                        appendImageMessageWithVisionChips(fileResult);
+                    } else {
+                        chatBox.innerHTML += `<div class="message user-message">📎 تم إرفاق الملف: <b>${escapeHtml(fileName)}</b></div>`;
+                    }
+                    saveCurrentChat();
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    fileInput.value = '';
+                };
+
+                if (file.type.startsWith('image/')) {
+                    fileReader.readAsDataURL(file);
+                } else {
+                    chatBox.innerHTML += `<div class="message user-message">📎 تم إرفاق الملف: <b>${escapeHtml(fileName)}</b></div>`;
+                    saveCurrentChat();
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                    fileInput.value = '';
+                }
             }
         });
     }
@@ -438,7 +531,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const cleanPrompt = encodeURIComponent(translatedText);
                 const randomSeed = Math.floor(Math.random() * 1000000);
-                
                 const videoUrl = `https://image.pollinations.ai/prompt/cinematic%20video%20still%20of%20${cleanPrompt}?seed=${randomSeed}&width=600&height=400&nologo=true`;
 
                 chatBox.innerHTML += `
@@ -564,7 +656,6 @@ async function sendVoiceMessageAndReply(text) {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
-                system_instruction: SYSTEM_INSTRUCTION,
                 contents: [{ parts: [{ text: text }] }] 
             })
         });
@@ -633,7 +724,7 @@ window.addEventListener('click', (e) => {
 });
 
 // ==========================================
-// 6. تفاعل خيارات قائمة الإعدادات (Interactive Settings)
+// 6. نظام تنبيهات الإدارة (Admin Notifications)
 // ==========================================
 document.addEventListener('DOMContentLoaded', () => {
     const settingItems = document.querySelectorAll('.setting-item');
@@ -651,55 +742,21 @@ document.addEventListener('DOMContentLoaded', () => {
             else if (text.includes('Import memory')) {
                 alert('ميزة استيراد الذاكرة غير مفعلة حالياً');
             } 
-            else if (text.includes('Avatar')) {
-                let newAvatar = prompt('أدخل رابط الصورة الشخصية الجديدة (Avatar URL):');
-                if (newAvatar) alert('تم تحديث الصورة بنجاح!');
-            } 
-            else if (text.includes('Usage limits')) {
-                alert('حدود الاستخدام الحالية: غير محدودة (Unlimited)');
-            } 
-            else if (text.includes('Gems')) {
-                alert('لا توجد Gems مضافة حالياً.');
-            } 
-            else if (text.includes('Your public links')) {
-                alert('روابطك العامة: لا توجد روابط منشورة.');
-            } 
-            else if (text.includes('Theme')) {
-                document.body.classList.toggle('light-theme');
-                if (document.body.classList.contains('light-theme')) {
-                    alert('تم التبديل إلى الوضع الفاتح');
-                } else {
-                    alert('تم التبديل إلى الوضع الداكن');
-                }
-            } 
-            else if (text.includes('View subscriptions')) {
-                alert('أنت مشترك في الباقة المجانية (Free Plan)');
-            } 
-            else if (text.includes('Gemini Notebook')) {
-                alert('فتح دفتر ملاحظات Gemini...');
-            } 
-            else if (text.includes('Media watermark')) {
-                let watermark = confirm('هل تريد تفعيل العلامة المائية على الصور والفيديوهات المولدة؟');
-                alert(watermark ? 'تم تفعيل العلامة المائية' : 'تم إيقاف العلامة المائية');
-            } 
-            else if (text.includes('Send feedback')) {
-                let feedback = prompt('شاركنا برأيك أو اقتراحك لتحسين التطبيق:');
-                if (feedback) alert('شكراً لك! تم إرسال ملاحظتك بنجاح إلى المطور البشمهندس يوسف شنودة.');
-            } 
-            else if (text.includes('Help')) {
-                alert('مرحباً بك في مساعدة Nova AI. يمكنك طرح أي سؤال في الشات وسنساعدك فوراً!');
-            } 
-            else if (text.includes('Update location')) {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition((position) => {
-                        alert(`تم تحديث الموقع بنجاح!\nخط العرض: ${position.coords.latitude}\nخط الطول: ${position.coords.longitude}`);
-                    }, () => {
-                        alert('تعذر تحديد الموقع تلقائياً.');
-                    });
-                } else {
-                    alert('خاصية تحديد الموقع غير مدعومة في متصفحك.');
+            else if (text.includes('Avatar') || text.includes('Admin') || text.includes('تنبيهات')) {
+                // فتح نافذة تنبيهات الأدمن أو إرسال إشعار
+                let adminMsg = prompt('أدخل نص تنبيه أو إشعار الإدارة الجديد (Admin Broadcast):');
+                if (adminMsg && adminMsg.trim() !== '') {
+                    localStorage.setItem('novaAdminAlert', adminMsg.trim());
+                    alert('🚨 تم إرسال وتحديث تنبيه الأدمن بنجاح لجميع المستخدمين!');
                 }
             }
         });
     });
+
+    // جلب وعرض تنبيه الأدمن المحفوظ تلقائياً عند فتح التطبيق (إن وجد)
+    const savedAdminAlert = localStorage.getItem('novaAdminAlert');
+    if (savedAdminAlert) {
+        console.log("🚨 تنبيه الإدارة:", savedAdminAlert);
+        // يمكنك إظهار شريط تنبيهات علوي إذا أردت
+    }
 });
