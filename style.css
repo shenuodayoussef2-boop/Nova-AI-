@@ -1182,3 +1182,83 @@ body.light-theme .message.bot-message {
         background-color: #f1f5f9;
     }
 }
+/* ==========================================
+   NOVA MESSAGE ACTIONS
+   ========================================== */
+
+.nova-message {
+    position: relative;
+}
+
+.nova-message-content {
+    line-height: 1.8;
+    white-space: normal;
+    word-break: break-word;
+}
+
+.message-actions {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 10px;
+    opacity: 0;
+    transform: translateY(3px);
+    transition: 0.2s ease;
+}
+
+.nova-message:hover .message-actions,
+.nova-message:focus-within .message-actions {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.message-action {
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.06);
+    color: #94a3b8;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s ease;
+}
+
+.message-action:hover {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+}
+
+.message-action.active {
+    color: #fff;
+    background: rgba(99,102,241,0.25);
+}
+
+#chatInput {
+    resize: none;
+    overflow-y: auto;
+    min-height: 42px;
+    max-height: 130px;
+    line-height: 1.5;
+    font-family: inherit;
+}
+
+@media (max-width: 768px) {
+
+    .message-actions {
+        opacity: 1;
+        transform: none;
+    }
+
+    .message-action {
+        width: 32px;
+        height: 32px;
+    }
+
+    #chatInput {
+        font-size: 15px;
+        min-height: 40px;
+    }
+}
