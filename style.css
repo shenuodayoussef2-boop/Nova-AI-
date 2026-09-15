@@ -299,26 +299,29 @@ body.light-theme .message.bot-message {
 }
 
 .message {
-    max-width: 75%;
+    max-width: 80%;
     padding: 12px 16px;
-    border-radius: 12px;
+    border-radius: 14px;
     font-size: 14px;
     line-height: 1.6;
     word-break: break-word;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
+/* رسالة البوت (تظهر على اليمين مع اتجاه الـ RTL) */
 .bot-message {
     align-self: flex-start;
     background-color: #334155;
     color: #f8fafc;
-    border-bottom-right-radius: 4px;
+    border-top-right-radius: 4px;
 }
 
+/* رسالة المستخدم (تظهر على اليسار) */
 .user-message {
     align-self: flex-end;
     background-color: #6366f1;
     color: #ffffff;
-    border-bottom-left-radius: 4px;
+    border-top-left-radius: 4px;
 }
 
 /* ==========================================
@@ -383,7 +386,7 @@ body.light-theme .message.bot-message {
     background-color: #4f46e5;
 }
 
-/* حاوية الأيقونات اليمين بجانب حقل النص */
+/* حاوية الأيقونات بجانب حقل النص */
 .input-actions-right {
     display: flex;
     align-items: center;
@@ -677,12 +680,12 @@ body.light-theme .message.bot-message {
     70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
     100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
 }
+
 /* تنسيقات الشاشات الصغيرة (الموبايل) */
 @media (max-width: 768px) {
-    /* جعل القائمة الجانبية مخفية تماماً بافتراضي على الموبايل */
     .sidebar {
         position: fixed;
-        right: -280px; /* أو left حسب اتجاه موقعك (RTL هنا right) */
+        right: -280px;
         top: 0;
         height: 100%;
         width: 260px;
@@ -690,12 +693,10 @@ body.light-theme .message.bot-message {
         transition: right 0.3s ease-in-out;
     }
 
-    /* عندما تكون القائمة مفعلة/مفتوحة */
     .sidebar.mobile-open {
         right: 0;
     }
 
-    /* ضمان ألا يتأثر محتوى الشات ويأخذ عرض الشاشة بالكامل */
     .chat-container, .main-content {
         width: 100% !important;
         margin-right: 0 !important;
