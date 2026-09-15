@@ -1262,3 +1262,111 @@ body.light-theme .message.bot-message {
         min-height: 40px;
     }
 }
+/* ==========================================
+   NOVA - CHAT TEXTAREA
+   ========================================== */
+
+#chatInput {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+
+    min-height: 52px;
+    height: 52px;
+    max-height: 140px;
+
+    padding: 14px 16px;
+
+    border: none;
+    outline: none;
+    resize: none;
+
+    background: transparent;
+    color: inherit;
+
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 1.5;
+
+    overflow-y: auto;
+
+    box-sizing: border-box;
+}
+
+/* Placeholder */
+#chatInput::placeholder {
+    color: #94a3b8;
+}
+
+/* لما المستخدم يضغط عليه */
+#chatInput:focus {
+    outline: none;
+}
+
+/* Scrollbar */
+#chatInput::-webkit-scrollbar {
+    width: 5px;
+}
+
+#chatInput::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.35);
+    border-radius: 10px;
+}
+
+
+/* ==========================================
+   INPUT AREA
+   ========================================== */
+
+.input-area {
+    min-height: 68px;
+    padding: 8px 10px;
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    box-sizing: border-box;
+}
+
+
+/* ==========================================
+   MOBILE
+   ========================================== */
+
+@media (max-width: 768px) {
+
+    .input-area {
+        min-height: 64px;
+        padding: 7px 8px;
+        gap: 6px;
+    }
+
+    #chatInput {
+        min-height: 48px;
+        height: 48px;
+
+        padding: 12px 13px;
+
+        font-size: 15px;
+    }
+
+}
+
+
+/* ==========================================
+   VERY SMALL PHONES
+   ========================================== */
+
+@media (max-width: 380px) {
+
+    #chatInput {
+        min-height: 46px;
+        height: 46px;
+
+        padding: 11px 12px;
+
+        font-size: 14px;
+    }
+
+}
