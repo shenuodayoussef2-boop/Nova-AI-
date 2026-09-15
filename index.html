@@ -93,25 +93,28 @@
                     <!-- حقل إدخال النص -->
                     <input type="text" id="chatInput" placeholder="اكتب رسالتك هنا...">
                     
-                    <!-- 🎤 زر الميكروفون العادي (يحول الكلام لنص داخل الشات) -->
-                    <button id="micBtn" type="button" title="تحويل الصوت لنص">
-                        <i class="fa-solid fa-microphone"></i>
-                    </button>
-                    
-                    <!-- 🔊 زر المحادثة الصوتية المباشرة (موجات صوتية - صوت لصوت بدون قراءة) -->
-                    <button id="liveVoiceBtn" class="mic-btn live-btn" type="button" title="محادثة صوتية مباشرة">
-                        <div class="wave-icon">
-                            <span class="bar"></span>
-                            <span class="bar"></span>
-                            <span class="bar"></span>
-                            <span class="bar"></span>
-                        </div>
-                    </button>
-                    
-                    <!-- زر الإرسال -->
-                    <button id="sendChatBtn" type="button" title="إرسال">
-                        <i class="fa-solid fa-paper-plane"></i>
-                    </button>
+                    <!-- الأيقونات والزراير اليمين للتحكم والتنظيم على الموبايل -->
+                    <div class="input-actions-right">
+                        <!-- 🎤 زر الميكروفون العادي (يحول الكلام لنص داخل الشات) -->
+                        <button id="micBtn" type="button" title="تحويل الصوت لنص">
+                            <i class="fa-solid fa-microphone"></i>
+                        </button>
+                        
+                        <!-- 🔊 زر المحادثة الصوتية المباشرة (موجات صوتية - صوت لصوت بدون قراءة) -->
+                        <button id="liveVoiceBtn" class="mic-btn live-btn" type="button" title="محادثة صوتية مباشرة">
+                            <div class="wave-icon">
+                                <span class="bar"></span>
+                                <span class="bar"></span>
+                                <span class="bar"></span>
+                                <span class="bar"></span>
+                            </div>
+                        </button>
+                        
+                        <!-- زر الإرسال -->
+                        <button id="sendChatBtn" type="button" title="إرسال">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
                 </div>
             </section>
 
@@ -145,33 +148,32 @@
             </button>
         </div>
     </div>
-<!-- نافذة الإعدادات المنبثقة (Settings Modal) -->
-<div id="settingsModal" class="settings-modal-overlay">
-    <div class="settings-modal-content">
-        <div class="settings-header">
-            <h3>الإعدادات</h3>
-            <button id="closeSettingsBtn" class="close-settings-btn"><i class="fa-solid fa-xmark"></i></button>
-        </div>
-        <div class="settings-body">
-            <div class="setting-item"><i class="fa-solid fa-clock-rotate-left"></i> Activity</div>
-            <div class="setting-item"><i class="fa-solid fa-brain"></i> Personal Intelligence</div>
-            <div class="setting-item"><i class="fa-solid fa-file-import"></i> Import memory to Nova</div>
-            <div class="setting-item"><i class="fa-regular fa-face-smile"></i> Avatar</div>
-            <div class="setting-item"><i class="fa-solid fa-chart-pie"></i> Usage limits</div>
-            <div class="setting-item"><i class="fa-solid fa-gem"></i> Gems</div>
-            <div class="setting-item"><i class="fa-solid fa-link"></i> Your public links</div>
-            <div class="setting-item"><i class="fa-solid fa-sun"></i> Theme <i class="fa-solid fa-chevron-left arrow"></i></div>
-            <div class="setting-item"><i class="fa-solid fa-box-archive"></i> View subscriptions</div>
-            <div class="setting-item"><i class="fa-solid fa-book"></i> Nova Notebook</div>
-            <div class="setting-item"><i class="fa-solid fa-photo-film"></i> Media watermark <i class="fa-solid fa-chevron-left arrow"></i></div>
-            <div class="setting-item"><i class="fa-solid fa-comment-dots"></i> Send feedback</div>
-            <div class="setting-item"><i class="fa-solid fa-circle-question"></i> Help <i class="fa-solid fa-chevron-left arrow"></i></div>
-                <div>
-                </div>
+
+    <!-- نافذة الإعدادات المنبثقة (Settings Modal) -->
+    <div id="settingsModal" class="settings-modal-overlay">
+        <div class="settings-modal-content">
+            <div class="settings-header">
+                <h3>الإعدادات</h3>
+                <button id="closeSettingsBtn" class="close-settings-btn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="settings-body">
+                <div class="setting-item"><i class="fa-solid fa-clock-rotate-left"></i> Activity</div>
+                <div class="setting-item"><i class="fa-solid fa-brain"></i> Personal Intelligence</div>
+                <div class="setting-item"><i class="fa-solid fa-file-import"></i> Import memory to Nova</div>
+                <div class="setting-item"><i class="fa-regular fa-face-smile"></i> Avatar</div>
+                <div class="setting-item"><i class="fa-solid fa-chart-pie"></i> Usage limits</div>
+                <div class="setting-item"><i class="fa-solid fa-gem"></i> Gems</div>
+                <div class="setting-item"><i class="fa-solid fa-link"></i> Your public links</div>
+                <div class="setting-item"><i class="fa-solid fa-sun"></i> Theme <i class="fa-solid fa-chevron-left arrow"></i></div>
+                <div class="setting-item"><i class="fa-solid fa-box-archive"></i> View subscriptions</div>
+                <div class="setting-item"><i class="fa-solid fa-book"></i> Nova Notebook</div>
+                <div class="setting-item"><i class="fa-solid fa-photo-film"></i> Media watermark <i class="fa-solid fa-chevron-left arrow"></i></div>
+                <div class="setting-item"><i class="fa-solid fa-comment-dots"></i> Send feedback</div>
+                <div class="setting-item"><i class="fa-solid fa-circle-question"></i> Help <i class="fa-solid fa-chevron-left arrow"></i></div>
             </div>
         </div>
     </div>
-</div>
+
     <script src="script.js"></script>
 </body>
 </html>
