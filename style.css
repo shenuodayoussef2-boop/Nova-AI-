@@ -1,80 +1,104 @@
-/* ==========================================
-   إعدادات عامة وتنسيق الأساسيات (CSS Reset & Base)
-   ========================================== */
+/* =========================================================
+   NOVA AI — COMPLETE STYLE SHEET
+   RTL / Dark & Light Theme / Responsive Mobile Design
+   ========================================================= */
+
+/* =========================
+   RESET & GLOBAL
+   ========================= */
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
 }
 
 body {
-    background-color: #0f172a;
-    color: #f8fafc;
-    height: 100vh;
-    overflow: hidden;
     direction: rtl;
+    background: #0f172a;
+    color: #f8fafc;
+    overflow: hidden;
+    -webkit-text-size-adjust: 100%;
 }
 
-/* الوضع الفاتح (Light Theme) */
-body.light-theme {
-    background-color: #f1f5f9;
-    color: #1e293b;
+button,
+input,
+textarea {
+    font: inherit;
 }
 
-body.light-theme .app-container {
-    background-color: #f8fafc;
+button {
+    cursor: pointer;
 }
 
-body.light-theme .sidebar {
-    background-color: #ffffff;
-    border-left: 1px solid #e2e8f0;
+button,
+input,
+textarea {
+    outline: none;
 }
 
-body.light-theme .main-content {
-    background-color: #f8fafc;
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+    outline: 2px solid #818cf8;
+    outline-offset: 2px;
 }
 
-body.light-theme .chat-box {
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-}
+/* =========================
+   APP LAYOUT
+   ========================= */
 
-body.light-theme .input-area {
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-}
-
-body.light-theme .input-area input[type="text"] {
-    color: #1e293b;
-}
-
-body.light-theme .message.bot-message {
-    background-color: #f1f5f9;
-    color: #1e293b;
-}
-
-/* هيكل التطبيق العام (App Layout) */
 .app-container {
     display: flex;
-    width: 100vw;
+    width: 100%;
     height: 100vh;
-    background-color: #0f172a;
+    height: 100dvh;
     overflow: hidden;
+    background: #0f172a;
 }
 
-/* ==========================================
-   القائمة الجانبية (Sidebar)
-   ========================================== */
-.sidebar {
-    width: 280px;
-    background-color: #1e293b;
-    border-left: 1px solid #334155;
+.main-content {
+    position: relative;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+    height: 100%;
+    overflow: hidden;
+    background: #0f172a;
+}
+
+.content-section {
     display: flex;
     flex-direction: column;
+    width: 100%;
     height: 100%;
+    min-height: 0;
+    padding: 20px;
+}
+
+/* =========================
+   SIDEBAR
+   ========================= */
+
+.sidebar {
+    position: relative;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    width: 280px;
+    height: 100%;
+    flex-shrink: 0;
+    background: #1e293b;
+    border-left: 1px solid #334155;
     transition: width 0.3s ease;
-    z-index: 10;
 }
 
 .sidebar.collapsed {
@@ -91,134 +115,157 @@ body.light-theme .message.bot-message {
 .sidebar-header {
     display: flex;
     align-items: center;
-    padding: 15px;
     gap: 12px;
+    padding: 15px;
 }
 
-.toggle-btn, .sidebar-icon-btn {
-    background: transparent;
-    border: none;
-    color: #94a3b8;
-    font-size: 18px;
-    cursor: pointer;
+.toggle-btn,
+.sidebar-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
     padding: 8px;
+    color: #94a3b8;
+    background: transparent;
+    border: 0;
     border-radius: 8px;
-    transition: background 0.2s;
+    font-size: 18px;
+    transition: 0.2s ease;
 }
 
-.toggle-btn:hover, .sidebar-icon-btn:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+.toggle-btn:hover,
+.sidebar-icon-btn:hover {
     color: #fff;
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .logo-text {
-    font-size: 20px;
-    font-weight: bold;
     color: #fff;
+    font-size: 21px;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 .logo-text span {
     color: #6366f1;
 }
 
-/* زر محادثة جديدة */
+/* =========================
+   NEW CHAT BUTTON
+   ========================= */
+
 .new-chat-btn {
-    margin: 10px 15px;
-    padding: 10px 15px;
-    background-color: #334155;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    cursor: pointer;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
+    min-height: 44px;
+    margin: 10px 15px;
+    padding: 10px 15px;
+    color: #fff;
+    background: #334155;
+    border: 0;
+    border-radius: 10px;
     font-size: 14px;
-    transition: background 0.2s;
+    transition: 0.2s ease;
 }
 
 .new-chat-btn:hover {
-    background-color: #475569;
+    background: #475569;
 }
 
-/* قسم السجل (Recents) */
+/* =========================
+   CHAT HISTORY
+   ========================= */
+
 .history-section {
     flex: 1;
-    overflow-y: auto;
     padding: 10px 15px;
+    overflow-y: auto;
+    scrollbar-width: thin;
 }
 
 .history-title {
-    font-size: 12px;
+    margin-bottom: 10px;
     color: #64748b;
-    margin-bottom: 8px;
-    text-transform: uppercase;
+    font-size: 12px;
+    font-weight: 600;
     letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
 .history-list {
-    list-style: none;
     display: flex;
     flex-direction: column;
     gap: 4px;
+    list-style: none;
 }
 
 .history-item {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    min-height: 40px;
     padding: 8px 10px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 14px;
     color: #cbd5e1;
-    position: relative;
-    transition: background 0.2s;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: background 0.2s ease;
 }
 
 .history-item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.06);
 }
 
 .history-item.active-chat {
-    background-color: rgba(99, 102, 241, 0.15);
-    color: #818cf8;
+    color: #a5b4fc;
+    background: rgba(99, 102, 241, 0.16);
 }
 
 .history-title-text {
     flex: 1;
-    white-space: nowrap;
+    min-width: 0;
     overflow: hidden;
+    white-space: nowrap;
     text-overflow: ellipsis;
 }
 
 .more-btn {
-    background: transparent;
-    border: none;
-    color: #94a3b8;
-    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 4px 8px;
-    border-radius: 4px;
+    color: #94a3b8;
+    background: transparent;
+    border: 0;
+    border-radius: 5px;
 }
 
 .more-btn:hover {
     color: #fff;
+    background: rgba(255, 255, 255, 0.08);
 }
 
-/* القائمة المنبثقة لخيارات المحادثة (Context Menu) */
+/* =========================
+   CONTEXT MENU
+   ========================= */
+
 .chat-context-menu {
     position: absolute;
+    top: 35px;
     left: 40px;
-    top: 30px;
-    background-color: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 3000;
     display: none;
     flex-direction: column;
-    z-index: 100;
-    min-width: 130px;
+    min-width: 145px;
     overflow: hidden;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 9px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
 }
 
 .chat-context-menu.show {
@@ -226,18 +273,22 @@ body.light-theme .message.bot-message {
 }
 
 .context-item {
-    padding: 8px 12px;
-    font-size: 13px;
-    color: #cbd5e1;
-    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 9px;
+    min-height: 40px;
+    padding: 9px 12px;
+    color: #cbd5e1;
+    background: transparent;
+    border: 0;
+    font-size: 13px;
+    text-align: right;
+    transition: 0.2s ease;
 }
 
 .context-item:hover {
-    background-color: #334155;
     color: #fff;
+    background: #334155;
 }
 
 .context-item.opt-delete {
@@ -245,946 +296,90 @@ body.light-theme .message.bot-message {
 }
 
 .context-item.opt-delete:hover {
-    background-color: rgba(248, 113, 113, 0.15);
+    background: rgba(248, 113, 113, 0.15);
 }
 
-/* ==========================================
-   المحتوى الرئيسي ومنطقة الشات (Main Content)
-   ========================================== */
-.main-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    background-color: #0f172a;
-    overflow: hidden;
-    position: relative;
-}
-
-.content-section {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    padding: 20px;
-    box-sizing: border-box;
-}
+/* =========================
+   SECTION HEADER
+   ========================= */
 
 .section-header {
     margin-bottom: 15px;
 }
 
 .section-header h2 {
-    font-size: 22px;
-    font-weight: 600;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
+    color: inherit;
+    font-size: 24px;
+    font-weight: 700;
 }
 
 .section-header p {
-    font-size: 13px;
     color: #94a3b8;
+    font-size: 13px;
 }
 
-/* صندوق رسائل الشات */
+/* =========================
+   CHAT BOX
+   ========================= */
+
 .chat-box {
-    flex: 1;
-    background-color: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 16px;
-    padding: 20px;
-    overflow-y: auto;
     display: flex;
+    flex: 1;
     flex-direction: column;
     gap: 16px;
+    min-height: 0;
     margin-bottom: 15px;
+    padding: 20px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
 }
+
+.chat-box::-webkit-scrollbar,
+.history-section::-webkit-scrollbar,
+.settings-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-box::-webkit-scrollbar-thumb,
+.history-section::-webkit-scrollbar-thumb,
+.settings-body::-webkit-scrollbar-thumb {
+    background: #475569;
+    border-radius: 10px;
+}
+
+/* =========================
+   MESSAGES
+   ========================= */
 
 .message {
     max-width: 80%;
     padding: 12px 16px;
+    color: #f8fafc;
     border-radius: 14px;
     font-size: 14px;
-    line-height: 1.6;
-    word-break: break-word;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-/* رسالة البوت (تظهر على اليمين في واجهة الـ RTL) */
 .bot-message {
     align-self: flex-start;
-    background-color: #334155;
-    color: #f8fafc;
+    background: #334155;
     border-top-right-radius: 4px;
 }
 
-/* رسالة المستخدم (تظهر على اليسار) */
 .user-message {
     align-self: flex-end;
-    background-color: #6366f1;
-    color: #ffffff;
+    color: #fff;
+    background: #6366f1;
     border-top-left-radius: 4px;
 }
-
-/* ==========================================
-   منطقة إدخال الرسائل والأزرار (Input Area)
-   ========================================== */
-.input-area {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background-color: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 16px;
-    padding: 8px 14px;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.input-area input[type="text"] {
-    flex: 1;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: #fff;
-    font-size: 14px;
-    padding: 6px;
-}
-
-/* أزرار الإدخال العامة والموحدة */
-.input-area button,
-.attach-btn,
-#micBtn,
-#liveVoiceBtn,
-#sendChatBtn {
-    background: transparent;
-    border: none;
-    color: #94a3b8;
-    width: 38px;
-    height: 38px;
-    min-width: 38px;
-    border-radius: 10px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.2s ease;
-}
-
-.input-area button:hover,
-.attach-btn:hover,
-#micBtn:hover,
-#liveVoiceBtn:hover {
-    background-color: rgba(255, 255, 255, 0.08);
-    color: #fff;
-}
-
-#sendChatBtn {
-    background-color: #6366f1;
-    color: #ffffff;
-}
-
-#sendChatBtn:hover {
-    background-color: #4f46e5;
-}
-
-/* حاوية الأيقونات بجانب حقل النص */
-.input-actions-right {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}
-
-/* قائمة المرفقات المنبثقة (+) */
-.attach-wrapper {
-    position: relative;
-    display: inline-block;
-}
-
-.attach-dropdown {
-    position: absolute;
-    bottom: 50px;
-    right: 0;
-    background-color: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
-    display: none;
-    flex-direction: column;
-    min-width: 160px;
-    overflow: hidden;
-    z-index: 100;
-}
-
-.attach-dropdown.show {
-    display: flex;
-}
-
-.dropdown-item {
-    padding: 10px 14px;
-    font-size: 13px;
-    color: #cbd5e1;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    transition: background 0.2s;
-}
-
-.dropdown-item:hover {
-    background-color: #334155;
-    color: #fff;
-}
-
-/* أيقونة الموجات الصوتية للزِر المباشر */
-.wave-icon {
-    display: flex;
-    align-items: center;
-    gap: 2px;
-    height: 14px;
-}
-
-.wave-icon .bar {
-    width: 3px;
-    height: 100%;
-    background-color: currentColor;
-    border-radius: 2px;
-    animation: wavePulse 1s infinite alternate;
-}
-
-.wave-icon .bar:nth-child(2) { animation-delay: 0.2s; }
-.wave-icon .bar:nth-child(3) { animation-delay: 0.4s; }
-.wave-icon .bar:nth-child(4) { animation-delay: 0.6s; }
-
-@keyframes wavePulse {
-    0% { height: 4px; }
-    100% { height: 14px; }
-}
-
-/* ==========================================
-   واجهة المحادثة الصوتية بملء الشاشة (Voice Overlay)
-   ========================================== */
-.voice-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(15, 23, 42, 0.95);
-    backdrop-filter: blur(10px);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    padding: 40px;
-    z-index: 1000;
-}
-
-.voice-overlay.active {
-    display: flex;
-}
-
-.close-voice-btn {
-    position: absolute;
-    top: 25px;
-    left: 25px;
-    background: #1e293b;
-    border: 1px solid #334155;
-    color: #fff;
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.voice-header {
-    font-size: 18px;
-    font-weight: 600;
-    color: #94a3b8;
-}
-
-.orb-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.voice-orb {
-    width: 150px;
-    height: 150px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #6366f1, #a855f7);
-    box-shadow: 0 0 40px rgba(99, 102, 241, 0.5);
-    transition: transform 0.3s ease;
-}
-
-.voice-orb.listening {
-    animation: orbPulse 2s infinite ease-in-out;
-}
-
-.voice-orb.speaking {
-    animation: orbSpeak 1s infinite alternate ease-in-out;
-}
-
-@keyframes orbPulse {
-    0% { transform: scale(1); box-shadow: 0 0 30px rgba(99, 102, 241, 0.4); }
-    50% { transform: scale(1.15); box-shadow: 0 0 60px rgba(168, 85, 247, 0.7); }
-    100% { transform: scale(1); box-shadow: 0 0 30px rgba(99, 102, 241, 0.4); }
-}
-
-@keyframes orbSpeak {
-    0% { transform: scale(1.05); filter: hue-rotate(0deg); }
-    100% { transform: scale(1.25); filter: hue-rotate(45deg); }
-}
-
-.voice-controls {
-    display: flex;
-    gap: 20px;
-}
-
-.voice-ctrl-btn {
-    width: 55px;
-    height: 55px;
-    border-radius: 50%;
-    background-color: #1e293b;
-    border: 1px solid #334155;
-    color: #fff;
-    font-size: 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-}
-
-.voice-ctrl-btn:hover {
-    background-color: #334155;
-}
-
-.voice-ctrl-btn.close-call {
-    background-color: #ef4444;
-    border-color: #dc2626;
-}
-
-.voice-ctrl-btn.close-call:hover {
-    background-color: #dc2626;
-}
-
-/* ==========================================
-   نافذة الإعدادات المنبثقة (Settings Modal)
-   ========================================== */
-.settings-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(5px);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-}
-
-.settings-modal-overlay.active {
-    display: flex;
-}
-
-.settings-modal-content {
-    background-color: #1e293b;
-    border: 1px solid #334155;
-    border-radius: 16px;
-    width: 450px;
-    max-width: 90vw;
-    max-height: 85vh;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-}
-
-.settings-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 20px;
-    border-bottom: 1px solid #334155;
-}
-
-.settings-header h3 {
-    font-size: 18px;
-    font-weight: 600;
-}
-
-.close-settings-btn {
-    background: transparent;
-    border: none;
-    color: #94a3b8;
-    font-size: 18px;
-    cursor: pointer;
-}
-
-.close-settings-btn:hover {
-    color: #fff;
-}
-
-.settings-body {
-    padding: 15px 20px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.setting-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 14px;
-    color: #cbd5e1;
-    transition: background 0.2s;
-}
-
-.setting-item i {
-    width: 20px;
-    color: #94a3b8;
-    text-align: center;
-}
-
-.setting-item:hover {
-    background-color: rgba(255, 255, 255, 0.05);
-    color: #fff;
-}
-
-.setting-item .arrow {
-    margin-right: auto;
-    font-size: 12px;
-    color: #64748b;
-}
-
-/* زر التفعيل للميكروفون العادي */
-#micBtn.recording {
-    background-color: #ef4444 !important;
-    color: #fff !important;
-    animation: pulseMic 1.2s infinite;
-}
-
-@keyframes pulseMic {
-    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
-    70% { transform: scale(1.05); box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); }
-    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
-}
-
-/* ==========================================
-   تنسيقات الشاشات الصغيرة والهواتف (Mobile Responsive)
-   ========================================== */
-@media (max-width: 768px) {
-    .sidebar {
-        position: fixed;
-        right: -280px;
-        top: 0;
-        height: 100vh;
-        width: 260px;
-        z-index: 1000;
-        transition: right 0.3s ease-in-out;
-    }
-
-    .sidebar.mobile-open {
-        right: 0;
-    }
-
-    .app-container, 
-    .main-content, 
-    .content-section {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin-right: 0 !important;
-        padding: 10px !important;
-    }
-
-    .chat-box {
-        padding: 12px !important;
-        gap: 12px !important;
-    }
-
-    .message {
-        max-width: 88% !important;
-        font-size: 13px !important;
-        padding: 10px 14px !important;
-    }
-
-    .input-area {
-        padding: 6px 10px !important;
-        border-radius: 12px !important;
-    }
-
-    .input-area input[type="text"] {
-        font-size: 13px !important;
-    }
-
-    .input-area button,
-    .attach-btn,
-    #micBtn,
-    #liveVoiceBtn,
-    #sendChatBtn {
-        width: 34px !important;
-        height: 34px !important;
-        min-width: 34px !important;
-    }
-}
-/* =========================================================
-   NOVA AI — MOBILE APP EXPERIENCE
-   إضافات تحسين الهاتف — توضع في آخر ملف style.css
-   ========================================================= */
-
-@media (max-width: 768px) {
-
-    /* ---------- أساس الصفحة ---------- */
-
-    html,
-    body {
-        width: 100%;
-        height: 100%;
-        min-height: 100%;
-        overflow: hidden;
-        overscroll-behavior: none;
-    }
-
-    body {
-        -webkit-text-size-adjust: 100%;
-        touch-action: manipulation;
-    }
-
-    .app-container {
-        width: 100%;
-        height: 100dvh;
-        min-height: 100dvh;
-        display: flex;
-        position: relative;
-    }
-
-    /* ---------- المحتوى الرئيسي ---------- */
-
-    .main-content {
-        width: 100%;
-        height: 100dvh;
-        min-width: 0;
-        position: relative;
-    }
-
-    .content-section {
-        width: 100%;
-        height: 100%;
-        min-height: 0;
-        padding: 8px !important;
-        gap: 8px;
-    }
-
-    /* نخلي عنوان القسم أصغر على الهاتف */
-    .section-header {
-        margin-bottom: 4px;
-        padding: 4px 6px;
-    }
-
-    .section-header h2 {
-        font-size: 18px;
-        margin-bottom: 2px;
-    }
-
-    .section-header p {
-        font-size: 11px;
-    }
-
-    /* ---------- Sidebar / Drawer ---------- */
-
-    .sidebar {
-        width: min(285px, 82vw) !important;
-        height: 100dvh !important;
-        top: 0;
-        right: -100%;
-        bottom: 0;
-        border-left: 1px solid #334155;
-        box-shadow: -12px 0 35px rgba(0, 0, 0, 0.35);
-        transition: right 0.28s ease;
-        z-index: 2000;
-    }
-
-    .sidebar.mobile-open {
-        right: 0;
-    }
-
-    .sidebar-header {
-        padding: 14px;
-    }
-
-    .new-chat-btn {
-        margin: 8px 12px;
-        min-height: 44px;
-        justify-content: center;
-    }
-
-    .history-section {
-        padding: 8px 12px;
-        -webkit-overflow-scrolling: touch;
-    }
-
-    .history-item {
-        min-height: 42px;
-        padding: 9px 10px;
-    }
-
-    /* ---------- طبقة خلفية للـ Sidebar ---------- */
-
-    .sidebar.mobile-open::after {
-        content: "";
-        position: fixed;
-        inset: 0;
-        width: 100vw;
-        height: 100dvh;
-        background: rgba(0, 0, 0, 0.45);
-        backdrop-filter: blur(2px);
-        z-index: -1;
-        pointer-events: none;
-    }
-
-    /* ---------- Chat Box ---------- */
-
-    .chat-box {
-        width: 100%;
-        min-height: 0;
-        flex: 1;
-        margin-bottom: 4px !important;
-        padding: 12px 8px !important;
-        gap: 12px !important;
-        border-radius: 14px !important;
-        overflow-x: hidden;
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
-        scroll-behavior: smooth;
-    }
-
-    /* ---------- Messages ---------- */
-
-    .message {
-        max-width: 88% !important;
-        padding: 10px 12px !important;
-        border-radius: 13px;
-        font-size: 14px !important;
-        line-height: 1.55;
-    }
-
-    .bot-message {
-        border-top-right-radius: 5px;
-    }
-
-    .user-message {
-        border-top-left-radius: 5px;
-    }
-
-    /* ---------- Input Area ---------- */
-
-    .input-area {
-        flex-shrink: 0;
-        width: 100%;
-        min-height: 54px;
-        padding: 7px 8px !important;
-        gap: 5px;
-        border-radius: 15px !important;
-        margin-bottom: env(safe-area-inset-bottom, 0px);
-    }
-
-    .input-area input[type="text"] {
-        min-width: 0;
-        width: 100%;
-        font-size: 14px !important;
-        padding: 7px 4px;
-    }
-
-    .input-area input[type="text"]::placeholder {
-        color: #64748b;
-    }
-
-    .input-area button,
-    .attach-btn,
-    #micBtn,
-    #liveVoiceBtn,
-    #sendChatBtn {
-        width: 38px !important;
-        height: 38px !important;
-        min-width: 38px !important;
-        flex-shrink: 0;
-        border-radius: 11px;
-    }
-
-    .input-actions-right {
-        gap: 3px;
-        flex-shrink: 0;
-    }
-
-    /* زر الإرسال */
-    #sendChatBtn {
-        box-shadow: 0 3px 12px rgba(99, 102, 241, 0.25);
-    }
-
-    /* ---------- Attach Dropdown ---------- */
-
-    .attach-dropdown {
-        position: fixed;
-        right: 10px;
-        bottom: calc(68px + env(safe-area-inset-bottom, 0px));
-        min-width: 190px;
-        max-width: calc(100vw - 20px);
-        border-radius: 14px;
-        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45);
-    }
-
-    .dropdown-item {
-        min-height: 45px;
-        padding: 11px 14px;
-        font-size: 14px;
-    }
-
-    /* ---------- Context Menu ---------- */
-
-    .chat-context-menu {
-        position: fixed;
-        left: auto;
-        right: 12px;
-        top: auto;
-        min-width: 155px;
-        z-index: 3000;
-    }
-
-    .context-item {
-        min-height: 44px;
-        padding: 10px 13px;
-    }
-
-    /* ---------- Settings Modal ---------- */
-
-    .settings-modal-overlay {
-        padding: 12px;
-        align-items: flex-end;
-    }
-
-    .settings-modal-content {
-        width: 100%;
-        max-width: 100%;
-        max-height: 88dvh;
-        border-radius: 20px 20px 14px 14px;
-        margin: 0;
-    }
-
-    .settings-header {
-        padding: 16px;
-    }
-
-    .settings-header h3 {
-        font-size: 17px;
-    }
-
-    .settings-body {
-        padding: 10px 12px;
-        padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-    }
-
-    .setting-item {
-        min-height: 48px;
-        padding: 11px;
-        font-size: 14px;
-    }
-
-    /* ---------- Voice Overlay ---------- */
-
-    .voice-overlay {
-        width: 100%;
-        height: 100dvh;
-        min-height: 100dvh;
-        padding:
-            calc(22px + env(safe-area-inset-top, 0px))
-            18px
-            calc(22px + env(safe-area-inset-bottom, 0px));
-    }
-
-    .close-voice-btn {
-        top: calc(16px + env(safe-area-inset-top, 0px));
-        left: 16px;
-        width: 42px;
-        height: 42px;
-    }
-
-    .voice-header {
-        font-size: 16px;
-        margin-top: 8px;
-    }
-
-    .voice-orb {
-        width: 125px;
-        height: 125px;
-    }
-
-    .voice-controls {
-        gap: 14px;
-    }
-
-    .voice-ctrl-btn {
-        width: 52px;
-        height: 52px;
-        min-width: 52px;
-    }
-}
-
-
-/* =========================================================
-   هواتف صغيرة جدًا
-   ========================================================= */
-
-@media (max-width: 360px) {
-
-    .content-section {
-        padding: 6px !important;
-    }
-
-    .chat-box {
-        padding: 9px 6px !important;
-    }
-
-    .message {
-        max-width: 92% !important;
-        font-size: 13px !important;
-        padding: 9px 11px !important;
-    }
-
-    .input-area {
-        min-height: 50px;
-        padding: 6px !important;
-    }
-
-    .input-area button,
-    .attach-btn,
-    #micBtn,
-    #liveVoiceBtn,
-    #sendChatBtn {
-        width: 35px !important;
-        height: 35px !important;
-        min-width: 35px !important;
-    }
-
-    .input-area input[type="text"] {
-        font-size: 13px !important;
-    }
-
-    .voice-orb {
-        width: 110px;
-        height: 110px;
-    }
-}
-
-
-/* =========================================================
-   الشاشات الطويلة — منع ضغط الـ Input
-   ========================================================= */
-
-@media (max-width: 768px) and (min-height: 700px) {
-
-    .chat-box {
-        padding-bottom: 14px !important;
-    }
-
-    .input-area {
-        min-height: 56px;
-    }
-}
-
-
-/* =========================================================
-   دعم Safe Area لأجهزة iPhone
-   ========================================================= */
-
-@supports (padding: env(safe-area-inset-bottom)) {
-
-    .content-section {
-        padding-bottom: calc(
-            8px + env(safe-area-inset-bottom)
-        ) !important;
-    }
-
-    .input-area {
-        margin-bottom: env(safe-area-inset-bottom);
-    }
-}
-
-
-/* =========================================================
-   تحسين اللمس
-   ========================================================= */
-
-@media (hover: none) and (pointer: coarse) {
-
-    button,
-    .history-item,
-    .setting-item,
-    .dropdown-item,
-    .context-item {
-        -webkit-tap-highlight-color: transparent;
-    }
-
-    button:active {
-        transform: scale(0.96);
-    }
-
-    .history-item:active,
-    .setting-item:active,
-    .dropdown-item:active,
-    .context-item:active {
-        background-color: rgba(255, 255, 255, 0.08);
-    }
-}
-
-
-/* =========================================================
-   Light Theme — Mobile
-   ========================================================= */
-
-@media (max-width: 768px) {
-
-    body.light-theme .sidebar {
-        box-shadow: -12px 0 35px rgba(15, 23, 42, 0.15);
-    }
-
-    body.light-theme .chat-box {
-        border-color: #e2e8f0;
-    }
-
-    body.light-theme .input-area {
-        border-color: #e2e8f0;
-    }
-
-    body.light-theme .attach-dropdown,
-    body.light-theme .chat-context-menu {
-        background-color: #ffffff;
-        border-color: #e2e8f0;
-    }
-
-    body.light-theme .dropdown-item,
-    body.light-theme .context-item {
-        color: #334155;
-    }
-
-    body.light-theme .dropdown-item:hover,
-    body.light-theme .context-item:hover {
-        background-color: #f1f5f9;
-    }
-}
-/* ==========================================
-   NOVA MESSAGE ACTIONS
-   ========================================== */
 
 .nova-message {
     position: relative;
@@ -1193,8 +388,12 @@ body.light-theme .message.bot-message {
 .nova-message-content {
     line-height: 1.8;
     white-space: normal;
-    word-break: break-word;
+    overflow-wrap: anywhere;
 }
+
+/* =========================
+   MESSAGE ACTIONS
+   ========================= */
 
 .message-actions {
     display: flex;
@@ -1213,39 +412,690 @@ body.light-theme .message.bot-message {
 }
 
 .message-action {
-    width: 30px;
-    height: 30px;
-    border: 0;
-    border-radius: 8px;
-    background: rgba(255,255,255,0.06);
-    color: #94a3b8;
-    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 30px;
+    height: 30px;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.06);
+    border: 0;
+    border-radius: 8px;
     transition: 0.2s ease;
 }
 
 .message-action:hover {
-    background: rgba(255,255,255,0.12);
     color: #fff;
+    background: rgba(255, 255, 255, 0.14);
 }
 
 .message-action.active {
     color: #fff;
-    background: rgba(99,102,241,0.25);
+    background: rgba(99, 102, 241, 0.3);
+}
+
+/* =========================
+   INPUT AREA
+   ========================= */
+
+.input-area {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 68px;
+    padding: 8px 10px;
+    flex-shrink: 0;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
 }
 
 #chatInput {
+    flex: 1;
+    width: 100%;
+    min-width: 0;
+    min-height: 52px;
+    height: 52px;
+    max-height: 140px;
+    padding: 12px 14px;
+    color: #fff;
+    background: transparent;
+    border: 0;
+    outline: none;
     resize: none;
     overflow-y: auto;
-    min-height: 42px;
-    max-height: 130px;
+    font-size: 16px;
     line-height: 1.5;
-    font-family: inherit;
 }
 
+#chatInput::placeholder {
+    color: #94a3b8;
+}
+
+#chatInput::-webkit-scrollbar {
+    width: 5px;
+}
+
+#chatInput::-webkit-scrollbar-thumb {
+    background: rgba(148, 163, 184, 0.35);
+    border-radius: 10px;
+}
+
+.input-area button,
+.attach-btn,
+#micBtn,
+#liveVoiceBtn,
+#sendChatBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    flex-shrink: 0;
+    color: #94a3b8;
+    background: transparent;
+    border: 0;
+    border-radius: 10px;
+    transition: 0.2s ease;
+}
+
+.input-area button:hover,
+.attach-btn:hover,
+#micBtn:hover,
+#liveVoiceBtn:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.09);
+}
+
+#sendChatBtn {
+    color: #fff;
+    background: #6366f1;
+}
+
+#sendChatBtn:hover {
+    background: #4f46e5;
+}
+
+.input-actions-right {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+/* =========================
+   ATTACHMENTS DROPDOWN
+   ========================= */
+
+.attach-wrapper {
+    position: relative;
+    display: inline-flex;
+}
+
+.attach-dropdown {
+    position: absolute;
+    right: 0;
+    bottom: 50px;
+    z-index: 2000;
+    display: none;
+    flex-direction: column;
+    min-width: 175px;
+    overflow: hidden;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.attach-dropdown.show {
+    display: flex;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 44px;
+    padding: 10px 14px;
+    color: #cbd5e1;
+    background: transparent;
+    border: 0;
+    font-size: 13px;
+    text-align: right;
+    transition: 0.2s ease;
+}
+
+.dropdown-item:hover {
+    color: #fff;
+    background: #334155;
+}
+
+/* =========================
+   WAVE ICON
+   ========================= */
+
+.wave-icon {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    height: 16px;
+}
+
+.wave-icon .bar {
+    width: 3px;
+    height: 100%;
+    background: currentColor;
+    border-radius: 2px;
+    animation: wavePulse 1s infinite alternate;
+}
+
+.wave-icon .bar:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.wave-icon .bar:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+.wave-icon .bar:nth-child(4) {
+    animation-delay: 0.6s;
+}
+
+@keyframes wavePulse {
+    from {
+        height: 4px;
+    }
+
+    to {
+        height: 15px;
+    }
+}
+
+/* =========================
+   VOICE OVERLAY
+   ========================= */
+
+.voice-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    padding: 40px;
+    background: rgba(15, 23, 42, 0.96);
+    backdrop-filter: blur(12px);
+}
+
+.voice-overlay.active {
+    display: flex;
+}
+
+.close-voice-btn {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    color: #fff;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 50%;
+    font-size: 18px;
+}
+
+.voice-header {
+    margin-top: 20px;
+    color: #cbd5e1;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.orb-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.voice-orb {
+    width: 150px;
+    height: 150px;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    border-radius: 50%;
+    box-shadow: 0 0 40px rgba(99, 102, 241, 0.5);
+}
+
+.voice-orb.listening {
+    animation: orbPulse 2s infinite ease-in-out;
+}
+
+.voice-orb.speaking {
+    animation: orbSpeak 1s infinite alternate ease-in-out;
+}
+
+@keyframes orbPulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+    }
+
+    50% {
+        transform: scale(1.15);
+        box-shadow: 0 0 60px rgba(168, 85, 247, 0.7);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 30px rgba(99, 102, 241, 0.4);
+    }
+}
+
+@keyframes orbSpeak {
+    from {
+        transform: scale(1.05);
+    }
+
+    to {
+        transform: scale(1.25);
+    }
+}
+
+.voice-controls {
+    display: flex;
+    gap: 20px;
+}
+
+.voice-ctrl-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 55px;
+    height: 55px;
+    color: #fff;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 50%;
+    font-size: 20px;
+    transition: 0.2s ease;
+}
+
+.voice-ctrl-btn:hover {
+    background: #334155;
+}
+
+.voice-ctrl-btn.close-call {
+    background: #ef4444;
+    border-color: #dc2626;
+}
+
+.voice-ctrl-btn.close-call:hover {
+    background: #dc2626;
+}
+
+/* =========================
+   SETTINGS MODAL
+   ========================= */
+
+.settings-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 4000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(6px);
+}
+
+.settings-modal-overlay.active {
+    display: flex;
+}
+
+.settings-modal-content {
+    display: flex;
+    flex-direction: column;
+    width: 450px;
+    max-width: 100%;
+    max-height: 85vh;
+    overflow: hidden;
+    background: #1e293b;
+    border: 1px solid #334155;
+    border-radius: 16px;
+    box-shadow: 0 10px 35px rgba(0, 0, 0, 0.5);
+}
+
+.settings-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid #334155;
+}
+
+.settings-header h3 {
+    color: #fff;
+    font-size: 18px;
+}
+
+.close-settings-btn {
+    color: #94a3b8;
+    background: transparent;
+    border: 0;
+    font-size: 20px;
+}
+
+.close-settings-btn:hover {
+    color: #fff;
+}
+
+.settings-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 15px 20px;
+    overflow-y: auto;
+}
+
+.setting-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 48px;
+    padding: 12px;
+    color: #cbd5e1;
+    border-radius: 10px;
+    font-size: 14px;
+    transition: 0.2s ease;
+}
+
+.setting-item i {
+    width: 20px;
+    color: #94a3b8;
+    text-align: center;
+}
+
+.setting-item:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.setting-item .arrow {
+    margin-right: auto;
+    color: #64748b;
+    font-size: 12px;
+}
+
+/* =========================
+   MICROPHONE STATES
+   ========================= */
+
+#micBtn.recording {
+    color: #fff !important;
+    background: #ef4444 !important;
+    animation: pulseMic 1.2s infinite;
+}
+
+@keyframes pulseMic {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+    }
+
+    70% {
+        transform: scale(1.05);
+        box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+    }
+
+    100% {
+        transform: scale(1);
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+    }
+}
+
+/* =========================
+   LIGHT THEME
+   ========================= */
+
+body.light-theme {
+    color: #1e293b;
+    background: #f1f5f9;
+}
+
+body.light-theme .app-container,
+body.light-theme .main-content {
+    background: #f8fafc;
+}
+
+body.light-theme .sidebar {
+    color: #1e293b;
+    background: #fff;
+    border-color: #e2e8f0;
+}
+
+body.light-theme .logo-text {
+    color: #1e293b;
+}
+
+body.light-theme .toggle-btn,
+body.light-theme .sidebar-icon-btn {
+    color: #64748b;
+}
+
+body.light-theme .toggle-btn:hover,
+body.light-theme .sidebar-icon-btn:hover {
+    background: #f1f5f9;
+}
+
+body.light-theme .new-chat-btn {
+    color: #1e293b;
+    background: #e2e8f0;
+}
+
+body.light-theme .new-chat-btn:hover {
+    background: #cbd5e1;
+}
+
+body.light-theme .history-item {
+    color: #475569;
+}
+
+body.light-theme .history-item:hover {
+    background: #f1f5f9;
+}
+
+body.light-theme .history-item.active-chat {
+    color: #4f46e5;
+    background: #eef2ff;
+}
+
+body.light-theme .chat-box {
+    background: #fff;
+    border-color: #e2e8f0;
+}
+
+body.light-theme .bot-message {
+    color: #1e293b;
+    background: #f1f5f9;
+}
+
+body.light-theme .user-message {
+    color: #fff;
+    background: #6366f1;
+}
+
+body.light-theme .input-area {
+    background: #fff;
+    border-color: #e2e8f0;
+}
+
+body.light-theme #chatInput {
+    color: #1e293b;
+}
+
+body.light-theme .section-header p {
+    color: #64748b;
+}
+
+body.light-theme .attach-dropdown,
+body.light-theme .chat-context-menu,
+body.light-theme .settings-modal-content {
+    background: #fff;
+    border-color: #e2e8f0;
+}
+
+body.light-theme .dropdown-item,
+body.light-theme .context-item,
+body.light-theme .setting-item {
+    color: #334155;
+}
+
+body.light-theme .dropdown-item:hover,
+body.light-theme .context-item:hover,
+body.light-theme .setting-item:hover {
+    background: #f1f5f9;
+}
+
+body.light-theme .settings-header {
+    border-color: #e2e8f0;
+}
+
+/* =========================
+   MOBILE DESIGN
+   ========================= */
+
 @media (max-width: 768px) {
+    html,
+    body {
+        width: 100%;
+        height: 100%;
+        min-height: 100%;
+        overflow: hidden;
+        overscroll-behavior: none;
+    }
+
+    body {
+        touch-action: manipulation;
+    }
+
+    .app-container {
+        position: relative;
+        width: 100%;
+        height: 100dvh;
+        min-height: 100dvh;
+    }
+
+    .main-content {
+        width: 100%;
+        height: 100dvh;
+        min-width: 0;
+    }
+
+    .content-section {
+        width: 100%;
+        height: 100%;
+        min-height: 0;
+        padding: 8px !important;
+        gap: 8px;
+    }
+
+    .section-header {
+        margin-bottom: 4px;
+        padding: 4px 6px;
+    }
+
+    .section-header h2 {
+        font-size: 20px;
+    }
+
+    .section-header p {
+        font-size: 12px;
+    }
+
+    /* Mobile sidebar drawer */
+    .sidebar {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        z-index: 2000;
+        width: min(285px, 82vw) !important;
+        height: 100dvh !important;
+        border-left: 1px solid #334155;
+        box-shadow: -12px 0 35px rgba(0, 0, 0, 0.35);
+        transition: right 0.28s ease;
+    }
+
+    .sidebar.mobile-open {
+        right: 0;
+    }
+
+    .sidebar-header {
+        padding: 14px;
+    }
+
+    .new-chat-btn {
+        min-height: 44px;
+        margin: 8px 12px;
+    }
+
+    .history-section {
+        padding: 8px 12px;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .history-item {
+        min-height: 42px;
+        padding: 9px 10px;
+    }
+
+    /* Sidebar background overlay */
+    .sidebar.mobile-open::after {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: -1;
+        width: 100vw;
+        height: 100dvh;
+        background: rgba(0, 0, 0, 0.45);
+        pointer-events: none;
+    }
+
+    .chat-box {
+        width: 100%;
+        min-height: 0;
+        flex: 1;
+        gap: 12px !important;
+        margin-bottom: 4px !important;
+        padding: 12px 8px !important;
+        border-radius: 14px !important;
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .message {
+        max-width: 90% !important;
+        padding: 10px 12px !important;
+        border-radius: 13px;
+        font-size: 14px !important;
+        line-height: 1.6;
+    }
+
+    .bot-message {
+        border-top-right-radius: 5px;
+    }
+
+    .user-message {
+        border-top-left-radius: 5px;
+    }
 
     .message-actions {
         opacity: 1;
@@ -1257,116 +1107,233 @@ body.light-theme .message.bot-message {
         height: 32px;
     }
 
-    #chatInput {
-        font-size: 15px;
-        min-height: 40px;
-    }
-}
-/* ==========================================
-   NOVA - CHAT TEXTAREA
-   ========================================== */
-
-#chatInput {
-    flex: 1;
-    width: 100%;
-    min-width: 0;
-
-    min-height: 52px;
-    height: 52px;
-    max-height: 140px;
-
-    padding: 14px 16px;
-
-    border: none;
-    outline: none;
-    resize: none;
-
-    background: transparent;
-    color: inherit;
-
-    font-family: inherit;
-    font-size: 16px;
-    line-height: 1.5;
-
-    overflow-y: auto;
-
-    box-sizing: border-box;
-}
-
-/* Placeholder */
-#chatInput::placeholder {
-    color: #94a3b8;
-}
-
-/* لما المستخدم يضغط عليه */
-#chatInput:focus {
-    outline: none;
-}
-
-/* Scrollbar */
-#chatInput::-webkit-scrollbar {
-    width: 5px;
-}
-
-#chatInput::-webkit-scrollbar-thumb {
-    background: rgba(148, 163, 184, 0.35);
-    border-radius: 10px;
-}
-
-
-/* ==========================================
-   INPUT AREA
-   ========================================== */
-
-.input-area {
-    min-height: 68px;
-    padding: 8px 10px;
-
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    box-sizing: border-box;
-}
-
-
-/* ==========================================
-   MOBILE
-   ========================================== */
-
-@media (max-width: 768px) {
-
+    /* Mobile input */
     .input-area {
+        width: 100%;
         min-height: 64px;
-        padding: 7px 8px;
-        gap: 6px;
+        padding: 7px 8px !important;
+        gap: 5px;
+        margin-bottom: env(safe-area-inset-bottom, 0px);
+        border-radius: 15px !important;
     }
 
     #chatInput {
         min-height: 48px;
         height: 48px;
-
-        padding: 12px 13px;
-
-        font-size: 15px;
+        padding: 11px 10px;
+        font-size: 15px !important;
     }
 
+    .input-area button,
+    .attach-btn,
+    #micBtn,
+    #liveVoiceBtn,
+    #sendChatBtn {
+        width: 38px !important;
+        height: 38px !important;
+        min-width: 38px !important;
+        border-radius: 10px;
+    }
+
+    .input-actions-right {
+        gap: 3px;
+    }
+
+    .attach-dropdown {
+        position: fixed;
+        right: 10px;
+        bottom: calc(74px + env(safe-area-inset-bottom, 0px));
+        min-width: 190px;
+        max-width: calc(100vw - 20px);
+        border-radius: 14px;
+    }
+
+    .dropdown-item {
+        min-height: 45px;
+        padding: 11px 14px;
+        font-size: 14px;
+    }
+
+    .chat-context-menu {
+        position: fixed;
+        top: auto;
+        right: 12px;
+        left: auto;
+        min-width: 155px;
+    }
+
+    .context-item {
+        min-height: 44px;
+        padding: 10px 13px;
+    }
+
+    /* Settings */
+    .settings-modal-overlay {
+        align-items: flex-end;
+        padding: 12px;
+    }
+
+    .settings-modal-content {
+        width: 100%;
+        max-width: 100%;
+        max-height: 88dvh;
+        border-radius: 20px 20px 14px 14px;
+    }
+
+    .settings-header {
+        padding: 16px;
+    }
+
+    .settings-body {
+        padding: 10px 12px;
+        padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .setting-item {
+        min-height: 48px;
+        padding: 11px;
+    }
+
+    /* Voice overlay */
+    .voice-overlay {
+        width: 100%;
+        height: 100dvh;
+        min-height: 100dvh;
+        padding:
+            calc(22px + env(safe-area-inset-top, 0px))
+            18px
+            calc(22px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .close-voice-btn {
+        top: calc(16px + env(safe-area-inset-top, 0px));
+        left: 16px;
+        width: 42px;
+        height: 42px;
+    }
+
+    .voice-header {
+        margin-top: 8px;
+        font-size: 16px;
+    }
+
+    .voice-orb {
+        width: 125px;
+        height: 125px;
+    }
+
+    .voice-controls {
+        gap: 14px;
+    }
+
+    .voice-ctrl-btn {
+        width: 52px;
+        height: 52px;
+        min-width: 52px;
+    }
 }
 
-
-/* ==========================================
+/* =========================
    VERY SMALL PHONES
-   ========================================== */
+   ========================= */
 
 @media (max-width: 380px) {
+    .content-section {
+        padding: 6px !important;
+    }
+
+    .section-header h2 {
+        font-size: 18px;
+    }
+
+    .chat-box {
+        padding: 9px 6px !important;
+    }
+
+    .message {
+        max-width: 93% !important;
+        padding: 9px 11px !important;
+        font-size: 13px !important;
+    }
+
+    .input-area {
+        min-height: 58px;
+        padding: 6px !important;
+    }
 
     #chatInput {
         min-height: 46px;
         height: 46px;
-
-        padding: 11px 12px;
-
-        font-size: 14px;
+        padding: 10px;
+        font-size: 14px !important;
     }
 
+    .input-area button,
+    .attach-btn,
+    #micBtn,
+    #liveVoiceBtn,
+    #sendChatBtn {
+        width: 35px !important;
+        height: 35px !important;
+        min-width: 35px !important;
+    }
+
+    .voice-orb {
+        width: 110px;
+        height: 110px;
+    }
+}
+
+/* =========================
+   TOUCH IMPROVEMENTS
+   ========================= */
+
+@media (hover: none) and (pointer: coarse) {
+    button,
+    .history-item,
+    .setting-item,
+    .dropdown-item,
+    .context-item {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    button:active {
+        transform: scale(0.96);
+    }
+
+    .history-item:active,
+    .setting-item:active,
+    .dropdown-item:active,
+    .context-item:active {
+        background: rgba(255, 255, 255, 0.08);
+    }
+}
+
+/* =========================
+   SAFE AREA
+   ========================= */
+
+@supports (padding: env(safe-area-inset-bottom)) {
+    .content-section {
+        padding-bottom: calc(8px + env(safe-area-inset-bottom)) !important;
+    }
+
+    .input-area {
+        margin-bottom: env(safe-area-inset-bottom);
+    }
+}
+
+/* =========================
+   REDUCED MOTION
+   ========================= */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
 }
