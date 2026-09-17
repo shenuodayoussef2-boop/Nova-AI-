@@ -6,187 +6,110 @@
 
     <title>تسجيل الدخول - Nova AI</title>
 
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    >
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
         * {
-            box-sizing: border-box;
             margin: 0;
             padding: 0;
-        }
-
-        :root {
-            --cyan: #00e5ff;
-            --cyan-dark: #00bfd6;
-            --bg: #05090b;
-            --card: rgba(12, 21, 25, 0.92);
-            --border: rgba(0, 229, 255, 0.16);
-            --text: #ffffff;
-            --muted: #91a5aa;
-            --input: #081316;
+            box-sizing: border-box;
         }
 
         body {
             min-height: 100vh;
-            font-family: Arial, Tahoma, sans-serif;
-            color: var(--text);
-
+            font-family: "Segoe UI", Tahoma, Arial, sans-serif;
             background:
-                radial-gradient(
-                    circle at 50% -10%,
-                    rgba(0, 229, 255, 0.16),
-                    transparent 35%
-                ),
-                radial-gradient(
-                    circle at 10% 90%,
-                    rgba(0, 170, 190, 0.08),
-                    transparent 30%
-                ),
-                var(--bg);
-
+                radial-gradient(circle at top right, rgba(99, 102, 241, 0.22), transparent 35%),
+                radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.18), transparent 35%),
+                #0f172a;
+            color: #f8fafc;
             display: flex;
             align-items: center;
             justify-content: center;
-
-            padding: 24px;
+            padding: 20px;
         }
 
-        .page {
+        .login-wrapper {
             width: 100%;
-            max-width: 430px;
+            max-width: 440px;
         }
-
-        /* ================= LOGO ================= */
 
         .logo {
             text-align: center;
-            margin-bottom: 26px;
+            margin-bottom: 24px;
         }
 
-        .logo-title {
-            font-size: 43px;
+        .logo h1 {
+            font-size: 32px;
             font-weight: 800;
-            letter-spacing: -1.5px;
+            letter-spacing: -1px;
         }
 
-        .logo-title span {
-            color: var(--cyan);
+        .logo h1 span {
+            color: #6366f1;
         }
 
-        .logo-subtitle {
+        .logo p {
+            color: #94a3b8;
             margin-top: 8px;
-            color: var(--muted);
             font-size: 14px;
         }
 
-        /* ================= CARD ================= */
-
-        .card {
-            background: var(--card);
-
-            border: 1px solid var(--border);
-            border-radius: 24px;
-
-            padding: 32px;
-
-            box-shadow:
-                0 25px 70px rgba(0, 0, 0, 0.55),
-                0 0 40px rgba(0, 229, 255, 0.035);
-
-            backdrop-filter: blur(20px);
+        .login-card {
+            background: rgba(30, 41, 59, 0.92);
+            border: 1px solid #334155;
+            border-radius: 22px;
+            padding: 30px;
+            box-shadow: 0 25px 70px rgba(0, 0, 0, 0.35);
+            backdrop-filter: blur(15px);
         }
 
-        .card-title {
+        .login-title {
             text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .login-title h2 {
             font-size: 24px;
-            margin-bottom: 8px;
+            margin-bottom: 7px;
         }
 
-        .card-subtitle {
-            text-align: center;
-            color: var(--muted);
+        .login-title p {
+            color: #94a3b8;
             font-size: 14px;
-            margin-bottom: 26px;
         }
-
-        /* ================= MESSAGE ================= */
-
-        .message {
-            display: none;
-
-            padding: 12px 14px;
-            margin-bottom: 18px;
-
-            border-radius: 11px;
-
-            font-size: 14px;
-            line-height: 1.6;
-
-            text-align: center;
-        }
-
-        .message.error {
-            display: block;
-
-            color: #ff9c9c;
-
-            background: rgba(255, 70, 70, 0.08);
-            border: 1px solid rgba(255, 70, 70, 0.2);
-        }
-
-        .message.success {
-            display: block;
-
-            color: #75efff;
-
-            background: rgba(0, 229, 255, 0.07);
-            border: 1px solid rgba(0, 229, 255, 0.18);
-        }
-
-        /* ================= SOCIAL BUTTONS ================= */
 
         .social-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 11px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 22px;
         }
 
         .social-btn {
-            width: 100%;
-            height: 50px;
-
-            border-radius: 12px;
-
-            border: 1px solid #27383c;
-
-            background: #0a1518;
-            color: #fff;
-
+            height: 48px;
+            border: 1px solid #475569;
+            border-radius: 11px;
+            background: #1e293b;
+            color: #f8fafc;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
             display: flex;
             align-items: center;
             justify-content: center;
-
-            gap: 11px;
-
-            font-size: 14px;
-            font-weight: 600;
-
-            cursor: pointer;
-
-            transition: 0.2s ease;
+            gap: 9px;
         }
 
         .social-btn:hover {
-            border-color: rgba(0, 229, 255, 0.35);
-            background: #0d1c20;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            background: #334155;
         }
 
         .google-icon {
-            color: #4285f4;
+            color: #ea4335;
             font-size: 18px;
         }
 
@@ -195,14 +118,13 @@
             font-size: 18px;
         }
 
-        /* ================= DIVIDER ================= */
-
         .divider {
             display: flex;
             align-items: center;
             gap: 12px;
-
-            margin: 24px 0;
+            color: #64748b;
+            font-size: 13px;
+            margin: 22px 0;
         }
 
         .divider::before,
@@ -210,15 +132,8 @@
             content: "";
             flex: 1;
             height: 1px;
-            background: #253438;
+            background: #334155;
         }
-
-        .divider span {
-            color: #71858a;
-            font-size: 12px;
-        }
-
-        /* ================= FORM ================= */
 
         .form-group {
             margin-bottom: 17px;
@@ -226,141 +141,184 @@
 
         .form-group label {
             display: block;
-
-            color: #d8e2e5;
-
-            font-size: 14px;
-
             margin-bottom: 8px;
+            font-size: 14px;
+            color: #cbd5e1;
         }
 
         .input-wrapper {
             position: relative;
         }
 
-        .input-icon {
+        .input-wrapper > i {
             position: absolute;
-
             right: 15px;
             top: 50%;
-
             transform: translateY(-50%);
-
-            color: #62777c;
-
-            pointer-events: none;
+            color: #64748b;
         }
 
         .input-wrapper input {
             width: 100%;
             height: 50px;
-
-            border-radius: 12px;
-
-            border: 1px solid #26383c;
-
-            background: var(--input);
-            color: white;
-
+            border: 1px solid #475569;
+            border-radius: 11px;
+            background: #0f172a;
+            color: #f8fafc;
             outline: none;
-
-            padding: 0 45px 0 15px;
-
-            font-size: 14px;
-
+            padding: 0 45px 0 45px;
+            font-size: 15px;
             transition: 0.2s;
         }
 
         .input-wrapper input:focus {
-            border-color: var(--cyan);
-
-            box-shadow:
-                0 0 0 3px rgba(0, 229, 255, 0.07);
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
         }
 
-        .input-wrapper input::placeholder {
-            color: #52666b;
+        .password-toggle {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: transparent;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 16px;
         }
 
-        /* ================= LOGIN BUTTON ================= */
+        .password-toggle:hover {
+            color: #a5b4fc;
+        }
+
+        .form-options {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin: 5px 0 20px;
+            font-size: 13px;
+        }
+
+        .remember {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: #94a3b8;
+            cursor: pointer;
+        }
+
+        .remember input {
+            accent-color: #6366f1;
+        }
+
+        .forgot-password {
+            color: #818cf8;
+            text-decoration: none;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
 
         .login-btn {
             width: 100%;
-            height: 51px;
-
-            margin-top: 5px;
-
+            height: 50px;
             border: none;
-            border-radius: 12px;
-
-            background: var(--cyan);
-
-            color: #001215;
-
-            font-size: 15px;
-            font-weight: 800;
-
+            border-radius: 11px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
-
-            transition: 0.2s ease;
+            transition: 0.2s;
         }
 
         .login-btn:hover {
-            background: #1be8ff;
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.25);
         }
 
         .login-btn:disabled {
-            opacity: 0.55;
+            opacity: 0.65;
             cursor: not-allowed;
             transform: none;
         }
 
-        /* ================= REGISTER ================= */
-
-        .register-text {
+        .message {
+            display: none;
+            margin-top: 15px;
+            padding: 11px;
+            border-radius: 10px;
             text-align: center;
+            font-size: 13px;
+        }
 
+        .message.error {
+            display: block;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #fca5a5;
+        }
+
+        .message.success {
+            display: block;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: #86efac;
+        }
+
+        .register-link {
+            text-align: center;
             margin-top: 23px;
-
-            color: var(--muted);
-
+            color: #94a3b8;
             font-size: 14px;
         }
 
-        .register-text a {
-            color: var(--cyan);
+        .register-link a {
+            color: #818cf8;
             text-decoration: none;
             font-weight: 600;
         }
 
-        .register-text a:hover {
+        .register-link a:hover {
             text-decoration: underline;
         }
 
-        /* ================= FOOTER ================= */
-
-        .footer {
+        .back-home {
+            display: block;
             text-align: center;
+            margin-top: 18px;
+            color: #64748b;
+            text-decoration: none;
+            font-size: 13px;
+        }
 
-            margin-top: 20px;
-
-            color: #52666b;
-
-            font-size: 11px;
+        .back-home:hover {
+            color: #94a3b8;
         }
 
         @media (max-width: 480px) {
             body {
-                padding: 16px;
+                padding: 14px;
             }
 
-            .card {
-                padding: 25px 20px;
+            .login-card {
+                padding: 23px 18px;
+                border-radius: 18px;
             }
 
-            .logo-title {
-                font-size: 37px;
+            .logo h1 {
+                font-size: 28px;
+            }
+
+            .social-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .form-options {
+                font-size: 12px;
             }
         }
     </style>
@@ -368,91 +326,50 @@
 
 <body>
 
-<div class="page">
-
-    <!-- LOGO -->
+<div class="login-wrapper">
 
     <div class="logo">
-        <div class="logo-title">
-            Nova <span>AI</span>
-        </div>
-
-        <div class="logo-subtitle">
-            استوديو الذكاء الاصطناعي
-        </div>
+        <h1>Nova <span>AI</span></h1>
+        <p>استوديو الذكاء الاصطناعي</p>
     </div>
 
+    <div class="login-card">
 
-    <!-- LOGIN CARD -->
+        <div class="login-title">
+            <h2>مرحبًا بعودتك 👋</h2>
+            <p>سجل الدخول إلى حسابك في Nova AI</p>
+        </div>
 
-    <div class="card">
-
-        <h1 class="card-title">
-            تسجيل الدخول
-        </h1>
-
-        <p class="card-subtitle">
-            سجّل دخولك للمتابعة إلى Nova
-        </p>
-
-
-        <!-- MESSAGE -->
-
-        <div id="message" class="message"></div>
-
-
-        <!-- SOCIAL LOGIN -->
-
+        <!-- Google & Facebook -->
         <div class="social-buttons">
 
-            <button
-                type="button"
-                class="social-btn"
-                id="googleLoginBtn"
-            >
+            <button type="button"
+                    class="social-btn"
+                    id="googleLoginBtn">
                 <i class="fa-brands fa-google google-icon"></i>
-
-                <span>
-                    المتابعة باستخدام Google
-                </span>
+                <span>Google</span>
             </button>
 
-
-            <button
-                type="button"
-                class="social-btn"
-                id="facebookLoginBtn"
-            >
-                <i class="fa-brands fa-facebook facebook-icon"></i>
-
-                <span>
-                    المتابعة باستخدام Facebook
-                </span>
+            <button type="button"
+                    class="social-btn"
+                    id="facebookLoginBtn">
+                <i class="fa-brands fa-facebook-f facebook-icon"></i>
+                <span>Facebook</span>
             </button>
 
         </div>
-
-
-        <!-- DIVIDER -->
 
         <div class="divider">
-            <span>أو</span>
+            <span>أو سجل باستخدام البريد الإلكتروني</span>
         </div>
-
-
-        <!-- EMAIL LOGIN -->
 
         <form id="loginForm">
 
             <div class="form-group">
-
-                <label for="email">
-                    البريد الإلكتروني
-                </label>
+                <label for="email">البريد الإلكتروني</label>
 
                 <div class="input-wrapper">
-
-                    <i class="fa-solid fa-envelope input-icon"></i>
+                    <i class="fa-regular fa-envelope"></i>
 
                     <input
                         type="email"
@@ -462,21 +379,14 @@
                         autocomplete="email"
                         required
                     >
-
                 </div>
-
             </div>
 
-
             <div class="form-group">
-
-                <label for="password">
-                    كلمة المرور
-                </label>
+                <label for="password">كلمة المرور</label>
 
                 <div class="input-wrapper">
-
-                    <i class="fa-solid fa-lock input-icon"></i>
+                    <i class="fa-solid fa-lock"></i>
 
                     <input
                         type="password"
@@ -487,188 +397,148 @@
                         required
                     >
 
+                    <button
+                        type="button"
+                        class="password-toggle"
+                        id="passwordToggle"
+                        aria-label="إظهار كلمة المرور">
+                        <i class="fa-regular fa-eye"></i>
+                    </button>
                 </div>
+            </div>
+
+            <div class="form-options">
+
+                <label class="remember">
+                    <input type="checkbox" id="rememberMe">
+                    <span>تذكرني</span>
+                </label>
+
+                <a href="#" class="forgot-password">
+                    نسيت كلمة المرور؟
+                </a>
 
             </div>
 
-
-            <button
-                type="submit"
-                class="login-btn"
-                id="loginBtn"
-            >
+            <button type="submit" class="login-btn" id="loginBtn">
                 تسجيل الدخول
             </button>
 
+            <div id="message" class="message"></div>
+
         </form>
 
-
-        <!-- REGISTER -->
-
-        <div class="register-text">
-
+        <div class="register-link">
             ليس لديك حساب؟
-
-            <a href="#">
-                إنشاء حساب
-            </a>
-
+            <a href="register.html">إنشاء حساب جديد</a>
         </div>
 
     </div>
 
-
-    <div class="footer">
-        © 2026 Nova AI
-    </div>
+    <a href="index.html" class="back-home">
+        <i class="fa-solid fa-arrow-right"></i>
+        العودة إلى Nova AI
+    </a>
 
 </div>
 
-
 <script>
+    const loginForm = document.getElementById("loginForm");
+    const loginBtn = document.getElementById("loginBtn");
+    const passwordInput = document.getElementById("password");
+    const passwordToggle = document.getElementById("passwordToggle");
+    const message = document.getElementById("message");
 
-    const loginForm =
-        document.getElementById("loginForm");
+    // إظهار / إخفاء كلمة المرور
+    passwordToggle.addEventListener("click", () => {
+        const icon = passwordToggle.querySelector("i");
 
-    const loginBtn =
-        document.getElementById("loginBtn");
+        if (passwordInput.type === "password") {
+            passwordInput.type = "text";
+            icon.className = "fa-regular fa-eye-slash";
+        } else {
+            passwordInput.type = "password";
+            icon.className = "fa-regular fa-eye";
+        }
+    });
 
-    const message =
-        document.getElementById("message");
-
-    const googleLoginBtn =
-        document.getElementById("googleLoginBtn");
-
-    const facebookLoginBtn =
-        document.getElementById("facebookLoginBtn");
-
-
-    function showMessage(text, type) {
-
+    function showMessage(text, type = "error") {
         message.textContent = text;
-
-        message.className =
-            "message " + type;
+        message.className = "message " + type;
     }
 
-
-    function clearMessage() {
-
-        message.textContent = "";
-
-        message.className =
-            "message";
-    }
-
-
-    /* ================= EMAIL LOGIN ================= */
-
+    // تسجيل الدخول بالبريد وكلمة المرور
     loginForm.addEventListener("submit", async (event) => {
-
         event.preventDefault();
 
-        clearMessage();
+        const email = document.getElementById("email").value.trim();
+        const password = passwordInput.value;
+        const rememberMe = document.getElementById("rememberMe").checked;
+
+        if (!email || !password) {
+            showMessage("من فضلك أدخل البريد الإلكتروني وكلمة المرور.");
+            return;
+        }
 
         loginBtn.disabled = true;
-
-        loginBtn.textContent =
-            "جاري تسجيل الدخول...";
-
-
-        const formData =
-            new FormData(loginForm);
-
+        loginBtn.textContent = "جاري تسجيل الدخول...";
 
         try {
+            const response = await fetch("/api/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    email,
+                    password,
+                    rememberMe
+                })
+            });
 
-            const response =
-                await fetch("api/login.php", {
-                    method: "POST",
-                    body: formData
-                });
+            const data = await response.json();
 
-
-            const data =
-                await response.json();
-
-
-            if (!response.ok || !data.success) {
-
+            if (!response.ok) {
                 throw new Error(
-                    data.message ||
-                    "فشل تسجيل الدخول."
+                    data.error || "بيانات تسجيل الدخول غير صحيحة."
                 );
-
             }
 
-
-            showMessage(
-                "تم تسجيل الدخول بنجاح!",
-                "success"
-            );
-
-
-            /*
-                لاحقًا هنخلي هنا:
-                حفظ Session / Token
-                ثم الانتقال إلى Nova.
-            */
+            showMessage("تم تسجيل الدخول بنجاح ✓", "success");
 
             setTimeout(() => {
-
-                window.location.href =
-                    "index.html";
-
+                window.location.href = "index.html";
             }, 700);
 
-
         } catch (error) {
-
+            console.error(error);
             showMessage(
-                error.message,
-                "error"
+                error.message || "حدث خطأ أثناء تسجيل الدخول."
             );
 
         } finally {
-
             loginBtn.disabled = false;
-
-            loginBtn.textContent =
-                "تسجيل الدخول";
+            loginBtn.textContent = "تسجيل الدخول";
         }
-
     });
 
+    // Google
+    document.getElementById("googleLoginBtn").addEventListener("click", () => {
+        /*
+         * سيتم ربط Google OAuth هنا.
+         * لا نضع Client Secret داخل JavaScript.
+         */
+        window.location.href = "/api/auth/google";
+    });
 
-    /* ================= GOOGLE ================= */
-
-    googleLoginBtn.addEventListener(
-        "click",
-        () => {
-
-            showMessage(
-                "تسجيل الدخول باستخدام Google سيتم تفعيله بعد إعداد OAuth.",
-                "error"
-            );
-
-        }
-    );
-
-
-    /* ================= FACEBOOK ================= */
-
-    facebookLoginBtn.addEventListener(
-        "click",
-        () => {
-
-            showMessage(
-                "تسجيل الدخول باستخدام Facebook سيتم تفعيله بعد إعداد OAuth.",
-                "error"
-            );
-
-        }
-    );
-
+    // Facebook
+    document.getElementById("facebookLoginBtn").addEventListener("click", () => {
+        /*
+         * سيتم ربط Facebook OAuth هنا.
+         * لا نضع App Secret داخل JavaScript.
+         */
+        window.location.href = "/api/auth/facebook";
+    });
 </script>
 
 </body>
