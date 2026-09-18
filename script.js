@@ -1828,34 +1828,40 @@ async function generateImage(
     // رسالة التحميل
     // ==========================================
 
-    chatBox.insertAdjacentHTML(
-        "beforeend",
-        `
-        <div
-            class="message bot-message nova-message"
-            id="${loadingId}"
-        >
-            <div class="nova-message-content">
-                جاري إنشاء الصورة باستخدام Nova AI... 🎨
-                <div class="nova-loading" style="margin-top:8px;">
-                    <span>جاري التوليد</span>
+   chatBox.insertAdjacentHTML(
+    "beforeend",
+       
+    <div class="message bot-message nova-image-loading" id="${loadingId}">
+        <div class="image-loading-card">
+            <div class="image-loading-preview">
+                <div class="loading-shimmer"></div>
+                <div class="loading-icon">
+                    <i class="fas fa-image"></i>
+                </div>
+            </div>
 
-                    <span class="loading-dots">
-                        <i></i>
-                        <i></i>
-                        <i></i>
-                    </span>
+            <div class="image-loading-info">
+                <div class="image-loading-title">
+                    <i class="fas fa-wand-magic-sparkles"></i>
+                    Nova AI يصنع صورتك
+                </div>
+
+                <div class="image-loading-subtitle">
+                    جاري تحويل وصفك إلى صورة واقعية...
+                </div>
+
+                <div class="image-progress">
+                    <div class="image-progress-bar"></div>
+                </div>
+
+                <div class="image-loading-status">
+                    <span class="loading-pulse"></span>
+                    جاري الإبداع، انتظر قليلًا ✨
                 </div>
             </div>
         </div>
-        `
-    );
-
-    chatBox.scrollTop =
-        chatBox.scrollHeight;
-
-    try {
-
+    </div>
+);
 // ==========================================
 // ترجمة الوصف للعربية → الإنجليزية
 // ==========================================
