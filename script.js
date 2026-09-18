@@ -1856,42 +1856,56 @@ async function generateImage(
 
     try {
 
-        // ==========================================
-        // ترجمة الوصف للعربية → الإنجليزية
-        // ==========================================
+// ==========================================
+// ترجمة الوصف للعربية → الإنجليزية
+// ==========================================
 
-        const translatedText =
-            await translateToEnglishIfNeeded(
-                text
-            );
+const translatedText =
+    await translateToEnglishIfNeeded(
+        text
+    );
 
-        // ==========================================
-        // إرسال الطلب إلى Vercel API
-        // ==========================================
+// ==========================================
+// إعداد برومبت واقعي جدًا
+// ==========================================
 
-        const response =
-            await fetch(
-                "/api/generate-image",
-                {
-                    method:
-                        "POST",
+const finalPrompt = `
+Photorealistic, ultra-realistic photography, highly detailed,
+natural lighting, realistic textures, realistic materials,
+professional DSLR photography, cinematic composition,
+sharp focus, lifelike appearance, realistic depth of field,
+natural colors, realistic shadows, physically accurate lighting,
+authentic environment, realistic proportions, high detail.
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
+${translatedText}
+`;
 
-                    body:
-                        JSON.stringify({
-                            prompt:
-                                translatedText
-                        })
-                }
-            );
+// ==========================================
+// إرسال الطلب إلى Vercel API
+// ==========================================
 
-        const data =
-            await response.json();
+const response =
+    await fetch(
+        "/api/generate-image",
+        {
+            method:
+                "POST",
 
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body:
+                JSON.stringify({
+                    prompt:
+                        finalPrompt
+                })
+        }
+    );
+
+const data =
+    await response.json();
         // ==========================================
         // إزالة رسالة التحميل
         // ==========================================
