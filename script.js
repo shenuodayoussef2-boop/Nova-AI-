@@ -1807,17 +1807,26 @@ async function translateToEnglishIfNeeded(
 }
 
 
+
 // ==========================================
-// 5. توليد الصور
+// 5. توليد الصور - fal.ai
 // ==========================================
 
 async function generateImage(
     text
 ) {
 
+    if (!chatBox) {
+        return;
+    }
+
     const loadingId =
         "img-loading-" +
         Date.now();
+
+    // ==========================================
+    // رسالة التحميل
+    // ==========================================
 
     chatBox.insertAdjacentHTML(
         "beforeend",
@@ -1826,7 +1835,18 @@ async function generateImage(
             class="message bot-message nova-message"
             id="${loadingId}"
         >
-            جاري إعداد الصورة التخيلية... 🎨
+            <div class="nova-message-content">
+                جاري إنشاء الصورة باستخدام Nova AI... 🎨
+                <div class="nova-loading" style="margin-top:8px;">
+                    <span>جاري التوليد</span>
+
+                    <span class="loading-dots">
+                        <i></i>
+                        <i></i>
+                        <i></i>
+                    </span>
+                </div>
+            </div>
         </div>
         `
     );
@@ -1834,37 +1854,128 @@ async function generateImage(
     chatBox.scrollTop =
         chatBox.scrollHeight;
 
-    const translatedText =
-        await translateToEnglishIfNeeded(
-            text
+    try {
+
+        // ==========================================
+        // ترجمة الوصف للعربية → الإنجليزية
+        // ==========================================
+
+        const translatedText =
+            await translateToEnglishIfNeeded(
+                text
+            );
+
+        // ==========================================
+        // إرسال الطلب إلى Vercel API
+        // ==========================================
+
+        const response =
+            await fetch(
+                "/api/generate-image",
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+                            prompt:
+                                translatedText
+                        })
+                }
+            );
+
+        const data =
+            await response.json();
+
+        // ==========================================
+        // إزالة رسالة التحميل
+        // ==========================================
+
+        document
+            .getElementById(
+                loadingId
+            )
+            ?.remove();
+
+        // ==========================================
+        // التحقق من نجاح التوليد
+        // ==========================================
+
+        if (
+            response.ok &&
+            data &&
+            data.success &&
+            data.image
+        ) {
+
+            appendMediaMessage(
+                "إليك الصورة التخيلية المطلوبة من Nova AI: ✨",
+                data.image,
+                text,
+                "image"
+            );
+
+            saveCurrentChat();
+
+            chatBox.scrollTop =
+                chatBox.scrollHeight;
+
+            return;
+
+        }
+
+        // ==========================================
+        // خطأ من API
+        // ==========================================
+
+        console.error(
+            "fal.ai Image Error:",
+            data
         );
 
-    document
-        .getElementById(
-            loadingId
-        )
-        ?.remove();
+        const errorMessage =
+            data?.error ||
+            "تعذر إنشاء الصورة حاليًا.";
 
-    const cleanPrompt =
-        encodeURIComponent(
-            translatedText
+        chatBox.appendChild(
+            createAssistantMessage(
+                `❌ ${errorMessage}`
+            )
         );
 
-    const randomSeed =
-        Math.floor(
-            Math.random() *
-            1000000
+    } catch (error) {
+
+        // ==========================================
+        // إزالة Loading عند حدوث خطأ
+        // ==========================================
+
+        document
+            .getElementById(
+                loadingId
+            )
+            ?.remove();
+
+        console.error(
+            "Nova Image API Error:",
+            error
         );
 
-    const imgUrl =
-        `https://image.pollinations.ai/prompt/${cleanPrompt}?seed=${randomSeed}&width=512&height=512&nologo=true`;
+        chatBox.appendChild(
+            createAssistantMessage(
+                "❌ تعذر الاتصال بخدمة توليد الصور حاليًا."
+            )
+        );
 
-    appendMediaMessage(
-        "إليك الصورة التخيلية المطلوبة: ✨",
-        imgUrl,
-        text,
-        "image"
-    );
+    }
+
+    // ==========================================
+    // حفظ المحادثة
+    // ==========================================
 
     saveCurrentChat();
 
@@ -1872,8 +1983,6 @@ async function generateImage(
         chatBox.scrollHeight;
 
 }
-
-
 // ==========================================
 // 6. توليد الفيديو
 // ==========================================
