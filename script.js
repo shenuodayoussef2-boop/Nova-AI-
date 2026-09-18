@@ -1824,54 +1824,71 @@ async function generateImage(
         "img-loading-" +
         Date.now();
 
-  // ==========================================
+// ==========================================
 // رسالة التحميل
 // ==========================================
 
-chatBox.insertAdjacentHTML(
-    "beforeend",
-    `
-    <div class="message bot-message nova-image-loading" id="${loadingId}">
-        <div class="image-loading-card">
-            <div class="image-loading-preview">
-                <div class="loading-shimmer"></div>
+try {
+    chatBox.insertAdjacentHTML(
+        "beforeend",
+        `
+        <div class="message bot-message nova-image-loading" id="${loadingId}">
+            <div class="image-loading-card">
+                <div class="image-loading-preview">
+                    <div class="loading-shimmer"></div>
 
-                <div class="loading-icon">
-                    <i class="fas fa-image"></i>
-                </div>
-            </div>
-
-            <div class="image-loading-info">
-                <div class="image-loading-title">
-                    <i class="fas fa-wand-magic-sparkles"></i>
-                    Nova AI يصنع صورتك
+                    <div class="loading-icon">
+                        <i class="fas fa-image"></i>
+                    </div>
                 </div>
 
-                <div class="image-loading-subtitle">
-                    جاري تحويل وصفك إلى صورة واقعية...
-                </div>
+                <div class="image-loading-info">
+                    <div class="image-loading-title">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                        Nova AI يصنع صورتك
+                    </div>
 
-                <div class="image-progress">
-                    <div class="image-progress-bar"></div>
-                </div>
+                    <div class="image-loading-subtitle">
+                        جاري تحويل وصفك إلى صورة واقعية...
+                    </div>
 
-                <div class="image-loading-status">
-                    <span class="loading-pulse"></span>
-                    جاري الإبداع، انتظر قليلًا ✨
+                    <div class="image-progress">
+                        <div class="image-progress-bar"></div>
+                    </div>
+
+                    <div class="image-loading-status">
+                        <span class="loading-pulse"></span>
+                        جاري الإبداع، انتظر قليلًا ✨
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    `
-);
-// ==========================================
-// ترجمة الوصف للعربية → الإنجليزية
-// ==========================================
-
-const translatedText =
-    await translateToEnglishIfNeeded(
-        text
+        `
     );
+
+    // ==========================================
+    // ترجمة الوصف للعربية → الإنجليزية
+    // ==========================================
+
+    const translatedText =
+        await translateToEnglishIfNeeded(text);
+
+    // باقي كود توليد الصورة هنا...
+
+} catch (error) {
+    console.error("Nova AI Image Error:", error);
+
+    document.getElementById(loadingId)?.remove();
+
+    chatBox.appendChild(
+        createAssistantMessage(
+            "❌ حدث خطأ أثناء إنشاء الصورة."
+        )
+    );
+
+    saveCurrentChat();
+    chatBox.scrollTop = chatBox.scrollHeight;
+}
 
 // ==========================================
 // إعداد برومبت واقعي جدًا
