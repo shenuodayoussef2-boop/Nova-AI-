@@ -1812,23 +1812,17 @@ async function translateToEnglishIfNeeded(
 // 5. توليد الصور - fal.ai
 // ==========================================
 
-async function generateImage(
-    text
-) {
-
+async function generateImage(text) {
     if (!chatBox) {
         return;
     }
 
-    const loadingId =
-        "img-loading-" +
-        Date.now();
+    const loadingId = "img-loading-" + Date.now();
 
-// ==========================================
-// رسالة التحميل
-// ==========================================
+    // ==========================================
+    // رسالة التحميل
+    // ==========================================
 
-try {
     chatBox.insertAdjacentHTML(
         "beforeend",
         `
@@ -1866,35 +1860,22 @@ try {
         `
     );
 
-    // ==========================================
-    // ترجمة الوصف للعربية → الإنجليزية
-    // ==========================================
-
-    const translatedText =
-        await translateToEnglishIfNeeded(text);
-
-    // باقي كود توليد الصورة هنا...
-
-} catch (error) {
-    console.error("Nova AI Image Error:", error);
-
-    document.getElementById(loadingId)?.remove();
-
-    chatBox.appendChild(
-        createAssistantMessage(
-            "❌ حدث خطأ أثناء إنشاء الصورة."
-        )
-    );
-
-    saveCurrentChat();
     chatBox.scrollTop = chatBox.scrollHeight;
-}
 
-// ==========================================
-// إعداد برومبت واقعي جدًا
-// ==========================================
+    // ==========================================
+    // بداية معالجة توليد الصورة
+    // ==========================================
 
-const finalPrompt = `
+    try {
+        // ترجمة الوصف إلى الإنجليزية
+        const translatedText =
+            await translateToEnglishIfNeeded(text);
+
+        // ==========================================
+        // إعداد البرومبت الواقعي
+        // ==========================================
+
+        const finalPrompt = `
 Photorealistic, ultra-realistic photography, highly detailed,
 natural lighting, realistic textures, realistic materials,
 professional DSLR photography, cinematic composition,
@@ -1903,42 +1884,33 @@ natural colors, realistic shadows, physically accurate lighting,
 authentic environment, realistic proportions, high detail.
 
 ${translatedText}
-`;
+        `.trim();
 
-// ==========================================
-// إرسال الطلب إلى Vercel API
-// ==========================================
+        // ==========================================
+        // إرسال الطلب إلى Vercel API
+        // ==========================================
 
-const response =
-    await fetch(
-        "/api/generate-image",
-        {
-            method:
-                "POST",
+        const response = await fetch(
+            "/api/generate-image",
+            {
+                method: "POST",
 
-            headers: {
-                "Content-Type":
-                    "application/json"
-            },
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
-            body:
-                JSON.stringify({
-                    prompt:
-                        finalPrompt
+                body: JSON.stringify({
+                    prompt: finalPrompt
                 })
-        }
-    );
+            }
+        );
 
-const data =
-    await response.json();
-        // ==========================================
+        // قراءة رد السيرفر
+        const data = await response.json();
+
         // إزالة رسالة التحميل
-        // ==========================================
-
         document
-            .getElementById(
-                loadingId
-            )
+            .getElementById(loadingId)
             ?.remove();
 
         // ==========================================
@@ -1951,7 +1923,6 @@ const data =
             data.success &&
             data.image
         ) {
-
             appendMediaMessage(
                 "إليك الصورة التخيلية المطلوبة من Nova AI: ✨",
                 data.image,
@@ -1965,26 +1936,21 @@ const data =
                 chatBox.scrollHeight;
 
             return;
-
         }
 
         // ==========================================
-        // خطأ من API
+        // التعامل مع خطأ API
         // ==========================================
 
         console.error(
-            "nova.ai Image Error:",
+            "Nova AI Image Error:",
             data
         );
 
         const errorMessage =
-    data?.error ||
-    "تعذر إنشاء الصورة حاليًا.";
+            data?.error ||
+            "تعذر إنشاء الصورة حاليًا.";
 
-console.error(
-    "fal.ai FULL ERROR:",
-    JSON.stringify(data, null, 2)
-);
         chatBox.appendChild(
             createAssistantMessage(
                 `❌ ${errorMessage}`
@@ -1992,28 +1958,24 @@ console.error(
         );
 
     } catch (error) {
-
         // ==========================================
-        // إزالة Loading عند حدوث خطأ
+        // التعامل مع الأخطاء
         // ==========================================
-
-        document
-            .getElementById(
-                loadingId
-            )
-            ?.remove();
 
         console.error(
-            "Nova Image API Error:",
+            "Nova AI Image Exception:",
             error
         );
+
+        document
+            .getElementById(loadingId)
+            ?.remove();
 
         chatBox.appendChild(
             createAssistantMessage(
                 "❌ تعذر الاتصال بخدمة توليد الصور حاليًا."
             )
         );
-
     }
 
     // ==========================================
@@ -2024,7 +1986,6 @@ console.error(
 
     chatBox.scrollTop =
         chatBox.scrollHeight;
-
 }
 // ==========================================
 // 6. توليد الفيديو
