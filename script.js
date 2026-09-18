@@ -1824,17 +1824,18 @@ async function generateImage(
         "img-loading-" +
         Date.now();
 
-    // ==========================================
-    // رسالة التحميل
-    // ==========================================
+  // ==========================================
+// رسالة التحميل
+// ==========================================
 
-   chatBox.insertAdjacentHTML(
+chatBox.insertAdjacentHTML(
     "beforeend",
-       
+    `
     <div class="message bot-message nova-image-loading" id="${loadingId}">
         <div class="image-loading-card">
             <div class="image-loading-preview">
                 <div class="loading-shimmer"></div>
+
                 <div class="loading-icon">
                     <i class="fas fa-image"></i>
                 </div>
@@ -1861,6 +1862,7 @@ async function generateImage(
             </div>
         </div>
     </div>
+    `
 );
 // ==========================================
 // ترجمة الوصف للعربية → الإنجليزية
