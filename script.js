@@ -1948,14 +1948,18 @@ const data =
         // ==========================================
 
         console.error(
-            "fal.ai Image Error:",
+            "nova.ai Image Error:",
             data
         );
 
         const errorMessage =
-            data?.error ||
-            "تعذر إنشاء الصورة حاليًا.";
+    data?.error ||
+    "تعذر إنشاء الصورة حاليًا.";
 
+console.error(
+    "fal.ai FULL ERROR:",
+    JSON.stringify(data, null, 2)
+);
         chatBox.appendChild(
             createAssistantMessage(
                 `❌ ${errorMessage}`
