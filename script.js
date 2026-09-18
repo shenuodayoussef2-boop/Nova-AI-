@@ -1311,14 +1311,9 @@ function appendUserMessage(
 // رسالة Nova
 // ==========================================
 
-function createAssistantMessage(
-    text
-) {
+function createAssistantMessage(text) {
 
-    const messageDiv =
-        document.createElement(
-            "div"
-        );
+    const messageDiv = document.createElement("div");
 
     messageDiv.className =
         "message bot-message nova-message";
@@ -1326,7 +1321,7 @@ function createAssistantMessage(
     messageDiv.innerHTML = `
 
         <div class="nova-message-content">
-            ${escapeHtml(text)}
+            ${formatNovaResponse(text)}
         </div>
 
         <div class="message-actions">
@@ -1372,10 +1367,13 @@ function createAssistantMessage(
         text
     );
 
+    setupCodeCopyButtons(
+        messageDiv
+    );
+
     return messageDiv;
 
 }
-
 
 // ==========================================
 // أزرار رسالة Nova
@@ -1575,11 +1573,14 @@ function restoreMessageActions() {
                     text
                 );
 
+                setupCodeCopyButtons(
+                    message
+                );
+
             }
         );
 
 }
-
 
 // ==========================================
 // escape HTML
@@ -3513,8 +3514,435 @@ window.addEventListener(
 
     }
 );
+// ==========================================
+// تنسيق ردود Nova + أكواد البرمجة
+// ==========================================
+
+function formatNovaResponse(text) {
+
+    if (
+        text === null ||
+        text === undefined
+    ) {
+        return "";
+    }
+
+    text = String(text);
+
+    // تقسيم الرد إلى أجزاء:
+    // نص عادي + Code Blocks
+    const parts =
+        text.split(
+            /(```[\s\S]*?```)/g
+        );
+
+    return parts
+        .map(
+            part => {
+
+                // ==============================
+                // Code Block
+                // ==============================
+
+                if (
+                    part.startsWith("```") &&
+                    part.endsWith("```")
+                ) {
+
+                    let codeContent =
+                        part.slice(
+                            3,
+                            -3
+                        );
+
+                    let language =
+                        "";
+
+                    // استخراج اسم اللغة
+                    const firstNewLine =
+                        codeContent.indexOf(
+                            "\n"
+                        );
+
+                    if (
+                        firstNewLine !== -1
+                    ) {
+
+                        const possibleLanguage =
+                            codeContent
+                                .slice(
+                                    0,
+                                    firstNewLine
+                                )
+                                .trim();
+
+                        // لو أول سطر اسم لغة
+                        if (
+                            /^[a-zA-Z0-9+#.-]+$/.test(
+                                possibleLanguage
+                            )
+                        ) {
+
+                            language =
+                                possibleLanguage;
+
+                            codeContent =
+                                codeContent.slice(
+                                    firstNewLine + 1
+                                );
+
+                        }
+
+                    }
+
+                    const languageNames = {
+
+                        js: "JavaScript",
+                        javascript: "JavaScript",
+
+                        html: "HTML",
+
+                        css: "CSS",
+
+                        php: "PHP",
+
+                        python: "Python",
+                        py: "Python",
+
+                        json: "JSON",
+
+                        sql: "SQL",
+
+                        bash: "Bash",
+                        shell: "Shell",
+
+                        java: "Java",
+
+                        cpp: "C++",
+
+                        c: "C",
+
+                        csharp: "C#",
+                        cs: "C#",
+
+                        typescript:
+                            "TypeScript",
+
+                        ts:
+                            "TypeScript",
+
+                        jsx:
+                            "JSX",
+
+                        tsx:
+                            "TSX",
+
+                        xml:
+                            "XML",
+
+                        markdown:
+                            "Markdown",
+
+                        md:
+                            "Markdown"
+
+                    };
+
+                    const displayLanguage =
+                        languageNames[
+                            language.toLowerCase()
+                        ] ||
+                        language ||
+                        "Code";
+
+                    return `
+
+                        <div class="nova-code-wrapper">
+
+                            <div class="nova-code-header">
+
+                                <span class="nova-code-language">
+                                    <i class="fa-solid fa-code"></i>
+                                    ${escapeHtmlWithoutNewLines(
+                                        displayLanguage
+                                    )}
+                                </span>
+
+                                <button
+                                    type="button"
+                                    class="nova-copy-code"
+                                    title="نسخ الكود"
+                                >
+                                    <i class="fa-regular fa-copy"></i>
+                                    <span>نسخ</span>
+                                </button>
+
+                            </div>
+
+                            <pre class="nova-code-block"><code>${escapeCodeHtml(
+                                codeContent
+                            )}</code></pre>
+
+                        </div>
+
+                    `;
+
+                }
+
+                // ==============================
+                // النص العادي
+                // ==============================
+
+                return formatNormalText(
+                    part
+                );
+
+            }
+        )
+        .join("");
+
+}
 
 
+// ==========================================
+// تنسيق النص العادي
+// ==========================================
+
+function formatNormalText(
+    text
+) {
+
+    if (
+        !text
+    ) {
+        return "";
+    }
+
+    let result =
+        escapeHtmlWithoutNewLines(
+            text
+        );
+
+    // Bold
+    result =
+        result.replace(
+            /\*\*(.+?)\*\*/gs,
+            "<strong>$1</strong>"
+        );
+
+    result =
+        result.replace(
+            /__(.+?)__/gs,
+            "<strong>$1</strong>"
+        );
+
+    // Italic
+    result =
+        result.replace(
+            /(?<!\*)\*([^*\n]+)\*(?!\*)/g,
+            "<em>$1</em>"
+        );
+
+    // Inline code
+    result =
+        result.replace(
+            /`([^`\n]+)`/g,
+            '<code class="nova-inline-code">$1</code>'
+        );
+
+    // الأسطر الجديدة
+    result =
+        result.replace(
+            /\n/g,
+            "<br>"
+        );
+
+    return result;
+
+}
+
+
+// ==========================================
+// Escape HTML للكود
+// ==========================================
+
+function escapeCodeHtml(
+    code
+) {
+
+    if (
+        code === null ||
+        code === undefined
+    ) {
+
+        return "";
+
+    }
+
+    return String(code)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+// ==========================================
+// Escape HTML بدون تحويل الأسطر
+// ==========================================
+
+function escapeHtmlWithoutNewLines(
+    text
+) {
+
+    if (
+        text === null ||
+        text === undefined
+    ) {
+
+        return "";
+
+    }
+
+    return String(text)
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+        .replace(
+            /</g,
+            "&lt;"
+        )
+        .replace(
+            />/g,
+            "&gt;"
+        )
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
+}
+
+
+// ==========================================
+// أزرار نسخ الأكواد
+// ==========================================
+
+function setupCodeCopyButtons(
+    container
+) {
+
+    if (!container) {
+        return;
+    }
+
+    container
+        .querySelectorAll(
+            ".nova-copy-code"
+        )
+        .forEach(
+            button => {
+
+                // منع تكرار الحدث
+                if (
+                    button.dataset.copyReady ===
+                    "true"
+                ) {
+                    return;
+                }
+
+                button.dataset.copyReady =
+                    "true";
+
+                button.addEventListener(
+                    "click",
+                    async () => {
+
+                        const codeBlock =
+                            button
+                                .closest(
+                                    ".nova-code-wrapper"
+                                )
+                                ?.querySelector(
+                                    "code"
+                                );
+
+                        if (!codeBlock) {
+                            return;
+                        }
+
+                        const code =
+                            codeBlock.textContent;
+
+                        try {
+
+                            await navigator.clipboard.writeText(
+                                code
+                            );
+
+                            button.innerHTML = `
+                                <i class="fa-solid fa-check"></i>
+                                <span>تم النسخ</span>
+                            `;
+
+                            showToast(
+                                "تم نسخ الكود"
+                            );
+
+                            setTimeout(
+                                () => {
+
+                                    button.innerHTML = `
+                                        <i class="fa-regular fa-copy"></i>
+                                        <span>نسخ</span>
+                                    `;
+
+                                },
+                                1500
+                            );
+
+                        } catch (error) {
+
+                            console.error(
+                                "Code Copy Error:",
+                                error
+                            );
+
+                            alert(
+                                "تعذر نسخ الكود."
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+}
 // ==========================================
 // نهاية Nova AI
 // ==========================================
