@@ -1,3 +1,4 @@
+
 // ==========================================
 // NOVA AI - MAIN SCRIPT
 // ==========================================
@@ -7,7 +8,7 @@
 // ==========================================
 
 // true = عرض تجريبي بدون Gemini
-// false = استخدام api/chat.php
+// false = استخدام API الحقيقي
 const DEMO_MODE = false;
 
 
@@ -21,6 +22,9 @@ let chatsArray =
 let currentChatId = null;
 
 let currentAbortController = null;
+
+// الصورة المرفوعة التي سيتم استخدامها في تعديل الصورة
+let pendingVisionImage = null;
 
 const historyList =
     document.getElementById("historyList");
@@ -47,9 +51,13 @@ window.addEventListener("DOMContentLoaded", () => {
     renderHistoryList();
 
     if (chatsArray.length > 0) {
+
         loadChat(chatsArray[0].id);
+
     } else {
+
         startNewChat();
+
     }
 
 });
@@ -61,14 +69,34 @@ window.addEventListener("DOMContentLoaded", () => {
 
 function startNewChat() {
 
-    currentChatId = Date.now().toString();
+    currentChatId =
+        Date.now().toString();
+
+    // إلغاء أي صورة معلقة للتعديل
+    pendingVisionImage = null;
+
+    // إلغاء أي طلب جاري
+    if (currentAbortController) {
+
+        try {
+            currentAbortController.abort();
+        } catch {}
+
+        currentAbortController = null;
+
+    }
+
+    updateSendButtonState(false);
 
     if (chatBox) {
 
         chatBox.innerHTML = `
 
             <!-- شاشة الترحيب -->
-            <div class="nova-welcome" id="novaWelcome">
+            <div
+                class="nova-welcome"
+                id="novaWelcome"
+            >
 
                 <div class="nova-welcome-icon">
                     <i class="fa-solid fa-sparkles"></i>
@@ -129,9 +157,13 @@ function startNewChat() {
 
         `;
 
-        // تشغيل أزرار الاقتراحات بعد إنشاء العناصر
-        if (typeof setupQuickPrompts === "function") {
+        if (
+            typeof setupQuickPrompts ===
+            "function"
+        ) {
+
             setupQuickPrompts();
+
         }
 
     }
@@ -140,7 +172,8 @@ function startNewChat() {
 
         chatInput.value = "";
 
-        chatInput.style.height = "auto";
+        chatInput.style.height =
+            "auto";
 
     }
 
@@ -149,6 +182,8 @@ function startNewChat() {
     closeAllMenus();
 
 }
+
+
 // ==========================================
 // حفظ المحادثة
 // ==========================================
@@ -161,13 +196,16 @@ function saveCurrentChat(
         !chatBox ||
         !currentChatId
     ) {
+
         return;
+
     }
 
     let existingChat =
         chatsArray.find(
             chat =>
-                chat.id === currentChatId
+                chat.id ===
+                currentChatId
         );
 
     const chatHtml =
@@ -224,7 +262,9 @@ function saveCurrentChat(
 
     localStorage.setItem(
         "novaAllChats",
-        JSON.stringify(chatsArray)
+        JSON.stringify(
+            chatsArray
+        )
     );
 
     renderHistoryList();
@@ -239,7 +279,9 @@ function saveCurrentChat(
 function renderHistoryList() {
 
     if (!historyList) {
+
         return;
+
     }
 
     historyList.innerHTML = "";
@@ -252,14 +294,18 @@ function renderHistoryList() {
                     a.pinned &&
                     !b.pinned
                 ) {
+
                     return -1;
+
                 }
 
                 if (
                     !a.pinned &&
                     b.pinned
                 ) {
+
                     return 1;
+
                 }
 
                 return 0;
@@ -463,7 +509,9 @@ function renderHistoryList() {
                         );
 
                     if (!targetChat) {
+
                         return;
+
                     }
 
                     targetChat.pinned =
@@ -541,7 +589,9 @@ function renderHistoryList() {
                         );
 
                     if (!confirmed) {
+
                         return;
+
                     }
 
                     chatsArray =
@@ -607,6 +657,9 @@ function loadChat(id) {
     currentChatId =
         id;
 
+    pendingVisionImage =
+        null;
+
     const chat =
         chatsArray.find(
             c => c.id === id
@@ -616,7 +669,9 @@ function loadChat(id) {
         !chat ||
         !chatBox
     ) {
+
         return;
+
     }
 
     chatBox.innerHTML =
@@ -679,7 +734,9 @@ function updateSendButtonState(
 ) {
 
     if (!sendChatBtn) {
+
         return;
+
     }
 
     if (isGenerating) {
@@ -782,7 +839,9 @@ if (chatInput) {
                 if (
                     currentAbortController
                 ) {
+
                     return;
+
                 }
 
                 sendMessage();
@@ -800,11 +859,14 @@ if (chatInput) {
 // ==========================================
 
 async function sendMessage(
-    customText = null
+    customText = null,
+    options = {}
 ) {
 
     if (!chatBox) {
+
         return;
+
     }
 
     let text =
@@ -815,13 +877,70 @@ async function sendMessage(
                 : "";
 
     if (!text) {
+
         return;
+
     }
 
     if (!currentChatId) {
+
         startNewChat();
+
     }
 
+
+    // ==========================================
+    // تعديل الصورة المرفوعة
+    // ==========================================
+
+    if (
+        pendingVisionImage &&
+        !options.ignorePendingImage
+    ) {
+
+        const imageToEdit =
+            pendingVisionImage;
+
+        pendingVisionImage =
+            null;
+
+        appendUserMessage(
+            text
+        );
+
+        if (
+            !customText &&
+            chatInput
+        ) {
+
+            chatInput.value =
+                "";
+
+            chatInput.style.height =
+                "auto";
+
+        }
+
+        chatBox.scrollTop =
+            chatBox.scrollHeight;
+
+        saveCurrentChat(
+            text
+        );
+
+        await editImageWithPrompt(
+            text,
+            imageToEdit
+        );
+
+        return;
+
+    }
+
+
+    // ==========================================
+    // رسالة المستخدم العادية
+    // ==========================================
 
     appendUserMessage(
         text
@@ -941,13 +1060,22 @@ async function sendMessage(
                 loadingId
             )
         ) {
-            updateSendButtonState(false);
-            currentAbortController = null;
+
+            updateSendButtonState(
+                false
+            );
+
+            currentAbortController =
+                null;
+
             return;
+
         }
 
         document
-            .getElementById(loadingId)
+            .getElementById(
+                loadingId
+            )
             ?.remove();
 
         const demoReply =
@@ -977,7 +1105,7 @@ async function sendMessage(
 
 
     // ==========================================
-    // Gemini / PHP
+    // Gemini / API
     // ==========================================
 
     const loadingId =
@@ -1115,7 +1243,9 @@ async function sendMessage(
             );
 
         if (loadingElem) {
+
             loadingElem.remove();
+
         }
 
 
@@ -1176,7 +1306,9 @@ async function sendMessage(
             );
 
         if (loadingElem) {
+
             loadingElem.remove();
+
         }
 
 
@@ -1358,9 +1490,14 @@ function appendUserMessage(
 // رسالة Nova
 // ==========================================
 
-function createAssistantMessage(text) {
+function createAssistantMessage(
+    text
+) {
 
-    const messageDiv = document.createElement("div");
+    const messageDiv =
+        document.createElement(
+            "div"
+        );
 
     messageDiv.className =
         "message bot-message nova-message";
@@ -1422,6 +1559,7 @@ function createAssistantMessage(text) {
 
 }
 
+
 // ==========================================
 // أزرار رسالة Nova
 // ==========================================
@@ -1432,7 +1570,9 @@ function setupMessageActions(
 ) {
 
     if (!messageDiv) {
+
         return;
+
     }
 
     const copyBtn =
@@ -1514,7 +1654,9 @@ function setupMessageActions(
             if (
                 messageIndex <= 0
             ) {
+
                 return;
+
             }
 
             const previousUserMessage =
@@ -1534,7 +1676,9 @@ function setupMessageActions(
             if (
                 !previousUserMessage
             ) {
+
                 return;
+
             }
 
             const text =
@@ -1593,7 +1737,9 @@ function setupMessageActions(
 function restoreMessageActions() {
 
     if (!chatBox) {
+
         return;
+
     }
 
     chatBox
@@ -1609,7 +1755,9 @@ function restoreMessageActions() {
                     );
 
                 if (!content) {
+
                     return;
+
                 }
 
                 const text =
@@ -1628,6 +1776,7 @@ function restoreMessageActions() {
         );
 
 }
+
 
 // ==========================================
 // escape HTML
@@ -1815,7 +1964,9 @@ async function translateToEnglishIfNeeded(
         );
 
     if (!hasArabic) {
+
         return cleanedText;
+
     }
 
     try {
@@ -1855,36 +2006,46 @@ async function translateToEnglishIfNeeded(
 }
 
 
-
 // ==========================================
 // 5. توليد الصور - fal.ai
 // ==========================================
 
-async function generateImage(text) {
+async function generateImage(
+    text
+) {
+
     if (!chatBox) {
+
         return;
+
     }
 
-    const loadingId = "img-loading-" + Date.now();
+    const loadingId =
+        "img-loading-" +
+        Date.now();
 
-    // ==========================================
-    // رسالة التحميل
-    // ==========================================
 
     chatBox.insertAdjacentHTML(
         "beforeend",
         `
-        <div class="message bot-message nova-image-loading" id="${loadingId}">
+        <div
+            class="message bot-message nova-image-loading"
+            id="${loadingId}"
+        >
             <div class="image-loading-card">
+
                 <div class="image-loading-preview">
+
                     <div class="loading-shimmer"></div>
 
                     <div class="loading-icon">
                         <i class="fas fa-image"></i>
                     </div>
+
                 </div>
 
                 <div class="image-loading-info">
+
                     <div class="image-loading-title">
                         <i class="fas fa-wand-magic-sparkles"></i>
                         Nova AI يصنع صورتك
@@ -1902,26 +2063,25 @@ async function generateImage(text) {
                         <span class="loading-pulse"></span>
                         جاري الإبداع، انتظر قليلًا ✨
                     </div>
+
                 </div>
+
             </div>
         </div>
         `
     );
 
-    chatBox.scrollTop = chatBox.scrollHeight;
+    chatBox.scrollTop =
+        chatBox.scrollHeight;
 
-    // ==========================================
-    // بداية معالجة توليد الصورة
-    // ==========================================
 
     try {
-        // ترجمة الوصف إلى الإنجليزية
-        const translatedText =
-            await translateToEnglishIfNeeded(text);
 
-        // ==========================================
-        // إعداد البرومبت الواقعي
-        // ==========================================
+        const translatedText =
+            await translateToEnglishIfNeeded(
+                text
+            );
+
 
         const finalPrompt = `
 Photorealistic, ultra-realistic photography, highly detailed,
@@ -1934,36 +2094,39 @@ authentic environment, realistic proportions, high detail.
 ${translatedText}
         `.trim();
 
-        // ==========================================
-        // إرسال الطلب إلى Vercel API
-        // ==========================================
 
-        const response = await fetch(
-            "/api/generate-image",
-            {
-                method: "POST",
+        const response =
+            await fetch(
+                "/api/generate-image",
+                {
+                    method:
+                        "POST",
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
 
-                body: JSON.stringify({
-                    prompt: finalPrompt
-                })
-            }
-        );
+                    body:
+                        JSON.stringify({
+                            prompt:
+                                finalPrompt
+                        })
 
-        // قراءة رد السيرفر
-        const data = await response.json();
+                }
+            );
 
-        // إزالة رسالة التحميل
+
+        const data =
+            await response.json();
+
+
         document
-            .getElementById(loadingId)
+            .getElementById(
+                loadingId
+            )
             ?.remove();
 
-        // ==========================================
-        // التحقق من نجاح التوليد
-        // ==========================================
 
         if (
             response.ok &&
@@ -1971,6 +2134,7 @@ ${translatedText}
             data.success &&
             data.image
         ) {
+
             appendMediaMessage(
                 "إليك الصورة التخيلية المطلوبة من Nova AI: ✨",
                 data.image,
@@ -1984,11 +2148,9 @@ ${translatedText}
                 chatBox.scrollHeight;
 
             return;
+
         }
 
-        // ==========================================
-        // التعامل مع خطأ API
-        // ==========================================
 
         console.error(
             "Nova AI Image Error:",
@@ -2006,9 +2168,6 @@ ${translatedText}
         );
 
     } catch (error) {
-        // ==========================================
-        // التعامل مع الأخطاء
-        // ==========================================
 
         console.error(
             "Nova AI Image Exception:",
@@ -2016,7 +2175,9 @@ ${translatedText}
         );
 
         document
-            .getElementById(loadingId)
+            .getElementById(
+                loadingId
+            )
             ?.remove();
 
         chatBox.appendChild(
@@ -2024,17 +2185,251 @@ ${translatedText}
                 "❌ تعذر الاتصال بخدمة توليد الصور حاليًا."
             )
         );
+
     }
 
-    // ==========================================
-    // حفظ المحادثة
-    // ==========================================
 
     saveCurrentChat();
 
     chatBox.scrollTop =
         chatBox.scrollHeight;
+
 }
+
+
+// ==========================================
+// 5.5 تعديل الصورة المرفوعة
+// ==========================================
+
+async function editImageWithPrompt(
+    text,
+    imageSrc
+) {
+
+    if (
+        !chatBox ||
+        !imageSrc
+    ) {
+
+        return;
+
+    }
+
+    const loadingId =
+        "edit-image-loading-" +
+        Date.now();
+
+
+    chatBox.insertAdjacentHTML(
+        "beforeend",
+        `
+        <div
+            class="message bot-message nova-message"
+            id="${loadingId}"
+        >
+
+            <div class="image-loading-card">
+
+                <div class="image-loading-preview">
+
+                    <img
+                        src="${imageSrc}"
+                        alt="الصورة الأصلية"
+                        style="
+                            width:100%;
+                            height:180px;
+                            object-fit:cover;
+                            border-radius:12px;
+                            opacity:.65;
+                        "
+                    >
+
+                    <div class="loading-icon">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                    </div>
+
+                </div>
+
+                <div class="image-loading-info">
+
+                    <div class="image-loading-title">
+
+                        <i class="fas fa-wand-magic-sparkles"></i>
+
+                        Nova AI يعدّل الصورة
+
+                    </div>
+
+                    <div class="image-loading-subtitle">
+
+                        جاري تنفيذ التعديل المطلوب مع الحفاظ على ملامح الصورة...
+
+                    </div>
+
+                    <div class="image-progress">
+
+                        <div class="image-progress-bar"></div>
+
+                    </div>
+
+                    <div class="image-loading-status">
+
+                        <span class="loading-pulse"></span>
+
+                        جاري معالجة الصورة ✨
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+        `
+    );
+
+
+    chatBox.scrollTop =
+        chatBox.scrollHeight;
+
+
+    try {
+
+        const translatedText =
+            await translateToEnglishIfNeeded(
+                text
+            );
+
+
+        const finalPrompt = `
+Edit the provided image according to the user's request.
+
+Preserve the person's identity, facial features,
+face structure, skin tone, hairstyle, body proportions,
+and overall appearance as much as possible.
+
+Only change the elements explicitly requested by the user.
+
+Make the result photorealistic, natural, highly detailed,
+realistic lighting, realistic textures, realistic materials,
+professional photography, natural shadows,
+accurate proportions, realistic environment.
+
+User request:
+${translatedText}
+        `.trim();
+
+
+        const response =
+            await fetch(
+                "/api/edit-image",
+                {
+                    method:
+                        "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            prompt:
+                                finalPrompt,
+
+                            image:
+                                imageSrc
+
+                        })
+
+                }
+            );
+
+
+        const data =
+            await response.json();
+
+
+        document
+            .getElementById(
+                loadingId
+            )
+            ?.remove();
+
+
+        if (
+            response.ok &&
+            data &&
+            data.success &&
+            data.image
+        ) {
+
+            appendMediaMessage(
+                "✨ تم تعديل الصورة حسب طلبك:",
+                data.image,
+                text,
+                "image"
+            );
+
+            saveCurrentChat();
+
+            chatBox.scrollTop =
+                chatBox.scrollHeight;
+
+            return;
+
+        }
+
+
+        console.error(
+            "Nova AI Edit Image Error:",
+            data
+        );
+
+
+        chatBox.appendChild(
+            createAssistantMessage(
+                `❌ ${
+                    data?.error ||
+                    "تعذر تعديل الصورة حاليًا."
+                }`
+            )
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Nova AI Edit Image Exception:",
+            error
+        );
+
+
+        document
+            .getElementById(
+                loadingId
+            )
+            ?.remove();
+
+
+        chatBox.appendChild(
+            createAssistantMessage(
+                "❌ حدث خطأ أثناء تعديل الصورة."
+            )
+        );
+
+    }
+
+
+    saveCurrentChat();
+
+    chatBox.scrollTop =
+        chatBox.scrollHeight;
+
+}
+
+
 // ==========================================
 // 6. توليد الفيديو
 // ==========================================
@@ -2062,10 +2457,12 @@ async function generateVideo(
     chatBox.scrollTop =
         chatBox.scrollHeight;
 
+
     const translatedText =
         await translateToEnglishIfNeeded(
             text
         );
+
 
     document
         .getElementById(
@@ -2073,10 +2470,12 @@ async function generateVideo(
         )
         ?.remove();
 
+
     const cleanPrompt =
         encodeURIComponent(
             translatedText
         );
+
 
     const randomSeed =
         Math.floor(
@@ -2084,8 +2483,10 @@ async function generateVideo(
             1000000
         );
 
+
     const videoUrl =
         `https://image.pollinations.ai/prompt/cinematic%20video%20still%20of%20${cleanPrompt}?seed=${randomSeed}&width=600&height=400&nologo=true`;
+
 
     appendMediaMessage(
         "إليك المشهد المطلوب: 🎥",
@@ -2093,6 +2494,7 @@ async function generateVideo(
         text,
         "video"
     );
+
 
     saveCurrentChat();
 
@@ -2121,10 +2523,12 @@ function appendMediaMessage(
     message.className =
         "message bot-message nova-message";
 
+
     const icon =
         type === "video"
             ? "🎬"
             : "✨";
+
 
     message.innerHTML = `
 
@@ -2179,6 +2583,7 @@ function appendMediaMessage(
 
     `;
 
+
     chatBox.appendChild(
         message
     );
@@ -2195,8 +2600,16 @@ function appendImageMessageWithVisionChips(
 ) {
 
     if (!chatBox) {
+
         return;
+
     }
+
+
+    // حفظ الصورة لاستخدامها في التعديل
+    pendingVisionImage =
+        imageSrc;
+
 
     const messageDiv =
         document.createElement(
@@ -2205,6 +2618,7 @@ function appendImageMessageWithVisionChips(
 
     messageDiv.className =
         "message user-message";
+
 
     messageDiv.innerHTML = `
 
@@ -2265,6 +2679,7 @@ function appendImageMessageWithVisionChips(
 
     `;
 
+
     messageDiv
         .querySelectorAll(
             ".vision-chip-btn"
@@ -2290,12 +2705,17 @@ function appendImageMessageWithVisionChips(
             }
         );
 
+
     chatBox.appendChild(
         messageDiv
     );
 
 }
 
+
+// ==========================================
+// Vision Action
+// ==========================================
 
 window.triggerVisionAction =
     function (
@@ -2306,8 +2726,13 @@ window.triggerVisionAction =
         const promptText =
             `بخصوص الصورة المرفقة، من فضلك قم بـ: ${actionType}`;
 
+
         sendMessage(
-            promptText
+            promptText,
+            {
+                ignorePendingImage:
+                    true
+            }
         );
 
     };
@@ -2330,6 +2755,7 @@ document.addEventListener(
             document.getElementById(
                 "sidebarToggleBtn"
             );
+
 
         if (
             sidebarToggleBtn &&
@@ -2378,6 +2804,7 @@ document.addEventListener(
                 "fileInput"
             );
 
+
         if (
             attachBtn &&
             attachDropdown
@@ -2409,12 +2836,15 @@ document.addEventListener(
         );
 
 
+        // ==========================================
         // رفع الملفات
+        // ==========================================
 
         const optUpload =
             document.getElementById(
                 "optUpload"
             );
+
 
         if (
             optUpload &&
@@ -2445,23 +2875,30 @@ document.addEventListener(
                         !fileInput.files ||
                         !fileInput.files.length
                     ) {
+
                         return;
+
                     }
+
 
                     const file =
                         fileInput.files[0];
 
+
                     const fileName =
                         file.name;
 
+
                     const fileReader =
                         new FileReader();
+
 
                     fileReader.onload =
                         function (e) {
 
                             const fileResult =
                                 e.target.result;
+
 
                             if (
                                 file.type.startsWith(
@@ -2490,6 +2927,7 @@ document.addEventListener(
                                 );
 
                             }
+
 
                             saveCurrentChat();
 
@@ -2544,12 +2982,15 @@ document.addEventListener(
         }
 
 
+        // ==========================================
         // توليد صورة يدوي
+        // ==========================================
 
         const optImage =
             document.getElementById(
                 "optImage"
             );
+
 
         if (optImage) {
 
@@ -2563,24 +3004,31 @@ document.addEventListener(
                         "show"
                     );
 
+
                     const promptText =
                         prompt(
                             "اكتب وصف الصورة (بالعربي أو الإنجليزي):"
                         );
 
+
                     if (
                         !promptText ||
                         !promptText.trim()
                     ) {
+
                         return;
+
                     }
+
 
                     const userPrompt =
                         promptText.trim();
 
+
                     appendUserMessage(
                         `رسم صورة: ${userPrompt}`
                     );
+
 
                     await generateImage(
                         userPrompt
@@ -2592,12 +3040,15 @@ document.addEventListener(
         }
 
 
+        // ==========================================
         // توليد فيديو يدوي
+        // ==========================================
 
         const optVideo =
             document.getElementById(
                 "optVideo"
             );
+
 
         if (optVideo) {
 
@@ -2611,24 +3062,31 @@ document.addEventListener(
                         "show"
                     );
 
+
                     const promptText =
                         prompt(
                             "اكتب وصف الفيديو (بالعربي أو الإنجليزي):"
                         );
 
+
                     if (
                         !promptText ||
                         !promptText.trim()
                     ) {
+
                         return;
+
                     }
+
 
                     const userPrompt =
                         promptText.trim();
 
+
                     appendUserMessage(
                         `توليد فيديو: ${userPrompt}`
                     );
+
 
                     await generateVideo(
                         userPrompt
@@ -2640,12 +3098,15 @@ document.addEventListener(
         }
 
 
+        // ==========================================
         // توليد صوت
+        // ==========================================
 
         const optMusic =
             document.getElementById(
                 "optMusic"
             );
+
 
         if (optMusic) {
 
@@ -2659,29 +3120,37 @@ document.addEventListener(
                         "show"
                     );
 
+
                     const text =
                         prompt(
                             "اكتب النص المراد تحويله إلى صوت:"
                         );
 
+
                     if (
                         !text ||
                         !text.trim()
                     ) {
+
                         return;
+
                     }
+
 
                     const cleanText =
                         text.trim();
+
 
                     appendUserMessage(
                         `توليد صوت: ${cleanText}`
                     );
 
+
                     const audioUrl =
                         `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
                             cleanText
                         )}&tl=ar&client=tw-ob`;
+
 
                     chatBox.insertAdjacentHTML(
                         "beforeend",
@@ -2710,6 +3179,7 @@ document.addEventListener(
                         `
                     );
 
+
                     saveCurrentChat();
 
                     chatBox.scrollTop =
@@ -2732,38 +3202,46 @@ const SpeechRecognition =
     window.SpeechRecognition ||
     window.webkitSpeechRecognition;
 
+
 const voiceOverlay =
     document.getElementById(
         "voiceOverlay"
     );
+
 
 const closeVoiceBtn =
     document.getElementById(
         "closeVoiceBtn"
     );
 
+
 const endVoiceCallBtn =
     document.getElementById(
         "endVoiceCallBtn"
     );
+
 
 const voiceOrb =
     document.getElementById(
         "voiceOrb"
     );
 
+
 const liveVoiceBtn =
     document.getElementById(
         "liveVoiceBtn"
     );
+
 
 const micBtn =
     document.getElementById(
         "micBtn"
     );
 
+
 let isLiveMode =
     false;
+
 
 let recognition =
     null;
@@ -2778,11 +3256,14 @@ if (SpeechRecognition) {
     recognition =
         new SpeechRecognition();
 
+
     recognition.lang =
         "ar-SA";
 
+
     recognition.continuous =
         false;
+
 
     recognition.interimResults =
         false;
@@ -2796,6 +3277,7 @@ if (SpeechRecognition) {
 
                 isLiveMode =
                     false;
+
 
                 try {
 
@@ -2828,6 +3310,7 @@ if (SpeechRecognition) {
                 isLiveMode =
                     true;
 
+
                 if (voiceOverlay) {
 
                     voiceOverlay.classList.add(
@@ -2836,12 +3319,14 @@ if (SpeechRecognition) {
 
                 }
 
+
                 if (voiceOrb) {
 
                     voiceOrb.className =
                         "voice-orb listening";
 
                 }
+
 
                 try {
 
@@ -2869,9 +3354,11 @@ if (SpeechRecognition) {
                     .results[0][0]
                     .transcript;
 
+
             micBtn?.classList.remove(
                 "recording"
             );
+
 
             if (isLiveMode) {
 
@@ -2881,6 +3368,7 @@ if (SpeechRecognition) {
                         "voice-orb speaking";
 
                 }
+
 
                 await sendVoiceMessageAndReply(
                     transcript
@@ -2893,7 +3381,9 @@ if (SpeechRecognition) {
                     chatInput.value =
                         transcript;
 
+
                     chatInput.focus();
+
 
                     chatInput.dispatchEvent(
                         new Event(
@@ -2916,9 +3406,11 @@ if (SpeechRecognition) {
                 event.error
             );
 
+
             micBtn?.classList.remove(
                 "recording"
             );
+
 
             if (voiceOrb) {
 
@@ -2962,11 +3454,13 @@ function closeVoiceOverlay() {
 
     }
 
+
     try {
 
         recognition?.stop();
 
     } catch {}
+
 
     if (voiceOrb) {
 
@@ -2974,6 +3468,7 @@ function closeVoiceOverlay() {
             "voice-orb";
 
     }
+
 
     isLiveMode =
         false;
@@ -2989,6 +3484,7 @@ if (closeVoiceBtn) {
     );
 
 }
+
 
 if (endVoiceCallBtn) {
 
@@ -3009,12 +3505,16 @@ async function sendVoiceMessageAndReply(
 ) {
 
     if (!currentChatId) {
+
         startNewChat();
+
     }
+
 
     appendUserMessage(
         `🎙️ ${text}`
     );
+
 
     if (chatInput) {
 
@@ -3026,8 +3526,10 @@ async function sendVoiceMessageAndReply(
 
     }
 
+
     chatBox.scrollTop =
         chatBox.scrollHeight;
+
 
     saveCurrentChat(
         text
@@ -3044,6 +3546,7 @@ async function sendVoiceMessageAndReply(
             "voice-loading-" +
             Date.now();
 
+
         chatBox.insertAdjacentHTML(
             "beforeend",
             `
@@ -3056,10 +3559,13 @@ async function sendVoiceMessageAndReply(
             `
         );
 
+
         chatBox.scrollTop =
             chatBox.scrollHeight;
 
+
         await delay(900);
+
 
         document
             .getElementById(
@@ -3067,8 +3573,10 @@ async function sendVoiceMessageAndReply(
             )
             ?.remove();
 
+
         const reply =
             getDemoReply(text);
+
 
         const audioUrl =
             `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
@@ -3078,13 +3586,16 @@ async function sendVoiceMessageAndReply(
                 )
             )}&tl=ar&client=tw-ob`;
 
+
         const message =
             document.createElement(
                 "div"
             );
 
+
         message.className =
             "message bot-message nova-message";
+
 
         message.innerHTML = `
 
@@ -3108,9 +3619,11 @@ async function sendVoiceMessageAndReply(
 
         `;
 
+
         chatBox.appendChild(
             message
         );
+
 
         if (voiceOverlay) {
 
@@ -3120,6 +3633,7 @@ async function sendVoiceMessageAndReply(
 
         }
 
+
         if (voiceOrb) {
 
             voiceOrb.className =
@@ -3127,11 +3641,14 @@ async function sendVoiceMessageAndReply(
 
         }
 
+
         isLiveMode =
             false;
 
+
         chatBox.scrollTop =
             chatBox.scrollHeight;
+
 
         saveCurrentChat();
 
@@ -3148,6 +3665,7 @@ async function sendVoiceMessageAndReply(
         "voice-loading-" +
         Date.now();
 
+
     chatBox.insertAdjacentHTML(
         "beforeend",
         `
@@ -3160,8 +3678,10 @@ async function sendVoiceMessageAndReply(
         `
     );
 
+
     chatBox.scrollTop =
         chatBox.scrollHeight;
+
 
     try {
 
@@ -3185,14 +3705,17 @@ async function sendVoiceMessageAndReply(
                 }
             );
 
+
         const data =
             await response.json();
+
 
         document
             .getElementById(
                 loadingId
             )
             ?.remove();
+
 
         if (
             response.ok &&
@@ -3212,6 +3735,7 @@ async function sendVoiceMessageAndReply(
                     )
                     .join("\n");
 
+
             const audioUrl =
                 `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
                     reply.substring(
@@ -3220,13 +3744,16 @@ async function sendVoiceMessageAndReply(
                     )
                 )}&tl=ar&client=tw-ob`;
 
+
             const message =
                 document.createElement(
                     "div"
                 );
 
+
             message.className =
                 "message bot-message nova-message";
+
 
             message.innerHTML = `
 
@@ -3250,6 +3777,7 @@ async function sendVoiceMessageAndReply(
 
             `;
 
+
             chatBox.appendChild(
                 message
             );
@@ -3271,11 +3799,13 @@ async function sendVoiceMessageAndReply(
             error
         );
 
+
         document
             .getElementById(
                 loadingId
             )
             ?.remove();
+
 
         chatBox.appendChild(
             createAssistantMessage(
@@ -3284,6 +3814,7 @@ async function sendVoiceMessageAndReply(
         );
 
     }
+
 
     if (voiceOrb) {
 
@@ -3304,15 +3835,18 @@ const settingsBtn =
         "settingsBtn"
     );
 
+
 const settingsModal =
     document.getElementById(
         "settingsModal"
     );
 
+
 const closeSettingsBtn =
     document.getElementById(
         "closeSettingsBtn"
     );
+
 
 if (
     settingsBtn &&
@@ -3334,6 +3868,7 @@ if (
 
 }
 
+
 if (
     closeSettingsBtn &&
     settingsModal
@@ -3351,6 +3886,7 @@ if (
     );
 
 }
+
 
 window.addEventListener(
     "click",
@@ -3384,6 +3920,7 @@ document.addEventListener(
                 ".setting-item"
             );
 
+
         settingItems.forEach(
             item => {
 
@@ -3394,6 +3931,7 @@ document.addEventListener(
                         const text =
                             item.textContent
                                 .trim();
+
 
                         if (
                             text.includes(
@@ -3455,22 +3993,30 @@ document.addEventListener(
             window.innerWidth >
             768
         ) {
+
             return;
+
         }
+
 
         const sidebar =
             document.getElementById(
                 "sidebar"
             );
 
+
         const toggleBtn =
             document.getElementById(
                 "sidebarToggleBtn"
             );
 
+
         if (!sidebar) {
+
             return;
+
         }
+
 
         if (
             sidebar.classList.contains(
@@ -3506,6 +4052,7 @@ document.addEventListener(
             e.target.closest(
                 ".history-item"
             );
+
 
         if (
             historyItem &&
@@ -3547,6 +4094,7 @@ window.addEventListener(
                 "sidebar"
             );
 
+
         if (
             sidebar &&
             window.innerWidth >
@@ -3561,35 +4109,39 @@ window.addEventListener(
 
     }
 );
+
+
 // ==========================================
 // تنسيق ردود Nova + أكواد البرمجة
 // ==========================================
 
-function formatNovaResponse(text) {
+function formatNovaResponse(
+    text
+) {
 
     if (
         text === null ||
         text === undefined
     ) {
+
         return "";
+
     }
 
-    text = String(text);
 
-    // تقسيم الرد إلى أجزاء:
-    // نص عادي + Code Blocks
+    text =
+        String(text);
+
+
     const parts =
         text.split(
             /(```[\s\S]*?```)/g
         );
 
+
     return parts
         .map(
             part => {
-
-                // ==============================
-                // Code Block
-                // ==============================
 
                 if (
                     part.startsWith("```") &&
@@ -3602,14 +4154,16 @@ function formatNovaResponse(text) {
                             -3
                         );
 
+
                     let language =
                         "";
 
-                    // استخراج اسم اللغة
+
                     const firstNewLine =
                         codeContent.indexOf(
                             "\n"
                         );
+
 
                     if (
                         firstNewLine !== -1
@@ -3623,7 +4177,7 @@ function formatNovaResponse(text) {
                                 )
                                 .trim();
 
-                        // لو أول سطر اسم لغة
+
                         if (
                             /^[a-zA-Z0-9+#.-]+$/.test(
                                 possibleLanguage
@@ -3632,6 +4186,7 @@ function formatNovaResponse(text) {
 
                             language =
                                 possibleLanguage;
+
 
                             codeContent =
                                 codeContent.slice(
@@ -3642,35 +4197,56 @@ function formatNovaResponse(text) {
 
                     }
 
+
                     const languageNames = {
 
-                        js: "JavaScript",
-                        javascript: "JavaScript",
+                        js:
+                            "JavaScript",
 
-                        html: "HTML",
+                        javascript:
+                            "JavaScript",
 
-                        css: "CSS",
+                        html:
+                            "HTML",
 
-                        php: "PHP",
+                        css:
+                            "CSS",
 
-                        python: "Python",
-                        py: "Python",
+                        php:
+                            "PHP",
 
-                        json: "JSON",
+                        python:
+                            "Python",
 
-                        sql: "SQL",
+                        py:
+                            "Python",
 
-                        bash: "Bash",
-                        shell: "Shell",
+                        json:
+                            "JSON",
 
-                        java: "Java",
+                        sql:
+                            "SQL",
 
-                        cpp: "C++",
+                        bash:
+                            "Bash",
 
-                        c: "C",
+                        shell:
+                            "Shell",
 
-                        csharp: "C#",
-                        cs: "C#",
+                        java:
+                            "Java",
+
+                        cpp:
+                            "C++",
+
+                        c:
+                            "C",
+
+                        csharp:
+                            "C#",
+
+                        cs:
+                            "C#",
 
                         typescript:
                             "TypeScript",
@@ -3695,12 +4271,14 @@ function formatNovaResponse(text) {
 
                     };
 
+
                     const displayLanguage =
                         languageNames[
                             language.toLowerCase()
                         ] ||
                         language ||
                         "Code";
+
 
                     return `
 
@@ -3709,10 +4287,13 @@ function formatNovaResponse(text) {
                             <div class="nova-code-header">
 
                                 <span class="nova-code-language">
+
                                     <i class="fa-solid fa-code"></i>
+
                                     ${escapeHtmlWithoutNewLines(
                                         displayLanguage
                                     )}
+
                                 </span>
 
                                 <button
@@ -3720,8 +4301,11 @@ function formatNovaResponse(text) {
                                     class="nova-copy-code"
                                     title="نسخ الكود"
                                 >
+
                                     <i class="fa-regular fa-copy"></i>
+
                                     <span>نسخ</span>
+
                                 </button>
 
                             </div>
@@ -3736,9 +4320,6 @@ function formatNovaResponse(text) {
 
                 }
 
-                // ==============================
-                // النص العادي
-                // ==============================
 
                 return formatNormalText(
                     part
@@ -3759,16 +4340,18 @@ function formatNormalText(
     text
 ) {
 
-    if (
-        !text
-    ) {
+    if (!text) {
+
         return "";
+
     }
+
 
     let result =
         escapeHtmlWithoutNewLines(
             text
         );
+
 
     // Bold
     result =
@@ -3777,11 +4360,13 @@ function formatNormalText(
             "<strong>$1</strong>"
         );
 
+
     result =
         result.replace(
             /__(.+?)__/gs,
             "<strong>$1</strong>"
         );
+
 
     // Italic
     result =
@@ -3790,6 +4375,7 @@ function formatNormalText(
             "<em>$1</em>"
         );
 
+
     // Inline code
     result =
         result.replace(
@@ -3797,12 +4383,14 @@ function formatNormalText(
             '<code class="nova-inline-code">$1</code>'
         );
 
+
     // الأسطر الجديدة
     result =
         result.replace(
             /\n/g,
             "<br>"
         );
+
 
     return result;
 
@@ -3825,6 +4413,7 @@ function escapeCodeHtml(
         return "";
 
     }
+
 
     return String(code)
         .replace(
@@ -3868,6 +4457,7 @@ function escapeHtmlWithoutNewLines(
 
     }
 
+
     return String(text)
         .replace(
             /&/g,
@@ -3902,8 +4492,11 @@ function setupCodeCopyButtons(
 ) {
 
     if (!container) {
+
         return;
+
     }
+
 
     container
         .querySelectorAll(
@@ -3912,16 +4505,19 @@ function setupCodeCopyButtons(
         .forEach(
             button => {
 
-                // منع تكرار الحدث
                 if (
                     button.dataset.copyReady ===
                     "true"
                 ) {
+
                     return;
+
                 }
+
 
                 button.dataset.copyReady =
                     "true";
+
 
                 button.addEventListener(
                     "click",
@@ -3936,12 +4532,17 @@ function setupCodeCopyButtons(
                                     "code"
                                 );
 
+
                         if (!codeBlock) {
+
                             return;
+
                         }
+
 
                         const code =
                             codeBlock.textContent;
+
 
                         try {
 
@@ -3949,14 +4550,17 @@ function setupCodeCopyButtons(
                                 code
                             );
 
+
                             button.innerHTML = `
                                 <i class="fa-solid fa-check"></i>
                                 <span>تم النسخ</span>
                             `;
 
+
                             showToast(
                                 "تم نسخ الكود"
                             );
+
 
                             setTimeout(
                                 () => {
@@ -3970,12 +4574,14 @@ function setupCodeCopyButtons(
                                 1500
                             );
 
+
                         } catch (error) {
 
                             console.error(
                                 "Code Copy Error:",
                                 error
                             );
+
 
                             alert(
                                 "تعذر نسخ الكود."
@@ -3990,6 +4596,8 @@ function setupCodeCopyButtons(
         );
 
 }
+
+
 // ==========================================
 // NOVA AI - الاقتراحات الجاهزة
 // ==========================================
@@ -3997,46 +4605,85 @@ function setupCodeCopyButtons(
 function setupQuickPrompts() {
 
     const welcome =
-        document.getElementById("novaWelcome");
+        document.getElementById(
+            "novaWelcome"
+        );
+
 
     const input =
-        document.getElementById("chatInput");
+        document.getElementById(
+            "chatInput"
+        );
+
 
     const prompts =
-        document.querySelectorAll(".quick-prompt");
+        document.querySelectorAll(
+            ".quick-prompt"
+        );
 
-    if (!welcome || !input || !prompts.length) {
+
+    if (
+        !welcome ||
+        !input ||
+        !prompts.length
+    ) {
+
         return;
+
     }
 
-    prompts.forEach(button => {
 
-        button.addEventListener("click", () => {
+    prompts.forEach(
+        button => {
 
-            const prompt =
-                button.dataset.prompt || "";
+            button.addEventListener(
+                "click",
+                () => {
 
-            input.value = prompt;
+                    const prompt =
+                        button.dataset.prompt ||
+                        "";
 
-            input.dispatchEvent(
-                new Event("input", {
-                    bubbles: true
-                })
+
+                    input.value =
+                        prompt;
+
+
+                    input.dispatchEvent(
+                        new Event(
+                            "input",
+                            {
+                                bubbles:
+                                    true
+                            }
+                        )
+                    );
+
+
+                    welcome.classList.add(
+                        "hidden"
+                    );
+
+
+                    input.focus();
+
+                }
             );
 
-            welcome.classList.add("hidden");
-
-            input.focus();
-
-        });
-
-    });
+        }
+    );
 
 }
 
 
+// ==========================================
 // تشغيل الاقتراحات
-if (document.readyState === "loading") {
+// ==========================================
+
+if (
+    document.readyState ===
+    "loading"
+) {
 
     document.addEventListener(
         "DOMContentLoaded",
@@ -4048,55 +4695,42 @@ if (document.readyState === "loading") {
     setupQuickPrompts();
 
 }
+
+
 // ==========================================
 // تشغيل زر محادثة جديدة
 // ==========================================
 
-document.addEventListener("DOMContentLoaded", function () {
-    const newChatBtn = document.getElementById("newChatBtn");
+document.addEventListener(
+    "DOMContentLoaded",
+    function () {
 
-    if (newChatBtn) {
-        newChatBtn.addEventListener("click", function (event) {
-            event.preventDefault();
+        const newChatButton =
+            document.getElementById(
+                "newChatBtn"
+            );
 
-            // تفريغ منطقة المحادثة
-            const chatBox = document.getElementById("chatBox");
 
-            if (chatBox) {
-                chatBox.innerHTML = `
-                    <div class="nova-welcome" id="novaWelcome">
-                        <div class="nova-welcome-icon">
-                            <i class="fa-solid fa-sparkles"></i>
-                        </div>
+        if (newChatButton) {
 
-                        <h1>
-                            أهلاً بيك في <span>Nova AI</span> 👋
-                        </h1>
+            newChatButton.addEventListener(
+                "click",
+                function (event) {
 
-                        <p>
-                            مساعدك الذكي للبرمجة، الكتابة، التعلم والإبداع.
-                            <br>
-                            ابدأ محادثتك واكتشف إمكانيات Nova.
-                        </p>
-                    </div>
-                `;
-            }
+                    event.preventDefault();
 
-            // تفريغ حقل الكتابة
-            const chatInput = document.getElementById("chatInput");
+                    startNewChat();
 
-            if (chatInput) {
-                chatInput.value = "";
-                chatInput.focus();
-            }
+                }
+            );
 
-            // إنشاء محادثة جديدة إذا كانت الدالة موجودة
-            if (typeof startNewChat === "function") {
-                startNewChat();
-            }
-        });
+        }
+
     }
-});
+);
+
+
 // ==========================================
 // نهاية Nova AI
 // ==========================================
+
