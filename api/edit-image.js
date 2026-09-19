@@ -1,9 +1,10 @@
 // ==========================================
-// NOVA AI - GEMINI IMAGE EDIT API
+// NOVA AI - HUGGING FACE IMAGE EDIT API
 // api/edit-image.js
 // ==========================================
 
 export default async function handler(req, res) {
+    // السماح بـ POST فقط
     if (req.method !== "POST") {
         return res.status(405).json({
             success: false,
@@ -14,12 +15,20 @@ export default async function handler(req, res) {
     try {
         const { prompt, image } = req.body || {};
 
-        if (!prompt || typeof prompt !== "string") {
+        // ==========================================
+        // 1. التحقق من الـ Prompt
+        // ==========================================
+
+        if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
             return res.status(400).json({
                 success: false,
                 error: "وصف التعديل فارغ"
             });
         }
+
+        // ==========================================
+        // 2. التحقق من الصورة
+        // ==========================================
 
         if (!image || typeof image !== "string") {
             return res.status(400).json({
@@ -28,134 +37,204 @@ export default async function handler(req, res) {
             });
         }
 
-        const apiKey =
-            process.env.GEMINI_API_KEY ||
-            process.env.GOOGLE_API_KEY ||
-            process.env.GOOGLE_GEMINI_API_KEY;
+        // ==========================================
+        // 3. قراءة Hugging Face Token
+        // ==========================================
 
-        if (!apiKey) {
+        const hfToken = process.env.HF_TOKEN;
+
+        if (!hfToken) {
             return res.status(500).json({
                 success: false,
-                error: "مفتاح Gemini غير موجود في Vercel"
+                error: "HF_TOKEN غير موجود في Vercel"
             });
         }
 
+        // ==========================================
+        // 4. استخراج نوع الصورة و Base64
+        // ==========================================
+
         const imageMatch = image.match(
-            /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/
+            /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/s
         );
 
         if (!imageMatch) {
             return res.status(400).json({
                 success: false,
-                error: "صيغة الصورة غير صحيحة"
+                error: "صيغة الصورة غير صحيحة. يجب إرسال Data URL للصورة."
             });
         }
 
         const mimeType = imageMatch[1];
         const base64Image = imageMatch[2];
 
-        const geminiPrompt = `
-Edit the attached image according to this request:
+        // ==========================================
+        // 5. تحويل Base64 إلى Buffer
+        // ==========================================
 
+        const imageBuffer = Buffer.from(base64Image, "base64");
+
+        // ==========================================
+        // 6. Prompt الخاص بـ Nova AI
+        // ==========================================
+
+        const finalPrompt = `
+Edit the provided image according to the user's request.
+
+User request:
 ${prompt.trim()}
 
-Preserve the person's identity, facial features,
-skin tone, hairstyle, and overall appearance.
-Change only what the user requested.
-Make the result realistic and high quality.
-Return the edited image.
-        `.trim();
+Important instructions:
+- Preserve the person's identity and facial features.
+- Preserve the person's general appearance unless the user explicitly asks for a change.
+- Change only what the user requested.
+- Keep the image realistic and natural.
+- Maintain realistic lighting, proportions, anatomy, and details.
+- Do not unnecessarily change the background or other parts of the image.
+`.trim();
 
-        const model = "gemini-3.1-flash-image";
+        // ==========================================
+        // 7. Hugging Face Inference API
+        // ==========================================
+
+        const model = "Qwen/Qwen-Image-Edit";
+
+        /*
+         * Hugging Face Inference Providers
+         *
+         * نستخدم الـ API الحالي الخاص بـ
+         * Image-to-Image.
+         *
+         * provider=auto يسمح لـ Hugging Face
+         * باختيار Provider متاح للموديل.
+         */
 
         const response = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+            `https://router.huggingface.co/hf-inference/models/${model}`,
             {
                 method: "POST",
+
                 headers: {
+                    "Authorization": `Bearer ${hfToken}`,
                     "Content-Type": "application/json",
-                    "x-goog-api-key": apiKey
+                    "Accept": "image/*"
                 },
+
                 body: JSON.stringify({
-                    contents: [
-                        {
-                            parts: [
-                                {
-                                    text: geminiPrompt
-                                },
-                                {
-                                    inline_data: {
-                                        mime_type: mimeType,
-                                        data: base64Image
-                                    }
-                                }
-                            ]
-                        }
-                    ],
-                    generationConfig: {
-                        responseModalities: ["TEXT", "IMAGE"]
+                    inputs: base64Image,
+
+                    parameters: {
+                        prompt: finalPrompt
                     }
                 })
             }
         );
 
-        const rawText = await response.text();
+        // ==========================================
+        // 8. قراءة الاستجابة
+        // ==========================================
 
-        let data;
+        const contentType =
+            response.headers.get("content-type") || "";
 
-        try {
-            data = JSON.parse(rawText);
-        } catch {
-            data = {
-                raw: rawText
-            };
-        }
-
-        console.log("GEMINI STATUS:", response.status);
-        console.log("GEMINI RESPONSE:", JSON.stringify(data));
-
-        if (!response.ok) {
-            return res.status(200).json({
-                success: false,
-                error: "حدث خطأ من Gemini",
-                status: response.status,
-                details: data
-            });
-        }
-
-        const parts =
-            data?.candidates?.[0]?.content?.parts || [];
-
-        const imagePart = parts.find(
-            part =>
-                part?.inlineData?.data ||
-                part?.inline_data?.data
+        console.log(
+            "HUGGING FACE STATUS:",
+            response.status
         );
 
-        const imageData =
-            imagePart?.inlineData ||
-            imagePart?.inline_data;
+        console.log(
+            "HUGGING FACE CONTENT TYPE:",
+            contentType
+        );
 
-        if (!imageData?.data) {
+        // ==========================================
+        // 9. لو فيه خطأ
+        // ==========================================
+
+        if (!response.ok) {
+            let errorDetails = "";
+
+            try {
+                if (contentType.includes("application/json")) {
+                    const errorJson = await response.json();
+
+                    errorDetails =
+                        errorJson?.error ||
+                        errorJson?.message ||
+                        JSON.stringify(errorJson);
+                } else {
+                    errorDetails = await response.text();
+                }
+            } catch {
+                errorDetails = "تعذر قراءة تفاصيل الخطأ";
+            }
+
+            console.error(
+                "HUGGING FACE ERROR:",
+                errorDetails
+            );
+
             return res.status(200).json({
                 success: false,
-                error: "Gemini لم يرجع صورة معدلة",
-                details: data
+                error: "حدث خطأ من Hugging Face",
+                status: response.status,
+                details: errorDetails
             });
         }
 
-        const resultMimeType =
-            imageData.mimeType ||
-            imageData.mime_type ||
-            "image/jpeg";
+        // ==========================================
+        // 10. التأكد أن الناتج صورة
+        // ==========================================
+
+        if (!contentType.startsWith("image/")) {
+            let unexpectedResponse = "";
+
+            try {
+                unexpectedResponse = await response.text();
+            } catch {
+                unexpectedResponse = "استجابة غير متوقعة";
+            }
+
+            console.error(
+                "UNEXPECTED HF RESPONSE:",
+                unexpectedResponse
+            );
+
+            return res.status(200).json({
+                success: false,
+                error: "Hugging Face لم يرجع صورة",
+                details: unexpectedResponse
+            });
+        }
+
+        // ==========================================
+        // 11. تحويل الصورة الناتجة إلى Base64
+        // ==========================================
+
+        const resultBuffer =
+            Buffer.from(await response.arrayBuffer());
+
+        const resultBase64 =
+            resultBuffer.toString("base64");
+
+        // ==========================================
+        // 12. إرسال الصورة إلى Nova AI
+        // ==========================================
 
         return res.status(200).json({
             success: true,
-            image: `data:${resultMimeType};base64,${imageData.data}`
+            image: `data:${contentType};base64,${resultBase64}`
         });
 
     } catch (error) {
-        console.error("GEMINI EDIT ERROR:", error);
+        // ==========================================
+        // ERROR
+        // ==========================================
+
+        console.error(
+            "NOVA AI IMAGE EDIT ERROR:",
+            error
+        );
 
         return res.status(500).json({
             success: false,
