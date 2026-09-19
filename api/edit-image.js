@@ -23,95 +23,124 @@ export default async function handler(req, res) {
             });
         }
 
-        const apiKey = process.env.FAL_KEY;
+        const apiKey =
+            process.env.GEMINI_API_KEY ||
+            process.env.GOOGLE_API_KEY;
 
         if (!apiKey) {
             return res.status(500).json({
                 success: false,
-                error: "FAL_KEY غير موجود في Vercel"
+                error: "مفتاح Gemini غير موجود في Vercel"
             });
         }
 
-        console.log("========== NOVA EDIT IMAGE ==========");
-        console.log("Prompt:", prompt);
-        console.log("Image length:", image.length);
-        console.log("Image prefix:", image.substring(0, 40));
+        const match = image.match(
+            /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/
+        );
+
+        if (!match) {
+            return res.status(400).json({
+                success: false,
+                error: "صيغة الصورة غير صحيحة"
+            });
+        }
+
+        const mimeType = match[1];
+        const base64Image = match[2];
+
+        const geminiPrompt = `
+Edit the provided image according to this request:
+
+${prompt}
+
+Preserve the person's identity, facial features,
+skin tone, hairstyle, and overall appearance as much
+as possible. Change only what the user requested.
+Make the result realistic and high quality.
+Return the edited image.
+        `.trim();
 
         const response = await fetch(
-            "https://fal.run/fal-ai/flux/dev/image-to-image",
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent",
             {
                 method: "POST",
 
                 headers: {
-                    "Authorization": `Key ${apiKey}`,
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": apiKey
                 },
 
                 body: JSON.stringify({
-                    image_url: image,
-                    prompt: prompt.trim(),
-                    strength: 0.8,
-                    num_inference_steps: 40,
-                    guidance_scale: 3.5,
-                    num_images: 1,
-                    enable_safety_checker: true,
-                    output_format: "jpeg"
+                    contents: [
+                        {
+                            parts: [
+                                {
+                                    text: geminiPrompt
+                                },
+                                {
+                                    inline_data: {
+                                        mime_type: mimeType,
+                                        data: base64Image
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    generationConfig: {
+                        responseModalities: ["TEXT", "IMAGE"]
+                    }
                 })
             }
         );
 
-        const responseText =
-            await response.text();
-
-        console.log(
-            "FAL STATUS:",
-            response.status
-        );
-
-        console.log(
-            "FAL RESPONSE:",
-            responseText
-        );
+        const rawText = await response.text();
 
         let data;
 
         try {
-            data = JSON.parse(responseText);
+            data = JSON.parse(rawText);
         } catch {
             data = {
-                raw_response: responseText
+                raw: rawText
             };
         }
 
         if (!response.ok) {
-            return res.status(200).json({
+            console.error("Gemini Error:", data);
+
+            return res.status(response.status).json({
                 success: false,
-                error: "fal.ai رفض الطلب",
-
-                status: response.status,
-
-                statusText:
-                    response.statusText,
-
-                details: data,
-
-                raw:
-                    responseText
-            });
-        }
-
-        const generatedImage =
-            data?.images?.[0]?.url;
-
-        if (!generatedImage) {
-            return res.status(200).json({
-                success: false,
-                error:
-                    "fal.ai لم يرجع رابط الصورة",
-
+                error: "حدث خطأ من Gemini",
                 details: data
             });
         }
+
+        const parts =
+            data?.candidates?.[0]?.content?.parts || [];
+
+        const imagePart = parts.find(
+            part => part?.inlineData || part?.inline_data
+        );
+
+        const imageData =
+            imagePart?.inlineData ||
+            imagePart?.inline_data;
+
+        if (!imageData?.data) {
+            return res.status(500).json({
+                success: false,
+                error: "Gemini لم يرجع صورة",
+                details: data
+            });
+        }
+
+        const outputMimeType =
+            imageData.mimeType ||
+            imageData.mime_type ||
+            "image/png";
+
+        const generatedImage =
+            `data:${outputMimeType};base64,${imageData.data}`;
 
         return res.status(200).json({
             success: true,
@@ -119,20 +148,12 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-
-        console.error(
-            "NOVA EDIT IMAGE ERROR:",
-            error
-        );
+        console.error("Gemini Edit Image Error:", error);
 
         return res.status(500).json({
             success: false,
-            error:
-                "حدث خطأ داخل Nova AI",
-
-            details:
-                error?.message ||
-                String(error)
+            error: "حدث خطأ أثناء تعديل الصورة",
+            details: error.message
         });
     }
 }
