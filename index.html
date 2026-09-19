@@ -53,10 +53,68 @@
                 </div>
                 
                 <div class="chat-box" id="chatBox">
-                    <div class="message bot-message">
-                        أهلاً بك! أنا Nova، مساعدك الذكي. كيف يمكنني مساعدتك اليوم؟
-                    </div>
-                </div>
+
+    <!-- شاشة الترحيب -->
+    <div class="nova-welcome" id="novaWelcome">
+
+        <div class="nova-welcome-icon">
+            <i class="fa-solid fa-sparkles"></i>
+        </div>
+
+        <h1>
+            أهلاً بيك في <span>Nova AI</span> 👋
+        </h1>
+
+        <p>
+            مساعدك الذكي للبرمجة، الكتابة، التعلم والإبداع.
+            <br>
+            ابدأ محادثتك واكتشف إمكانيات Nova.
+        </p>
+
+        <!-- اقتراحات جاهزة -->
+        <div class="quick-prompts">
+
+            <button
+                type="button"
+                class="quick-prompt"
+                data-prompt="اكتب لي فكرة مشروع ويب مبتكر باستخدام HTML وCSS وJavaScript"
+            >
+                <i class="fa-solid fa-code"></i>
+                <span>اقترح لي مشروع برمجي</span>
+            </button>
+
+            <button
+                type="button"
+                class="quick-prompt"
+                data-prompt="اشرح لي الذكاء الاصطناعي بطريقة سهلة وبسيطة"
+            >
+                <i class="fa-solid fa-brain"></i>
+                <span>اشرح لي الذكاء الاصطناعي</span>
+            </button>
+
+            <button
+                type="button"
+                class="quick-prompt"
+                data-prompt="ساعدني في كتابة خطة لتعلم البرمجة من البداية"
+            >
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span>ساعدني أتعلم البرمجة</span>
+            </button>
+
+            <button
+                type="button"
+                class="quick-prompt"
+                data-prompt="اكتب لي قصة قصيرة وممتعة"
+            >
+                <i class="fa-solid fa-book-open"></i>
+                <span>اكتب لي قصة قصيرة</span>
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 
                 <!-- منطقة الكتابة والأزرار -->
                 <div class="input-area">
