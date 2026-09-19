@@ -9,14 +9,14 @@ export default async function handler(req, res) {
     try {
         const { prompt, image } = req.body || {};
 
-        if (!prompt) {
+        if (!prompt || typeof prompt !== "string") {
             return res.status(400).json({
                 success: false,
                 error: "وصف التعديل فارغ"
             });
         }
 
-        if (!image) {
+        if (!image || typeof image !== "string") {
             return res.status(400).json({
                 success: false,
                 error: "لم يتم إرسال الصورة"
@@ -32,13 +32,12 @@ export default async function handler(req, res) {
             });
         }
 
-        console.log("IMAGE TYPE:", typeof image);
-        console.log(
-            "IMAGE LENGTH:",
-            image.length
-        );
+        console.log("========== NOVA EDIT IMAGE ==========");
+        console.log("Prompt:", prompt);
+        console.log("Image length:", image.length);
+        console.log("Image prefix:", image.substring(0, 40));
 
-        const falResponse = await fetch(
+        const response = await fetch(
             "https://fal.run/fal-ai/flux/dev/image-to-image",
             {
                 method: "POST",
@@ -51,60 +50,53 @@ export default async function handler(req, res) {
                 body: JSON.stringify({
                     image_url: image,
                     prompt: prompt.trim(),
-
-                    strength: 0.75,
-
+                    strength: 0.8,
                     num_inference_steps: 40,
-
                     guidance_scale: 3.5,
-
                     num_images: 1,
-
                     enable_safety_checker: true,
-
                     output_format: "jpeg"
                 })
             }
         );
 
-        const rawText =
-            await falResponse.text();
+        const responseText =
+            await response.text();
 
         console.log(
             "FAL STATUS:",
-            falResponse.status
+            response.status
         );
 
         console.log(
-            "FAL RAW RESPONSE:",
-            rawText
+            "FAL RESPONSE:",
+            responseText
         );
 
         let data;
 
         try {
-            data = JSON.parse(rawText);
+            data = JSON.parse(responseText);
         } catch {
             data = {
-                raw: rawText
+                raw_response: responseText
             };
         }
 
-        if (!falResponse.ok) {
-            return res.status(500).json({
+        if (!response.ok) {
+            return res.status(200).json({
                 success: false,
+                error: "fal.ai رفض الطلب",
 
-                error:
-                    "fal.ai رفض الطلب",
+                status: response.status,
 
-                fal_status:
-                    falResponse.status,
+                statusText:
+                    response.statusText,
 
-                fal_status_text:
-                    falResponse.statusText,
+                details: data,
 
-                details:
-                    data
+                raw:
+                    responseText
             });
         }
 
@@ -112,14 +104,12 @@ export default async function handler(req, res) {
             data?.images?.[0]?.url;
 
         if (!generatedImage) {
-            return res.status(500).json({
+            return res.status(200).json({
                 success: false,
-
                 error:
-                    "fal.ai استجاب ولكن لم يرجع صورة",
+                    "fal.ai لم يرجع رابط الصورة",
 
-                details:
-                    data
+                details: data
             });
         }
 
@@ -131,15 +121,14 @@ export default async function handler(req, res) {
     } catch (error) {
 
         console.error(
-            "EDIT IMAGE ERROR:",
+            "NOVA EDIT IMAGE ERROR:",
             error
         );
 
         return res.status(500).json({
             success: false,
-
             error:
-                "حدث خطأ داخل API",
+                "حدث خطأ داخل Nova AI",
 
             details:
                 error?.message ||
