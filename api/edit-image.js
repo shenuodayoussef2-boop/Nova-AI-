@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     try {
         const { prompt, image } = req.body || {};
 
-        if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
+        if (!prompt || typeof prompt !== "string") {
             return res.status(400).json({
                 success: false,
                 error: "وصف التعديل فارغ"
@@ -30,7 +30,8 @@ export default async function handler(req, res) {
 
         const apiKey =
             process.env.GEMINI_API_KEY ||
-            process.env.GOOGLE_API_KEY;
+            process.env.GOOGLE_API_KEY ||
+            process.env.GOOGLE_GEMINI_API_KEY;
 
         if (!apiKey) {
             return res.status(500).json({
@@ -39,7 +40,6 @@ export default async function handler(req, res) {
             });
         }
 
-        // استخراج بيانات الصورة من Data URI
         const imageMatch = image.match(
             /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/
         );
@@ -54,48 +54,46 @@ export default async function handler(req, res) {
         const mimeType = imageMatch[1];
         const base64Image = imageMatch[2];
 
-        const editPrompt = `
-Edit the provided image according to the following request:
+        const geminiPrompt = `
+Edit the attached image according to this request:
 
 ${prompt.trim()}
 
 Preserve the person's identity, facial features,
-skin tone, hairstyle, and general appearance as much
-as possible.
-
+skin tone, hairstyle, and overall appearance.
 Change only what the user requested.
-Make the result realistic, natural, and high quality.
+Make the result realistic and high quality.
 Return the edited image.
         `.trim();
 
+        const model = "gemini-3.1-flash-image";
+
         const response = await fetch(
-            "https://generativelanguage.googleapis.com/v1beta/interactions",
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
             {
                 method: "POST",
-
                 headers: {
                     "Content-Type": "application/json",
                     "x-goog-api-key": apiKey
                 },
-
                 body: JSON.stringify({
-                    model: "gemini-3.1-flash-image",
-
-                    input: [
+                    contents: [
                         {
-                            type: "text",
-                            text: editPrompt
-                        },
-                        {
-                            type: "image",
-                            mime_type: mimeType,
-                            data: base64Image
+                            parts: [
+                                {
+                                    text: geminiPrompt
+                                },
+                                {
+                                    inline_data: {
+                                        mime_type: mimeType,
+                                        data: base64Image
+                                    }
+                                }
+                            ]
                         }
                     ],
-
-                    response_format: {
-                        type: "image",
-                        mime_type: "image/png"
+                    generationConfig: {
+                        responseModalities: ["TEXT", "IMAGE"]
                     }
                 })
             }
@@ -114,14 +112,10 @@ Return the edited image.
         }
 
         console.log("GEMINI STATUS:", response.status);
+        console.log("GEMINI RESPONSE:", JSON.stringify(data));
 
         if (!response.ok) {
-            console.error(
-                "GEMINI API ERROR:",
-                JSON.stringify(data)
-            );
-
-            return res.status(response.status).json({
+            return res.status(200).json({
                 success: false,
                 error: "حدث خطأ من Gemini",
                 status: response.status,
@@ -129,49 +123,43 @@ Return the edited image.
             });
         }
 
-        // البحث عن الصورة الناتجة
-        const outputImage =
-            data?.output?.find(
-                item => item?.type === "image"
-            );
+        const parts =
+            data?.candidates?.[0]?.content?.parts || [];
 
-        const imageBase64 =
-            outputImage?.data ||
-            data?.output_image?.data ||
-            null;
+        const imagePart = parts.find(
+            part =>
+                part?.inlineData?.data ||
+                part?.inline_data?.data
+        );
 
-        const resultMimeType =
-            outputImage?.mime_type ||
-            data?.output_image?.mime_type ||
-            "image/png";
+        const imageData =
+            imagePart?.inlineData ||
+            imagePart?.inline_data;
 
-        if (!imageBase64) {
-            console.error(
-                "Gemini did not return an image:",
-                JSON.stringify(data)
-            );
-
-            return res.status(500).json({
+        if (!imageData?.data) {
+            return res.status(200).json({
                 success: false,
                 error: "Gemini لم يرجع صورة معدلة",
                 details: data
             });
         }
 
+        const resultMimeType =
+            imageData.mimeType ||
+            imageData.mime_type ||
+            "image/png";
+
         return res.status(200).json({
             success: true,
-            image: `data:${resultMimeType};base64,${imageBase64}`
+            image: `data:${resultMimeType};base64,${imageData.data}`
         });
 
     } catch (error) {
-        console.error(
-            "NOVA GEMINI EDIT ERROR:",
-            error
-        );
+        console.error("GEMINI EDIT ERROR:", error);
 
         return res.status(500).json({
             success: false,
-            error: "حدث خطأ أثناء تعديل الصورة",
+            error: "حدث خطأ داخل Nova AI",
             details: error?.message || String(error)
         });
     }
