@@ -59,30 +59,80 @@ window.addEventListener("DOMContentLoaded", () => {
 // محادثة جديدة
 // ==========================================
 
-if (newChatBtn) {
-
-    newChatBtn.addEventListener(
-        "click",
-        startNewChat
-    );
-
-}
-
-
 function startNewChat() {
 
-    currentChatId =
-        Date.now().toString();
+    currentChatId = Date.now().toString();
 
     if (chatBox) {
 
         chatBox.innerHTML = `
-            <div class="message bot-message nova-message">
-                <div class="nova-message-content">
-                    أهلاً بك! أنا Nova، مساعدك الذكي من تطوير البشمهندس يوسف شنودة. كيف يمكنني مساعدتك اليوم؟
+
+            <!-- شاشة الترحيب -->
+            <div class="nova-welcome" id="novaWelcome">
+
+                <div class="nova-welcome-icon">
+                    <i class="fa-solid fa-sparkles"></i>
                 </div>
+
+                <h1>
+                    أهلاً بيك في <span>Nova AI</span> 👋
+                </h1>
+
+                <p>
+                    مساعدك الذكي للبرمجة، الكتابة، التعلم والإبداع.
+                    <br>
+                    ابدأ محادثتك واكتشف إمكانيات Nova.
+                </p>
+
+                <!-- الاقتراحات الجاهزة -->
+                <div class="quick-prompts">
+
+                    <button
+                        type="button"
+                        class="quick-prompt"
+                        data-prompt="اكتب لي فكرة مشروع ويب مبتكر باستخدام HTML وCSS وJavaScript"
+                    >
+                        <i class="fa-solid fa-code"></i>
+                        <span>اقترح لي مشروع برمجي</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="quick-prompt"
+                        data-prompt="اشرح لي الذكاء الاصطناعي بطريقة سهلة وبسيطة"
+                    >
+                        <i class="fa-solid fa-brain"></i>
+                        <span>اشرح لي الذكاء الاصطناعي</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="quick-prompt"
+                        data-prompt="ساعدني في كتابة خطة لتعلم البرمجة من البداية"
+                    >
+                        <i class="fa-solid fa-graduation-cap"></i>
+                        <span>ساعدني أتعلم البرمجة</span>
+                    </button>
+
+                    <button
+                        type="button"
+                        class="quick-prompt"
+                        data-prompt="اكتب لي قصة قصيرة وممتعة"
+                    >
+                        <i class="fa-solid fa-book-open"></i>
+                        <span>اكتب لي قصة قصيرة</span>
+                    </button>
+
+                </div>
+
             </div>
+
         `;
+
+        // تشغيل أزرار الاقتراحات بعد إنشاء العناصر
+        if (typeof setupQuickPrompts === "function") {
+            setupQuickPrompts();
+        }
 
     }
 
@@ -90,8 +140,7 @@ function startNewChat() {
 
         chatInput.value = "";
 
-        chatInput.style.height =
-            "auto";
+        chatInput.style.height = "auto";
 
     }
 
@@ -100,8 +149,6 @@ function startNewChat() {
     closeAllMenus();
 
 }
-
-
 // ==========================================
 // حفظ المحادثة
 // ==========================================
