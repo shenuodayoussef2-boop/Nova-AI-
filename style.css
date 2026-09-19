@@ -1543,3 +1543,168 @@ body.light-theme .image-loading-subtitle {
 body.light-theme .image-progress {
     background: #e2e8f0;
 }
+/* ==========================================
+   NOVA AI - شاشة الترحيب والاقتراحات
+========================================== */
+
+.nova-welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 100%;
+    padding: 35px 20px;
+    text-align: center;
+    animation: novaWelcomeFade 0.6s ease;
+}
+
+.nova-welcome-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 82px;
+    height: 82px;
+    margin-bottom: 20px;
+    color: #fff;
+    background: linear-gradient(135deg, #6366f1, #a855f7);
+    border-radius: 25px;
+    box-shadow: 0 0 35px rgba(99, 102, 241, 0.35);
+    font-size: 36px;
+}
+
+.nova-welcome h1 {
+    margin-bottom: 12px;
+    color: #f8fafc;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+.nova-welcome h1 span {
+    color: #818cf8;
+}
+
+.nova-welcome p {
+    max-width: 520px;
+    color: #94a3b8;
+    font-size: 14px;
+    line-height: 2;
+}
+
+.quick-prompts {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    width: min(100%, 620px);
+    margin-top: 28px;
+}
+
+.quick-prompt {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 70px;
+    padding: 14px;
+    color: #cbd5e1;
+    background: #263449;
+    border: 1px solid #334155;
+    border-radius: 14px;
+    text-align: right;
+    transition: 0.25s ease;
+}
+
+.quick-prompt i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    color: #a5b4fc;
+    background: rgba(99, 102, 241, 0.15);
+    border-radius: 10px;
+    font-size: 17px;
+}
+
+.quick-prompt span {
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.quick-prompt:hover {
+    color: #fff;
+    background: #334155;
+    border-color: #6366f1;
+    transform: translateY(-3px);
+}
+
+/* إخفاء شاشة الترحيب */
+.nova-welcome.hidden {
+    display: none;
+}
+
+@keyframes novaWelcomeFade {
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* الوضع الفاتح */
+body.light-theme .nova-welcome h1 {
+    color: #1e293b;
+}
+
+body.light-theme .nova-welcome p {
+    color: #64748b;
+}
+
+body.light-theme .quick-prompt {
+    color: #334155;
+    background: #fff;
+    border-color: #e2e8f0;
+}
+
+body.light-theme .quick-prompt:hover {
+    background: #f1f5f9;
+}
+
+/* الموبايل */
+@media (max-width: 600px) {
+
+    .nova-welcome {
+        padding: 25px 8px;
+    }
+
+    .nova-welcome-icon {
+        width: 68px;
+        height: 68px;
+        font-size: 28px;
+        border-radius: 20px;
+    }
+
+    .nova-welcome h1 {
+        font-size: 21px;
+    }
+
+    .nova-welcome p {
+        font-size: 12px;
+    }
+
+    .quick-prompts {
+        grid-template-columns: 1fr;
+        gap: 9px;
+        margin-top: 20px;
+    }
+
+    .quick-prompt {
+        min-height: 58px;
+        padding: 10px 12px;
+    }
+
+}
