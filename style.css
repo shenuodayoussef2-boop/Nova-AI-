@@ -1019,28 +1019,77 @@ body.light-theme .settings-header {
     .section-header p {
         font-size: 12px;
     }
+/* ==========================================
+   MOBILE SIDEBAR DRAWER - NOVA AI
+========================================== */
 
-    /* Mobile sidebar drawer */
-    .sidebar {
-        position: fixed;
-        top: 0;
-        right: -100%;
-        z-index: 2000;
-        width: min(285px, 82vw) !important;
-        height: 100dvh !important;
-        border-left: 1px solid #334155;
-        box-shadow: -12px 0 35px rgba(0, 0, 0, 0.35);
-        transition: right 0.28s ease;
-    }
+.sidebar {
+    position: fixed !important;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 3000;
+    width: min(285px, 82vw) !important;
+    height: 100dvh !important;
+    transform: translateX(110%);
+    visibility: hidden;
+    opacity: 0;
+    border-left: 1px solid #334155;
+    box-shadow: -12px 0 35px rgba(0, 0, 0, 0.4);
+    transition:
+        transform 0.3s ease,
+        opacity 0.3s ease,
+        visibility 0.3s ease;
+}
 
-    .sidebar.mobile-open {
-        right: 0;
-    }
+/* فتح القائمة */
+.sidebar.mobile-open {
+    right: 0;
+    transform: translateX(0);
+    visibility: visible;
+    opacity: 1;
+}
 
-    .sidebar-header {
-        padding: 14px;
-    }
+/* منع تأثير collapsed على الموبايل */
+.sidebar.collapsed,
+.sidebar.collapsed.mobile-open {
+    width: min(285px, 82vw) !important;
+}
 
+/* إظهار النصوص داخل القائمة على الموبايل */
+.sidebar.mobile-open .logo-text,
+.sidebar.mobile-open .btn-text,
+.sidebar.mobile-open .history-title,
+.sidebar.mobile-open .history-title-text {
+    display: initial;
+}
+
+/* خلفية الشاشة عند فتح القائمة */
+.mobile-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2999;
+    display: none;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(2px);
+}
+
+.mobile-sidebar-overlay.active {
+    display: block;
+}
+
+/* المحتوى الرئيسي */
+.main-content {
+    width: 100% !important;
+    min-width: 0;
+}
+
+/* زر فتح القائمة */
+#sidebarToggleBtn {
+    position: relative;
+    z-index: 3100;
+    touch-action: manipulation;
+}
     .new-chat-btn {
         min-height: 44px;
         margin: 8px 12px;
@@ -1054,18 +1103,6 @@ body.light-theme .settings-header {
     .history-item {
         min-height: 42px;
         padding: 9px 10px;
-    }
-
-    /* Sidebar background overlay */
-    .sidebar.mobile-open::after {
-        content: "";
-        position: fixed;
-        inset: 0;
-        z-index: -1;
-        width: 100vw;
-        height: 100dvh;
-        background: rgba(0, 0, 0, 0.45);
-        pointer-events: none;
     }
 
     .chat-box {
