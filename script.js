@@ -3944,5 +3944,63 @@ function setupCodeCopyButtons(
 
 }
 // ==========================================
+// NOVA AI - الاقتراحات الجاهزة
+// ==========================================
+
+function setupQuickPrompts() {
+
+    const welcome =
+        document.getElementById("novaWelcome");
+
+    const input =
+        document.getElementById("chatInput");
+
+    const prompts =
+        document.querySelectorAll(".quick-prompt");
+
+    if (!welcome || !input || !prompts.length) {
+        return;
+    }
+
+    prompts.forEach(button => {
+
+        button.addEventListener("click", () => {
+
+            const prompt =
+                button.dataset.prompt || "";
+
+            input.value = prompt;
+
+            input.dispatchEvent(
+                new Event("input", {
+                    bubbles: true
+                })
+            );
+
+            welcome.classList.add("hidden");
+
+            input.focus();
+
+        });
+
+    });
+
+}
+
+
+// تشغيل الاقتراحات
+if (document.readyState === "loading") {
+
+    document.addEventListener(
+        "DOMContentLoaded",
+        setupQuickPrompts
+    );
+
+} else {
+
+    setupQuickPrompts();
+
+}
+// ==========================================
 // نهاية Nova AI
 // ==========================================
