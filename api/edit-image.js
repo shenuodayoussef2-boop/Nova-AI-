@@ -9,14 +9,14 @@ export default async function handler(req, res) {
     try {
         const { prompt, image } = req.body || {};
 
-        if (!prompt || typeof prompt !== "string") {
+        if (!prompt) {
             return res.status(400).json({
                 success: false,
                 error: "وصف التعديل فارغ"
             });
         }
 
-        if (!image || typeof image !== "string") {
+        if (!image) {
             return res.status(400).json({
                 success: false,
                 error: "لم يتم إرسال الصورة"
@@ -28,22 +28,15 @@ export default async function handler(req, res) {
         if (!apiKey) {
             return res.status(500).json({
                 success: false,
-                error: "FAL_KEY غير موجود في إعدادات Vercel"
+                error: "FAL_KEY غير موجود في Vercel"
             });
         }
 
-        /*
-         * fal.ai يدعم Data URI / Base64
-         * مثل:
-         * data:image/jpeg;base64,...
-         */
-
-        if (!image.startsWith("data:image/")) {
-            return res.status(400).json({
-                success: false,
-                error: "صيغة الصورة غير صحيحة. يجب أن تكون Data URI"
-            });
-        }
+        console.log("IMAGE TYPE:", typeof image);
+        console.log(
+            "IMAGE LENGTH:",
+            image.length
+        );
 
         const falResponse = await fetch(
             "https://fal.run/fal-ai/flux/dev/image-to-image",
@@ -57,10 +50,9 @@ export default async function handler(req, res) {
 
                 body: JSON.stringify({
                     image_url: image,
-
                     prompt: prompt.trim(),
 
-                    strength: 0.85,
+                    strength: 0.75,
 
                     num_inference_steps: 40,
 
@@ -75,7 +67,8 @@ export default async function handler(req, res) {
             }
         );
 
-        const data = await falResponse.json();
+        const rawText =
+            await falResponse.text();
 
         console.log(
             "FAL STATUS:",
@@ -83,33 +76,56 @@ export default async function handler(req, res) {
         );
 
         console.log(
-            "FAL RESPONSE:",
-            JSON.stringify(data)
+            "FAL RAW RESPONSE:",
+            rawText
         );
 
+        let data;
+
+        try {
+            data = JSON.parse(rawText);
+        } catch {
+            data = {
+                raw: rawText
+            };
+        }
+
         if (!falResponse.ok) {
-            return res.status(falResponse.status).json({
+            return res.status(500).json({
                 success: false,
-                error: "حدث خطأ من fal.ai",
-                fal_status: falResponse.status,
-                details: data
+
+                error:
+                    "fal.ai رفض الطلب",
+
+                fal_status:
+                    falResponse.status,
+
+                fal_status_text:
+                    falResponse.statusText,
+
+                details:
+                    data
             });
         }
 
-        const imageUrl =
-            data?.images?.[0]?.url || null;
+        const generatedImage =
+            data?.images?.[0]?.url;
 
-        if (!imageUrl) {
+        if (!generatedImage) {
             return res.status(500).json({
                 success: false,
-                error: "fal.ai لم يرجع رابط الصورة",
-                details: data
+
+                error:
+                    "fal.ai استجاب ولكن لم يرجع صورة",
+
+                details:
+                    data
             });
         }
 
         return res.status(200).json({
             success: true,
-            image: imageUrl
+            image: generatedImage
         });
 
     } catch (error) {
@@ -121,8 +137,13 @@ export default async function handler(req, res) {
 
         return res.status(500).json({
             success: false,
-            error: "حدث خطأ أثناء تعديل الصورة",
-            details: error?.message || String(error)
+
+            error:
+                "حدث خطأ داخل API",
+
+            details:
+                error?.message ||
+                String(error)
         });
     }
 }
