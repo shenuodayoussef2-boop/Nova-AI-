@@ -147,7 +147,7 @@ Return the edited image.
         const resultMimeType =
             imageData.mimeType ||
             imageData.mime_type ||
-            "image/png";
+            "image/jpeg";
 
         return res.status(200).json({
             success: true,
