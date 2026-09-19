@@ -14,30 +14,20 @@ export default async function handler(req, res) {
     try {
         const { prompt, image } = req.body || {};
 
-        // التحقق من وصف التعديل
-        if (
-            !prompt ||
-            typeof prompt !== "string" ||
-            !prompt.trim()
-        ) {
+        if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
             return res.status(400).json({
                 success: false,
                 error: "وصف التعديل فارغ"
             });
         }
 
-        // التحقق من الصورة
-        if (
-            !image ||
-            typeof image !== "string"
-        ) {
+        if (!image || typeof image !== "string") {
             return res.status(400).json({
                 success: false,
                 error: "لم يتم إرسال الصورة"
             });
         }
 
-        // قراءة مفتاح Gemini من إعدادات Vercel
         const apiKey =
             process.env.GEMINI_API_KEY ||
             process.env.GOOGLE_API_KEY;
@@ -49,7 +39,7 @@ export default async function handler(req, res) {
             });
         }
 
-        // استخراج نوع الصورة وبيانات Base64
+        // استخراج بيانات الصورة من Data URI
         const imageMatch = image.match(
             /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/
         );
@@ -57,118 +47,105 @@ export default async function handler(req, res) {
         if (!imageMatch) {
             return res.status(400).json({
                 success: false,
-                error: "صيغة الصورة غير صحيحة. يجب أن تكون Base64 Data URI"
+                error: "صيغة الصورة غير صحيحة"
             });
         }
 
         const mimeType = imageMatch[1];
         const base64Image = imageMatch[2];
 
-        const geminiPrompt = `
-You are an expert photo editor.
+        const editPrompt = `
+Edit the provided image according to the following request:
 
-Edit the attached image according to the user's request.
-
-User request:
 ${prompt.trim()}
 
-Important instructions:
-- Preserve the person's identity and facial features as much as possible.
-- Preserve the person's skin tone, hairstyle, and general appearance.
-- Change only the elements requested by the user.
-- Make the result realistic, natural, and high quality.
-- Do not add unnecessary changes.
-- Return the edited image.
+Preserve the person's identity, facial features,
+skin tone, hairstyle, and general appearance as much
+as possible.
+
+Change only what the user requested.
+Make the result realistic, natural, and high quality.
+Return the edited image.
         `.trim();
 
-        // نموذج Gemini المخصص لإنشاء وتعديل الصور
-        const model = "gemini-3.1-flash-image";
-
-        const geminiResponse = await fetch(
-            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(apiKey)}`,
+        const response = await fetch(
+            "https://generativelanguage.googleapis.com/v1beta/interactions",
             {
                 method: "POST",
 
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "x-goog-api-key": apiKey
                 },
 
                 body: JSON.stringify({
-                    contents: [
+                    model: "gemini-3.1-flash-image",
+
+                    input: [
                         {
-                            parts: [
-                                {
-                                    text: geminiPrompt
-                                },
-                                {
-                                    inline_data: {
-                                        mime_type: mimeType,
-                                        data: base64Image
-                                    }
-                                }
-                            ]
+                            type: "text",
+                            text: editPrompt
+                        },
+                        {
+                            type: "image",
+                            mime_type: mimeType,
+                            data: base64Image
                         }
                     ],
 
-                    generationConfig: {
-                        responseModalities: [
-                            "IMAGE"
-                        ]
+                    response_format: {
+                        type: "image",
+                        mime_type: "image/png"
                     }
                 })
             }
         );
 
-        const rawResponse =
-            await geminiResponse.text();
+        const rawText = await response.text();
 
         let data;
 
         try {
-            data = JSON.parse(rawResponse);
+            data = JSON.parse(rawText);
         } catch {
             data = {
-                raw: rawResponse
+                raw: rawText
             };
         }
 
-        console.log(
-            "GEMINI STATUS:",
-            geminiResponse.status
-        );
+        console.log("GEMINI STATUS:", response.status);
 
-        if (!geminiResponse.ok) {
+        if (!response.ok) {
             console.error(
-                "GEMINI ERROR:",
+                "GEMINI API ERROR:",
                 JSON.stringify(data)
             );
 
-            return res.status(geminiResponse.status).json({
+            return res.status(response.status).json({
                 success: false,
                 error: "حدث خطأ من Gemini",
-                status: geminiResponse.status,
+                status: response.status,
                 details: data
             });
         }
 
-        const parts =
-            data?.candidates?.[0]?.content?.parts || [];
+        // البحث عن الصورة الناتجة
+        const outputImage =
+            data?.output?.find(
+                item => item?.type === "image"
+            );
 
-        // البحث عن جزء الصورة في رد Gemini
-        const imagePart = parts.find(
-            part =>
-                part?.inlineData?.data ||
-                part?.inline_data?.data
-        );
+        const imageBase64 =
+            outputImage?.data ||
+            data?.output_image?.data ||
+            null;
 
-        const imageData =
-            imagePart?.inlineData ||
-            imagePart?.inline_data;
+        const resultMimeType =
+            outputImage?.mime_type ||
+            data?.output_image?.mime_type ||
+            "image/png";
 
-        if (
-            !imageData ||
-            !imageData.data
-        ) {
+        if (!imageBase64) {
             console.error(
                 "Gemini did not return an image:",
                 JSON.stringify(data)
@@ -181,17 +158,9 @@ Important instructions:
             });
         }
 
-        const outputMimeType =
-            imageData.mimeType ||
-            imageData.mime_type ||
-            "image/png";
-
-        const generatedImage =
-            `data:${outputMimeType};base64,${imageData.data}`;
-
         return res.status(200).json({
             success: true,
-            image: generatedImage
+            image: `data:${resultMimeType};base64,${imageBase64}`
         });
 
     } catch (error) {
