@@ -4049,5 +4049,54 @@ if (document.readyState === "loading") {
 
 }
 // ==========================================
+// تشغيل زر محادثة جديدة
+// ==========================================
+
+document.addEventListener("DOMContentLoaded", function () {
+    const newChatBtn = document.getElementById("newChatBtn");
+
+    if (newChatBtn) {
+        newChatBtn.addEventListener("click", function (event) {
+            event.preventDefault();
+
+            // تفريغ منطقة المحادثة
+            const chatBox = document.getElementById("chatBox");
+
+            if (chatBox) {
+                chatBox.innerHTML = `
+                    <div class="nova-welcome" id="novaWelcome">
+                        <div class="nova-welcome-icon">
+                            <i class="fa-solid fa-sparkles"></i>
+                        </div>
+
+                        <h1>
+                            أهلاً بيك في <span>Nova AI</span> 👋
+                        </h1>
+
+                        <p>
+                            مساعدك الذكي للبرمجة، الكتابة، التعلم والإبداع.
+                            <br>
+                            ابدأ محادثتك واكتشف إمكانيات Nova.
+                        </p>
+                    </div>
+                `;
+            }
+
+            // تفريغ حقل الكتابة
+            const chatInput = document.getElementById("chatInput");
+
+            if (chatInput) {
+                chatInput.value = "";
+                chatInput.focus();
+            }
+
+            // إنشاء محادثة جديدة إذا كانت الدالة موجودة
+            if (typeof startNewChat === "function") {
+                startNewChat();
+            }
+        });
+    }
+});
+// ==========================================
 // نهاية Nova AI
 // ==========================================
