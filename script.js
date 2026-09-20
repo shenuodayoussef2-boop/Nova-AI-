@@ -1175,13 +1175,28 @@ async function sendMessage(
                                 currentAbortController
                                     .signal,
 
-                            body:
-                                JSON.stringify({
-                                    message:
-                                        text
-                                })
+body:
+    JSON.stringify({
+        message: text,
+        ...(pendingVisionImage &&
+        pendingVisionImage.startsWith("data:image/")
+            ? (() => {
+                const match =
+                    pendingVisionImage.match(
+                        /^data:(image\/[^;]+);base64,(.+)$/
+                    );
 
-                        }
+                if (!match) {
+                    return {};
+                }
+
+                return {
+                    imageData: match[2],
+                    mimeType: match[1]
+                };
+            })()
+            : {})
+    })
                     );
 
                 data =
