@@ -2754,6 +2754,38 @@ document.addEventListener(
                 "sidebarToggleBtn"
             );
 
+        const mobileMenuBtn =
+            document.getElementById(
+                "mobileMenuBtn"
+            );
+
+        if (
+            mobileMenuBtn &&
+            sidebar
+        ) {
+
+            mobileMenuBtn.addEventListener(
+                "click",
+                e => {
+
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    if (
+                        window.innerWidth <=
+                        768
+                    ) {
+
+                        sidebar.classList.toggle(
+                            "mobile-open"
+                        );
+
+                    }
+
+                }
+            );
+
+        }
 
         if (
             sidebarToggleBtn &&
@@ -2785,55 +2817,6 @@ document.addEventListener(
             );
 
         }
-
-
-        const attachBtn =
-            document.getElementById(
-                "attachBtn"
-            );
-
-        const attachDropdown =
-            document.getElementById(
-                "attachDropdown"
-            );
-
-        const fileInput =
-            document.getElementById(
-                "fileInput"
-            );
-
-
-        if (
-            attachBtn &&
-            attachDropdown
-        ) {
-
-            attachBtn.addEventListener(
-                "click",
-                e => {
-
-                    e.stopPropagation();
-
-                    attachDropdown.classList.toggle(
-                        "show"
-                    );
-
-                }
-            );
-
-        }
-
-
-        document.addEventListener(
-            "click",
-            () => {
-
-                closeAllMenus();
-
-            }
-        );
-
-
         // ==========================================
         // رفع الملفات
         // ==========================================
@@ -3993,28 +3976,27 @@ document.addEventListener(
         ) {
 
             return;
-
         }
-
 
         const sidebar =
             document.getElementById(
                 "sidebar"
             );
 
-
         const toggleBtn =
             document.getElementById(
                 "sidebarToggleBtn"
             );
 
+        const mobileMenuBtn =
+            document.getElementById(
+                "mobileMenuBtn"
+            );
 
         if (!sidebar) {
 
             return;
-
         }
-
 
         if (
             sidebar.classList.contains(
@@ -4024,6 +4006,9 @@ document.addEventListener(
                 e.target
             ) &&
             !toggleBtn?.contains(
+                e.target
+            ) &&
+            !mobileMenuBtn?.contains(
                 e.target
             )
         ) {
@@ -4036,7 +4021,6 @@ document.addEventListener(
 
     }
 );
-
 
 // ==========================================
 // إغلاق Sidebar بعد اختيار محادثة
