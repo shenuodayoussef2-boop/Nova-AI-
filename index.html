@@ -266,5 +266,18 @@
     </div>
 
     <script src="script.js"></script>
+    <script>
+    setTimeout(function () {
+        const loadingScreen = document.getElementById("novaLoadingScreen");
+
+        if (loadingScreen) {
+            loadingScreen.classList.add("loaded");
+
+            setTimeout(function () {
+                loadingScreen.remove();
+            }, 700);
+        }
+    }, 1800);
+</script>
 </body>
 </html>
