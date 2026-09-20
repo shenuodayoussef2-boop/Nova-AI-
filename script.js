@@ -1170,13 +1170,10 @@ const response = await fetch(
 
         signal: currentAbortController.signal,
 
-        body: JSON.stringify({
-            message: text
-        })
-    }
-);
-
-                data =
+body: JSON.stringify({
+    message: text,
+    image: options.visionImage || null
+})        data =
                     await response.json();
 
                 if (
