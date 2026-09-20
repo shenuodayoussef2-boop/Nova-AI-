@@ -279,17 +279,54 @@
 
     <script src="script.js"></script>
     <script>
-    setTimeout(function () {
-        const loadingScreen = document.getElementById("novaLoadingScreen");
+(function () {
 
-        if (loadingScreen) {
-            loadingScreen.classList.add("loaded");
+    const loadingScreen =
+        document.getElementById("novaLoadingScreen");
+
+    const progressBar =
+        document.getElementById("novaProgressBar");
+
+    const progressText =
+        document.getElementById("novaProgressText");
+
+    if (!loadingScreen || !progressBar || !progressText) {
+        return;
+    }
+
+    let progress = 1;
+
+    progressBar.style.width = "1%";
+    progressText.textContent = "1%";
+
+    const loadingInterval = setInterval(function () {
+
+        progress++;
+
+        progressBar.style.width =
+            progress + "%";
+
+        progressText.textContent =
+            progress + "%";
+
+        if (progress >= 100) {
+
+            clearInterval(loadingInterval);
 
             setTimeout(function () {
-                loadingScreen.remove();
-            }, 700);
+
+                loadingScreen.classList.add("loaded");
+
+                setTimeout(function () {
+                    loadingScreen.remove();
+                }, 700);
+
+            }, 350);
         }
-    }, 1800);
+
+    }, 35);
+
+})();
 </script>
 </body>
 </html>
