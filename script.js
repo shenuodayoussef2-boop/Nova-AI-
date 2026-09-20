@@ -1172,79 +1172,67 @@ async function sendMessage(
 
     try {
 
-        for (
-            let attempt = 1;
-            attempt <= 3;
-            attempt++
+for (
+    let attempt = 1;
+    attempt <= 3;
+    attempt++
+) {
+
+    try {
+
+        const response = await fetch(
+            "/api/chat",
+            {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                signal: currentAbortController.signal,
+
+                body: JSON.stringify({
+                    message: text
+                })
+            }
+        );
+
+        data = await response.json();
+
+        if (
+            data.error &&
+            data.error.message &&
+            data.error.message.includes(
+                "high demand"
+            ) &&
+            attempt < 3
         ) {
 
-            try {
+            await delay(1500);
 
-const response = await fetch(
-    "/api/chat",
-    {
-        method: "POST",
-
-        headers: {
-            "Content-Type": "application/json"
-        },
-
-        signal: currentAbortController.signal,
-
-body: JSON.stringify({
-    message: text
-})  
-);        data =
-                    await response.json();
-
-                if (
-                    data.error &&
-                    data.error.message &&
-                    data.error.message.includes(
-                        "high demand"
-                    ) &&
-                    attempt < 3
-                ) {
-
-                    await delay(
-                        1500
-                    );
-
-                    continue;
-
-                }
-
-                success =
-                    response.ok;
-
-                break;
-
-            } catch (netErr) {
-
-                if (
-                    netErr.name ===
-                    "AbortError"
-                ) {
-
-                    throw netErr;
-
-                }
-
-                if (
-                    attempt === 3
-                ) {
-
-                    throw netErr;
-
-                }
-
-                await delay(
-                    1500
-                );
-
-            }
-
+            continue;
         }
+
+        success = response.ok;
+
+        break;
+
+    } catch (netErr) {
+
+        if (
+            netErr.name === "AbortError"
+        ) {
+
+            throw netErr;
+        }
+
+        if (attempt === 3) {
+            throw netErr;
+        }
+
+        await delay(1500);
+    }
+}
 
 
         const loadingElem =
