@@ -4717,42 +4717,6 @@ document.addEventListener(
 
     }
 );
-// ==========================================
-// NOVA AI - STARTUP LOADING SCREEN
-// ==========================================
-
-(function () {
-
-    function hideNovaLoadingScreen() {
-
-        const loadingScreen =
-            document.getElementById("novaLoadingScreen");
-
-        if (!loadingScreen) return;
-
-        loadingScreen.classList.add("loaded");
-
-        // إزالة العنصر بعد انتهاء الأنيميشن
-        setTimeout(function () {
-
-            if (loadingScreen) {
-                loadingScreen.remove();
-            }
-
-        }, 700);
-    }
-
-    // ننتظر تحميل الصفحة
-    window.addEventListener("load", function () {
-
-        // وقت ظهور شاشة البداية
-        setTimeout(function () {
-            hideNovaLoadingScreen();
-        }, 1500);
-
-    });
-
-})();
 
 // ==========================================
 // نهاية Nova AI
