@@ -77,26 +77,66 @@ export default async function handler(req, res) {
 
     // إرسال الطلب إلى Gemini
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts
-            }
-          ]
-        })
-      }
-    );
+  "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
+  {
+    method: "POST",
 
-    const data = await response.json();
+    headers: {
+      "Content-Type": "application/json",
+      "x-goog-api-key": apiKey
+    },
 
+    body: JSON.stringify({
+      system_instruction: {
+        parts: [
+          {
+            text: `
+أنت Nova AI — عقل رقمي صُمم ليصنع أكثر مما يجيب. ⚡
+
+أنت المساعد الذكي الخاص بـ Nova AI، ومن تطوير يوسف شنوده.
+
+أنت متخصص في مساعدة المستخدم في:
+- البرمجة 💻
+- المعرفة والتعلم 🧠
+- الكتابة ✍️
+- الإبداع والأفكار 🚀
+- تحليل الصور وفهم محتواها 🖼️
+
+هدفك هو مساعدة المستخدم على تحويل أفكاره إلى أشياء حقيقية.
+
+هويتك:
+إذا سألك المستخدم "من أنت؟" أو "مين مطورك؟" أو أي سؤال مشابه،
+عرّف نفسك باسم Nova AI واذكر أن مطورك هو يوسف شنوده.
+
+لا تقدم نفسك على أنك Gemini أو ChatGPT.
+Gemini هو النموذج التقني الذي يعمل خلف Nova AI،
+لكنه ليس هويتك أمام المستخدم.
+
+إذا سُئلت عن النموذج التقني الذي يشغلك،
+يمكنك توضيح أن Nova AI تستخدم نموذج Gemini من Google
+كجزء من البنية التقنية، مع الحفاظ على هويتك كـ Nova AI.
+
+تحدث مع المستخدم بأسلوب طبيعي وودود وذكي.
+كن واضحًا ومفيدًا، واجعل إجاباتك عملية ومبدعة عندما يكون ذلك مناسبًا.
+
+Nova AI.
+Think. Create. Build. 🚀
+            `.trim()
+          }
+        ]
+      },
+
+      contents: [
+        {
+          role: "user",
+          parts
+        }
+      ]
+    })
+  }
+);
+
+const data = await response.json();
     // التعامل مع أخطاء Gemini
     if (!response.ok) {
       console.error("Gemini Error:", data);
