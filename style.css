@@ -3,6 +3,7 @@
    RTL / Dark & Light Theme / Responsive Mobile Design
    ========================================================= */
 
+
 /* =========================
    RESET & GLOBAL
    ========================= */
@@ -51,6 +52,7 @@ textarea:focus-visible {
     outline-offset: 2px;
 }
 
+
 /* =========================
    APP LAYOUT
    ========================= */
@@ -83,6 +85,7 @@ textarea:focus-visible {
     min-height: 0;
     padding: 20px;
 }
+
 
 /* =========================
    SIDEBAR
@@ -152,6 +155,7 @@ textarea:focus-visible {
     color: #6366f1;
 }
 
+
 /* =========================
    NEW CHAT BUTTON
    ========================= */
@@ -175,6 +179,7 @@ textarea:focus-visible {
 .new-chat-btn:hover {
     background: #475569;
 }
+
 
 /* =========================
    CHAT HISTORY
@@ -249,6 +254,7 @@ textarea:focus-visible {
     background: rgba(255, 255, 255, 0.08);
 }
 
+
 /* =========================
    CONTEXT MENU
    ========================= */
@@ -299,6 +305,7 @@ textarea:focus-visible {
     background: rgba(248, 113, 113, 0.15);
 }
 
+
 /* =========================
    SECTION HEADER
    ========================= */
@@ -318,6 +325,7 @@ textarea:focus-visible {
     color: #94a3b8;
     font-size: 13px;
 }
+
 
 /* =========================
    CHAT BOX
@@ -352,6 +360,7 @@ textarea:focus-visible {
     background: #475569;
     border-radius: 10px;
 }
+
 
 /* =========================
    MESSAGES
@@ -390,6 +399,7 @@ textarea:focus-visible {
     white-space: normal;
     overflow-wrap: anywhere;
 }
+
 
 /* =========================
    MESSAGE ACTIONS
@@ -433,6 +443,7 @@ textarea:focus-visible {
     color: #fff;
     background: rgba(99, 102, 241, 0.3);
 }
+
 
 /* =========================
    INPUT AREA
@@ -525,6 +536,7 @@ textarea:focus-visible {
     flex-shrink: 0;
 }
 
+
 /* =========================
    ATTACHMENTS DROPDOWN
    ========================= */
@@ -572,6 +584,7 @@ textarea:focus-visible {
     background: #334155;
 }
 
+
 /* =========================
    WAVE ICON
    ========================= */
@@ -612,6 +625,7 @@ textarea:focus-visible {
         height: 15px;
     }
 }
+
 
 /* =========================
    VOICE OVERLAY
@@ -740,6 +754,7 @@ textarea:focus-visible {
     background: #dc2626;
 }
 
+
 /* =========================
    SETTINGS MODAL
    ========================= */
@@ -834,6 +849,7 @@ textarea:focus-visible {
     font-size: 12px;
 }
 
+
 /* =========================
    MICROPHONE STATES
    ========================= */
@@ -860,6 +876,7 @@ textarea:focus-visible {
         box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
     }
 }
+
 
 /* =========================
    LIGHT THEME
@@ -968,11 +985,13 @@ body.light-theme .settings-header {
     border-color: #e2e8f0;
 }
 
-/* =========================
+
+/* =========================================================
    MOBILE DESIGN
-   ========================= */
+   ========================================================= */
 
 @media (max-width: 768px) {
+
     html,
     body {
         width: 100%;
@@ -1019,81 +1038,113 @@ body.light-theme .settings-header {
     .section-header p {
         font-size: 12px;
     }
-/* ==========================================
-   MOBILE SIDEBAR DRAWER - NOVA AI
-========================================== */
 
-.sidebar {
-    position: fixed !important;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    z-index: 3000;
-    width: min(285px, 82vw) !important;
-    height: 100dvh !important;
-    transform: translateX(110%);
-    visibility: hidden;
-    opacity: 0;
-    border-left: 1px solid #334155;
-    box-shadow: -12px 0 35px rgba(0, 0, 0, 0.4);
-    transition:
-        transform 0.3s ease,
-        opacity 0.3s ease,
-        visibility 0.3s ease;
-}
 
-/* فتح القائمة */
-.sidebar.mobile-open {
-    right: 0;
-    transform: translateX(0);
-    visibility: visible;
-    opacity: 1;
-}
+    /* =====================================================
+       MOBILE SIDEBAR DRAWER
+       ===================================================== */
 
-/* منع تأثير collapsed على الموبايل */
-.sidebar.collapsed,
-.sidebar.collapsed.mobile-open {
-    width: min(285px, 82vw) !important;
-}
+    .sidebar {
+        position: fixed !important;
 
-/* إظهار النصوص داخل القائمة على الموبايل */
-.sidebar.mobile-open .logo-text,
-.sidebar.mobile-open .btn-text,
-.sidebar.mobile-open .history-title,
-.sidebar.mobile-open .history-title-text {
-    display: initial;
-}
+        top: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
 
-/* خلفية الشاشة عند فتح القائمة */
-.mobile-sidebar-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 2999;
-    display: none;
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(2px);
-}
+        z-index: 10000 !important;
 
-.mobile-sidebar-overlay.active {
-    display: block;
-}
+        width: min(285px, 82vw) !important;
+        height: 100dvh !important;
 
-/* المحتوى الرئيسي */
-.main-content {
-    width: 100% !important;
-    min-width: 0;
-}
+        display: flex !important;
+        flex-direction: column;
 
-/* زر فتح القائمة */
-#sidebarToggleBtn {
-    position: relative;
-    z-index: 3100;
-    touch-action: manipulation;
-}
+        transform: translateX(110%) !important;
+
+        visibility: hidden;
+        opacity: 0;
+
+        border-left: 1px solid #334155;
+
+        box-shadow:
+            -12px 0 35px rgba(0, 0, 0, 0.4);
+
+        transition:
+            transform 0.3s ease,
+            opacity 0.3s ease,
+            visibility 0.3s ease;
+    }
+
+    /* فتح القائمة */
+    .sidebar.mobile-open {
+        transform: translateX(0) !important;
+        visibility: visible;
+        opacity: 1;
+    }
+
+    /* منع collapsed من التأثير على الهاتف */
+    .sidebar.collapsed {
+        width: min(285px, 82vw) !important;
+        transform: translateX(110%) !important;
+    }
+
+    .sidebar.collapsed.mobile-open {
+        width: min(285px, 82vw) !important;
+        transform: translateX(0) !important;
+        visibility: visible;
+        opacity: 1;
+    }
+
+    /* إظهار النصوص داخل القائمة */
+    .sidebar.mobile-open .logo-text,
+    .sidebar.mobile-open .btn-text,
+    .sidebar.mobile-open .history-title,
+    .sidebar.mobile-open .history-title-text {
+        display: initial;
+    }
+
+    /* خلفية الشاشة */
+    .mobile-sidebar-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: none;
+        background: rgba(0, 0, 0, 0.55);
+        backdrop-filter: blur(2px);
+    }
+
+    .mobile-sidebar-overlay.active {
+        display: block;
+    }
+
+    /* المحتوى الرئيسي */
+    .main-content {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 100dvh !important;
+    }
+
+    /* زر sidebar الداخلي */
+    #sidebarToggleBtn {
+        position: relative;
+        z-index: 10001;
+        touch-action: manipulation;
+    }
+
+
+    /* =========================
+       NEW CHAT
+       ========================= */
+
     .new-chat-btn {
         min-height: 44px;
         margin: 8px 12px;
     }
+
+
+    /* =========================
+       HISTORY
+       ========================= */
 
     .history-section {
         padding: 8px 12px;
@@ -1104,6 +1155,11 @@ body.light-theme .settings-header {
         min-height: 42px;
         padding: 9px 10px;
     }
+
+
+    /* =========================
+       CHAT BOX
+       ========================= */
 
     .chat-box {
         width: 100%;
@@ -1144,7 +1200,11 @@ body.light-theme .settings-header {
         height: 32px;
     }
 
-    /* Mobile input */
+
+    /* =========================
+       MOBILE INPUT
+       ========================= */
+
     .input-area {
         width: 100%;
         min-height: 64px;
@@ -1176,6 +1236,11 @@ body.light-theme .settings-header {
         gap: 3px;
     }
 
+
+    /* =========================
+       ATTACH DROPDOWN
+       ========================= */
+
     .attach-dropdown {
         position: fixed;
         right: 10px;
@@ -1191,6 +1256,11 @@ body.light-theme .settings-header {
         font-size: 14px;
     }
 
+
+    /* =========================
+       CONTEXT MENU
+       ========================= */
+
     .chat-context-menu {
         position: fixed;
         top: auto;
@@ -1204,7 +1274,11 @@ body.light-theme .settings-header {
         padding: 10px 13px;
     }
 
-    /* Settings */
+
+    /* =========================
+       SETTINGS
+       ========================= */
+
     .settings-modal-overlay {
         align-items: flex-end;
         padding: 12px;
@@ -1223,7 +1297,9 @@ body.light-theme .settings-header {
 
     .settings-body {
         padding: 10px 12px;
-        padding-bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+        padding-bottom: calc(
+            14px + env(safe-area-inset-bottom, 0px)
+        );
     }
 
     .setting-item {
@@ -1231,11 +1307,16 @@ body.light-theme .settings-header {
         padding: 11px;
     }
 
-    /* Voice overlay */
+
+    /* =========================
+       VOICE OVERLAY
+       ========================= */
+
     .voice-overlay {
         width: 100%;
         height: 100dvh;
         min-height: 100dvh;
+
         padding:
             calc(22px + env(safe-area-inset-top, 0px))
             18px
@@ -1270,11 +1351,13 @@ body.light-theme .settings-header {
     }
 }
 
-/* =========================
+
+/* =========================================================
    VERY SMALL PHONES
-   ========================= */
+   ========================================================= */
 
 @media (max-width: 380px) {
+
     .content-section {
         padding: 6px !important;
     }
@@ -1321,11 +1404,13 @@ body.light-theme .settings-header {
     }
 }
 
-/* =========================
+
+/* =========================================================
    TOUCH IMPROVEMENTS
-   ========================= */
+   ========================================================= */
 
 @media (hover: none) and (pointer: coarse) {
+
     button,
     .history-item,
     .setting-item,
@@ -1346,25 +1431,32 @@ body.light-theme .settings-header {
     }
 }
 
-/* =========================
+
+/* =========================================================
    SAFE AREA
-   ========================= */
+   ========================================================= */
 
 @supports (padding: env(safe-area-inset-bottom)) {
+
     .content-section {
-        padding-bottom: calc(8px + env(safe-area-inset-bottom)) !important;
+        padding-bottom:
+            calc(8px + env(safe-area-inset-bottom))
+            !important;
     }
 
     .input-area {
-        margin-bottom: env(safe-area-inset-bottom);
+        margin-bottom:
+            env(safe-area-inset-bottom);
     }
 }
 
-/* =========================
+
+/* =========================================================
    REDUCED MOTION
-   ========================= */
+   ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
+
     *,
     *::before,
     *::after {
@@ -1374,9 +1466,11 @@ body.light-theme .settings-header {
         scroll-behavior: auto !important;
     }
 }
-/* ==========================================
-   Nova AI - بطاقة إنشاء الصورة
-========================================== */
+
+
+/* =========================================================
+   NOVA AI — IMAGE GENERATION CARD
+   ========================================================= */
 
 .image-loading-card {
     width: min(100%, 420px);
@@ -1407,12 +1501,13 @@ body.light-theme .settings-header {
 .loading-shimmer {
     position: absolute;
     inset: 0;
-    background: linear-gradient(
-        110deg,
-        transparent 20%,
-        rgba(255, 255, 255, 0.16) 50%,
-        transparent 80%
-    );
+    background:
+        linear-gradient(
+            110deg,
+            transparent 20%,
+            rgba(255, 255, 255, 0.16) 50%,
+            transparent 80%
+        );
     transform: translateX(-100%);
     animation: novaShimmer 2s infinite;
 }
@@ -1468,7 +1563,12 @@ body.light-theme .settings-header {
     width: 40%;
     height: 100%;
     border-radius: inherit;
-    background: linear-gradient(90deg, #6366f1, #a78bfa);
+    background:
+        linear-gradient(
+            90deg,
+            #6366f1,
+            #a78bfa
+        );
     animation: novaProgress 2s ease-in-out infinite;
 }
 
@@ -1497,7 +1597,9 @@ body.light-theme .settings-header {
 }
 
 @keyframes novaFloat {
-    0%, 100% {
+
+    0%,
+    100% {
         transform: translateY(0);
     }
 
@@ -1507,6 +1609,7 @@ body.light-theme .settings-header {
 }
 
 @keyframes novaProgress {
+
     0% {
         transform: translateX(180%);
     }
@@ -1517,7 +1620,9 @@ body.light-theme .settings-header {
 }
 
 @keyframes novaPulse {
-    0%, 100% {
+
+    0%,
+    100% {
         opacity: 0.4;
     }
 
@@ -1526,7 +1631,11 @@ body.light-theme .settings-header {
     }
 }
 
-/* الوضع الفاتح */
+
+/* =========================
+   IMAGE CARD LIGHT THEME
+   ========================= */
+
 body.light-theme .image-loading-card {
     border-color: #e2e8f0;
     background: #ffffff;
@@ -1543,9 +1652,11 @@ body.light-theme .image-loading-subtitle {
 body.light-theme .image-progress {
     background: #e2e8f0;
 }
-/* ==========================================
-   NOVA AI - شاشة الترحيب والاقتراحات
-========================================== */
+
+
+/* =========================================================
+   NOVA AI — WELCOME SCREEN
+   ========================================================= */
 
 .nova-welcome {
     display: flex;
@@ -1567,9 +1678,15 @@ body.light-theme .image-progress {
     height: 82px;
     margin-bottom: 20px;
     color: #fff;
-    background: linear-gradient(135deg, #6366f1, #a855f7);
+    background:
+        linear-gradient(
+            135deg,
+            #6366f1,
+            #a855f7
+        );
     border-radius: 25px;
-    box-shadow: 0 0 35px rgba(99, 102, 241, 0.35);
+    box-shadow:
+        0 0 35px rgba(99, 102, 241, 0.35);
     font-size: 36px;
 }
 
@@ -1593,7 +1710,11 @@ body.light-theme .image-progress {
 
 .quick-prompts {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
     gap: 12px;
     width: min(100%, 620px);
     margin-top: 28px;
@@ -1638,12 +1759,12 @@ body.light-theme .image-progress {
     transform: translateY(-3px);
 }
 
-/* إخفاء شاشة الترحيب */
 .nova-welcome.hidden {
     display: none;
 }
 
 @keyframes novaWelcomeFade {
+
     from {
         opacity: 0;
         transform: translateY(15px);
@@ -1655,7 +1776,11 @@ body.light-theme .image-progress {
     }
 }
 
-/* الوضع الفاتح */
+
+/* =========================
+   WELCOME LIGHT THEME
+   ========================= */
+
 body.light-theme .nova-welcome h1 {
     color: #1e293b;
 }
@@ -1674,7 +1799,11 @@ body.light-theme .quick-prompt:hover {
     background: #f1f5f9;
 }
 
-/* الموبايل */
+
+/* =========================
+   WELCOME MOBILE
+   ========================= */
+
 @media (max-width: 600px) {
 
     .nova-welcome {
@@ -1706,64 +1835,17 @@ body.light-theme .quick-prompt:hover {
         min-height: 58px;
         padding: 10px 12px;
     }
-
 }
-/* ==========================================
-   MOBILE SIDEBAR
-========================================== */
 
-@media (max-width: 768px) {
 
-    .sidebar {
-        position: fixed;
-        top: 0;
-        right: 0;
-        width: 280px;
-        height: 100vh;
-        z-index: 9999;
-
-        transform: translateX(100%);
-        transition: transform 0.3s ease;
-
-        box-shadow: -8px 0 25px rgba(0, 0, 0, 0.35);
-    }
-
-    /* عند فتح القائمة */
-    .sidebar.mobile-open {
-        transform: translateX(0);
-    }
-
-    /* لا تستخدم collapsed على الهاتف */
-    .sidebar.collapsed {
-        width: 280px;
-        transform: translateX(100%);
-    }
-
-    .sidebar.collapsed.mobile-open {
-        transform: translateX(0);
-    }
-
-    .content-section {
-        width: 100%;
-        padding: 12px;
-    }
-
-    /* زر فتح القائمة */
-    #sidebarToggleBtn {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-        z-index: 10000;
-    }
-}
-/* ==========================================
-   NOVA AI - LOADING SCREEN
-========================================== */
+/* =========================================================
+   NOVA AI — LOADING SCREEN
+   ========================================================= */
 
 #novaLoadingScreen {
     position: fixed;
     inset: 0;
+
     width: 100%;
     height: 100%;
 
@@ -1785,7 +1867,6 @@ body.light-theme .quick-prompt:hover {
         visibility 0.7s ease;
 }
 
-/* عند الاختفاء */
 #novaLoadingScreen.loaded {
     opacity: 0;
     visibility: hidden;
@@ -1793,9 +1874,9 @@ body.light-theme .quick-prompt:hover {
 }
 
 
-/* ==========================================
-   اللوجو
-========================================== */
+/* =========================
+   LOADING LOGO
+   ========================= */
 
 #novaLoadingScreen img {
     width: 120px;
@@ -1808,11 +1889,10 @@ body.light-theme .quick-prompt:hover {
         novaLogoPulse 1.5s ease-in-out infinite;
 }
 
-
-/* حركة اللوجو */
 @keyframes novaLogoPulse {
 
-    0%, 100% {
+    0%,
+    100% {
         transform: scale(1);
         opacity: 0.8;
     }
@@ -1824,9 +1904,9 @@ body.light-theme .quick-prompt:hover {
 }
 
 
-/* ==========================================
-   اسم Nova AI
-========================================== */
+/* =========================
+   LOADING TITLE
+   ========================= */
 
 .nova-loading-title {
     margin-top: 20px;
@@ -1838,9 +1918,9 @@ body.light-theme .quick-prompt:hover {
 }
 
 
-/* ==========================================
-   شريط التحميل
-========================================== */
+/* =========================
+   LOADING PROGRESS
+   ========================= */
 
 .nova-progress-container {
     width: min(330px, 75%);
@@ -1859,21 +1939,19 @@ body.light-theme .quick-prompt:hover {
         0 0 15px rgba(124, 92, 255, 0.08);
 }
 
-
-/* الجزء الممتلئ */
-
 .nova-progress-bar {
     width: 1%;
     height: 100%;
 
     border-radius: 50px;
 
-    background: linear-gradient(
-        90deg,
-        #6c5ce7,
-        #8e7dff,
-        #6c5ce7
-    );
+    background:
+        linear-gradient(
+            90deg,
+            #6c5ce7,
+            #8e7dff,
+            #6c5ce7
+        );
 
     transition: width 0.08s linear;
 
@@ -1882,9 +1960,9 @@ body.light-theme .quick-prompt:hover {
 }
 
 
-/* ==========================================
-   النسبة المئوية
-========================================== */
+/* =========================
+   LOADING PERCENTAGE
+   ========================= */
 
 .nova-progress-text {
     margin-top: 10px;
@@ -1898,9 +1976,9 @@ body.light-theme .quick-prompt:hover {
 }
 
 
-/* ==========================================
-   النقاط
-========================================== */
+/* =========================
+   LOADING DOTS
+   ========================= */
 
 .nova-loading-dots {
     margin-top: 15px;
@@ -1930,12 +2008,11 @@ body.light-theme .quick-prompt:hover {
     animation-delay: 0.3s;
 }
 
-
-/* حركة النقاط */
-
 @keyframes novaDot {
 
-    0%, 80%, 100% {
+    0%,
+    80%,
+    100% {
         transform: scale(0.5);
         opacity: 0.4;
     }
@@ -1947,9 +2024,9 @@ body.light-theme .quick-prompt:hover {
 }
 
 
-/* ==========================================
-   موبايل
-========================================== */
+/* =========================
+   LOADING MOBILE
+   ========================= */
 
 @media (max-width: 768px) {
 
@@ -1971,9 +2048,11 @@ body.light-theme .quick-prompt:hover {
         font-size: 16px;
     }
 }
-/* ==========================================
-   NOVA AI - MOBILE MENU BUTTON
-   ========================================== */
+
+
+/* =========================================================
+   NOVA AI — MOBILE MENU BUTTON
+   ========================================================= */
 
 .mobile-menu-btn {
     display: none;
@@ -1983,7 +2062,13 @@ body.light-theme .quick-prompt:hover {
 
     .mobile-menu-btn {
         position: fixed;
-        top: calc(10px + env(safe-area-inset-top));
+
+        top:
+            calc(
+                10px +
+                env(safe-area-inset-top)
+            );
+
         right: 10px;
 
         width: 44px;
@@ -1993,32 +2078,41 @@ body.light-theme .quick-prompt:hover {
         align-items: center;
         justify-content: center;
 
-        border: 1px solid rgba(255,255,255,.12);
+        border:
+            1px solid
+            rgba(255, 255, 255, 0.12);
+
         border-radius: 12px;
 
-        background: rgba(30,41,59,.92);
+        background:
+            rgba(30, 41, 59, 0.92);
+
         color: #fff;
 
-        box-shadow: 0 8px 25px rgba(0,0,0,.25);
+        box-shadow:
+            0 8px 25px
+            rgba(0, 0, 0, 0.25);
 
         cursor: pointer;
 
         z-index: 10001;
 
-        -webkit-tap-highlight-color: transparent;
-        touch-action: manipulation;
+        -webkit-tap-highlight-color:
+            transparent;
+
+        touch-action:
+            manipulation;
 
         transition:
-            transform .2s ease,
-            background .2s ease;
+            transform 0.2s ease,
+            background 0.2s ease;
     }
 
     .mobile-menu-btn:active {
-        transform: scale(.92);
+        transform: scale(0.92);
     }
 
     .mobile-menu-btn i {
         font-size: 19px;
     }
-
 }
