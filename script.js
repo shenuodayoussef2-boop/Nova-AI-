@@ -1159,45 +1159,22 @@ async function sendMessage(
 
             try {
 
-                const response =
-                    await fetch(
-                        "/api/chat",
-                        {
-                            method:
-                                "POST",
+const response = await fetch(
+    "/api/chat",
+    {
+        method: "POST",
 
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
+        headers: {
+            "Content-Type": "application/json"
+        },
 
-                            signal:
-                                currentAbortController
-                                    .signal,
+        signal: currentAbortController.signal,
 
-body:
-    JSON.stringify({
-        message: text,
-        ...(pendingVisionImage &&
-        pendingVisionImage.startsWith("data:image/")
-            ? (() => {
-                const match =
-                    pendingVisionImage.match(
-                        /^data:(image\/[^;]+);base64,(.+)$/
-                    );
-
-                if (!match) {
-                    return {};
-                }
-
-                return {
-                    imageData: match[2],
-                    mimeType: match[1]
-                };
-            })()
-            : {})
-    })
-                    );
+        body: JSON.stringify({
+            message: text
+        })
+    }
+);
 
                 data =
                     await response.json();
