@@ -1,31 +1,81 @@
+// ==========================================
+// NOVA AI - GEMINI CHAT API
+// يدعم النصوص والصور
+// ==========================================
+
 export default async function handler(req, res) {
-  // السماح بـ POST فقط
+  // السماح بطلبات POST فقط
   if (req.method !== "POST") {
     return res.status(405).json({
+      success: false,
       error: "يسمح بطلبات POST فقط"
     });
   }
 
   try {
-    const { message } = req.body || {};
+    const {
+      message,
+      imageData,
+      mimeType
+    } = req.body || {};
 
-    // التحقق من الرسالة
-    if (!message || typeof message !== "string" || !message.trim()) {
+    // التحقق من وجود رسالة أو صورة
+    const hasMessage =
+      typeof message === "string" && message.trim().length > 0;
+
+    const hasImage =
+      typeof imageData === "string" &&
+      imageData.length > 0 &&
+      typeof mimeType === "string" &&
+      mimeType.startsWith("image/");
+
+    if (!hasMessage && !hasImage) {
       return res.status(400).json({
-        error: "الرسالة فارغة"
+        success: false,
+        error: "يجب إرسال رسالة أو صورة"
       });
     }
 
-    // قراءة مفتاح Gemini من Vercel
+    // قراءة مفتاح Gemini من إعدادات Vercel
     const apiKey = process.env.GEMINI_API_KEY;
 
     if (!apiKey) {
       return res.status(500).json({
+        success: false,
         error: "مفتاح Gemini غير موجود في إعدادات Vercel"
       });
     }
 
-    // طلب Gemini
+    // تجهيز أجزاء الرسالة
+    const parts = [];
+
+    // إضافة النص إذا كان موجودًا
+    if (hasMessage) {
+      parts.push({
+        text: message.trim()
+      });
+    } else if (hasImage) {
+      parts.push({
+        text: "حلل الصورة المرفقة واشرح محتواها باللغة العربية."
+      });
+    }
+
+    // إضافة الصورة إذا كانت موجودة
+    if (hasImage) {
+      // إزالة بادئة Data URL إذا كانت موجودة
+      const cleanBase64 = imageData.includes(",")
+        ? imageData.split(",")[1]
+        : imageData;
+
+      parts.push({
+        inline_data: {
+          mime_type: mimeType,
+          data: cleanBase64
+        }
+      });
+    }
+
+    // إرسال الطلب إلى Gemini
     const response = await fetch(
       "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent",
       {
@@ -38,11 +88,7 @@ export default async function handler(req, res) {
           contents: [
             {
               role: "user",
-              parts: [
-                {
-                  text: message.trim()
-                }
-              ]
+              parts
             }
           ]
         })
@@ -51,21 +97,25 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    // لو Gemini رجع خطأ
+    // التعامل مع أخطاء Gemini
     if (!response.ok) {
+      console.error("Gemini Error:", data);
+
       return res.status(response.status).json({
+        success: false,
         error: "حدث خطأ من Gemini",
         details: data
       });
     }
 
-    // إرسال رد Gemini كما هو إلى script.js
+    // إرسال استجابة Gemini إلى script.js
     return res.status(200).json(data);
 
   } catch (error) {
-    console.error("Gemini API Error:", error);
+    console.error("Chat API Error:", error);
 
     return res.status(500).json({
+      success: false,
       error: "حدث خطأ أثناء الاتصال بـ Gemini",
       details: error.message
     });
