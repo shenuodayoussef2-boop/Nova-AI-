@@ -2116,3 +2116,135 @@ body.light-theme .quick-prompt:hover {
         font-size: 19px;
     }
 }
+/* ==========================================
+   NOVA AI - WEB SEARCH SOURCES
+   ========================================== */
+
+.nova-search-sources {
+    margin-top: 14px;
+    padding: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.035);
+}
+
+.nova-search-sources-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.nova-search-sources-title {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.nova-search-sources-title i {
+    font-size: 13px;
+}
+
+.nova-search-sources-count {
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.nova-search-sources-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.nova-search-source {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+    padding: 9px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: inherit;
+    background: rgba(255, 255, 255, 0.025);
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+    box-sizing: border-box;
+}
+
+.nova-search-source:hover {
+    background: rgba(255, 255, 255, 0.07);
+    transform: translateY(-1px);
+}
+
+.nova-search-source-number {
+    flex: 0 0 25px;
+    width: 25px;
+    height: 25px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.nova-search-source-info {
+    min-width: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.nova-search-source-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.nova-search-source-url {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    direction: ltr;
+    text-align: left;
+    opacity: 0.55;
+    font-size: 10px;
+}
+
+.nova-search-source > i {
+    flex: 0 0 auto;
+    font-size: 11px;
+    opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+
+    .nova-search-sources {
+        padding: 10px;
+        border-radius: 12px;
+    }
+
+    .nova-search-source {
+        padding: 8px;
+    }
+
+    .nova-search-source-title {
+        font-size: 11px;
+    }
+
+}
