@@ -1112,22 +1112,22 @@ for (
 
     try {
 
-        const response = await fetch(
-            "/api/chat",
-            {
-                method: "POST",
+ const conversationHistory = getConversationHistory();
 
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                signal: currentAbortController.signal,
-
-                body: JSON.stringify({
-                    message: text
-                })
-            }
-        );
+const response = await fetch(
+    "/api/chat",
+    {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        signal: currentAbortController.signal,
+        body: JSON.stringify({
+            message: text,
+            history: conversationHistory.slice(0, -1)
+        })
+    }
+);
 
         data = await response.json();
 
