@@ -410,46 +410,282 @@
         </div>
     </div>
 
-    <!-- نافذة الإعدادات المنبثقة (Settings Modal) -->
-    <div id="settingsModal" class="settings-modal-overlay">
-        <div class="settings-modal-content">
-            <div class="settings-header">
-                <h3>الإعدادات</h3>
-                <button id="closeSettingsBtn" class="close-settings-btn"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="settings-body">
-                <div class="setting-item"><i class="fa-solid fa-clock-rotate-left"></i> Activity</div>
-                <div class="setting-item"><i class="fa-solid fa-brain"></i> Personal Intelligence</div>
-                <div class="setting-item"><i class="fa-solid fa-file-import"></i> Import memory to Nova</div>
-                <div class="setting-item"><i class="fa-regular fa-face-smile"></i> Avatar</div>
-                <div class="setting-item"><i class="fa-solid fa-chart-pie"></i> Usage limits</div>
-                <div class="setting-item"><i class="fa-solid fa-gem"></i> Gems</div>
-                <div class="setting-item"><i class="fa-solid fa-link"></i> Your public links</div>
-                <div class="setting-item"><i class="fa-solid fa-sun"></i> Theme <i class="fa-solid fa-chevron-left arrow"></i></div>
-                <div class="setting-item"><i class="fa-solid fa-box-archive"></i> View subscriptions</div>
-                <div class="setting-item"><i class="fa-solid fa-book"></i> Nova Notebook</div>
-                <div class="setting-item"><i class="fa-solid fa-photo-film"></i> Media watermark <i class="fa-solid fa-chevron-left arrow"></i></div>
-                <div class="setting-item"><i class="fa-solid fa-comment-dots"></i> Send feedback</div>
-                <div class="setting-item"><i class="fa-solid fa-circle-question"></i> Help <i class="fa-solid fa-chevron-left arrow"></i></div>
-            </div>
+   <!-- ==========================================
+     NOVA AI - SETTINGS MODAL
+     ========================================== -->
+
+<div id="settingsModal" class="settings-modal-overlay">
+
+    <div class="settings-modal-content">
+
+        <!-- ==========================================
+             SETTINGS HEADER
+             ========================================== -->
+
+        <div class="settings-header">
+
+            <h3>الإعدادات</h3>
+
+            <button
+                id="closeSettingsBtn"
+                class="close-settings-btn"
+                type="button"
+                aria-label="إغلاق الإعدادات"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
         </div>
+
+
+        <!-- ==========================================
+             SETTINGS BODY
+             ========================================== -->
+
+        <div class="settings-body">
+
+            <!-- Activity -->
+
+            <div
+                class="setting-item"
+                data-setting="activity"
+            >
+                <i class="fa-solid fa-clock-rotate-left"></i>
+
+                <span>
+                    Activity
+                </span>
+            </div>
+
+
+            <!-- Personal Intelligence -->
+
+            <div
+                class="setting-item"
+                data-setting="personal-intelligence"
+            >
+                <i class="fa-solid fa-brain"></i>
+
+                <span>
+                    Personal Intelligence
+                </span>
+            </div>
+
+
+            <!-- Import Memory -->
+
+            <div
+                class="setting-item"
+                data-setting="import-memory"
+            >
+                <i class="fa-solid fa-file-import"></i>
+
+                <span>
+                    Import memory to Nova
+                </span>
+            </div>
+
+
+            <!-- Avatar -->
+
+            <div
+                class="setting-item"
+                data-setting="avatar"
+            >
+                <i class="fa-regular fa-face-smile"></i>
+
+                <span>
+                    Avatar
+                </span>
+            </div>
+
+
+            <!-- Usage Limits -->
+
+            <div
+                class="setting-item"
+                data-setting="usage"
+            >
+                <i class="fa-solid fa-chart-pie"></i>
+
+                <span>
+                    Usage limits
+                </span>
+            </div>
+
+
+            <!-- Gems -->
+
+            <div
+                class="setting-item"
+                data-setting="gems"
+            >
+                <i class="fa-solid fa-gem"></i>
+
+                <span>
+                    Gems
+                </span>
+            </div>
+
+
+            <!-- Public Links -->
+
+            <div
+                class="setting-item"
+                data-setting="public-links"
+            >
+                <i class="fa-solid fa-link"></i>
+
+                <span>
+                    Your public links
+                </span>
+            </div>
+
+
+            <!-- Theme -->
+
+            <div
+                class="setting-item"
+                data-setting="theme"
+            >
+                <i class="fa-solid fa-sun"></i>
+
+                <span>
+                    Theme
+                </span>
+
+                <i class="fa-solid fa-chevron-left arrow"></i>
+            </div>
+
+
+            <!-- Subscriptions -->
+
+            <div
+                class="setting-item"
+                data-setting="subscriptions"
+            >
+                <i class="fa-solid fa-box-archive"></i>
+
+                <span>
+                    View subscriptions
+                </span>
+            </div>
+
+
+            <!-- Nova Notebook -->
+
+            <div
+                class="setting-item"
+                data-setting="notebook"
+            >
+                <i class="fa-solid fa-book"></i>
+
+                <span>
+                    Nova Notebook
+                </span>
+            </div>
+
+
+            <!-- Media Watermark -->
+
+            <div
+                class="setting-item"
+                data-setting="watermark"
+            >
+                <i class="fa-solid fa-photo-film"></i>
+
+                <span>
+                    Media watermark
+                </span>
+
+                <i class="fa-solid fa-chevron-left arrow"></i>
+            </div>
+
+
+            <!-- Feedback -->
+
+            <div
+                class="setting-item"
+                data-setting="feedback"
+            >
+                <i class="fa-solid fa-comment-dots"></i>
+
+                <span>
+                    Send feedback
+                </span>
+            </div>
+
+
+            <!-- Help -->
+
+            <div
+                class="setting-item"
+                data-setting="help"
+            >
+                <i class="fa-solid fa-circle-question"></i>
+
+                <span>
+                    Help
+                </span>
+
+                <i class="fa-solid fa-chevron-left arrow"></i>
+            </div>
+
+
+            <!-- ==========================================
+                 SMART MEMORY
+                 ========================================== -->
+
+            <div class="settings-section memory-section">
+
+                <div class="settings-section-title">
+
+                    <i class="fa-solid fa-brain"></i>
+
+                    <span>
+                        ذاكرة Nova
+                    </span>
+
+                </div>
+
+
+                <p class="settings-description">
+
+                    المعلومات التي طلبت من Nova أن تتذكرها عنك.
+
+                </p>
+
+
+                <!-- Memory List -->
+
+                <div
+                    id="memoryList"
+                    class="memory-list"
+                ></div>
+
+
+                <!-- Clear Memory -->
+
+                <button
+                    id="clearMemoryBtn"
+                    class="danger-btn"
+                    type="button"
+                >
+
+                    <i class="fa-solid fa-trash"></i>
+
+                    <span>
+                        مسح كل الذكريات
+                    </span>
+
+                </button>
+
+            </div>
+
+        </div>
+
     </div>
-<div class="settings-section memory-section">
-    <div class="settings-section-title">
-        <i class="fas fa-brain"></i>
-        <span>ذاكرة Nova</span>
-    </div>
 
-    <p class="settings-description">
-        المعلومات التي طلبت من Nova أن تتذكرها عنك.
-    </p>
-
-    <div id="memoryList" class="memory-list"></div>
-
-    <button id="clearMemoryBtn" class="danger-btn">
-        <i class="fas fa-trash"></i>
-        مسح كل الذكريات
-    </button>
 </div>
     <script src="script.js"></script>
     <script>
