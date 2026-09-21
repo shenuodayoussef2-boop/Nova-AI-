@@ -4977,6 +4977,612 @@ window.addEventListener(
     }
 );
 
+// ==========================================
+// NOVA AI - SMART MEMORY
+// ==========================================
+
+const MEMORY_STORAGE_KEY = "novaSmartMemory";
+
+let novaMemory = loadNovaMemory();
+
+
+// ==========================================
+// LOAD MEMORY
+// ==========================================
+
+function loadNovaMemory() {
+
+    try {
+
+        const saved =
+            localStorage.getItem(MEMORY_STORAGE_KEY);
+
+        if (!saved) {
+            return [];
+        }
+
+        const parsed = JSON.parse(saved);
+
+        return Array.isArray(parsed)
+            ? parsed
+            : [];
+
+    } catch (error) {
+
+        console.error(
+            "Memory Load Error:",
+            error
+        );
+
+        return [];
+    }
+}
+
+
+// ==========================================
+// SAVE MEMORY
+// ==========================================
+
+function saveNovaMemory() {
+
+    try {
+
+        localStorage.setItem(
+            MEMORY_STORAGE_KEY,
+            JSON.stringify(novaMemory)
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Memory Save Error:",
+            error
+        );
+    }
+}
+
+
+// ==========================================
+// ADD MEMORY
+// ==========================================
+
+function addNovaMemory(text) {
+
+    if (
+        typeof text !== "string" ||
+        !text.trim()
+    ) {
+        return false;
+    }
+
+    const cleanText = text.trim();
+
+    const exists = novaMemory.some(
+        memory =>
+            memory.text.toLowerCase() ===
+            cleanText.toLowerCase()
+    );
+
+    if (exists) {
+        return false;
+    }
+
+    const memory = {
+
+        id:
+            Date.now().toString() +
+            Math.random().toString(36).slice(2),
+
+        text: cleanText,
+
+        createdAt: Date.now()
+
+    };
+
+    novaMemory.unshift(memory);
+
+    saveNovaMemory();
+
+    renderNovaMemory();
+
+    return true;
+}
+
+
+// ==========================================
+// DELETE MEMORY
+// ==========================================
+
+function deleteNovaMemory(id) {
+
+    novaMemory =
+        novaMemory.filter(
+            memory => memory.id !== id
+        );
+
+    saveNovaMemory();
+
+    renderNovaMemory();
+
+    showToast("تم حذف الذكرى 🗑️");
+}
+
+
+// ==========================================
+// CLEAR ALL MEMORY
+// ==========================================
+
+function clearAllNovaMemory() {
+
+    if (!novaMemory.length) {
+
+        showToast(
+            "لا توجد ذكريات محفوظة."
+        );
+
+        return;
+    }
+
+    const confirmed = confirm(
+        "هل أنت متأكد من حذف جميع ذكريات Nova؟"
+    );
+
+    if (!confirmed) {
+        return;
+    }
+
+    novaMemory = [];
+
+    saveNovaMemory();
+
+    renderNovaMemory();
+
+    showToast(
+        "تم مسح جميع الذكريات 🧹"
+    );
+}
+
+
+// ==========================================
+// RENDER MEMORY
+// ==========================================
+
+function renderNovaMemory() {
+
+    const memoryList =
+        document.getElementById(
+            "memoryList"
+        );
+
+    if (!memoryList) {
+        return;
+    }
+
+    if (!novaMemory.length) {
+
+        memoryList.innerHTML = `
+            <div class="memory-empty">
+                <i class="fas fa-brain"></i>
+
+                <span>
+                    لا توجد ذكريات محفوظة حاليًا.
+                </span>
+            </div>
+        `;
+
+        return;
+    }
+
+    memoryList.innerHTML =
+        novaMemory.map(memory => {
+
+            return `
+                <div
+                    class="memory-item"
+                    data-memory-id="${escapeAttribute(memory.id)}"
+                >
+
+                    <div class="memory-icon">
+                        <i class="fas fa-brain"></i>
+                    </div>
+
+                    <div class="memory-content">
+                        <div class="memory-text">
+                            ${escapeHTML(memory.text)}
+                        </div>
+                    </div>
+
+                    <button
+                        class="memory-delete-btn"
+                        type="button"
+                        title="حذف الذكرى"
+                        data-memory-delete="${escapeAttribute(memory.id)}"
+                    >
+                        <i class="fas fa-trash"></i>
+                    </button>
+
+                </div>
+            `;
+
+        }).join("");
+
+    memoryList
+        .querySelectorAll(
+            "[data-memory-delete]"
+        )
+        .forEach(button => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const id =
+                        button.dataset.memoryDelete;
+
+                    deleteNovaMemory(id);
+                }
+            );
+
+        });
+}
+
+
+// ==========================================
+// GET MEMORY FOR AI
+// ==========================================
+
+function getNovaMemoryForAI() {
+
+    if (!novaMemory.length) {
+        return "";
+    }
+
+    return novaMemory
+        .map(memory => `- ${memory.text}`)
+        .join("\n");
+}
+
+
+// ==========================================
+// MEMORY COMMAND DETECTION
+// ==========================================
+
+function detectMemoryCommand(text) {
+
+    if (
+        typeof text !== "string" ||
+        !text.trim()
+    ) {
+        return {
+            type: "none",
+            value: ""
+        };
+    }
+
+    const cleanText =
+        text.trim();
+
+    // حفظ ذاكرة
+
+    const rememberPatterns = [
+
+        /^افتكر\s+(.+)$/i,
+
+        /^تذكر\s+(.+)$/i,
+
+        /^احفظ\s+(.+)$/i,
+
+        /^خلي بالك إن\s+(.+)$/i,
+
+        /^خليك فاكر إن\s+(.+)$/i,
+
+        /^remember\s+(.+)$/i,
+
+        /^remember that\s+(.+)$/i
+
+    ];
+
+    for (const pattern of rememberPatterns) {
+
+        const match =
+            cleanText.match(pattern);
+
+        if (match) {
+
+            return {
+                type: "save",
+                value: match[1].trim()
+            };
+        }
+    }
+
+
+    // حذف ذاكرة
+
+    const forgetPatterns = [
+
+        /^انسَ\s+(.+)$/i,
+
+        /^انسى\s+(.+)$/i,
+
+        /^احذف من ذاكرتك\s+(.+)$/i,
+
+        /^forget\s+(.+)$/i,
+
+        /^forget that\s+(.+)$/i
+
+    ];
+
+    for (const pattern of forgetPatterns) {
+
+        const match =
+            cleanText.match(pattern);
+
+        if (match) {
+
+            return {
+                type: "forget",
+                value: match[1].trim()
+            };
+        }
+    }
+
+
+    // عرض الذكريات
+
+    const showPatterns = [
+
+        "إيه اللي فاكره عني",
+        "ايه اللي فاكره عني",
+        "ماذا تتذكر عني",
+        "إيه الذكريات اللي عندك",
+        "ايه الذكريات اللي عندك",
+        "اعرض ذاكرتك",
+        "عرض الذكريات",
+        "what do you remember about me",
+        "show my memories"
+
+    ];
+
+    const normalized =
+        cleanText
+            .toLowerCase()
+            .replace(/[؟?]/g, "");
+
+    if (
+        showPatterns.some(
+            pattern =>
+                normalized ===
+                pattern.toLowerCase()
+        )
+    ) {
+
+        return {
+            type: "show",
+            value: ""
+        };
+    }
+
+
+    return {
+        type: "none",
+        value: ""
+    };
+}
+
+
+// ==========================================
+// FIND MEMORY TO DELETE
+// ==========================================
+
+function findMemoryToDelete(searchText) {
+
+    if (!searchText) {
+        return null;
+    }
+
+    const normalized =
+        searchText
+            .toLowerCase()
+            .trim();
+
+    // تطابق كامل
+
+    let found =
+        novaMemory.find(
+            memory =>
+                memory.text
+                    .toLowerCase()
+                    .includes(normalized)
+        );
+
+    if (found) {
+        return found;
+    }
+
+    // محاولة مطابقة الكلمات
+
+    const words =
+        normalized
+            .split(/\s+/)
+            .filter(Boolean);
+
+    if (!words.length) {
+        return null;
+    }
+
+    found =
+        novaMemory.find(memory => {
+
+            const memoryText =
+                memory.text.toLowerCase();
+
+            return words.every(
+                word =>
+                    memoryText.includes(word)
+            );
+
+        });
+
+    return found || null;
+}
+
+
+// ==========================================
+// HANDLE MEMORY COMMAND
+// ==========================================
+
+function handleMemoryCommand(text) {
+
+    const command =
+        detectMemoryCommand(text);
+
+    if (command.type === "none") {
+        return null;
+    }
+
+
+    // ==========================
+    // SAVE
+    // ==========================
+
+    if (command.type === "save") {
+
+        const added =
+            addNovaMemory(command.value);
+
+        if (added) {
+
+            return {
+                handled: true,
+
+                reply:
+                    `تمام 🧠 حفظت دي في ذاكرتي:\n\n` +
+                    `**${command.value}**`
+            };
+
+        }
+
+        return {
+            handled: true,
+
+            reply:
+                "المعلومة دي موجودة بالفعل في ذاكرتي 🧠"
+        };
+    }
+
+
+    // ==========================
+    // FORGET
+    // ==========================
+
+    if (command.type === "forget") {
+
+        const memory =
+            findMemoryToDelete(
+                command.value
+            );
+
+        if (!memory) {
+
+            return {
+                handled: true,
+
+                reply:
+                    "مش لاقي المعلومة دي في ذاكرتي."
+            };
+        }
+
+        deleteNovaMemorySilently(
+            memory.id
+        );
+
+        return {
+            handled: true,
+
+            reply:
+                `تمام 🧹 نسيت المعلومة دي:\n\n` +
+                `**${memory.text}**`
+        };
+    }
+
+
+    // ==========================
+    // SHOW
+    // ==========================
+
+    if (command.type === "show") {
+
+        if (!novaMemory.length) {
+
+            return {
+                handled: true,
+
+                reply:
+                    "لسه مفيش أي معلومات محفوظة في ذاكرتي 🧠"
+            };
+        }
+
+        const list =
+            novaMemory
+                .map(
+                    (memory, index) =>
+                        `${index + 1}. ${memory.text}`
+                )
+                .join("\n");
+
+        return {
+            handled: true,
+
+            reply:
+                `دي المعلومات اللي محفوظة عندي 🧠:\n\n${list}`
+        };
+    }
+
+
+    return null;
+}
+
+
+// ==========================================
+// SILENT DELETE
+// ==========================================
+
+function deleteNovaMemorySilently(id) {
+
+    novaMemory =
+        novaMemory.filter(
+            memory =>
+                memory.id !== id
+        );
+
+    saveNovaMemory();
+
+    renderNovaMemory();
+}
+
+
+// ==========================================
+// MEMORY EVENTS
+// ==========================================
+
+function setupMemory() {
+
+    renderNovaMemory();
+
+    const clearMemoryBtn =
+        document.getElementById(
+            "clearMemoryBtn"
+        );
+
+    if (clearMemoryBtn) {
+
+        clearMemoryBtn.addEventListener(
+            "click",
+            clearAllNovaMemory
+        );
+    }
+}
 
 // ==========================================
 // NOVA AI
