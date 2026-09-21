@@ -747,132 +747,64 @@ function closeAllMenus() {
 
 
 // ==========================================
-// 2. زر الإرسال
+// NOVA AI V2 - استخراج سياق المحادثة
 // ==========================================
 
-function updateSendButtonState(
-    isGenerating
-) {
+function getConversationHistory() {
 
-    if (!sendChatBtn) {
-
-        return;
-
+    if (!chatBox) {
+        return [];
     }
 
-    if (isGenerating) {
+    const messages = [];
 
-        sendChatBtn.innerHTML =
-            `<i class="fa-solid fa-square"></i>`;
+    const messageElements =
+        chatBox.querySelectorAll(".message");
 
-        sendChatBtn.title =
-            "إيقاف الرد";
+    messageElements.forEach(messageElement => {
 
-        sendChatBtn.classList.add(
-            "stop-generating"
-        );
+        if (
+            messageElement.classList.contains("nova-loading") ||
+            messageElement.querySelector(".nova-loading")
+        ) {
+            return;
+        }
 
-    } else {
+        if (messageElement.classList.contains("user-message")) {
 
-        sendChatBtn.innerHTML =
-            `<i class="fa-solid fa-paper-plane"></i>`;
+            const text = messageElement.innerText.trim();
 
-        sendChatBtn.title =
-            "إرسال";
-
-        sendChatBtn.classList.remove(
-            "stop-generating"
-        );
-
-    }
-
-}
-
-
-if (sendChatBtn) {
-
-    sendChatBtn.addEventListener(
-        "click",
-        () => {
-
-            if (
-                currentAbortController
-            ) {
-
-                currentAbortController.abort();
-
-                currentAbortController =
-                    null;
-
-                updateSendButtonState(
-                    false
-                );
-
-                return;
-
+            if (text) {
+                messages.push({
+                    role: "user",
+                    parts: [{ text }]
+                });
             }
 
-            sendMessage();
+        } else if (
+            messageElement.classList.contains("nova-message")
+        ) {
 
-        }
-    );
+            const content =
+                messageElement.querySelector(".nova-message-content");
 
-}
+            if (!content) return;
 
+            const text = content.innerText.trim();
 
-// ==========================================
-// الكتابة
-// ==========================================
-
-if (chatInput) {
-
-    chatInput.addEventListener(
-        "input",
-        () => {
-
-            chatInput.style.height =
-                "auto";
-
-            const maxHeight =
-                130;
-
-            chatInput.style.height =
-                Math.min(
-                    chatInput.scrollHeight,
-                    maxHeight
-                ) + "px";
-
-        }
-    );
-
-
-    chatInput.addEventListener(
-        "keydown",
-        e => {
-
-            if (
-                e.key === "Enter" &&
-                !e.shiftKey
-            ) {
-
-                e.preventDefault();
-
-                if (
-                    currentAbortController
-                ) {
-
-                    return;
-
-                }
-
-                sendMessage();
-
+            if (text) {
+                messages.push({
+                    role: "model",
+                    parts: [{ text }]
+                });
             }
-
         }
-    );
+    });
 
+    return messages.slice(-20);
 }
+
+
 
 
 // ==========================================
