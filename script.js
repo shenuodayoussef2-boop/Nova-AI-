@@ -1,4 +1,3 @@
-
 // ==========================================
 // NOVA AI - MAIN SCRIPT
 // ==========================================
@@ -40,12 +39,18 @@ try {
 
     localStorage.removeItem("novaAllChats");
 }
+
 let currentChatId = null;
 
 let currentAbortController = null;
 
 // الصورة المرفوعة التي سيتم استخدامها في تعديل الصورة
 let pendingVisionImage = null;
+
+
+// ==========================================
+// DOM ELEMENTS
+// ==========================================
 
 const historyList =
     document.getElementById("historyList");
@@ -61,6 +66,12 @@ const sendChatBtn =
 
 const chatInput =
     document.getElementById("chatInput");
+
+const fileInput =
+    document.getElementById("fileInput");
+
+const attachDropdown =
+    document.getElementById("attachDropdown");
 
 
 // ==========================================
@@ -113,7 +124,6 @@ function startNewChat() {
 
         chatBox.innerHTML = `
 
-            <!-- شاشة الترحيب -->
             <div
                 class="nova-welcome"
                 id="novaWelcome"
@@ -133,7 +143,6 @@ function startNewChat() {
                     ابدأ محادثتك واكتشف إمكانيات Nova.
                 </p>
 
-                <!-- الاقتراحات الجاهزة -->
                 <div class="quick-prompts">
 
                     <button
@@ -406,7 +415,6 @@ function renderHistoryList() {
 
             `;
 
-
             li.addEventListener(
                 "click",
                 e => {
@@ -429,7 +437,6 @@ function renderHistoryList() {
                 }
             );
 
-
             const moreBtn =
                 li.querySelector(
                     ".more-btn"
@@ -439,7 +446,6 @@ function renderHistoryList() {
                 li.querySelector(
                     ".chat-context-menu"
                 );
-
 
             moreBtn.addEventListener(
                 "click",
@@ -475,7 +481,6 @@ function renderHistoryList() {
                 }
             );
 
-
             li.querySelector(
                 ".opt-share"
             )?.addEventListener(
@@ -508,7 +513,6 @@ function renderHistoryList() {
 
                 }
             );
-
 
             li.querySelector(
                 ".opt-pin"
@@ -550,7 +554,6 @@ function renderHistoryList() {
                 }
             );
 
-
             li.querySelector(
                 ".opt-rename"
             )?.addEventListener(
@@ -590,7 +593,6 @@ function renderHistoryList() {
 
                 }
             );
-
 
             li.querySelector(
                 ".opt-delete"
@@ -657,7 +659,6 @@ function renderHistoryList() {
 
                 }
             );
-
 
             historyList.appendChild(
                 li
@@ -730,14 +731,9 @@ function closeAllMenus() {
             }
         );
 
-    const dropdown =
-        document.getElementById(
-            "attachDropdown"
-        );
+    if (attachDropdown) {
 
-    if (dropdown) {
-
-        dropdown.classList.remove(
+        attachDropdown.classList.remove(
             "show"
         );
 
@@ -753,58 +749,97 @@ function closeAllMenus() {
 function getConversationHistory() {
 
     if (!chatBox) {
+
         return [];
+
     }
 
     const messages = [];
 
     const messageElements =
-        chatBox.querySelectorAll(".message");
+        chatBox.querySelectorAll(
+            ".message"
+        );
 
-    messageElements.forEach(messageElement => {
+    messageElements.forEach(
+        messageElement => {
 
-        if (
-            messageElement.classList.contains("nova-loading") ||
-            messageElement.querySelector(".nova-loading")
-        ) {
-            return;
-        }
+            if (
+                messageElement.classList.contains(
+                    "nova-loading"
+                ) ||
+                messageElement.querySelector(
+                    ".nova-loading"
+                )
+            ) {
 
-        if (messageElement.classList.contains("user-message")) {
+                return;
 
-            const text = messageElement.innerText.trim();
-
-            if (text) {
-                messages.push({
-                    role: "user",
-                    parts: [{ text }]
-                });
             }
 
-        } else if (
-            messageElement.classList.contains("nova-message")
-        ) {
+            if (
+                messageElement.classList.contains(
+                    "user-message"
+                )
+            ) {
 
-            const content =
-                messageElement.querySelector(".nova-message-content");
+                const text =
+                    messageElement.innerText.trim();
 
-            if (!content) return;
+                if (text) {
 
-            const text = content.innerText.trim();
+                    messages.push({
+                        role: "user",
+                        parts: [
+                            {
+                                text
+                            }
+                        ]
+                    });
 
-            if (text) {
-                messages.push({
-                    role: "model",
-                    parts: [{ text }]
-                });
+                }
+
+            } else if (
+                messageElement.classList.contains(
+                    "nova-message"
+                )
+            ) {
+
+                const content =
+                    messageElement.querySelector(
+                        ".nova-message-content"
+                    );
+
+                if (!content) {
+
+                    return;
+
+                }
+
+                const text =
+                    content.innerText.trim();
+
+                if (text) {
+
+                    messages.push({
+                        role: "model",
+                        parts: [
+                            {
+                                text
+                            }
+                        ]
+                    });
+
+                }
+
             }
+
         }
-    });
+    );
 
     return messages.slice(-20);
+
 }
-
-
 
 
 // ==========================================
@@ -899,7 +934,6 @@ async function sendMessage(
         text
     );
 
-
     if (
         !customText &&
         chatInput
@@ -913,15 +947,12 @@ async function sendMessage(
 
     }
 
-
     chatBox.scrollTop =
         chatBox.scrollHeight;
-
 
     saveCurrentChat(
         text
     );
-
 
     const lowerText =
         text.toLowerCase();
@@ -1101,70 +1132,105 @@ async function sendMessage(
     let data =
         null;
 
-
     try {
 
-for (
-    let attempt = 1;
-    attempt <= 3;
-    attempt++
-) {
-
-    try {
-
- const conversationHistory = getConversationHistory();
-
-const response = await fetch(
-    "/api/chat",
-    {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        signal: currentAbortController.signal,
-        body: JSON.stringify({
-            message: text,
-            history: conversationHistory.slice(0, -1)
-        })
-    }
-);
-
-        data = await response.json();
-
-        if (
-            data.error &&
-            data.error.message &&
-            data.error.message.includes(
-                "high demand"
-            ) &&
-            attempt < 3
+        for (
+            let attempt = 1;
+            attempt <= 3;
+            attempt++
         ) {
 
-            await delay(1500);
+            try {
 
-            continue;
+                // ==========================================
+                // NOVA AI V2 - إرسال سياق المحادثة
+                // ==========================================
+
+                const conversationHistory =
+                    getConversationHistory();
+
+                const response =
+                    await fetch(
+                        "/api/chat",
+                        {
+                            method:
+                                "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            signal:
+                                currentAbortController.signal,
+
+                            body:
+                                JSON.stringify({
+                                    message:
+                                        text,
+
+                                    history:
+                                        conversationHistory.slice(
+                                            0,
+                                            -1
+                                        )
+                                })
+
+                        }
+                    );
+
+                data =
+                    await response.json();
+
+                if (
+                    data.error &&
+                    data.error.message &&
+                    data.error.message.includes(
+                        "high demand"
+                    ) &&
+                    attempt < 3
+                ) {
+
+                    await delay(
+                        1500
+                    );
+
+                    continue;
+
+                }
+
+                success =
+                    response.ok;
+
+                break;
+
+            } catch (netErr) {
+
+                if (
+                    netErr.name ===
+                    "AbortError"
+                ) {
+
+                    throw netErr;
+
+                }
+
+                if (
+                    attempt ===
+                    3
+                ) {
+
+                    throw netErr;
+
+                }
+
+                await delay(
+                    1500
+                );
+
+            }
+
         }
-
-        success = response.ok;
-
-        break;
-
-    } catch (netErr) {
-
-        if (
-            netErr.name === "AbortError"
-        ) {
-
-            throw netErr;
-        }
-
-        if (attempt === 3) {
-            throw netErr;
-        }
-
-        await delay(1500);
-    }
-}
 
 
         const loadingElem =
@@ -1241,7 +1307,6 @@ const response = await fetch(
 
         }
 
-
         if (
             error.name ===
             "AbortError"
@@ -1273,7 +1338,6 @@ const response = await fetch(
 
     }
 
-
     updateSendButtonState(
         false
     );
@@ -1300,7 +1364,6 @@ function getDemoReply(
     const lower =
         text.toLowerCase().trim();
 
-
     if (
         lower.includes("مين أنت") ||
         lower.includes("من أنت") ||
@@ -1318,7 +1381,6 @@ function getDemoReply(
         `.trim();
 
     }
-
 
     if (
         lower.includes("مرحبا") ||
@@ -1338,7 +1400,6 @@ function getDemoReply(
         `.trim();
 
     }
-
 
     if (
         lower.includes("ماذا تستطيع") ||
@@ -1362,7 +1423,6 @@ function getDemoReply(
 
     }
 
-
     if (
         lower.includes("nova") ||
         lower.includes("نوفا")
@@ -1375,7 +1435,6 @@ function getDemoReply(
         `.trim();
 
     }
-
 
     return `
 وصلتني رسالتك:
@@ -1525,7 +1584,6 @@ function setupMessageActions(
             ".dislike-message"
         );
 
-
     copyBtn?.addEventListener(
         "click",
         async () => {
@@ -1563,7 +1621,6 @@ function setupMessageActions(
 
         }
     );
-
 
     regenerateBtn?.addEventListener(
         "click",
@@ -1625,7 +1682,6 @@ function setupMessageActions(
         }
     );
 
-
     likeBtn?.addEventListener(
         "click",
         () => {
@@ -1640,7 +1696,6 @@ function setupMessageActions(
 
         }
     );
-
 
     dislikeBtn?.addEventListener(
         "click",
@@ -1832,6 +1887,69 @@ function showToast(
 
 
 // ==========================================
+// تحديث زر الإرسال
+// ==========================================
+
+function updateSendButtonState(
+    isGenerating
+) {
+
+    if (!sendChatBtn) {
+
+        return;
+
+    }
+
+    if (isGenerating) {
+
+        sendChatBtn.innerHTML =
+            `<i class="fa-solid fa-square"></i>`;
+
+        sendChatBtn.title =
+            "إيقاف الرد";
+
+        sendChatBtn.classList.add(
+            "stop-generating"
+        );
+
+        sendChatBtn.onclick =
+            () => {
+
+                if (
+                    currentAbortController
+                ) {
+
+                    try {
+
+                        currentAbortController.abort();
+
+                    } catch {}
+
+                }
+
+            };
+
+    } else {
+
+        sendChatBtn.innerHTML =
+            `<i class="fa-solid fa-paper-plane"></i>`;
+
+        sendChatBtn.title =
+            "إرسال";
+
+        sendChatBtn.classList.remove(
+            "stop-generating"
+        );
+
+        sendChatBtn.onclick =
+            null;
+
+    }
+
+}
+
+
+// ==========================================
 // 4. ترجمة النصوص للصور
 // ==========================================
 
@@ -1954,7 +2072,6 @@ async function generateImage(
         "img-loading-" +
         Date.now();
 
-
     chatBox.insertAdjacentHTML(
         "beforeend",
         `
@@ -2004,14 +2121,12 @@ async function generateImage(
     chatBox.scrollTop =
         chatBox.scrollHeight;
 
-
     try {
 
         const translatedText =
             await translateToEnglishIfNeeded(
                 text
             );
-
 
         const finalPrompt = `
 Photorealistic, ultra-realistic photography, highly detailed,
@@ -2023,7 +2138,6 @@ authentic environment, realistic proportions, high detail.
 
 ${translatedText}
         `.trim();
-
 
         const response =
             await fetch(
@@ -2046,17 +2160,14 @@ ${translatedText}
                 }
             );
 
-
         const data =
             await response.json();
-
 
         document
             .getElementById(
                 loadingId
             )
             ?.remove();
-
 
         if (
             response.ok &&
@@ -2080,7 +2191,6 @@ ${translatedText}
             return;
 
         }
-
 
         console.error(
             "Nova AI Image Error:",
@@ -2118,7 +2228,6 @@ ${translatedText}
 
     }
 
-
     saveCurrentChat();
 
     chatBox.scrollTop =
@@ -2148,7 +2257,6 @@ async function editImageWithPrompt(
     const loadingId =
         "edit-image-loading-" +
         Date.now();
-
 
     chatBox.insertAdjacentHTML(
         "beforeend",
@@ -2218,10 +2326,8 @@ async function editImageWithPrompt(
         `
     );
 
-
     chatBox.scrollTop =
         chatBox.scrollHeight;
-
 
     try {
 
@@ -2229,7 +2335,6 @@ async function editImageWithPrompt(
             await translateToEnglishIfNeeded(
                 text
             );
-
 
         const finalPrompt = `
 Edit the provided image according to the user's request.
@@ -2248,7 +2353,6 @@ accurate proportions, realistic environment.
 User request:
 ${translatedText}
         `.trim();
-
 
         const response =
             await fetch(
@@ -2276,17 +2380,14 @@ ${translatedText}
                 }
             );
 
-
         const data =
             await response.json();
-
 
         document
             .getElementById(
                 loadingId
             )
             ?.remove();
-
 
         if (
             response.ok &&
@@ -2311,12 +2412,10 @@ ${translatedText}
 
         }
 
-
         console.error(
             "Nova AI Edit Image Error:",
             data
         );
-
 
         chatBox.appendChild(
             createAssistantMessage(
@@ -2327,7 +2426,6 @@ ${translatedText}
             )
         );
 
-
     } catch (error) {
 
         console.error(
@@ -2335,13 +2433,11 @@ ${translatedText}
             error
         );
 
-
         document
             .getElementById(
                 loadingId
             )
             ?.remove();
-
 
         chatBox.appendChild(
             createAssistantMessage(
@@ -2350,7 +2446,6 @@ ${translatedText}
         );
 
     }
-
 
     saveCurrentChat();
 
@@ -2387,12 +2482,10 @@ async function generateVideo(
     chatBox.scrollTop =
         chatBox.scrollHeight;
 
-
     const translatedText =
         await translateToEnglishIfNeeded(
             text
         );
-
 
     document
         .getElementById(
@@ -2400,12 +2493,10 @@ async function generateVideo(
         )
         ?.remove();
 
-
     const cleanPrompt =
         encodeURIComponent(
             translatedText
         );
-
 
     const randomSeed =
         Math.floor(
@@ -2413,10 +2504,8 @@ async function generateVideo(
             1000000
         );
 
-
     const videoUrl =
         `https://image.pollinations.ai/prompt/cinematic%20video%20still%20of%20${cleanPrompt}?seed=${randomSeed}&width=600&height=400&nologo=true`;
-
 
     appendMediaMessage(
         "إليك المشهد المطلوب: 🎥",
@@ -2424,7 +2513,6 @@ async function generateVideo(
         text,
         "video"
     );
-
 
     saveCurrentChat();
 
@@ -2453,12 +2541,10 @@ function appendMediaMessage(
     message.className =
         "message bot-message nova-message";
 
-
     const icon =
         type === "video"
             ? "🎬"
             : "✨";
-
 
     message.innerHTML = `
 
@@ -2513,7 +2599,6 @@ function appendMediaMessage(
 
     `;
 
-
     chatBox.appendChild(
         message
     );
@@ -2535,11 +2620,8 @@ function appendImageMessageWithVisionChips(
 
     }
 
-
-    // حفظ الصورة لاستخدامها في التعديل
     pendingVisionImage =
         imageSrc;
-
 
     const messageDiv =
         document.createElement(
@@ -2548,7 +2630,6 @@ function appendImageMessageWithVisionChips(
 
     messageDiv.className =
         "message user-message";
-
 
     messageDiv.innerHTML = `
 
@@ -2609,7 +2690,6 @@ function appendImageMessageWithVisionChips(
 
     `;
 
-
     messageDiv
         .querySelectorAll(
             ".vision-chip-btn"
@@ -2635,7 +2715,6 @@ function appendImageMessageWithVisionChips(
             }
         );
 
-
     chatBox.appendChild(
         messageDiv
     );
@@ -2655,7 +2734,6 @@ window.triggerVisionAction =
 
         const promptText =
             `بخصوص الصورة المرفقة، من فضلك قم بـ: ${actionType}`;
-
 
         sendMessage(
             promptText,
@@ -2749,6 +2827,8 @@ document.addEventListener(
             );
 
         }
+
+
         // ==========================================
         // رفع الملفات
         // ==========================================
@@ -2757,7 +2837,6 @@ document.addEventListener(
             document.getElementById(
                 "optUpload"
             );
-
 
         if (
             optUpload &&
@@ -2770,15 +2849,18 @@ document.addEventListener(
 
                     e.stopPropagation();
 
-                    attachDropdown?.classList.remove(
-                        "show"
-                    );
+                    if (attachDropdown) {
+
+                        attachDropdown.classList.remove(
+                            "show"
+                        );
+
+                    }
 
                     fileInput.click();
 
                 }
             );
-
 
             fileInput.addEventListener(
                 "change",
@@ -2793,25 +2875,20 @@ document.addEventListener(
 
                     }
 
-
                     const file =
                         fileInput.files[0];
-
 
                     const fileName =
                         file.name;
 
-
                     const fileReader =
                         new FileReader();
-
 
                     fileReader.onload =
                         function (e) {
 
                             const fileResult =
                                 e.target.result;
-
 
                             if (
                                 file.type.startsWith(
@@ -2841,7 +2918,6 @@ document.addEventListener(
 
                             }
 
-
                             saveCurrentChat();
 
                             chatBox.scrollTop =
@@ -2851,7 +2927,6 @@ document.addEventListener(
                                 "";
 
                         };
-
 
                     if (
                         file.type.startsWith(
@@ -2904,7 +2979,6 @@ document.addEventListener(
                 "optImage"
             );
 
-
         if (optImage) {
 
             optImage.addEventListener(
@@ -2913,16 +2987,18 @@ document.addEventListener(
 
                     e.stopPropagation();
 
-                    attachDropdown?.classList.remove(
-                        "show"
-                    );
+                    if (attachDropdown) {
 
+                        attachDropdown.classList.remove(
+                            "show"
+                        );
+
+                    }
 
                     const promptText =
                         prompt(
                             "اكتب وصف الصورة (بالعربي أو الإنجليزي):"
                         );
-
 
                     if (
                         !promptText ||
@@ -2933,15 +3009,12 @@ document.addEventListener(
 
                     }
 
-
                     const userPrompt =
                         promptText.trim();
-
 
                     appendUserMessage(
                         `رسم صورة: ${userPrompt}`
                     );
-
 
                     await generateImage(
                         userPrompt
@@ -2962,7 +3035,6 @@ document.addEventListener(
                 "optVideo"
             );
 
-
         if (optVideo) {
 
             optVideo.addEventListener(
@@ -2971,16 +3043,18 @@ document.addEventListener(
 
                     e.stopPropagation();
 
-                    attachDropdown?.classList.remove(
-                        "show"
-                    );
+                    if (attachDropdown) {
 
+                        attachDropdown.classList.remove(
+                            "show"
+                        );
+
+                    }
 
                     const promptText =
                         prompt(
                             "اكتب وصف الفيديو (بالعربي أو الإنجليزي):"
                         );
-
 
                     if (
                         !promptText ||
@@ -2991,15 +3065,12 @@ document.addEventListener(
 
                     }
 
-
                     const userPrompt =
                         promptText.trim();
-
 
                     appendUserMessage(
                         `توليد فيديو: ${userPrompt}`
                     );
-
 
                     await generateVideo(
                         userPrompt
@@ -3020,7 +3091,6 @@ document.addEventListener(
                 "optMusic"
             );
 
-
         if (optMusic) {
 
             optMusic.addEventListener(
@@ -3029,16 +3099,18 @@ document.addEventListener(
 
                     e.stopPropagation();
 
-                    attachDropdown?.classList.remove(
-                        "show"
-                    );
+                    if (attachDropdown) {
 
+                        attachDropdown.classList.remove(
+                            "show"
+                        );
+
+                    }
 
                     const text =
                         prompt(
                             "اكتب النص المراد تحويله إلى صوت:"
                         );
-
 
                     if (
                         !text ||
@@ -3049,21 +3121,17 @@ document.addEventListener(
 
                     }
 
-
                     const cleanText =
                         text.trim();
-
 
                     appendUserMessage(
                         `توليد صوت: ${cleanText}`
                     );
 
-
                     const audioUrl =
                         `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
                             cleanText
                         )}&tl=ar&client=tw-ob`;
-
 
                     chatBox.insertAdjacentHTML(
                         "beforeend",
@@ -3092,7 +3160,6 @@ document.addEventListener(
                         `
                     );
 
-
                     saveCurrentChat();
 
                     chatBox.scrollTop =
@@ -3115,46 +3182,38 @@ const SpeechRecognition =
     window.SpeechRecognition ||
     window.webkitSpeechRecognition;
 
-
 const voiceOverlay =
     document.getElementById(
         "voiceOverlay"
     );
-
 
 const closeVoiceBtn =
     document.getElementById(
         "closeVoiceBtn"
     );
 
-
 const endVoiceCallBtn =
     document.getElementById(
         "endVoiceCallBtn"
     );
-
 
 const voiceOrb =
     document.getElementById(
         "voiceOrb"
     );
 
-
 const liveVoiceBtn =
     document.getElementById(
         "liveVoiceBtn"
     );
-
 
 const micBtn =
     document.getElementById(
         "micBtn"
     );
 
-
 let isLiveMode =
     false;
-
 
 let recognition =
     null;
@@ -3169,18 +3228,14 @@ if (SpeechRecognition) {
     recognition =
         new SpeechRecognition();
 
-
     recognition.lang =
         "ar-SA";
-
 
     recognition.continuous =
         false;
 
-
     recognition.interimResults =
         false;
-
 
     if (micBtn) {
 
@@ -3190,7 +3245,6 @@ if (SpeechRecognition) {
 
                 isLiveMode =
                     false;
-
 
                 try {
 
@@ -3213,7 +3267,6 @@ if (SpeechRecognition) {
 
     }
 
-
     if (liveVoiceBtn) {
 
         liveVoiceBtn.addEventListener(
@@ -3223,7 +3276,6 @@ if (SpeechRecognition) {
                 isLiveMode =
                     true;
 
-
                 if (voiceOverlay) {
 
                     voiceOverlay.classList.add(
@@ -3232,14 +3284,12 @@ if (SpeechRecognition) {
 
                 }
 
-
                 if (voiceOrb) {
 
                     voiceOrb.className =
                         "voice-orb listening";
 
                 }
-
 
                 try {
 
@@ -3258,7 +3308,6 @@ if (SpeechRecognition) {
 
     }
 
-
     recognition.onresult =
         async event => {
 
@@ -3267,11 +3316,9 @@ if (SpeechRecognition) {
                     .results[0][0]
                     .transcript;
 
-
             micBtn?.classList.remove(
                 "recording"
             );
-
 
             if (isLiveMode) {
 
@@ -3281,7 +3328,6 @@ if (SpeechRecognition) {
                         "voice-orb speaking";
 
                 }
-
 
                 await sendVoiceMessageAndReply(
                     transcript
@@ -3294,9 +3340,7 @@ if (SpeechRecognition) {
                     chatInput.value =
                         transcript;
 
-
                     chatInput.focus();
-
 
                     chatInput.dispatchEvent(
                         new Event(
@@ -3310,7 +3354,6 @@ if (SpeechRecognition) {
 
         };
 
-
     recognition.onerror =
         event => {
 
@@ -3319,11 +3362,9 @@ if (SpeechRecognition) {
                 event.error
             );
 
-
             micBtn?.classList.remove(
                 "recording"
             );
-
 
             if (voiceOrb) {
 
@@ -3333,7 +3374,6 @@ if (SpeechRecognition) {
             }
 
         };
-
 
     recognition.onend =
         () => {
@@ -3367,13 +3407,11 @@ function closeVoiceOverlay() {
 
     }
 
-
     try {
 
         recognition?.stop();
 
     } catch {}
-
 
     if (voiceOrb) {
 
@@ -3382,12 +3420,10 @@ function closeVoiceOverlay() {
 
     }
 
-
     isLiveMode =
         false;
 
 }
-
 
 if (closeVoiceBtn) {
 
@@ -3397,7 +3433,6 @@ if (closeVoiceBtn) {
     );
 
 }
-
 
 if (endVoiceCallBtn) {
 
@@ -3423,11 +3458,9 @@ async function sendVoiceMessageAndReply(
 
     }
 
-
     appendUserMessage(
         `🎙️ ${text}`
     );
-
 
     if (chatInput) {
 
@@ -3439,10 +3472,8 @@ async function sendVoiceMessageAndReply(
 
     }
 
-
     chatBox.scrollTop =
         chatBox.scrollHeight;
-
 
     saveCurrentChat(
         text
@@ -3459,7 +3490,6 @@ async function sendVoiceMessageAndReply(
             "voice-loading-" +
             Date.now();
 
-
         chatBox.insertAdjacentHTML(
             "beforeend",
             `
@@ -3472,13 +3502,10 @@ async function sendVoiceMessageAndReply(
             `
         );
 
-
         chatBox.scrollTop =
             chatBox.scrollHeight;
 
-
         await delay(900);
-
 
         document
             .getElementById(
@@ -3486,10 +3513,8 @@ async function sendVoiceMessageAndReply(
             )
             ?.remove();
 
-
         const reply =
             getDemoReply(text);
-
 
         const audioUrl =
             `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
@@ -3499,16 +3524,13 @@ async function sendVoiceMessageAndReply(
                 )
             )}&tl=ar&client=tw-ob`;
 
-
         const message =
             document.createElement(
                 "div"
             );
 
-
         message.className =
             "message bot-message nova-message";
-
 
         message.innerHTML = `
 
@@ -3532,11 +3554,9 @@ async function sendVoiceMessageAndReply(
 
         `;
 
-
         chatBox.appendChild(
             message
         );
-
 
         if (voiceOverlay) {
 
@@ -3546,7 +3566,6 @@ async function sendVoiceMessageAndReply(
 
         }
 
-
         if (voiceOrb) {
 
             voiceOrb.className =
@@ -3554,14 +3573,11 @@ async function sendVoiceMessageAndReply(
 
         }
 
-
         isLiveMode =
             false;
 
-
         chatBox.scrollTop =
             chatBox.scrollHeight;
-
 
         saveCurrentChat();
 
@@ -3578,7 +3594,6 @@ async function sendVoiceMessageAndReply(
         "voice-loading-" +
         Date.now();
 
-
     chatBox.insertAdjacentHTML(
         "beforeend",
         `
@@ -3591,10 +3606,8 @@ async function sendVoiceMessageAndReply(
         `
     );
 
-
     chatBox.scrollTop =
         chatBox.scrollHeight;
-
 
     try {
 
@@ -3618,17 +3631,14 @@ async function sendVoiceMessageAndReply(
                 }
             );
 
-
         const data =
             await response.json();
-
 
         document
             .getElementById(
                 loadingId
             )
             ?.remove();
-
 
         if (
             response.ok &&
@@ -3648,7 +3658,6 @@ async function sendVoiceMessageAndReply(
                     )
                     .join("\n");
 
-
             const audioUrl =
                 `https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(
                     reply.substring(
@@ -3657,16 +3666,13 @@ async function sendVoiceMessageAndReply(
                     )
                 )}&tl=ar&client=tw-ob`;
 
-
             const message =
                 document.createElement(
                     "div"
                 );
 
-
             message.className =
                 "message bot-message nova-message";
-
 
             message.innerHTML = `
 
@@ -3690,7 +3696,6 @@ async function sendVoiceMessageAndReply(
 
             `;
 
-
             chatBox.appendChild(
                 message
             );
@@ -3712,13 +3717,11 @@ async function sendVoiceMessageAndReply(
             error
         );
 
-
         document
             .getElementById(
                 loadingId
             )
             ?.remove();
-
 
         chatBox.appendChild(
             createAssistantMessage(
@@ -3727,7 +3730,6 @@ async function sendVoiceMessageAndReply(
         );
 
     }
-
 
     if (voiceOrb) {
 
@@ -3748,18 +3750,15 @@ const settingsBtn =
         "settingsBtn"
     );
 
-
 const settingsModal =
     document.getElementById(
         "settingsModal"
     );
 
-
 const closeSettingsBtn =
     document.getElementById(
         "closeSettingsBtn"
     );
-
 
 if (
     settingsBtn &&
@@ -3781,7 +3780,6 @@ if (
 
 }
 
-
 if (
     closeSettingsBtn &&
     settingsModal
@@ -3799,7 +3797,6 @@ if (
     );
 
 }
-
 
 window.addEventListener(
     "click",
@@ -3833,7 +3830,6 @@ document.addEventListener(
                 ".setting-item"
             );
 
-
         settingItems.forEach(
             item => {
 
@@ -3844,7 +3840,6 @@ document.addEventListener(
                         const text =
                             item.textContent
                                 .trim();
-
 
                         if (
                             text.includes(
@@ -3908,6 +3903,7 @@ document.addEventListener(
         ) {
 
             return;
+
         }
 
         const sidebar =
@@ -3928,6 +3924,7 @@ document.addEventListener(
         if (!sidebar) {
 
             return;
+
         }
 
         if (
@@ -3954,6 +3951,7 @@ document.addEventListener(
     }
 );
 
+
 // ==========================================
 // إغلاق Sidebar بعد اختيار محادثة
 // ==========================================
@@ -3966,7 +3964,6 @@ document.addEventListener(
             e.target.closest(
                 ".history-item"
             );
-
 
         if (
             historyItem &&
@@ -4008,7 +4005,6 @@ window.addEventListener(
                 "sidebar"
             );
 
-
         if (
             sidebar &&
             window.innerWidth >
@@ -4042,16 +4038,13 @@ function formatNovaResponse(
 
     }
 
-
     text =
         String(text);
-
 
     const parts =
         text.split(
             /(```[\s\S]*?```)/g
         );
-
 
     return parts
         .map(
@@ -4068,16 +4061,13 @@ function formatNovaResponse(
                             -3
                         );
 
-
                     let language =
                         "";
-
 
                     const firstNewLine =
                         codeContent.indexOf(
                             "\n"
                         );
-
 
                     if (
                         firstNewLine !== -1
@@ -4091,7 +4081,6 @@ function formatNovaResponse(
                                 )
                                 .trim();
 
-
                         if (
                             /^[a-zA-Z0-9+#.-]+$/.test(
                                 possibleLanguage
@@ -4101,7 +4090,6 @@ function formatNovaResponse(
                             language =
                                 possibleLanguage;
 
-
                             codeContent =
                                 codeContent.slice(
                                     firstNewLine + 1
@@ -4110,7 +4098,6 @@ function formatNovaResponse(
                         }
 
                     }
-
 
                     const languageNames = {
 
@@ -4185,14 +4172,12 @@ function formatNovaResponse(
 
                     };
 
-
                     const displayLanguage =
                         languageNames[
                             language.toLowerCase()
                         ] ||
                         language ||
                         "Code";
-
 
                     return `
 
@@ -4234,7 +4219,6 @@ function formatNovaResponse(
 
                 }
 
-
                 return formatNormalText(
                     part
                 );
@@ -4260,12 +4244,10 @@ function formatNormalText(
 
     }
 
-
     let result =
         escapeHtmlWithoutNewLines(
             text
         );
-
 
     // Bold
     result =
@@ -4274,13 +4256,11 @@ function formatNormalText(
             "<strong>$1</strong>"
         );
 
-
     result =
         result.replace(
             /__(.+?)__/gs,
             "<strong>$1</strong>"
         );
-
 
     // Italic
     result =
@@ -4289,7 +4269,6 @@ function formatNormalText(
             "<em>$1</em>"
         );
 
-
     // Inline code
     result =
         result.replace(
@@ -4297,14 +4276,12 @@ function formatNormalText(
             '<code class="nova-inline-code">$1</code>'
         );
 
-
     // الأسطر الجديدة
     result =
         result.replace(
             /\n/g,
             "<br>"
         );
-
 
     return result;
 
@@ -4327,7 +4304,6 @@ function escapeCodeHtml(
         return "";
 
     }
-
 
     return String(code)
         .replace(
@@ -4371,7 +4347,6 @@ function escapeHtmlWithoutNewLines(
 
     }
 
-
     return String(text)
         .replace(
             /&/g,
@@ -4411,7 +4386,6 @@ function setupCodeCopyButtons(
 
     }
 
-
     container
         .querySelectorAll(
             ".nova-copy-code"
@@ -4428,10 +4402,8 @@ function setupCodeCopyButtons(
 
                 }
 
-
                 button.dataset.copyReady =
                     "true";
-
 
                 button.addEventListener(
                     "click",
@@ -4446,17 +4418,14 @@ function setupCodeCopyButtons(
                                     "code"
                                 );
 
-
                         if (!codeBlock) {
 
                             return;
 
                         }
 
-
                         const code =
                             codeBlock.textContent;
-
 
                         try {
 
@@ -4464,17 +4433,14 @@ function setupCodeCopyButtons(
                                 code
                             );
 
-
                             button.innerHTML = `
                                 <i class="fa-solid fa-check"></i>
                                 <span>تم النسخ</span>
                             `;
 
-
                             showToast(
                                 "تم نسخ الكود"
                             );
-
 
                             setTimeout(
                                 () => {
@@ -4488,14 +4454,12 @@ function setupCodeCopyButtons(
                                 1500
                             );
 
-
                         } catch (error) {
 
                             console.error(
                                 "Code Copy Error:",
                                 error
                             );
-
 
                             alert(
                                 "تعذر نسخ الكود."
@@ -4523,18 +4487,15 @@ function setupQuickPrompts() {
             "novaWelcome"
         );
 
-
     const input =
         document.getElementById(
             "chatInput"
         );
 
-
     const prompts =
         document.querySelectorAll(
             ".quick-prompt"
         );
-
 
     if (
         !welcome ||
@@ -4545,7 +4506,6 @@ function setupQuickPrompts() {
         return;
 
     }
-
 
     prompts.forEach(
         button => {
@@ -4558,10 +4518,8 @@ function setupQuickPrompts() {
                         button.dataset.prompt ||
                         "";
 
-
                     input.value =
                         prompt;
-
 
                     input.dispatchEvent(
                         new Event(
@@ -4573,11 +4531,9 @@ function setupQuickPrompts() {
                         )
                     );
 
-
                     welcome.classList.add(
                         "hidden"
                     );
-
 
                     input.focus();
 
@@ -4615,35 +4571,113 @@ if (
 // تشغيل زر محادثة جديدة
 // ==========================================
 
-document.addEventListener(
-    "DOMContentLoaded",
-    function () {
+if (newChatBtn) {
 
-        const newChatButton =
-            document.getElementById(
-                "newChatBtn"
-            );
+    newChatBtn.addEventListener(
+        "click",
+        function (event) {
 
+            event.preventDefault();
 
-        if (newChatButton) {
-
-            newChatButton.addEventListener(
-                "click",
-                function (event) {
-
-                    event.preventDefault();
-
-                    startNewChat();
-
-                }
-            );
+            startNewChat();
 
         }
+    );
 
-    }
-);
+}
+
 
 // ==========================================
-// نهاية Nova AI
+// زر الإرسال + Enter
 // ==========================================
 
+if (sendChatBtn) {
+
+    sendChatBtn.addEventListener(
+        "click",
+        () => {
+
+            if (
+                sendChatBtn.classList.contains(
+                    "stop-generating"
+                )
+            ) {
+
+                if (
+                    currentAbortController
+                ) {
+
+                    try {
+
+                        currentAbortController.abort();
+
+                    } catch {}
+
+                }
+
+                return;
+
+            }
+
+            sendMessage();
+
+        }
+    );
+
+}
+
+
+if (chatInput) {
+
+    chatInput.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key === "Enter" &&
+                !event.shiftKey
+            ) {
+
+                event.preventDefault();
+
+                sendMessage();
+
+            }
+
+        }
+    );
+
+}
+
+
+// ==========================================
+// Auto Grow للـ textarea
+// ==========================================
+
+if (chatInput) {
+
+    chatInput.addEventListener(
+        "input",
+        () => {
+
+            chatInput.style.height =
+                "auto";
+
+            const maxHeight =
+                130;
+
+            chatInput.style.height =
+                Math.min(
+                    chatInput.scrollHeight,
+                    maxHeight
+                ) + "px";
+
+        }
+    );
+
+}
+
+
+// ==========================================
+// نهاية Nova AI V2 ✅
+// ==========================================
