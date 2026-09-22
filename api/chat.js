@@ -1,345 +1,134 @@
 // ==========================================
-// NOVA AI V2.5 - GEMINI CHAT API ✅
-// يدعم:
-// - النصوص
-// - الصور
-// - سياق المحادثة
-// - Web Search
+// NOVA AI V3 - ANTI 429 & ANTI 404 ✅
+// موديل خاص + Fallback + Web Search + Images
 // ==========================================
 
 export default async function handler(req, res) {
-
-  // ==========================================
-  // 1. السماح بطلبات POST فقط
-  // ==========================================
-
-  if (req.method !== "POST") {
-    return res.status(405).json({
-      success: false,
-      error: "يسمح بطلبات POST فقط"
-    });
+  if (req.method!== "POST") {
+    return res.status(405).json({ success: false, error: "يسمح بطلبات POST فقط" });
   }
 
   try {
+    const { message, imageData, mimeType, history } = req.body || {};
 
-    // ==========================================
-    // 2. قراءة البيانات
-    // ==========================================
+    const hasMessage = typeof message === "string" && message.trim().length > 0;
+    const hasImage = typeof imageData === "string" && imageData.length > 0 && typeof mimeType === "string" && mimeType.startsWith("image/");
 
-    const {
-      message,
-      imageData,
-      mimeType,
-      history
-    } = req.body || {};
-
-    // ==========================================
-    // 3. التحقق من الرسالة والصورة
-    // ==========================================
-
-    const hasMessage =
-      typeof message === "string" &&
-      message.trim().length > 0;
-
-    const hasImage =
-      typeof imageData === "string" &&
-      imageData.length > 0 &&
-      typeof mimeType === "string" &&
-      mimeType.startsWith("image/");
-
-    if (!hasMessage && !hasImage) {
-      return res.status(400).json({
-        success: false,
-        error: "يجب إرسال رسالة أو صورة"
-      });
+    if (!hasMessage &&!hasImage) {
+      return res.status(400).json({ success: false, error: "يجب إرسال رسالة أو صورة" });
     }
 
-    // ==========================================
-    // 4. قراءة مفتاح Gemini
-    // ==========================================
-
-    const apiKey = process.env.GEMINI_API_KEY;
-
-    if (!apiKey) {
-      return res.status(500).json({
-        success: false,
-        error: "مفتاح Gemini غير موجود في إعدادات Vercel"
-      });
+    // يدعم اكتر من مفتاح: حطهم في Vercel كده: KEY1,KEY2,KEY3
+    const allKeys = (process.env.GEMINI_API_KEY || "").split(",").map(k => k.trim()).filter(Boolean);
+    if (allKeys.length === 0) {
+      return res.status(500).json({ success: false, error: "مفتاح Gemini غير موجود في Vercel" });
     }
 
-    // ==========================================
-    // 5. تجهيز سجل المحادثة
-    // ==========================================
+    // موديلات بكوتة منفصلة - لو واحد ادى 429 ينقل على اللي بعده
+    const MODELS = [
+      "gemini-2.0-flash",
+      "gemini-1.5-flash",
+      "gemini-1.5-flash-8b",
+      "gemini-1.5-flash-latest"
+    ];
 
     const contents = [];
-
     if (Array.isArray(history)) {
-
-      const safeHistory = history
-        .filter(item => {
-
-          return (
-            item &&
-            (item.role === "user" || item.role === "model") &&
-            Array.isArray(item.parts) &&
-            item.parts.length > 0
-          );
-
-        })
-        .slice(-20);
-
+      const safeHistory = history.filter(i => i && (i.role === "user" || i.role === "model") && Array.isArray(i.parts) && i.parts.length > 0).slice(-20);
       for (const item of safeHistory) {
-
-        const safeParts = item.parts
-          .filter(part => {
-
-            return (
-              part &&
-              typeof part.text === "string" &&
-              part.text.trim().length > 0
-            );
-
-          })
-          .map(part => ({
-            text: part.text.trim()
-          }));
-
-        if (safeParts.length > 0) {
-
-          contents.push({
-            role: item.role,
-            parts: safeParts
-          });
-
-        }
-
+        const safeParts = item.parts.filter(p => p && typeof p.text === "string" && p.text.trim().length > 0).map(p => ({ text: p.text.trim() }));
+        if (safeParts.length > 0) contents.push({ role: item.role, parts: safeParts });
       }
-
     }
-
-    // ==========================================
-    // 6. تجهيز الرسالة الحالية
-    // ==========================================
 
     const currentParts = [];
-
-    if (hasMessage) {
-
-      currentParts.push({
-        text: message.trim()
-      });
-
-    } else if (hasImage) {
-
-      currentParts.push({
-        text:
-          "حلل الصورة المرفقة واشرح محتواها باللغة العربية."
-      });
-
-    }
-
-    // ==========================================
-    // 7. إضافة الصورة
-    // ==========================================
+    if (hasMessage) currentParts.push({ text: message.trim() });
+    else if (hasImage) currentParts.push({ text: "حلل الصورة المرفقة واشرح محتواها باللغة العربية." });
 
     if (hasImage) {
-
-      const cleanBase64 =
-        imageData.includes(",")
-          ? imageData.split(",")[1]
-          : imageData;
-
-      currentParts.push({
-        inline_data: {
-          mime_type: mimeType,
-          data: cleanBase64
-        }
-      });
-
+      const cleanBase64 = imageData.includes(",")? imageData.split(",")[1] : imageData;
+      currentParts.push({ inline_data: { mime_type: mimeType, data: cleanBase64 } });
     }
-
-    // ==========================================
-    // 8. إضافة الرسالة الحالية
-    // ==========================================
-
-    contents.push({
-      role: "user",
-      parts: currentParts
-    });
-
-    // ==========================================
-    // 9. تعليمات Nova AI
-    // ==========================================
+    contents.push({ role: "user", parts: currentParts });
 
     const systemInstruction = `
 أنت Nova AI — عقل رقمي صُمم ليصنع أكثر مما يجيب. ⚡
-
 أنت المساعد الذكي الخاص بـ Nova AI، ومن تطوير يوسف شنوده.
+مجالاتك: البرمجة 💻 - المعرفة 🧠 - الكتابة ✍️ - الإبداع 🚀 - تحليل الصور 🖼️ - البحث 🌐
 
-مجالاتك الأساسية:
-- البرمجة 💻
-- المعرفة والتعلم 🧠
-- الكتابة ✍️
-- الإبداع وتوليد الأفكار 🚀
-- تحليل الصور 🖼️
-- البحث عن المعلومات الحديثة 🌐
-
-هدفك هو مساعدة المستخدم على تحويل أفكاره إلى أشياء حقيقية.
-
-========================================
-هوية Nova AI
-========================================
-
+هوية Nova AI:
 - عرّف نفسك باسم Nova AI.
 - إذا سُئلت عن مطورك، اذكر أن مطورك هو يوسف شنوده.
-- لا تقدم نفسك على أنك Gemini أو ChatGPT.
-- إذا سُئلت عن النموذج التقني، وضّح أن Nova AI تستخدم نموذج Gemini من Google.
-- لا تخترع معلومات عن المستخدم أو عن المشروع.
-- لا تدّعِ تنفيذ إجراء لم تنفذه فعليًا.
+- لا تقدم نفسك على أنك Gemini أو ChatGPT ابدا.
+- إذا سُئلت عن النموذج التقني، وضّح أن Nova AI تستخدم نموذج Gemini من Google لكنها هوية خاصة.
+- لا تدّعِ تنفيذ إجراء لم تنفذه.
 
-========================================
-قواعد المحادثة
-========================================
-
-- استخدم سياق الرسائل السابقة عند الإجابة.
-- لا تكرر المعلومات التي قدمتها سابقًا دون داعٍ.
-- إذا كان السؤال غير واضح، اطلب توضيحًا مختصرًا.
+قواعد المحادثة:
+- استخدم سياق الرسائل السابقة.
 - كن عمليًا وواضحًا ومنظمًا.
-- عند كتابة الأكواد، قدم كودًا كاملًا عندما يطلب المستخدم ذلك.
-- لا تغير متطلبات المستخدم من نفسك.
+- عند كتابة الأكواد، قدم كودًا كاملًا.
 
-========================================
-البحث على الإنترنت
-========================================
+البحث على الإنترنت:
+استخدم أداة google_search عندما يحتاج السؤال لمعلومات حديثة (اسعار، اخبار، مباريات، اصدارات).
+لا تخترع مصادر.
 
-لديك إمكانية استخدام البحث على الإنترنت.
-
-استخدم البحث عندما يحتاج السؤال إلى معلومات حديثة أو متغيرة، مثل:
-- الأخبار
-- أسعار المنتجات
-- أسعار العملات
-- الأحداث الحالية
-- نتائج المباريات
-- المعلومات التي يمكن أن تتغير بمرور الوقت
-- إصدارات البرامج والمكتبات الحديثة
-- معلومات المواقع والشركات الحالية
-- أي سؤال يكون من الأفضل الإجابة عنه بمعلومات حديثة
-
-لا تستخدم البحث بدون حاجة عندما يكون السؤال:
-- معرفة عامة ثابتة
-- شرحًا تعليميًا
-- كتابة أو إعادة صياغة
-- برمجة لا تحتاج معلومات حديثة
-- سؤالًا يمكن الإجابة عنه من المعرفة العامة
-
-عند استخدام البحث:
-- اعتمد على النتائج التي تحصل عليها من أداة البحث.
-- لا تخترع مصادر أو روابط.
-- إذا كانت المعلومات غير مؤكدة، وضّح ذلك.
-- لا تدّعِ أنك بحثت إذا لم تستخدم أداة البحث فعليًا.
-- عند توفر معلومات من البحث، اجعل الإجابة مرتبطة بما وجدته.
-
-========================================
-أسلوبك
-========================================
-
-طبيعي، ودود، ذكي، ومفيد.
-
-لا تجعل كل إجابة طويلة بلا داعٍ.
-استخدم التفاصيل عندما تكون مفيدة.
-
-Nova AI.
-Think. Create. Build. 🚀
+أسلوبك: طبيعي، ودود، ذكي، ومفيد. عامية مصرية خفيفة عند الحاجة.
+Nova AI. Think. Create. Build. 🚀
 `.trim();
 
-    // ==========================================
-    // 10. إرسال الطلب إلى Gemini
-    // ==========================================
+    const requestBody = {
+      system_instruction: { parts: [{ text: systemInstruction }] },
+      tools: [{ google_search: {} }],
+      contents
+    };
 
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent",
-      {
-        method: "POST",
-
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": apiKey
-        },
-
-        body: JSON.stringify({
-
-          // --------------------------------------
-          // تعليمات النظام
-          // --------------------------------------
-
-          system_instruction: {
-            parts: [
-              {
-                text: systemInstruction
-              }
-            ]
-          },
-
-          // --------------------------------------
-          // أدوات Gemini
-          // --------------------------------------
-
-          tools: [
+    // Loop محاولة المفاتيح والموديلات
+    let lastError = null;
+    for (const apiKey of allKeys) {
+      for (const model of MODELS) {
+        try {
+          const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
             {
-              google_search: {}
+              method: "POST",
+              headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+              body: JSON.stringify(requestBody)
             }
-          ],
+          );
 
-          // --------------------------------------
-          // المحادثة
-          // --------------------------------------
+          const data = await response.json();
 
-          contents
+          if (response.ok) {
+            return res.status(200).json(data);
+          }
 
-        })
+          // لو 429 او 404 جرب الموديل اللي بعده
+          if (response.status === 429 || response.status === 404 || response.status === 503) {
+            console.warn(`Failed ${model} with ${response.status}, trying next...`);
+            lastError = data;
+            continue;
+          }
+
+          // اي خطأ تاني اطبعه
+          console.error("Gemini Error:", JSON.stringify(data, null, 2));
+          lastError = data;
+
+        } catch (e) {
+          console.error(`Network error on ${model}:`, e.message);
+          lastError = { message: e.message };
+        }
       }
-    );
-
-    const data = await response.json();
-
-    // ==========================================
-    // 11. معالجة أخطاء Gemini
-    // ==========================================
-
-    if (!response.ok) {
-
-      console.error(
-        "Gemini Error:",
-        JSON.stringify(data, null, 2)
-      );
-
-      return res.status(response.status).json({
-        success: false,
-        error: "حدث خطأ من Gemini",
-        details: data
-      });
-
     }
 
-    // ==========================================
-    // 12. إرسال الرد إلى الواجهة
-    // ==========================================
-
-    return res.status(200).json(data);
-
-  } catch (error) {
-
-    console.error(
-      "Chat API Error:",
-      error
-    );
-
-    return res.status(500).json({
+    // لو كل المحاولات فشلت
+    return res.status(429).json({
       success: false,
-      error: "حدث خطأ أثناء الاتصال بـ Gemini",
-      details: error.message
+      error: "كل مفاتيح وموديلات Nova مشغولة حاليا، جرب بعد 10 ثواني",
+      details: lastError
     });
 
+  } catch (error) {
+    console.error("Chat API Error:", error);
+    return res.status(500).json({ success: false, error: "حدث خطأ أثناء الاتصال بـ Gemini", details: error.message });
   }
-
 }
