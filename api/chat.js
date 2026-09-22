@@ -1,42 +1,85 @@
 // ==========================================
-// NOVA AI V3 - ANTI 429 & ANTI 404 ✅
-// موديل خاص + Fallback + Web Search + Images
+// NOVA AI V3 - NOVA 2.0 PRO MODEL ✅
+// يدعم: nova-2.0-pro + مفاتيح NOVA الخاصة + Gemini
 // ==========================================
 
 export default async function handler(req, res) {
+
   if (req.method!== "POST") {
-    return res.status(405).json({ success: false, error: "يسمح بطلبات POST فقط" });
+    return res.status(405).json({
+      success: false,
+      error: "يسمح بطلبات POST فقط"
+    });
+  }
+
+  // التحقق من مفتاح Nova الخاص (اختياري)
+  const novaKeyHeader = req.headers["x-nova-key"] || req.headers["authorization"]?.replace("Bearer ", "") || "";
+  const validNovaKeys = (process.env.NOVA_KEYS || "").split(",").map(k => k.trim()).filter(Boolean);
+
+  if (novaKeyHeader && validNovaKeys.length > 0) {
+    if (!validNovaKeys.includes(novaKeyHeader)) {
+      return res.status(401).json({
+        success: false,
+        error: "مفتاح Nova API غير صحيح"
+      });
+    }
   }
 
   try {
-    const { message, imageData, mimeType, history } = req.body || {};
+
+    const {
+      message,
+      imageData,
+      mimeType,
+      history,
+      model: requestedModel
+    } = req.body || {};
 
     const hasMessage = typeof message === "string" && message.trim().length > 0;
     const hasImage = typeof imageData === "string" && imageData.length > 0 && typeof mimeType === "string" && mimeType.startsWith("image/");
 
     if (!hasMessage &&!hasImage) {
-      return res.status(400).json({ success: false, error: "يجب إرسال رسالة أو صورة" });
+      return res.status(400).json({
+        success: false,
+        error: "يجب إرسال رسالة أو صورة"
+      });
     }
 
-    // يدعم اكتر من مفتاح: حطهم في Vercel كده: KEY1,KEY2,KEY3
     const allKeys = (process.env.GEMINI_API_KEY || "").split(",").map(k => k.trim()).filter(Boolean);
+
     if (allKeys.length === 0) {
-      return res.status(500).json({ success: false, error: "مفتاح Gemini غير موجود في Vercel" });
+      return res.status(500).json({
+        success: false,
+        error: "مفتاح Gemini غير موجود في Vercel"
+      });
     }
 
-    // موديلات بكوتة منفصلة - لو واحد ادى 429 ينقل على اللي بعده
-    const MODELS = [
-      "gemini-2.0-flash",
-      "gemini-1.5-flash",
-      "gemini-1.5-flash-8b",
-      "gemini-1.5-flash-latest"
-    ];
+    // تحويل اسم موديلك الخاص للموديل الحقيقي
+    const MODEL_MAP = {
+      "nova-2.0-pro": "gemini-2.0-flash",
+      "nova-2.0-flash": "gemini-1.5-flash",
+      "nova-2.0-mini": "gemini-1.5-flash-8b",
+      "gemini-2.0-flash": "gemini-2.0-flash",
+      "gemini-1.5-flash": "gemini-1.5-flash",
+      "gemini-1.5-flash-8b": "gemini-1.5-flash-8b"
+    };
 
+    const finalModelsToTry = [];
+    const userWant = MODEL_MAP[requestedModel] || "gemini-2.0-flash";
+
+    // نجرب الموديل اللي طلبه المستخدم اول حاجة
+    finalModelsToTry.push(userWant);
+    // وبعدين باقي الموديلات كـ Fallback
+    finalModelsToTry.push("gemini-1.5-flash", "gemini-1.5-flash-8b", "gemini-1.5-flash-latest");
+
+    const uniqueModels = [...new Set(finalModelsToTry)];
+
+    // تجهيز الهيستوري
     const contents = [];
     if (Array.isArray(history)) {
-      const safeHistory = history.filter(i => i && (i.role === "user" || i.role === "model") && Array.isArray(i.parts) && i.parts.length > 0).slice(-20);
+      const safeHistory = history.filter(item => item && (item.role === "user" || item.role === "model") && Array.isArray(item.parts) && item.parts.length > 0).slice(-20);
       for (const item of safeHistory) {
-        const safeParts = item.parts.filter(p => p && typeof p.text === "string" && p.text.trim().length > 0).map(p => ({ text: p.text.trim() }));
+        const safeParts = item.parts.filter(part => part && typeof part.text === "string" && part.text.trim().length > 0).map(part => ({ text: part.text.trim() }));
         if (safeParts.length > 0) contents.push({ role: item.role, parts: safeParts });
       }
     }
@@ -49,30 +92,24 @@ export default async function handler(req, res) {
       const cleanBase64 = imageData.includes(",")? imageData.split(",")[1] : imageData;
       currentParts.push({ inline_data: { mime_type: mimeType, data: cleanBase64 } });
     }
+
     contents.push({ role: "user", parts: currentParts });
 
     const systemInstruction = `
-أنت Nova AI — عقل رقمي صُمم ليصنع أكثر مما يجيب. ⚡
+أنت Nova AI 2.0 Pro — عقل رقمي خاص صُمم ليصنع أكثر مما يجيب. ⚡
 أنت المساعد الذكي الخاص بـ Nova AI، ومن تطوير يوسف شنوده.
-مجالاتك: البرمجة 💻 - المعرفة 🧠 - الكتابة ✍️ - الإبداع 🚀 - تحليل الصور 🖼️ - البحث 🌐
 
-هوية Nova AI:
-- عرّف نفسك باسم Nova AI.
-- إذا سُئلت عن مطورك، اذكر أن مطورك هو يوسف شنوده.
-- لا تقدم نفسك على أنك Gemini أو ChatGPT ابدا.
-- إذا سُئلت عن النموذج التقني، وضّح أن Nova AI تستخدم نموذج Gemini من Google لكنها هوية خاصة.
-- لا تدّعِ تنفيذ إجراء لم تنفذه.
+هويتك:
+- اسمك هو Nova 2.0 Pro.
+- إذا سُئلت من أنت، قل أنا Nova 2.0 Pro من تطوير يوسف شنوده.
+- لا تقل أبدا أنك Gemini أو ChatGPT.
+- إذا سُئلت عن التقنية، قل أنك مبني على معمارية Nova الخاصة والمدعومة بـ Gemini.
 
-قواعد المحادثة:
-- استخدم سياق الرسائل السابقة.
-- كن عمليًا وواضحًا ومنظمًا.
-- عند كتابة الأكواد، قدم كودًا كاملًا.
+قواعدك:
+- استخدم سياق المحادثة.
+- كن عملي وذكي ومنظم.
+- عند طلب كود، قدم كود كامل.
 
-البحث على الإنترنت:
-استخدم أداة google_search عندما يحتاج السؤال لمعلومات حديثة (اسعار، اخبار، مباريات، اصدارات).
-لا تخترع مصادر.
-
-أسلوبك: طبيعي، ودود، ذكي، ومفيد. عامية مصرية خفيفة عند الحاجة.
 Nova AI. Think. Create. Build. 🚀
 `.trim();
 
@@ -82,10 +119,10 @@ Nova AI. Think. Create. Build. 🚀
       contents
     };
 
-    // Loop محاولة المفاتيح والموديلات
     let lastError = null;
+
     for (const apiKey of allKeys) {
-      for (const model of MODELS) {
+      for (const model of uniqueModels) {
         try {
           const response = await fetch(
             `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
@@ -99,36 +136,41 @@ Nova AI. Think. Create. Build. 🚀
           const data = await response.json();
 
           if (response.ok) {
-            return res.status(200).json(data);
+            // نرجع الرد مع اسم موديلك انت مش اسم جوجل
+            return res.status(200).json({
+             ...data,
+              model_used: requestedModel || "nova-2.0-pro",
+              nova_model: true
+            });
           }
 
-          // لو 429 او 404 جرب الموديل اللي بعده
           if (response.status === 429 || response.status === 404 || response.status === 503) {
-            console.warn(`Failed ${model} with ${response.status}, trying next...`);
             lastError = data;
             continue;
           }
 
-          // اي خطأ تاني اطبعه
           console.error("Gemini Error:", JSON.stringify(data, null, 2));
-          lastError = data;
+          return res.status(response.status).json({ success: false, error: "خطأ من المحرك", details: data });
 
         } catch (e) {
-          console.error(`Network error on ${model}:`, e.message);
           lastError = { message: e.message };
+          continue;
         }
       }
     }
 
-    // لو كل المحاولات فشلت
     return res.status(429).json({
       success: false,
-      error: "كل مفاتيح وموديلات Nova مشغولة حاليا، جرب بعد 10 ثواني",
+      error: "كل محركات Nova مشغولة حاليا، جرب بعد 10 ثواني",
       details: lastError
     });
 
   } catch (error) {
     console.error("Chat API Error:", error);
-    return res.status(500).json({ success: false, error: "حدث خطأ أثناء الاتصال بـ Gemini", details: error.message });
+    return res.status(500).json({
+      success: false,
+      error: "حدث خطأ أثناء الاتصال بـ Nova",
+      details: error.message
+    });
   }
 }
