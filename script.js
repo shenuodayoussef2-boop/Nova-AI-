@@ -992,7 +992,238 @@ function getConversationHistory() {
     );
 
 }
+// ==========================================
+// CODE WORKSPACE INTEGRATION
+// ==========================================
 
+function isWorkspaceRequest(text) {
+
+    if (!text) {
+        return false;
+    }
+
+    const lower = String(text).toLowerCase();
+
+    const keywords = [
+        "code workspace",
+        "code-workspace",
+        "workspace",
+        "اكتب في workspace",
+        "اكتب في الوورك سبيس",
+        "حط الكود في workspace",
+        "ضع الكود في workspace",
+        "حط الكود في الوورك سبيس",
+        "اكتبلي الكود في workspace",
+        "اكتب لي الكود في workspace",
+        "اعمل الكود في workspace",
+        "اعمل المشروع في workspace",
+        "افتح code workspace",
+        "افتح الـworkspace",
+        "افتح الوورك سبيس",
+        "في مساحة الكود"
+    ];
+
+    return keywords.some(keyword =>
+        lower.includes(keyword.toLowerCase())
+    );
+}
+
+
+function extractWorkspaceCode(reply) {
+
+    if (!reply) {
+        return null;
+    }
+
+    const blocks = [];
+
+    const regex =
+        /```([a-zA-Z0-9_+#.-]*)\s*\n?([\s\S]*?)```/g;
+
+    let match;
+
+    while ((match = regex.exec(reply)) !== null) {
+
+        const language =
+            String(match[1] || "")
+                .toLowerCase()
+                .trim();
+
+        const code =
+            String(match[2] || "")
+                .trim();
+
+        if (!code) {
+            continue;
+        }
+
+        blocks.push({
+            language,
+            code
+        });
+    }
+
+    if (!blocks.length) {
+        return null;
+    }
+
+    let html = "";
+    let css = "";
+    let js = "";
+
+    blocks.forEach(block => {
+
+        const language = block.language;
+
+        if (
+            language === "html" ||
+            language === "htm" ||
+            language === "xml"
+        ) {
+
+            html +=
+                (html ? "\n\n" : "") +
+                block.code;
+
+        }
+
+        else if (
+            language === "css"
+        ) {
+
+            css +=
+                (css ? "\n\n" : "") +
+                block.code;
+
+        }
+
+        else if (
+            language === "js" ||
+            language === "javascript" ||
+            language === "typescript" ||
+            language === "ts"
+        ) {
+
+            js +=
+                (js ? "\n\n" : "") +
+                block.code;
+
+        }
+
+    });
+
+    // لو AI كتب بلوكات غير مسماة أو بلغة غير واضحة
+    // نحاول نعرف نوع الكود تلقائيًا.
+
+    blocks.forEach(block => {
+
+        if (
+            block.language &&
+            [
+                "html",
+                "htm",
+                "xml",
+                "css",
+                "js",
+                "javascript",
+                "typescript",
+                "ts"
+            ].includes(block.language)
+        ) {
+            return;
+        }
+
+        const code = block.code;
+
+        if (
+            /<!doctype html/i.test(code) ||
+            /<html[\s>]/i.test(code) ||
+            /<body[\s>]/i.test(code)
+        ) {
+
+            html +=
+                (html ? "\n\n" : "") +
+                code;
+
+        }
+
+        else if (
+            /[.#]?[a-zA-Z][\w-]*\s*\{[\s\S]*\}/.test(code)
+        ) {
+
+            css +=
+                (css ? "\n\n" : "") +
+                code;
+
+        }
+
+        else {
+
+            js +=
+                (js ? "\n\n" : "") +
+                code;
+
+        }
+
+    });
+
+    if (!html && !css && !js) {
+        return null;
+    }
+
+    return {
+        html,
+        css,
+        js
+    };
+}
+
+
+function openCodeWorkspace(code) {
+
+    if (!code) {
+        return;
+    }
+
+    try {
+
+        localStorage.setItem(
+            "novaWorkspaceTransfer",
+            JSON.stringify({
+                html: code.html || "",
+                css: code.css || "",
+                js: code.js || "",
+                createdAt: Date.now()
+            })
+        );
+
+        const workspaceUrl =
+            "code-workspace.html?from=nova";
+
+        window.open(
+            workspaceUrl,
+            "_blank"
+        );
+
+        showToast(
+            "تم فتح Code Workspace بالكود 🚀"
+        );
+
+    }
+
+    catch (error) {
+
+        console.error(
+            "Workspace transfer error:",
+            error
+        );
+
+        showToast(
+            "تعذر فتح Code Workspace"
+        );
+
+    }
+}
 
 // ==========================================
 // 10. SEND MESSAGE
