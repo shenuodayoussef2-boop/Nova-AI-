@@ -1385,70 +1385,47 @@ async function sendMessage(
         }
 
 
-        // ==================================
-        // GEMINI RESPONSE
-        // ==================================
+    // ==================================
+// GEMINI RESPONSE - FIXED v2
+// ==================================
+        console.log("Nova API Response:", data);
 
-        const candidate =
-            data?.candidates?.[0];
+        let reply = "";
+        let groundingMetadata = null;
+        let sources = [];
 
-
-        const parts =
-            candidate?.content?.parts ||
-            [];
-
-
-        const reply =
-            parts
-                .map(
-                    part =>
-                        typeof part.text ===
-                        "string"
-                            ? part.text
-                            : ""
-                )
-                .join("")
-                .trim();
-
-
-        const groundingMetadata =
-            candidate?.groundingMetadata ||
-            null;
-
-
-        const sources =
-            extractSearchSources(
-                groundingMetadata
-            );
-
-
-        if (!reply) {
-
-            createAssistantMessage(
-                "لم يصل رد نصي من Nova AI."
-            );
-
-        } else {
-
-            createAssistantMessage(
-                reply,
-                {
-                    sources
-                }
-            );
-
+        // يدعم كل انواع الرد
+        if (typeof data?.text === "string" && data.text.trim()) {
+            reply = data.text;
+        } else if (typeof data?.reply === "string" && data.reply.trim()) {
+            reply = data.reply;
+        } else if (typeof data?.response === "string" && data.response.trim()) {
+            reply = data.response;
+        } else if (typeof data?.message === "string" && data.message.trim()) {
+            reply = data.message;
+        } else if (data?.candidates?.[0]) {
+            const candidate = data.candidates[0];
+            const parts = candidate?.content?.parts || [];
+            reply = parts.map(p => typeof p.text === "string"? p.text : "").join("").trim();
+            groundingMetadata = candidate?.groundingMetadata || null;
+            sources = extractSearchSources(groundingMetadata);
+        } else if (typeof data === "string") {
+            reply = data;
         }
 
+        reply = reply.trim();
 
-        completed =
-            true;
+        if (!reply) {
+            console.error("Empty reply, full data:", data);
+            createAssistantMessage(
+                "وصل رد فاضي من السيرفر. افتح F12 وشوف Console - هتلاقي الرد الحقيقي هناك."
+            );
+        } else {
+            createAssistantMessage(reply, { sources });
+        }
 
-
+        completed = true;
         saveCurrentChat();
-
-
-    }
-
     catch (error) {
 
         removeLoadingMessage();
