@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>تسجيل الدخول - Nova AI</title>
+
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+  >
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+
+      font-family:
+        Arial,
+        "Tajawal",
+        sans-serif;
+
+      background:
+        radial-gradient(
+          circle at top,
+          #102b3d,
+          #071018 55%,
+          #04080c
+        );
+
+      color: white;
+    }
+
+    .login-container {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .login-card {
+      background: rgba(12, 20, 28, 0.94);
+      border: 1px solid rgba(0, 255, 255, 0.15);
+
+      border-radius: 24px;
+
+      padding: 32px;
+
+      box-shadow:
+        0 25px 80px rgba(0, 0, 0, 0.45);
+
+      backdrop-filter: blur(18px);
+    }
+
+    .logo {
+      width: 72px;
+      height: 72px;
+
+      margin: 0 auto 18px;
+
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      border-radius: 22px;
+
+      background:
+        linear-gradient(
+          135deg,
+          #00e5ff,
+          #007cff
+        );
+
+      color: #041018;
+
+      font-size: 32px;
+
+      box-shadow:
+        0 12px 35px rgba(0, 229, 255, 0.25);
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 30px;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #91a3b2;
+      margin-bottom: 28px;
+    }
+
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field label {
+      display: block;
+      margin-bottom: 8px;
+
+      color: #dce7ee;
+
+      font-size: 14px;
+    }
+
+    .input-wrap {
+      position: relative;
+    }
+
+    .input-wrap i {
+      position: absolute;
+
+      right: 14px;
+      top: 50%;
+
+      transform: translateY(-50%);
+
+      color: #6f8594;
+
+      pointer-events: none;
+    }
+
+    input {
+      width: 100%;
+
+      padding: 14px 44px 14px 14px;
+
+      border-radius: 14px;
+
+      border: 1px solid #243746;
+
+      background: #0b151e;
+
+      color: white;
+
+      outline: none;
+
+      font-size: 15px;
+
+      transition: 0.2s;
+    }
+
+    input:focus {
+      border-color: #00d9ff;
+
+      box-shadow:
+        0 0 0 3px
+        rgba(0, 217, 255, 0.08);
+    }
+
+    .main-btn {
+      width: 100%;
+
+      border: 0;
+
+      padding: 14px;
+
+      border-radius: 14px;
+
+      margin-top: 8px;
+
+      font-size: 16px;
+      font-weight: bold;
+
+      cursor: pointer;
+
+      color: #031016;
+
+      background:
+        linear-gradient(
+          135deg,
+          #00e5ff,
+          #00a8ff
+        );
+
+      transition: 0.2s;
+    }
+
+    .main-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    .main-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .switch {
+      text-align: center;
+
+      margin-top: 22px;
+
+      color: #8ea0ad;
+
+      font-size: 14px;
+    }
+
+    .switch button {
+      border: 0;
+      background: none;
+
+      color: #00d9ff;
+
+      cursor: pointer;
+
+      font-size: 14px;
+      font-weight: bold;
+    }
+
+    .message {
+      margin-top: 16px;
+
+      padding: 12px 14px;
+
+      border-radius: 12px;
+
+      display: none;
+
+      font-size: 14px;
+
+      line-height: 1.6;
+    }
+
+    .message.show {
+      display: block;
+    }
+
+    .message.error {
+      background: rgba(255, 70, 70, 0.1);
+      border: 1px solid rgba(255, 70, 70, 0.2);
+      color: #ffaaaa;
+    }
+
+    .message.success {
+      background: rgba(40, 220, 150, 0.1);
+      border: 1px solid rgba(40, 220, 150, 0.2);
+      color: #9ff0ca;
+    }
+
+    @media (max-width: 500px) {
+
+      .login-card {
+        padding: 24px 18px;
+      }
+
+      h1 {
+        font-size: 26px;
+      }
+
+    }
+
+  </style>
+
+</head>
+
+<body>
+
+  <main class="login-container">
+
+    <section class="login-card">
+
+      <div class="logo">
+        <i class="fa-solid fa-bolt"></i>
+      </div>
+
+      <h1 id="formTitle">
+        أهلاً بيك في Nova AI 👋
+      </h1>
+
+      <p
+        class="subtitle"
+        id="formSubtitle"
+      >
+        سجّل دخولك وكمل مع Nova
+      </p>
+
+      <form id="authForm">
+
+        <div
+          class="field"
+          id="nameField"
+          style="display:none;"
+        >
+
+          <label for="name">
+            اسمك
+          </label>
+
+          <div class="input-wrap">
+
+            <i class="fa-solid fa-user"></i>
+
+            <input
+              id="name"
+              type="text"
+              placeholder="اكتب اسمك"
+              autocomplete="name"
+            >
+
+          </div>
+
+        </div>
+
+        <div class="field">
+
+          <label for="email">
+            البريد الإلكتروني
+          </label>
+
+          <div class="input-wrap">
+
+            <i class="fa-solid fa-envelope"></i>
+
+            <input
+              id="email"
+              type="email"
+              placeholder="example@email.com"
+              required
+              autocomplete="email"
+            >
+
+          </div>
+
+        </div>
+
+        <div class="field">
+
+          <label for="password">
+            كلمة المرور
+          </label>
+
+          <div class="input-wrap">
+
+            <i class="fa-solid fa-lock"></i>
+
+            <input
+              id="password"
+              type="password"
+              placeholder="كلمة المرور"
+              required
+              minlength="6"
+              autocomplete="current-password"
+            >
+
+          </div>
+
+        </div>
+
+        <button
+          type="submit"
+          class="main-btn"
+          id="submitBtn"
+        >
+          تسجيل الدخول
+        </button>
+
+      </form>
+
+      <div
+        class="message"
+        id="message"
+      ></div>
+
+      <div class="switch">
+
+        <span id="switchText">
+          معندكش حساب؟
+        </span>
+
+        <button
+          type="button"
+          id="switchBtn"
+        >
+          إنشاء حساب
+        </button>
+
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  ></script>
+
+  <script src="supabase.js"></script>
+  <script src="auth.js"></script>
+
+</body>
+
+</html>
