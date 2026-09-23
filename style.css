@@ -1839,56 +1839,22 @@ body.light-theme .quick-prompt:hover {
 
 
 /* =========================================================
-   NOVA AI — PREMIUM LOADING SCREEN
+   NOVA AI — PREMIUM LOADING SCREEN v2.1 (OPTIMIZED)
    ========================================================= */
 
 #novaLoadingScreen {
     position: fixed;
     inset: 0;
-    z-index: 999999999;
-
+    z-index: 999999;
     display: flex;
     align-items: center;
     justify-content: center;
-
-    width: 100%;
-    height: 100%;
-    min-height: 100dvh;
-
-    overflow: hidden;
-
-    background:
-        radial-gradient(
-            circle at 50% 42%,
-            rgba(99, 102, 241, 0.13) 0%,
-            rgba(15, 23, 42, 0.96) 38%,
-            #070b14 75%,
-            #05070d 100%
-        );
-
-    opacity: 1;
-    visibility: visible;
-    pointer-events: all;
-
-    transition:
-        opacity 0.7s ease,
-        visibility 0.7s ease;
-}
-
-#novaLoadingScreen::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-
-    background:
-        linear-gradient(
-            115deg,
-            transparent 0%,
-            rgba(255, 255, 255, 0.025) 50%,
-            transparent 100%
-        );
-
-    pointer-events: none;
+    background: #05070d;
+    /* خلفية بريميوم بدل radial العادي */
+    background-image: 
+        radial-gradient(600px at 50% 0%, rgba(99,102,241,0.15), transparent 80%),
+        radial-gradient(800px at 80% 100%, rgba(168,85,247,0.12), transparent 80%);
+    transition: opacity 0.6s cubic-bezier(0.4,0,0.2,1), visibility 0.6s;
 }
 
 #novaLoadingScreen.loaded {
@@ -1897,464 +1863,122 @@ body.light-theme .quick-prompt:hover {
     pointer-events: none;
 }
 
-
-/* =========================
-   LOADER CONTAINER
-   ========================= */
-
 .nova-loader {
     position: relative;
-    z-index: 2;
-
     display: flex;
     flex-direction: column;
     align-items: center;
-
-    width: min(430px, calc(100% - 40px));
-
-    text-align: center;
+    width: min(400px, 90vw);
 }
 
-
-/* =========================
-   GLOW
-   ========================= */
-
+/* توهج متحرك ورا اللوجو - اخف واسرع */
 .nova-loader-glow {
     position: absolute;
-
-    top: 5px;
+    top: 10px;
     left: 50%;
-
-    width: 220px;
-    height: 220px;
-
+    width: 280px;
+    height: 280px;
     transform: translateX(-50%);
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(99, 102, 241, 0.28) 0%,
-            rgba(139, 92, 246, 0.12) 35%,
-            transparent 70%
-        );
-
-    filter: blur(10px);
-
-    pointer-events: none;
-
-    animation:
-        novaLoadingGlow 3s ease-in-out infinite;
+    background: radial-gradient(circle, rgba(99,102,241,0.3) 0%, transparent 70%);
+    filter: blur(35px);
+    animation: novaLoadingGlow 3.5s ease-in-out infinite;
+    will-change: transform, opacity;
 }
-
-@keyframes novaLoadingGlow {
-
-    0%,
-    100% {
-        transform:
-            translateX(-50%)
-            scale(0.9);
-
-        opacity: 0.65;
-    }
-
-    50% {
-        transform:
-            translateX(-50%)
-            scale(1.15);
-
-        opacity: 1;
-    }
-}
-
-
-/* =========================
-   LOGO
-   ========================= */
 
 .nova-loader-logo-wrap {
     position: relative;
-
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    width: 112px;
-    height: 112px;
-
-    padding: 5px;
-
-    border-radius: 30px;
-
-    background:
-        linear-gradient(
-            145deg,
-            rgba(255, 255, 255, 0.14),
-            rgba(255, 255, 255, 0.035)
-        );
-
-    border:
-        1px solid
-        rgba(255, 255, 255, 0.12);
-
-    box-shadow:
-        0 20px 60px rgba(0, 0, 0, 0.35),
-        0 0 45px rgba(99, 102, 241, 0.22);
-
-    backdrop-filter: blur(15px);
-
-    animation:
-        novaLoaderLogoFloat 3s ease-in-out infinite;
+    display: grid;
+    place-items: center;
+    width: 96px;
+    height: 96px;
+    border-radius: 28px;
+    background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.03));
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 
+        0 10px 40px rgba(0,0,0,0.5),
+        0 0 0 1px rgba(255,255,255,0.05) inset,
+        0 0 30px rgba(99,102,241,0.2);
+    backdrop-filter: blur(20px);
+    animation: novaLoaderLogoFloat 3s ease-in-out infinite;
 }
 
 .nova-loading-logo {
-    width: 100%;
-    height: 100%;
-
+    width: 72%;
+    height: 72%;
     object-fit: contain;
-
-    border-radius: 25px;
 }
-
-@keyframes novaLoaderLogoFloat {
-
-    0%,
-    100% {
-        transform: translateY(0);
-    }
-
-    50% {
-        transform: translateY(-7px);
-    }
-}
-
-
-/* =========================
-   BRAND
-   ========================= */
 
 .nova-loading-brand {
-    display: flex;
-    align-items: baseline;
-    gap: 5px;
-
-    margin-top: 25px;
-
-    font-size: 38px;
+    margin-top: 24px;
+    font-size: 34px;
     font-weight: 800;
-
-    letter-spacing: -1.5px;
+    letter-spacing: -1px;
+    display: flex; gap: 6px;
 }
-
-.nova-brand-nova {
-    color: #ffffff;
-}
-
+.nova-brand-nova { color: #fff; }
 .nova-brand-ai {
-    background:
-        linear-gradient(
-            135deg,
-            #818cf8,
-            #a78bfa,
-            #c084fc
-        );
-
+    background: linear-gradient(100deg, #818cf8, #c084fc);
     -webkit-background-clip: text;
-    background-clip: text;
-
     -webkit-text-fill-color: transparent;
 }
 
-
-/* =========================
-   SUBTITLE
-   ========================= */
-
 .nova-loading-subtitle {
-    margin-top: 5px;
-
+    margin-top: 6px;
     color: #94a3b8;
-
     font-size: 13px;
+    letter-spacing: 0.4px;
     font-weight: 500;
-
-    letter-spacing: 0.5px;
 }
 
-
-/* =========================
-   PROGRESS WRAPPER
-   ========================= */
-
-.nova-progress-wrapper {
-    width: 100%;
-
-    margin-top: 38px;
-}
-
+.nova-progress-wrapper { width: 100%; margin-top: 36px; }
 .nova-progress-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-
-    margin-bottom: 10px;
-
-    color: #94a3b8;
-
-    font-size: 12px;
-    font-weight: 500;
+    display: flex; justify-content: space-between;
+    color: #64748b; font-size: 11px; margin-bottom: 10px;
+    letter-spacing: 0.5px; text-transform: uppercase;
 }
-
-
-/* =========================
-   PROGRESS BAR
-   ========================= */
 
 .nova-progress-container {
-    position: relative;
-
-    width: 100%;
-    height: 7px;
-
+    height: 5px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.04);
+    border-radius: 100px;
     overflow: hidden;
-
-    background:
-        rgba(255, 255, 255, 0.07);
-
-    border:
-        1px solid
-        rgba(255, 255, 255, 0.05);
-
-    border-radius: 999px;
-
-    box-shadow:
-        inset 0 1px 2px rgba(0, 0, 0, 0.25),
-        0 0 25px rgba(99, 102, 241, 0.08);
 }
 
 .nova-progress-bar {
-    position: relative;
-
-    width: 1%;
+    width: 0%;
     height: 100%;
-
-    overflow: hidden;
-
     border-radius: inherit;
-
-    background:
-        linear-gradient(
-            90deg,
-            #6366f1,
-            #818cf8,
-            #a78bfa,
-            #6366f1
-        );
-
-    background-size: 200% 100%;
-
-    transition:
-        width 0.08s linear;
-
-    box-shadow:
-        0 0 14px
-        rgba(129, 140, 248, 0.65);
-
-    animation:
-        novaProgressShine 2s linear infinite;
+    background: linear-gradient(90deg, #6366f1, #a78bfa);
+    box-shadow: 0 0 15px rgba(99,102,241,0.6);
+    position: relative;
+    transition: width 0.15s ease-out;
 }
 
+/* خط اللمعان اللي بيجري */
 .nova-progress-bar::after {
     content: "";
-
-    position: absolute;
-    inset: 0;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(255, 255, 255, 0.45),
-            transparent
-        );
-
-    transform:
-        translateX(-100%);
-
-    animation:
-        novaProgressLight 1.4s linear infinite;
+    position: absolute; inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+    animation: novaProgressLight 1.2s ease-in-out infinite;
 }
-
-@keyframes novaProgressShine {
-
-    0% {
-        background-position: 0% 50%;
-    }
-
-    100% {
-        background-position: 200% 50%;
-    }
-}
-
-@keyframes novaProgressLight {
-
-    100% {
-        transform:
-            translateX(100%);
-    }
-}
-
-
-/* =========================
-   PERCENTAGE
-   ========================= */
-
-.nova-progress-text {
-    min-width: 35px;
-
-    color: #e2e8f0;
-
-    font-size: 12px;
-    font-weight: 700;
-
-    text-align: left;
-}
-
-
-/* =========================
-   STATUS
-   ========================= */
 
 .nova-loading-status {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    margin-top: 17px;
-
-    color: #64748b;
-
-    font-size: 11px;
+    margin-top: 18px;
+    display: flex; align-items: center; gap: 8px;
+    color: #475569; font-size: 11px;
 }
-
 .nova-status-dot {
-    width: 6px;
-    height: 6px;
-
-    flex-shrink: 0;
-
-    border-radius: 50%;
-
-    background: #818cf8;
-
-    box-shadow:
-        0 0 10px
-        rgba(129, 140, 248, 0.9);
-
-    animation:
-        novaStatusPulse 1.2s ease-in-out infinite;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #22c55e;
+    box-shadow: 0 0 8px #22c55e;
+    animation: novaStatusPulse 1.5s infinite;
 }
 
-@keyframes novaStatusPulse {
-
-    0%,
-    100% {
-        transform: scale(0.7);
-        opacity: 0.45;
-    }
-
-    50% {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-
-/* =========================
-   LOADING MOBILE
-   ========================= */
-
-@media (max-width: 768px) {
-
-    #novaLoadingScreen {
-        padding:
-            20px
-            env(safe-area-inset-right)
-            20px
-            env(safe-area-inset-left);
-    }
-
-    .nova-loader {
-        width:
-            min(
-                360px,
-                calc(100% - 25px)
-            );
-    }
-
-    .nova-loader-logo-wrap {
-        width: 92px;
-        height: 92px;
-
-        border-radius: 25px;
-    }
-
-    .nova-loading-logo {
-        border-radius: 20px;
-    }
-
-    .nova-loading-brand {
-        margin-top: 20px;
-        font-size: 31px;
-    }
-
-    .nova-loading-subtitle {
-        font-size: 12px;
-    }
-
-    .nova-progress-wrapper {
-        margin-top: 32px;
-    }
-
-    .nova-progress-container {
-        height: 6px;
-    }
-
-    .nova-loading-status {
-        margin-top: 15px;
-    }
-}
-
-
-/* =========================
-   VERY SMALL PHONES
-   ========================= */
-
-@media (max-width: 380px) {
-
-    .nova-loader {
-        width: calc(100% - 30px);
-    }
-
-    .nova-loader-logo-wrap {
-        width: 82px;
-        height: 82px;
-
-        border-radius: 22px;
-    }
-
-    .nova-loading-brand {
-        font-size: 28px;
-    }
-
-    .nova-loading-subtitle {
-        font-size: 11px;
-    }
-
-    .nova-progress-wrapper {
-        margin-top: 27px;
-    }
-}
+@keyframes novaLoadingGlow { 0%,100%{opacity:.6; transform:translateX(-50%) scale(.9)} 50%{opacity:1; transform:translateX(-50%) scale(1.1)} }
+@keyframes novaLoaderLogoFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
+@keyframes novaProgressLight { 0%{transform:translateX(-100%)} 100%{transform:translateX(200%)} }
+@keyframes novaStatusPulse { 0%,100%{opacity:.5} 50%{opacity:1} }
 /* =========================================================
    NOVA AI — MOBILE MENU BUTTON
    ========================================================= */
@@ -2653,4 +2277,38 @@ body.light-theme .quick-prompt:hover {
 
 .danger-btn:hover {
     background: rgba(255, 70, 70, .18);
+}
+/* =========================
+   LOADING LIGHT THEME
+   ========================= */
+body.light-theme #novaLoadingScreen {
+    background: #f8fafc;
+    background-image: 
+        radial-gradient(600px at 50% 0%, rgba(99,102,241,0.12), transparent 80%),
+        radial-gradient(800px at 80% 100%, rgba(168,85,247,0.10), transparent 80%);
+}
+body.light-theme .nova-brand-nova { color: #0f172a; }
+body.light-theme .nova-loader-logo-wrap {
+    background: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6));
+    border-color: #e2e8f0;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.08), 0 0 0 1px rgba(0,0,0,0.04) inset;
+}
+body.light-theme .nova-progress-container {
+    background: #e2e8f0;
+    border-color: #e2e8f0;
+}
+body.light-theme .nova-loading-subtitle,
+body.light-theme .nova-progress-top,
+body.light-theme .nova-loading-status {
+    color: #64748b;
+}
+
+/* =========================
+   LOADING MOBILE FIX
+   ========================= */
+@media (max-width: 768px) {
+    .nova-loader { width: min(320px, 85vw); }
+    .nova-loader-logo-wrap { width: 82px; height: 82px; border-radius: 22px; }
+    .nova-loading-brand { font-size: 28px; margin-top: 18px; }
+    .nova-progress-wrapper { margin-top: 28px; }
 }
