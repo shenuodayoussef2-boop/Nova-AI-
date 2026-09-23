@@ -1,13 +1,20 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
+
     <meta charset="UTF-8">
 
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
     >
-<meta name="google-site-verification" content="U4lbMdErCwu2gXKKds2fLr9R78B5ULqtpR39sEVElEc" />
+
+    <meta
+        name="google-site-verification"
+        content="U4lbMdErCwu2gXKKds2fLr9R78B5ULqtpR39sEVElEc"
+    >
+
     <!-- =========================
          SEO
     ========================== -->
@@ -135,8 +142,15 @@
     >
 
     <!-- =========================
+         Supabase
+    ========================== -->
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="supabase.js"></script>
+
+    <!-- =========================
          Structured Data
-         Google / WebApplication
     ========================== -->
 
     <script type="application/ld+json">
@@ -155,7 +169,9 @@
     </script>
 
 </head>
+
 <body>
+
 <!-- =========================
      NOVA AI LOADING SCREEN
 ========================= -->
@@ -167,16 +183,25 @@
         <div class="nova-loader-glow"></div>
 
         <div class="nova-loader-logo-wrap">
+
             <img
                 src="https://i.postimg.cc/6Qzm7v1P/file-00000000205081f4830669209be96998.png"
                 alt="Nova AI"
                 class="nova-loading-logo"
             >
+
         </div>
 
         <div class="nova-loading-brand">
-            <span class="nova-brand-nova">Nova</span>
-            <span class="nova-brand-ai">AI</span>
+
+            <span class="nova-brand-nova">
+                Nova
+            </span>
+
+            <span class="nova-brand-ai">
+                AI
+            </span>
+
         </div>
 
         <div class="nova-loading-subtitle">
@@ -186,7 +211,10 @@
         <div class="nova-progress-wrapper">
 
             <div class="nova-progress-top">
-                <span>جاري تشغيل Nova</span>
+
+                <span>
+                    جاري تشغيل Nova
+                </span>
 
                 <span
                     id="novaProgressText"
@@ -194,253 +222,597 @@
                 >
                     1%
                 </span>
+
             </div>
 
             <div class="nova-progress-container">
+
                 <div
                     id="novaProgressBar"
                     class="nova-progress-bar"
                 ></div>
+
             </div>
 
         </div>
 
         <div class="nova-loading-status">
+
             <span class="nova-status-dot"></span>
-            <span>تهيئة النظام...</span>
+
+            <span>
+                تهيئة النظام...
+            </span>
+
         </div>
 
     </div>
 
 </div>
-    <div class="app-container">
-        <!-- القائمة الجانبية (Sidebar) -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <button id="sidebarToggleBtn" class="toggle-btn" title="طي / فتح القائمة">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-                <h2 class="logo-text">Nova <span>AI</span></h2>
-            </div>
-            
-            <!-- زر محادثة جديدة -->
-            <button id="newChatBtn" class="new-chat-btn">
-                <i class="fa-solid fa-plus"></i>
-                <span class="btn-text">محادثة جديدة</span>
-            </button>
 
-            <!-- سجل المحادثات السابقة (Recents) -->
-            <div class="history-section">
-                <h3 class="history-title">Recents</h3>
-                <ul class="history-list" id="historyList">
-                    <!-- يتم توليد عناصر القوائم المنبثقة والخيار ديناميكياً بواسطة script.js -->
-                </ul>
-            </div>
 
-            <!-- زر الإعدادات في أسفل القائمة الجانبية -->
-            <div class="sidebar-footer-actions" style="margin-top: auto; padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                <button class="sidebar-icon-btn" id="settingsBtn" title="الإعدادات">
-                    <i class="fa-solid fa-gear"></i>
-                </button>
-            </div>
-        </aside>
+<!-- =========================
+     APP
+========================= -->
 
-        <!-- المحتوى الرئيسي (Main Content) -->
-    <main class="main-content">
+<div class="app-container">
 
-    <button
-        id="mobileMenuBtn"
-        class="mobile-menu-btn"
-        type="button"
-        title="فتح القائمة"
-        aria-label="فتح القائمة"
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside
+        class="sidebar"
+        id="sidebar"
     >
-        <i class="fa-solid fa-bars"></i>
-    </button>
 
-    <section id="chat-section" class="content-section active">
-            <!-- قسم الدردشة الشامل مع أدوات الـ + -->
-            <section id="chat-section" class="content-section active">
-                <div class="section-header">
-                    <h2>الدردشة مع Nova</h2>
-                </div>
-                
-                <div class="chat-box" id="chatBox">
-
-    <!-- شاشة الترحيب -->
-    <div class="nova-welcome" id="novaWelcome">
-
-        <div class="nova-welcome-icon">
-            <i class="fa-solid fa-sparkles"></i>
-        </div>
-
-        <h1>
-            أهلاً بيك في <span>Nova AI</span> 👋
-        </h1>
-
-        <p>
-            مساعدك الذكي للبرمجة، الكتابة، التعلم والإبداع.
-            <br>
-            ابدأ محادثتك واكتشف إمكانيات Nova.
-        </p>
-
-        <!-- اقتراحات جاهزة -->
-        <div class="quick-prompts">
+        <div class="sidebar-header">
 
             <button
+                id="sidebarToggleBtn"
+                class="toggle-btn"
+                title="طي / فتح القائمة"
                 type="button"
-                class="quick-prompt"
-                data-prompt="اكتب لي فكرة مشروع ويب مبتكر باستخدام HTML وCSS وJavaScript"
             >
-                <i class="fa-solid fa-code"></i>
-                <span>اقترح لي مشروع برمجي</span>
+
+                <i class="fa-solid fa-bars"></i>
+
             </button>
 
-            <button
-                type="button"
-                class="quick-prompt"
-                data-prompt="اشرح لي الذكاء الاصطناعي بطريقة سهلة وبسيطة"
-            >
-                <i class="fa-solid fa-brain"></i>
-                <span>اشرح لي الذكاء الاصطناعي</span>
-            </button>
-
-            <button
-                type="button"
-                class="quick-prompt"
-                data-prompt="ساعدني في كتابة خطة لتعلم البرمجة من البداية"
-            >
-                <i class="fa-solid fa-graduation-cap"></i>
-                <span>ساعدني أتعلم البرمجة</span>
-            </button>
-
-            <button
-                type="button"
-                class="quick-prompt"
-                data-prompt="اكتب لي قصة قصيرة وممتعة"
-            >
-                <i class="fa-solid fa-book-open"></i>
-                <span>اكتب لي قصة قصيرة</span>
-            </button>
+            <h2 class="logo-text">
+                Nova <span>AI</span>
+            </h2>
 
         </div>
 
-    </div>
 
-</div>
+        <!-- =========================
+             NEW CHAT
+        ========================== -->
 
-                <!-- منطقة الكتابة والأزرار -->
-                <div class="input-area">
-                    <!-- Input خفي لرفع الملفات -->
-                    <input type="file" id="fileInput" style="display: none;" multiple>
+        <button
+            id="newChatBtn"
+            class="new-chat-btn"
+            type="button"
+        >
 
-                    <!-- زر المرفقات (+) الموحد مع القائمة المنبثقة -->
-                    <div class="attach-wrapper" style="position: relative; display: inline-block;">
-                        <button id="attachBtn" class="attach-btn" type="button" title="خيارات إضافية">
-                            <i class="fa-solid fa-plus"></i>
-                        </button>
-                        
-                        <!-- القائمة المنبثقة للتوليد والرفع -->
-                        <div id="attachDropdown" class="attach-dropdown">
-                            <div class="dropdown-item" id="optUpload">
-                                <i class="fa-solid fa-paperclip"></i>
-                                <span>رفع ملف</span>
-                            </div>
-                            <div class="dropdown-item" id="optImage">
-                                <i class="fa-solid fa-wand-magic-sparkles"></i>
-                                <span>توليد صورة</span>
-                            </div>
-                            <div class="dropdown-item" id="optVideo">
-                                <i class="fa-solid fa-video"></i>
-                                <span>توليد فيديو</span>
-                            </div>
-                            <div class="dropdown-item" id="optMusic">
-                                <i class="fa-solid fa-music"></i>
-                                <span>توليد صوت</span>
-                            </div>
-                        </div>
-                    </div>
+            <i class="fa-solid fa-plus"></i>
 
-                    <!-- حقل إدخال النص -->
-                    <textarea
-    id="chatInput"
-    rows="1"
-    placeholder="اكتب رسالتك هنا..."
-    autocomplete="off"
-    spellcheck="true"
-></textarea>
-                    
-                    <!-- الأيقونات والزراير اليمين للتحكم والتنظيم على الموبايل -->
-                    <div class="input-actions-right">
-                        <!-- 🎤 زر الميكروفون العادي (يحول الكلام لنص داخل الشات) -->
-                        <button id="micBtn" type="button" title="تحويل الصوت لنص">
-                            <i class="fa-solid fa-microphone"></i>
-                        </button>
-                        
-                        <!-- 🔊 زر المحادثة الصوتية المباشرة (موجات صوتية - صوت لصوت بدون قراءة) -->
-                        <button id="liveVoiceBtn" class="mic-btn live-btn" type="button" title="محادثة صوتية مباشرة">
-                            <div class="wave-icon">
-                                <span class="bar"></span>
-                                <span class="bar"></span>
-                                <span class="bar"></span>
-                                <span class="bar"></span>
-                            </div>
-                        </button>
-                        
-                        <!-- زر الإرسال -->
-                        <button id="sendChatBtn" type="button" title="إرسال">
-                            <i class="fa-solid fa-paper-plane"></i>
-                        </button>
-                    </div>
-                </div>
-            </section>
+            <span class="btn-text">
+                محادثة جديدة
+            </span>
 
-        </main>
-    </div>
-
-    <!-- واجهة المحادثة الصوتية المباشرة (Full-Screen Voice Overlay) -->
-    <div id="voiceOverlay" class="voice-overlay">
-        <!-- زر الإغلاق (X) -->
-        <button id="closeVoiceBtn" class="close-voice-btn" title="إغلاق المحادثة الصوتية">
-            <i class="fa-solid fa-xmark"></i>
         </button>
 
-        <!-- اسم التطبيق في الأعلى -->
-        <div class="voice-header">
-            <span>Nova الصوت</span>
+
+        <!-- =========================
+             CHAT HISTORY
+        ========================== -->
+
+        <div class="history-section">
+
+            <h3 class="history-title">
+                Recents
+            </h3>
+
+            <ul
+                class="history-list"
+                id="historyList"
+            >
+                <!--
+                    يتم توليد المحادثات
+                    تلقائيًا بواسطة script.js
+                -->
+            </ul>
+
         </div>
 
-        <!-- الكرة الصوتية المتحركة (Orb) -->
-        <div class="orb-container">
-            <div id="voiceOrb" class="voice-orb"></div>
+
+        <!-- =========================
+             SIDEBAR FOOTER
+        ========================== -->
+
+        <div
+            class="sidebar-footer-actions"
+            style="
+                margin-top: auto;
+                padding: 15px;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 10px;
+            "
+        >
+
+            <button
+                class="sidebar-icon-btn"
+                id="settingsBtn"
+                title="الإعدادات"
+                type="button"
+            >
+
+                <i class="fa-solid fa-gear"></i>
+
+            </button>
+
         </div>
 
-        <!-- أزرار التحكم في الأسفل -->
-        <div class="voice-controls">
-            <button id="toggleMuteBtn" class="voice-ctrl-btn" title="كتم الصوت">
-                <i class="fa-solid fa-microphone"></i>
-            </button>
-            <button id="endVoiceCallBtn" class="voice-ctrl-btn close-call" title="إنهاء المحادثة">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
+    </aside>
+
+
+    <!-- =========================
+         MAIN CONTENT
+    ========================== -->
+
+    <main class="main-content">
+
+
+        <!-- =========================
+             MOBILE MENU
+        ========================== -->
+
+        <button
+            id="mobileMenuBtn"
+            class="mobile-menu-btn"
+            type="button"
+            title="فتح القائمة"
+            aria-label="فتح القائمة"
+        >
+
+            <i class="fa-solid fa-bars"></i>
+
+        </button>
+
+
+        <!-- =========================
+             CHAT SECTION
+        ========================== -->
+
+        <section
+            id="chat-section"
+            class="content-section active"
+        >
+
+            <div class="section-header">
+
+                <h2>
+                    الدردشة مع Nova
+                </h2>
+
+            </div>
+
+
+            <!-- =========================
+                 CHAT BOX
+            ========================== -->
+
+            <div
+                class="chat-box"
+                id="chatBox"
+            >
+
+                <!-- =========================
+                     WELCOME SCREEN
+                ========================== -->
+
+                <div
+                    class="nova-welcome"
+                    id="novaWelcome"
+                >
+
+                    <div class="nova-welcome-icon">
+
+                        <i class="fa-solid fa-sparkles"></i>
+
+                    </div>
+
+
+                    <h1>
+
+                        أهلاً بيك في
+                        <span>Nova AI</span>
+                        👋
+
+                    </h1>
+
+
+                    <p>
+
+                        مساعدك الذكي للبرمجة،
+                        الكتابة، التعلم والإبداع.
+
+                        <br>
+
+                        ابدأ محادثتك واكتشف إمكانيات Nova.
+
+                    </p>
+
+
+                    <!-- =========================
+                         QUICK PROMPTS
+                    ========================== -->
+
+                    <div class="quick-prompts">
+
+
+                        <button
+                            type="button"
+                            class="quick-prompt"
+                            data-prompt="اكتب لي فكرة مشروع ويب مبتكر باستخدام HTML وCSS وJavaScript"
+                        >
+
+                            <i class="fa-solid fa-code"></i>
+
+                            <span>
+                                اقترح لي مشروع برمجي
+                            </span>
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="quick-prompt"
+                            data-prompt="اشرح لي الذكاء الاصطناعي بطريقة سهلة وبسيطة"
+                        >
+
+                            <i class="fa-solid fa-brain"></i>
+
+                            <span>
+                                اشرح لي الذكاء الاصطناعي
+                            </span>
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="quick-prompt"
+                            data-prompt="ساعدني في كتابة خطة لتعلم البرمجة من البداية"
+                        >
+
+                            <i class="fa-solid fa-graduation-cap"></i>
+
+                            <span>
+                                ساعدني أتعلم البرمجة
+                            </span>
+
+                        </button>
+
+
+                        <button
+                            type="button"
+                            class="quick-prompt"
+                            data-prompt="اكتب لي قصة قصيرة وممتعة"
+                        >
+
+                            <i class="fa-solid fa-book-open"></i>
+
+                            <span>
+                                اكتب لي قصة قصيرة
+                            </span>
+
+                        </button>
+
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- =========================
+                 INPUT AREA
+            ========================== -->
+
+            <div class="input-area">
+
+
+                <!-- FILE INPUT -->
+
+                <input
+                    type="file"
+                    id="fileInput"
+                    style="display: none;"
+                    multiple
+                >
+
+
+                <!-- =========================
+                     ATTACHMENTS
+                ========================== -->
+
+                <div
+                    class="attach-wrapper"
+                    style="
+                        position: relative;
+                        display: inline-block;
+                    "
+                >
+
+                    <button
+                        id="attachBtn"
+                        class="attach-btn"
+                        type="button"
+                        title="خيارات إضافية"
+                    >
+
+                        <i class="fa-solid fa-plus"></i>
+
+                    </button>
+
+
+                    <!-- DROPDOWN -->
+
+                    <div
+                        id="attachDropdown"
+                        class="attach-dropdown"
+                    >
+
+
+                        <div
+                            class="dropdown-item"
+                            id="optUpload"
+                        >
+
+                            <i class="fa-solid fa-paperclip"></i>
+
+                            <span>
+                                رفع ملف
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="dropdown-item"
+                            id="optImage"
+                        >
+
+                            <i class="fa-solid fa-wand-magic-sparkles"></i>
+
+                            <span>
+                                توليد صورة
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="dropdown-item"
+                            id="optVideo"
+                        >
+
+                            <i class="fa-solid fa-video"></i>
+
+                            <span>
+                                توليد فيديو
+                            </span>
+
+                        </div>
+
+
+                        <div
+                            class="dropdown-item"
+                            id="optMusic"
+                        >
+
+                            <i class="fa-solid fa-music"></i>
+
+                            <span>
+                                توليد صوت
+                            </span>
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================
+                     CHAT INPUT
+                ========================== -->
+
+                <textarea
+                    id="chatInput"
+                    rows="1"
+                    placeholder="اكتب رسالتك هنا..."
+                    autocomplete="off"
+                    spellcheck="true"
+                ></textarea>
+
+
+                <!-- =========================
+                     INPUT ACTIONS
+                ========================== -->
+
+                <div class="input-actions-right">
+
+
+                    <!-- MICROPHONE -->
+
+                    <button
+                        id="micBtn"
+                        type="button"
+                        title="تحويل الصوت لنص"
+                    >
+
+                        <i class="fa-solid fa-microphone"></i>
+
+                    </button>
+
+
+                    <!-- LIVE VOICE -->
+
+                    <button
+                        id="liveVoiceBtn"
+                        class="mic-btn live-btn"
+                        type="button"
+                        title="محادثة صوتية مباشرة"
+                    >
+
+                        <div class="wave-icon">
+
+                            <span class="bar"></span>
+                            <span class="bar"></span>
+                            <span class="bar"></span>
+                            <span class="bar"></span>
+
+                        </div>
+
+                    </button>
+
+
+                    <!-- SEND -->
+
+                    <button
+                        id="sendChatBtn"
+                        type="button"
+                        title="إرسال"
+                    >
+
+                        <i class="fa-solid fa-paper-plane"></i>
+
+                    </button>
+
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- =========================
+     VOICE OVERLAY
+========================= -->
+
+<div
+    id="voiceOverlay"
+    class="voice-overlay"
+>
+
+
+    <!-- CLOSE -->
+
+    <button
+        id="closeVoiceBtn"
+        class="close-voice-btn"
+        title="إغلاق المحادثة الصوتية"
+        type="button"
+    >
+
+        <i class="fa-solid fa-xmark"></i>
+
+    </button>
+
+
+    <!-- HEADER -->
+
+    <div class="voice-header">
+
+        <span>
+            Nova الصوت
+        </span>
+
     </div>
 
-   <!-- ==========================================
-     NOVA AI - SETTINGS MODAL
-     ========================================== -->
 
-<div id="settingsModal" class="settings-modal-overlay">
+    <!-- ORB -->
+
+    <div class="orb-container">
+
+        <div
+            id="voiceOrb"
+            class="voice-orb"
+        ></div>
+
+    </div>
+
+
+    <!-- CONTROLS -->
+
+    <div class="voice-controls">
+
+
+        <button
+            id="toggleMuteBtn"
+            class="voice-ctrl-btn"
+            title="كتم الصوت"
+            type="button"
+        >
+
+            <i class="fa-solid fa-microphone"></i>
+
+        </button>
+
+
+        <button
+            id="endVoiceCallBtn"
+            class="voice-ctrl-btn close-call"
+            title="إنهاء المحادثة"
+            type="button"
+        >
+
+            <i class="fa-solid fa-xmark"></i>
+
+        </button>
+
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     SETTINGS MODAL
+========================= -->
+
+<div
+    id="settingsModal"
+    class="settings-modal-overlay"
+>
 
     <div class="settings-modal-content">
 
-        <!-- ==========================================
+
+        <!-- =========================
              SETTINGS HEADER
-             ========================================== -->
+        ========================== -->
 
         <div class="settings-header">
 
-            <h3>الإعدادات</h3>
+            <h3>
+                الإعدادات
+            </h3>
+
 
             <button
                 id="closeSettingsBtn"
@@ -448,122 +820,140 @@
                 type="button"
                 aria-label="إغلاق الإعدادات"
             >
+
                 <i class="fa-solid fa-xmark"></i>
+
             </button>
 
         </div>
 
 
-        <!-- ==========================================
+        <!-- =========================
              SETTINGS BODY
-             ========================================== -->
+        ========================== -->
 
         <div class="settings-body">
 
-            <!-- Activity -->
+
+            <!-- ACTIVITY -->
 
             <div
                 class="setting-item"
                 data-setting="activity"
             >
+
                 <i class="fa-solid fa-clock-rotate-left"></i>
 
                 <span>
                     Activity
                 </span>
+
             </div>
 
 
-            <!-- Personal Intelligence -->
+            <!-- PERSONAL INTELLIGENCE -->
 
             <div
                 class="setting-item"
                 data-setting="personal-intelligence"
             >
+
                 <i class="fa-solid fa-brain"></i>
 
                 <span>
                     Personal Intelligence
                 </span>
+
             </div>
 
 
-            <!-- Import Memory -->
+            <!-- IMPORT MEMORY -->
 
             <div
                 class="setting-item"
                 data-setting="import-memory"
             >
+
                 <i class="fa-solid fa-file-import"></i>
 
                 <span>
                     Import memory to Nova
                 </span>
+
             </div>
 
 
-            <!-- Avatar -->
+            <!-- AVATAR -->
 
             <div
                 class="setting-item"
                 data-setting="avatar"
             >
+
                 <i class="fa-regular fa-face-smile"></i>
 
                 <span>
                     Avatar
                 </span>
+
             </div>
 
 
-            <!-- Usage Limits -->
+            <!-- USAGE -->
 
             <div
                 class="setting-item"
                 data-setting="usage"
             >
+
                 <i class="fa-solid fa-chart-pie"></i>
 
                 <span>
                     Usage limits
                 </span>
+
             </div>
 
 
-            <!-- Gems -->
+            <!-- GEMS -->
 
             <div
                 class="setting-item"
                 data-setting="gems"
             >
+
                 <i class="fa-solid fa-gem"></i>
 
                 <span>
                     Gems
                 </span>
+
             </div>
 
 
-            <!-- Public Links -->
+            <!-- PUBLIC LINKS -->
 
             <div
                 class="setting-item"
                 data-setting="public-links"
             >
+
                 <i class="fa-solid fa-link"></i>
 
                 <span>
                     Your public links
                 </span>
+
             </div>
 
 
-            <!-- Theme -->
+            <!-- THEME -->
 
             <div
                 class="setting-item"
                 data-setting="theme"
             >
+
                 <i class="fa-solid fa-sun"></i>
 
                 <span>
@@ -571,43 +961,49 @@
                 </span>
 
                 <i class="fa-solid fa-chevron-left arrow"></i>
+
             </div>
 
 
-            <!-- Subscriptions -->
+            <!-- SUBSCRIPTIONS -->
 
             <div
                 class="setting-item"
                 data-setting="subscriptions"
             >
+
                 <i class="fa-solid fa-box-archive"></i>
 
                 <span>
                     View subscriptions
                 </span>
+
             </div>
 
 
-            <!-- Nova Notebook -->
+            <!-- NOTEBOOK -->
 
             <div
                 class="setting-item"
                 data-setting="notebook"
             >
+
                 <i class="fa-solid fa-book"></i>
 
                 <span>
                     Nova Notebook
                 </span>
+
             </div>
 
 
-            <!-- Media Watermark -->
+            <!-- WATERMARK -->
 
             <div
                 class="setting-item"
                 data-setting="watermark"
             >
+
                 <i class="fa-solid fa-photo-film"></i>
 
                 <span>
@@ -615,29 +1011,33 @@
                 </span>
 
                 <i class="fa-solid fa-chevron-left arrow"></i>
+
             </div>
 
 
-            <!-- Feedback -->
+            <!-- FEEDBACK -->
 
             <div
                 class="setting-item"
                 data-setting="feedback"
             >
+
                 <i class="fa-solid fa-comment-dots"></i>
 
                 <span>
                     Send feedback
                 </span>
+
             </div>
 
 
-            <!-- Help -->
+            <!-- HELP -->
 
             <div
                 class="setting-item"
                 data-setting="help"
             >
+
                 <i class="fa-solid fa-circle-question"></i>
 
                 <span>
@@ -645,14 +1045,18 @@
                 </span>
 
                 <i class="fa-solid fa-chevron-left arrow"></i>
+
             </div>
 
 
-            <!-- ==========================================
+            <!-- =========================
                  SMART MEMORY
-                 ========================================== -->
+            ========================== -->
 
-            <div class="settings-section memory-section">
+            <div
+                class="settings-section memory-section"
+            >
+
 
                 <div class="settings-section-title">
 
@@ -667,12 +1071,13 @@
 
                 <p class="settings-description">
 
-                    المعلومات التي طلبت من Nova أن تتذكرها عنك.
+                    المعلومات التي طلبت من Nova
+                    أن تتذكرها عنك.
 
                 </p>
 
 
-                <!-- Memory List -->
+                <!-- MEMORY LIST -->
 
                 <div
                     id="memoryList"
@@ -680,7 +1085,7 @@
                 ></div>
 
 
-                <!-- Clear Memory -->
+                <!-- CLEAR MEMORY -->
 
                 <button
                     id="clearMemoryBtn"
@@ -696,63 +1101,127 @@
 
                 </button>
 
+
             </div>
+
 
         </div>
 
     </div>
 
 </div>
-    <script src="script.js"></script>
-    <script>
+
+
+<!-- =========================
+     AUTH GUARD
+========================= -->
+
+<script src="auth-guard.js"></script>
+
+
+<!-- =========================
+     NOVA MAIN SCRIPT
+========================= -->
+
+<script src="script.js"></script>
+
+
+<!-- =========================
+     LOADING SCREEN SCRIPT
+========================= -->
+
+<script>
+
 (function () {
 
     const loadingScreen =
-        document.getElementById("novaLoadingScreen");
+        document.getElementById(
+            "novaLoadingScreen"
+        );
 
     const progressBar =
-        document.getElementById("novaProgressBar");
+        document.getElementById(
+            "novaProgressBar"
+        );
 
     const progressText =
-        document.getElementById("novaProgressText");
+        document.getElementById(
+            "novaProgressText"
+        );
 
-    if (!loadingScreen || !progressBar || !progressText) {
+
+    if (
+        !loadingScreen ||
+        !progressBar ||
+        !progressText
+    ) {
+
         return;
+
     }
+
 
     let progress = 1;
 
-    progressBar.style.width = "1%";
-    progressText.textContent = "1%";
 
-    const loadingInterval = setInterval(function () {
+    progressBar.style.width =
+        "1%";
 
-        progress++;
+    progressText.textContent =
+        "1%";
 
-        progressBar.style.width =
-            progress + "%";
 
-        progressText.textContent =
-            progress + "%";
+    const loadingInterval =
+        setInterval(function () {
 
-        if (progress >= 100) {
+            progress++;
 
-            clearInterval(loadingInterval);
 
-            setTimeout(function () {
+            progressBar.style.width =
+                progress + "%";
 
-                loadingScreen.classList.add("loaded");
 
-                setTimeout(function () {
-                    loadingScreen.remove();
-                }, 700);
+            progressText.textContent =
+                progress + "%";
 
-            }, 350);
-        }
 
-    }, 35);
+            if (
+                progress >= 100
+            ) {
+
+                clearInterval(
+                    loadingInterval
+                );
+
+
+                setTimeout(
+                    function () {
+
+                        loadingScreen.classList.add(
+                            "loaded"
+                        );
+
+
+                        setTimeout(
+                            function () {
+
+                                loadingScreen.remove();
+
+                            },
+                            700
+                        );
+
+                    },
+                    350
+                );
+
+            }
+
+        }, 35);
 
 })();
+
 </script>
+
 </body>
 </html>
