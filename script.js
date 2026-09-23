@@ -1424,9 +1424,10 @@ async function sendMessage(
             createAssistantMessage(reply, { sources });
         }
 
-        completed = true;
-        saveCurrentChat();
-    catch (error) {
+  completed = true;
+  saveCurrentChat();
+
+} catch (error) {
 
         removeLoadingMessage();
 
