@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Nova AI — Projects</title>
+
+  <link rel="stylesheet" href="projects.css">
+</head>
+
+<body>
+
+  <div class="app">
+
+    <!-- Header -->
+    <header class="topbar">
+
+      <div class="brand">
+
+        <div class="brand-icon">
+          ✦
+        </div>
+
+        <div>
+          <h1>Nova Projects</h1>
+          <span>مشاريعك البرمجية</span>
+        </div>
+
+      </div>
+
+
+      <button
+        id="newProjectBtn"
+        class="new-project-btn"
+      >
+        ＋ مشروع جديد
+      </button>
+
+    </header>
+
+
+    <!-- Content -->
+    <main class="content">
+
+      <section class="hero">
+
+        <div>
+          <h2>مشاريعك</h2>
+
+          <p>
+            أنشئ مشاريعك البرمجية واحفظ كل مشروع
+            بكوده بشكل مستقل.
+          </p>
+        </div>
+
+
+        <div class="project-count">
+
+          <strong id="projectCount">
+            0
+          </strong>
+
+          <span>
+            مشروع
+          </span>
+
+        </div>
+
+      </section>
+
+
+      <!-- Search -->
+      <div class="search-box">
+
+        <span>
+          🔎
+        </span>
+
+        <input
+          id="searchInput"
+          type="text"
+          placeholder="ابحث عن مشروع..."
+          autocomplete="off"
+        >
+
+      </div>
+
+
+      <!-- Projects -->
+      <section
+        id="projectsGrid"
+        class="projects-grid"
+      ></section>
+
+
+      <!-- Empty -->
+      <section
+        id="emptyState"
+        class="empty-state"
+        hidden
+      >
+
+        <div class="empty-icon">
+          📁
+        </div>
+
+        <h3>
+          لسه مفيش مشاريع
+        </h3>
+
+        <p>
+          أنشئ أول مشروع وابدأ البرمجة.
+        </p>
+
+        <button
+          id="emptyCreateBtn"
+        >
+          ＋ إنشاء أول مشروع
+        </button>
+
+      </section>
+
+    </main>
+
+  </div>
+
+
+  <!-- New Project Modal -->
+  <div
+    id="projectModal"
+    class="modal"
+    hidden
+  >
+
+    <div class="modal-card">
+
+      <div class="modal-header">
+
+        <div>
+          <h3>
+            مشروع جديد
+          </h3>
+
+          <p>
+            اكتب اسم المشروع وابدأ.
+          </p>
+        </div>
+
+        <button
+          id="closeModalBtn"
+          class="close-btn"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <label>
+        اسم المشروع
+      </label>
+
+      <input
+        id="projectNameInput"
+        type="text"
+        placeholder="مثال: متجر إلكتروني"
+        maxlength="60"
+      >
+
+
+      <label>
+        وصف المشروع
+      </label>
+
+      <textarea
+        id="projectDescriptionInput"
+        placeholder="اختياري..."
+        maxlength="180"
+      ></textarea>
+
+
+      <div class="modal-actions">
+
+        <button
+          id="cancelProjectBtn"
+          class="cancel-btn"
+        >
+          إلغاء
+        </button>
+
+        <button
+          id="createProjectBtn"
+          class="create-btn"
+        >
+          إنشاء المشروع
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- Rename Modal -->
+  <div
+    id="renameModal"
+    class="modal"
+    hidden
+  >
+
+    <div class="modal-card">
+
+      <div class="modal-header">
+
+        <div>
+          <h3>
+            إعادة تسمية المشروع
+          </h3>
+        </div>
+
+        <button
+          id="closeRenameBtn"
+          class="close-btn"
+        >
+          ×
+        </button>
+
+      </div>
+
+
+      <label>
+        الاسم الجديد
+      </label>
+
+      <input
+        id="renameInput"
+        type="text"
+        maxlength="60"
+      >
+
+
+      <div class="modal-actions">
+
+        <button
+          id="cancelRenameBtn"
+          class="cancel-btn"
+        >
+          إلغاء
+        </button>
+
+        <button
+          id="saveRenameBtn"
+          class="create-btn"
+        >
+          حفظ
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div
+    id="toast"
+    class="toast"
+  ></div>
+
+
+  <script src="projects.js"></script>
+
+</body>
+
+</html>
