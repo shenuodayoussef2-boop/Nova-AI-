@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
-  // ==============================
+  // ==========================================
   // NOVA AI 2.0 PRO - CHAT API
-  // ==============================
+  // ==========================================
 
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
@@ -10,12 +10,10 @@ export default async function handler(req, res) {
     "Content-Type, x-nova-key"
   );
 
-  // CORS preflight
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
-  // POST only
   if (req.method !== "POST") {
     return res.status(405).json({
       error: "POST only"
@@ -23,7 +21,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { message } = req.body || {};
+    const { message, history = [] } = req.body || {};
 
     if (!message || typeof message !== "string") {
       return res.status(400).json({
@@ -40,7 +38,7 @@ export default async function handler(req, res) {
     }
 
     // ==========================================
-    // 1️⃣ GEMINI
+    // GEMINI API KEY
     // ==========================================
 
     const allKeys = (process.env.GEMINI_API_KEY || "")
@@ -48,96 +46,173 @@ export default async function handler(req, res) {
       .map(key => key.trim())
       .filter(Boolean);
 
+    if (allKeys.length === 0) {
+      return res.status(500).json({
+        error: "GEMINI_API_KEY مش موجود في Environment Variables."
+      });
+    }
+
+    // ==========================================
+    // BUILD CONVERSATION
+    // ==========================================
+
+    const contents = [];
+
+    if (Array.isArray(history)) {
+      for (const item of history) {
+        if (!item || typeof item !== "object") continue;
+
+        const role =
+          item.role === "model" || item.role === "assistant"
+            ? "model"
+            : "user";
+
+        const text =
+          typeof item.content === "string"
+            ? item.content.trim()
+            : typeof item.text === "string"
+              ? item.text.trim()
+              : "";
+
+        if (!text) continue;
+
+        contents.push({
+          role,
+          parts: [
+            {
+              text
+            }
+          ]
+        });
+      }
+    }
+
+    contents.push({
+      role: "user",
+      parts: [
+        {
+          text: cleanMessage
+        }
+      ]
+    });
+
+    // ==========================================
+    // SYSTEM INSTRUCTION
+    // ==========================================
+
+    const systemInstruction = {
+      parts: [
+        {
+          text: `
+أنت Nova AI 2.0 Pro.
+
+أنت مساعد ذكي للبرمجة والكتابة والتعلم والإبداع.
+
+قواعدك:
+- أجب باللغة التي يستخدمها المستخدم.
+- إذا كان المستخدم يتحدث بالعربية، استخدم العربية الطبيعية.
+- كن واضحًا ومفيدًا ومباشرًا.
+- في البرمجة، أعطِ كودًا كاملًا وقابلًا للتشغيل عندما يطلب المستخدم ذلك.
+- لا تذكر Gemini أو Google أو تفاصيل مزود النموذج للمستخدم.
+- لا تقل إنك لا تستطيع المساعدة إلا إذا كان الطلب غير ممكن فعلًا.
+`
+        }
+      ]
+    };
+
+    // ==========================================
+    // TRY GEMINI KEYS
+    // ==========================================
+
+    let lastGeminiError = null;
+
     for (const key of allKeys) {
       try {
         const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(key)}`,
+          "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
           {
             method: "POST",
+
             headers: {
-              "Content-Type": "application/json"
+              "Content-Type": "application/json",
+              "x-goog-api-key": key
             },
+
             body: JSON.stringify({
-              system_instruction: {
-                parts: [
-                  {
-                    text: `
-أنت Nova AI 2.0 Pro من تطوير يوسف شنوده.
+              systemInstruction,
 
-كن مساعدًا ذكيًا ومفيدًا.
-أجب باللغة التي يستخدمها المستخدم.
-إذا كان المستخدم يتحدث بالعربية، استخدم العربية بشكل طبيعي.
-لا تذكر اسم Gemini أو تفاصيل مزود النموذج للمستخدم.
-`
-                  }
-                ]
-              },
+              contents,
 
-              contents: [
-                {
-                  role: "user",
-                  parts: [
-                    {
-                      text: cleanMessage
-                    }
-                  ]
-                }
-              ]
+              generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 8192
+              }
             })
           }
         );
 
         const data = await response.json();
 
+        // ======================================
+        // SUCCESS
+        // ======================================
+
         if (
           response.ok &&
-          data?.candidates?.[0]?.content?.parts?.[0]?.text
+          data?.candidates?.[0]?.content?.parts
         ) {
-          const answer =
-            data.candidates[0].content.parts[0].text;
+          const answer = data.candidates[0].content.parts
+            .map(part =>
+              typeof part?.text === "string"
+                ? part.text
+                : ""
+            )
+            .join("")
+            .trim();
 
-          // الشكل الذي يفهمه script.js الحالي
-          return res.status(200).json({
-            candidates: [
-              {
-                content: {
-                  parts: [
-                    {
-                      text: answer
-                    }
-                  ]
+          if (answer) {
+            return res.status(200).json({
+              candidates: [
+                {
+                  content: {
+                    parts: [
+                      {
+                        text: answer
+                      }
+                    ]
+                  }
                 }
-              }
-            ],
+              ],
 
-            // صيغة إضافية لو احتجتها لاحقًا
-            model: "nova-2.0-pro",
-            choices: [
-              {
-                message: {
-                  content: answer
-                }
-              }
-            ],
-
-            server: "nova-private"
-          });
+              model: "gemini-3.8-flash",
+              server: "nova-gemini"
+            });
+          }
         }
 
+        // ======================================
+        // SAVE ACTUAL GEMINI ERROR
+        // ======================================
+
+        lastGeminiError =
+          data?.error?.message ||
+          `Gemini HTTP ${response.status}`;
+
       } catch (error) {
-        // نجرب المفتاح التالي
-        continue;
+        lastGeminiError = error?.message || "Gemini request failed";
       }
     }
 
     // ==========================================
-    // 2️⃣ FALLBACK
+    // FALLBACK
     // ==========================================
 
     try {
       const fallbackResponse = await fetch(
-        `https://text.pollinations.ai/${encodeURIComponent(cleanMessage)}?system=${encodeURIComponent(
-          "You are Nova AI 2.0 Pro developed by Youssef Shenouda. Reply in Arabic when appropriate. Never mention Gemini."
+        `https://text.pollinations.ai/${encodeURIComponent(
+          cleanMessage
+        )}?system=${encodeURIComponent(
+          "You are Nova AI 2.0 Pro. Reply in the user's language. If Arabic, reply naturally in Arabic."
         )}`
       );
 
@@ -158,83 +233,31 @@ export default async function handler(req, res) {
               }
             ],
 
-            model: "nova-2.0-pro",
-            choices: [
-              {
-                message: {
-                  content: text.trim()
-                }
-              }
-            ],
-
-            server: "nova-private-fallback"
+            model: "nova-fallback",
+            server: "nova-fallback"
           });
         }
       }
     } catch (error) {
-      // ننتقل للرسالة الاحتياطية
+      // fallback failed
     }
 
     // ==========================================
-    // 3️⃣ FINAL RESPONSE
+    // REAL ERROR
     // ==========================================
 
-    const finalMessage =
-      "أهلاً! أنا Nova AI 2.0 Pro 👋 جاهز أساعدك. جرّب تبعتلي طلبك مرة تانية.";
-
-    return res.status(200).json({
-      candidates: [
-        {
-          content: {
-            parts: [
-              {
-                text: finalMessage
-              }
-            ]
-          }
-        }
-      ],
-
-      model: "nova-2.0-pro",
-      choices: [
-        {
-          message: {
-            content: finalMessage
-          }
-        }
-      ],
-
-      server: "nova-private"
+    return res.status(502).json({
+      error: "Nova AI لم تستطع الحصول على رد من النموذج.",
+      details: lastGeminiError || "Unknown Gemini error"
     });
 
   } catch (error) {
 
-    const errorMessage =
-      "حصل خطأ بسيط في Nova AI. جرّب إرسال الرسالة مرة تانية.";
+    console.error("NOVA CHAT ERROR:", error);
 
-    return res.status(200).json({
-      candidates: [
-        {
-          content: {
-            parts: [
-              {
-                text: errorMessage
-              }
-            ]
-          }
-        }
-      ],
-
-      model: "nova-2.0-pro",
-      choices: [
-        {
-          message: {
-            content: errorMessage
-          }
-        }
-      ],
-
-      server: "nova-private"
+    return res.status(500).json({
+      error: "حصل خطأ في Nova AI.",
+      details: error?.message || "Unknown server error"
     });
   }
 }
