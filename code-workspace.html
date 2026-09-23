@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Nova AI — Code Workspace</title>
+
+  <link rel="stylesheet" href="code-workspace.css">
+</head>
+
+<body>
+
+  <div class="workspace">
+
+    <!-- Header -->
+    <header class="topbar">
+
+      <div class="brand">
+        <div class="brand-icon">✦</div>
+
+        <div>
+          <h1>Nova Code</h1>
+          <span>Code Workspace</span>
+        </div>
+      </div>
+
+      <div class="top-actions">
+
+        <button id="clearBtn" class="tool-btn danger">
+          🗑️ مسح
+        </button>
+
+        <button id="copyBtn" class="tool-btn">
+          📋 نسخ
+        </button>
+
+        <button id="downloadBtn" class="tool-btn">
+          💾 تنزيل
+        </button>
+
+        <button id="runBtn" class="run-btn">
+          ▶ تشغيل
+        </button>
+
+      </div>
+
+    </header>
+
+
+    <!-- Main -->
+    <main class="workspace-main">
+
+      <!-- Editors -->
+      <section class="editors-panel">
+
+        <!-- HTML -->
+        <div class="editor-card">
+
+          <div class="editor-header">
+
+            <div class="editor-title">
+              <span class="file-icon html-icon">HTML</span>
+              <span>index.html</span>
+            </div>
+
+            <span id="htmlLines">1</span>
+
+          </div>
+
+          <textarea
+            id="htmlEditor"
+            spellcheck="false"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+          ></textarea>
+
+        </div>
+
+
+        <!-- CSS -->
+        <div class="editor-card">
+
+          <div class="editor-header">
+
+            <div class="editor-title">
+              <span class="file-icon css-icon">CSS</span>
+              <span>style.css</span>
+            </div>
+
+            <span id="cssLines">1</span>
+
+          </div>
+
+          <textarea
+            id="cssEditor"
+            spellcheck="false"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+          ></textarea>
+
+        </div>
+
+
+        <!-- JavaScript -->
+        <div class="editor-card">
+
+          <div class="editor-header">
+
+            <div class="editor-title">
+              <span class="file-icon js-icon">JS</span>
+              <span>script.js</span>
+            </div>
+
+            <span id="jsLines">1</span>
+
+          </div>
+
+          <textarea
+            id="jsEditor"
+            spellcheck="false"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+          ></textarea>
+
+        </div>
+
+      </section>
+
+
+      <!-- Preview -->
+      <section class="preview-panel">
+
+        <div class="preview-header">
+
+          <div class="preview-title">
+            <span class="status-dot"></span>
+            Preview
+          </div>
+
+          <div class="preview-actions">
+
+            <button id="refreshPreviewBtn" title="تحديث">
+              ↻
+            </button>
+
+            <button id="fullscreenBtn" title="ملء الشاشة">
+              ⛶
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <iframe
+          id="previewFrame"
+          title="Nova Code Preview"
+          sandbox="allow-scripts allow-forms allow-modals"
+        ></iframe>
+
+
+        <!-- Console -->
+        <div class="console">
+
+          <div class="console-header">
+
+            <div>
+              🖥️ Console
+            </div>
+
+            <button id="clearConsoleBtn">
+              مسح
+            </button>
+
+          </div>
+
+          <div id="consoleOutput" class="console-output">
+            <div class="console-empty">
+              Console جاهز...
+            </div>
+          </div>
+
+        </div>
+
+      </section>
+
+    </main>
+
+
+    <!-- Status Bar -->
+    <footer class="statusbar">
+
+      <div>
+        <span class="online-dot"></span>
+        Nova Code Workspace
+      </div>
+
+      <div id="statusText">
+        جاهز
+      </div>
+
+    </footer>
+
+  </div>
+
+
+  <div id="toast" class="toast"></div>
+
+
+  <script src="code-workspace.js"></script>
+
+</body>
+</html>
