@@ -156,7 +156,6 @@
 
 </head>
 <body>
-
 <!-- =========================
      NOVA AI LOADING SCREEN
 ========================= -->
@@ -165,32 +164,50 @@
 
     <div class="nova-loader">
 
-        <img
-            src="https://i.postimg.cc/6Qzm7v1P/file-00000000205081f4830669209be96998.png"
-            alt="Nova AI"
-            class="nova-loading-logo"
-        >
+        <div class="nova-loader-glow"></div>
 
-        <div class="nova-loading-title">
-            Nova <span>AI</span>
+        <div class="nova-loader-logo-wrap">
+            <img
+                src="https://i.postimg.cc/6Qzm7v1P/file-00000000205081f4830669209be96998.png"
+                alt="Nova AI"
+                class="nova-loading-logo"
+            >
         </div>
 
-        <div class="nova-progress-container">
-            <div
-                id="novaProgressBar"
-                class="nova-progress-bar"
-            ></div>
+        <div class="nova-loading-brand">
+            <span class="nova-brand-nova">Nova</span>
+            <span class="nova-brand-ai">AI</span>
         </div>
 
-        <div
-            id="novaProgressText"
-            class="nova-progress-text"
-        >
-            1%
+        <div class="nova-loading-subtitle">
+            استوديو الذكاء الاصطناعي
+        </div>
+
+        <div class="nova-progress-wrapper">
+
+            <div class="nova-progress-top">
+                <span>جاري تشغيل Nova</span>
+
+                <span
+                    id="novaProgressText"
+                    class="nova-progress-text"
+                >
+                    1%
+                </span>
+            </div>
+
+            <div class="nova-progress-container">
+                <div
+                    id="novaProgressBar"
+                    class="nova-progress-bar"
+                ></div>
+            </div>
+
         </div>
 
         <div class="nova-loading-status">
-            تحميل
+            <span class="nova-status-dot"></span>
+            <span>تهيئة النظام...</span>
         </div>
 
     </div>
