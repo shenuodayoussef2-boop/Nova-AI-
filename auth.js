@@ -1,405 +1,243 @@
-const supabaseClient =
-  window.novaSupabase;
+const supabaseClient = window.novaSupabase;
 
-const authForm =
-  document.getElementById("authForm");
-
-const emailInput =
-  document.getElementById("email");
-
-const passwordInput =
-  document.getElementById("password");
-
-const nameInput =
-  document.getElementById("name");
-
-const nameField =
-  document.getElementById("nameField");
-
-const submitBtn =
-  document.getElementById("submitBtn");
-
-const switchBtn =
-  document.getElementById("switchBtn");
-
-const switchText =
-  document.getElementById("switchText");
-
-const formTitle =
-  document.getElementById("formTitle");
-
-const formSubtitle =
-  document.getElementById("formSubtitle");
-
-const messageBox =
-  document.getElementById("message");
+const authForm = document.getElementById("authForm");
+const emailInput = document.getElementById("email");
+const passwordInput = document.getElementById("password");
+const nameInput = document.getElementById("name");
+const nameField = document.getElementById("nameField");
+const submitBtn = document.getElementById("submitBtn");
+const switchBtn = document.getElementById("switchBtn");
+const switchText = document.getElementById("switchText");
+const formTitle = document.getElementById("formTitle");
+const formSubtitle = document.getElementById("formSubtitle");
+const messageBox = document.getElementById("message");
 
 let isSignup = false;
 
-
-// ==========================================
-// MESSAGE
-// ==========================================
-
-function showMessage(
-  text,
-  type = "error"
-) {
-
-  messageBox.textContent = text;
-
-  messageBox.className =
-    `message show ${type}`;
-
+function showMessage(text, type = "error") {
+    messageBox.textContent = text;
+    messageBox.className = `message show ${type}`;
 }
-
-
-// ==========================================
-// CLEAR MESSAGE
-// ==========================================
 
 function clearMessage() {
-
-  messageBox.textContent = "";
-
-  messageBox.className =
-    "message";
-
+    messageBox.textContent = "";
+    messageBox.className = "message";
 }
 
+/* =========================
+   التبديل بين الدخول والتسجيل
+========================= */
 
-// ==========================================
-// SWITCH LOGIN / SIGNUP
-// ==========================================
+switchBtn.addEventListener("click", function (event) {
 
-switchBtn.addEventListener(
-  "click",
-  () => {
+    event.preventDefault();
 
-    isSignup =
-      !isSignup;
+    isSignup = !isSignup;
 
     clearMessage();
 
     if (isSignup) {
 
-      formTitle.textContent =
-        "اعمل حساب جديد 🚀";
+        formTitle.textContent = "اعمل حساب جديد 🚀";
+        formSubtitle.textContent = "سجّل حسابك وابدأ تستخدم Nova AI";
 
-      formSubtitle.textContent =
-        "سجّل حسابك وابدأ تستخدم Nova AI";
+        submitBtn.textContent = "إنشاء الحساب";
 
-      submitBtn.textContent =
-        "إنشاء الحساب";
+        switchText.textContent = "عندك حساب بالفعل؟";
+        switchBtn.textContent = "تسجيل الدخول";
 
-      switchText.textContent =
-        "عندك حساب بالفعل؟";
+        nameField.style.display = "block";
+        nameInput.required = true;
 
-      switchBtn.textContent =
-        "تسجيل الدخول";
+        passwordInput.autocomplete = "new-password";
 
-      nameField.style.display =
-        "block";
+    } else {
 
-      nameInput.required =
-        true;
+        formTitle.textContent = "أهلاً بيك في Nova AI 👋";
+        formSubtitle.textContent = "سجّل دخولك وكمل مع Nova";
 
-      passwordInput.autocomplete =
-        "new-password";
+        submitBtn.textContent = "تسجيل الدخول";
 
+        switchText.textContent = "معندكش حساب؟";
+        switchBtn.textContent = "إنشاء حساب";
+
+        nameField.style.display = "none";
+        nameInput.required = false;
+
+        passwordInput.autocomplete = "current-password";
     }
-
-    else {
-
-      formTitle.textContent =
-        "أهلاً بيك في Nova AI 👋";
-
-      formSubtitle.textContent =
-        "سجّل دخولك وكمل مع Nova";
-
-      submitBtn.textContent =
-        "تسجيل الدخول";
-
-      switchText.textContent =
-        "معندكش حساب؟";
-
-      switchBtn.textContent =
-        "إنشاء حساب";
-
-      nameField.style.display =
-        "none";
-
-      nameInput.required =
-        false;
-
-      passwordInput.autocomplete =
-        "current-password";
-
-    }
-
-  }
-);
+});
 
 
-// ==========================================
-// SUBMIT
-// ==========================================
+/* =========================
+   تسجيل الدخول / إنشاء الحساب
+========================= */
 
-authForm.addEventListener(
-  "submit",
-  async event => {
+authForm.addEventListener("submit", async function (event) {
 
     event.preventDefault();
 
     clearMessage();
 
-    const email =
-      emailInput.value.trim();
-
-    const password =
-      passwordInput.value;
-
-    const name =
-      nameInput.value.trim();
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    const name = nameInput.value.trim();
 
     if (!email || !password) {
-
-      showMessage(
-        "اكتب الإيميل والباسورد الأول."
-      );
-
-      return;
+        showMessage("اكتب الإيميل والباسورد الأول.");
+        return;
     }
 
-
-    if (
-      isSignup &&
-      !name
-    ) {
-
-      showMessage(
-        "اكتب اسمك الأول."
-      );
-
-      return;
+    if (isSignup && !name) {
+        showMessage("اكتب اسمك الأول.");
+        return;
     }
 
+    if (!supabaseClient) {
+        showMessage("Supabase مش متصل.");
+        console.error("Nova: Supabase client missing.");
+        return;
+    }
 
-    submitBtn.disabled =
-      true;
+    submitBtn.disabled = true;
 
-    submitBtn.textContent =
-      isSignup
+    submitBtn.textContent = isSignup
         ? "جاري إنشاء الحساب..."
         : "جاري تسجيل الدخول...";
 
-
     try {
 
-      // ====================================
-      // SIGN UP
-      // ====================================
+        /* =========================
+           إنشاء حساب
+        ========================= */
 
-      if (isSignup) {
+        if (isSignup) {
 
-        const {
-          data,
-          error
-        } =
-          await supabaseClient.auth.signUp({
-            email,
-            password,
+            const { data, error } =
+                await supabaseClient.auth.signUp({
+                    email: email,
+                    password: password,
+                    options: {
+                        data: {
+                            name: name
+                        }
+                    }
+                });
 
-            options: {
-              data: {
-                name
-              }
+            console.log("SIGN UP RESULT:", data);
+            console.log("SIGN UP ERROR:", error);
+
+            if (error) {
+                throw error;
             }
-          });
 
+            /*
+             * لو تأكيد الإيميل شغال
+             */
+            if (!data.session) {
+
+                showMessage(
+                    "الحساب اتعمل ✅ افتح إيميلك واضغط رابط التأكيد، وبعدها سجل دخول.",
+                    "success"
+                );
+
+                return;
+            }
+
+            /*
+             * لو التأكيد مقفول
+             * هيكون فيه Session وندخل الشات مباشرة
+             */
+
+            showMessage(
+                "تم إنشاء الحساب 🎉",
+                "success"
+            );
+
+            window.location.replace("index.html");
+
+            return;
+        }
+
+
+        /* =========================
+           تسجيل الدخول
+        ========================= */
+
+        const { data, error } =
+            await supabaseClient.auth.signInWithPassword({
+                email: email,
+                password: password
+            });
+
+        console.log("LOGIN RESULT:", data);
+        console.log("LOGIN ERROR:", error);
 
         if (error) {
-          throw error;
+            throw error;
         }
 
-
-        // في حالة الـ email confirmation
-        if (
-          data?.user &&
-          !data?.session
-        ) {
-
-          showMessage(
-            "الحساب اتعمل ✅ راجع إيميلك واضغط على رابط التأكيد، وبعدها ارجع سجّل دخول.",
-            "success"
-          );
-
-          return;
+        if (!data.session) {
+            throw new Error("تم الدخول لكن Session مش موجودة.");
         }
-
 
         showMessage(
-          "الحساب اتعمل بنجاح 🎉",
-          "success"
+            "تم تسجيل الدخول ✅",
+            "success"
         );
 
+        window.location.replace("index.html");
 
-  window.location.replace("index.html");
+    } catch (error) {
 
-        return;
-      }
+        console.error("NOVA AUTH ERROR:", error);
 
-
-      // ====================================
-      // LOGIN
-      // ====================================
-
-      const {
-        data,
-        error
-      } =
-        await supabaseClient.auth.signInWithPassword({
-          email,
-          password
-        });
-
-
-      if (error) {
-        throw error;
-      }
-
-
-      if (!data?.session) {
-
-        throw new Error(
-          "تم الدخول لكن الجلسة مش موجودة."
+        showMessage(
+            getArabicAuthError(error)
         );
 
-      }
+    } finally {
+
+        submitBtn.disabled = false;
+
+        submitBtn.textContent = isSignup
+            ? "إنشاء الحساب"
+            : "تسجيل الدخول";
+    }
+});
 
 
-      showMessage(
-        "تم تسجيل الدخول ✅",
-        "success"
-      );
+/* =========================
+   رسائل الأخطاء بالعربي
+========================= */
 
+function getArabicAuthError(error) {
 
-      setTimeout(
-        () => {
+    const msg =
+        String(error?.message || "").toLowerCase();
 
-          window.location.href =
-            "index.html";
-
-        },
-        500
-      );
-
+    if (msg.includes("invalid login credentials")) {
+        return "الإيميل أو الباسورد غلط.";
     }
 
-    catch (error) {
-
-      console.error(
-        "NOVA AUTH ERROR:",
-        error
-      );
-
-      showMessage(
-        getArabicAuthError(
-          error
-        )
-      );
-
+    if (msg.includes("email not confirmed")) {
+        return "أكد إيميلك الأول من الرسالة اللي اتبعتتلك.";
     }
 
-    finally {
-
-      submitBtn.disabled =
-        false;
-
-      submitBtn.textContent =
-        isSignup
-          ? "إنشاء الحساب"
-          : "تسجيل الدخول";
-
+    if (
+        msg.includes("password") &&
+        msg.includes("at least")
+    ) {
+        return "الباسورد لازم يكون 6 حروف أو أكتر.";
     }
 
-  }
-);
+    if (msg.includes("user already registered")) {
+        return "الإيميل ده مسجل بالفعل، جرّب تسجيل الدخول.";
+    }
 
+    if (msg.includes("rate limit")) {
+        return "استنى شوية وجرب تاني.";
+    }
 
-// ==========================================
-// ARABIC ERROR MESSAGES
-// ==========================================
-
-function getArabicAuthError(
-  error
-) {
-
-  const msg =
-    String(
-      error?.message ||
-      ""
-    ).toLowerCase();
-
-
-  if (
-    msg.includes(
-      "invalid login credentials"
-    )
-  ) {
-
-    return (
-      "الإيميل أو الباسورد غلط."
-    );
-
-  }
-
-
-  if (
-    msg.includes(
-      "email not confirmed"
-    )
-  ) {
-
-    return (
-      "أكد إيميلك الأول من الرسالة اللي اتبعتتلك."
-    );
-
-  }
-
-
-  if (
-    msg.includes(
-      "password"
-    ) &&
-    msg.includes(
-      "at least"
-    )
-  ) {
-
-    return (
-      "الباسورد لازم يكون 6 حروف أو أكتر."
-    );
-
-  }
-
-
-  if (
-    msg.includes(
-      "rate limit"
-    )
-  ) {
-
-    return (
-      "استنى شوية وجرب تاني."
-    );
-
-  }
-
-
-  return (
-    error?.message ||
-    "حصلت مشكلة، جرّب تاني."
-  );
-
+    return error?.message || "حصلت مشكلة، جرّب تاني.";
 }
