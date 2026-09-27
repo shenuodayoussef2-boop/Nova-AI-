@@ -244,13 +244,7 @@ authForm.addEventListener(
         );
 
 
-        setTimeout(
-          () => {
-            window.location.href =
-              "index.html";
-          },
-          800
-        );
+  window.location.replace("index.html");
 
         return;
       }
