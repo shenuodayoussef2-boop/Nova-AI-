@@ -1,5 +1,3 @@
-const supabaseClient = window.novaSupabase;
-
 const signupForm = document.getElementById("signupForm");
 const signupBtn = document.getElementById("signupBtn");
 
@@ -9,15 +7,10 @@ const passwordInput = document.getElementById("password");
 
 const messageBox = document.getElementById("message");
 
-
 function showMessage(text, type = "error") {
-
     messageBox.textContent = text;
-
-    messageBox.className =
-        `message show ${type}`;
+    messageBox.className = `message show ${type}`;
 }
-
 
 signupForm.addEventListener("submit", async function (event) {
 
@@ -28,65 +21,36 @@ signupForm.addEventListener("submit", async function (event) {
     const password = passwordInput.value;
 
     if (!name || !email || !password) {
-
-        showMessage(
-            "املأ كل البيانات الأول."
-        );
-
+        showMessage("املأ كل البيانات الأول.");
         return;
     }
 
-
     signupBtn.disabled = true;
-
-    signupBtn.textContent =
-        "جاري إنشاء الحساب...";
-
+    signupBtn.textContent = "جاري إنشاء الحساب...";
 
     try {
 
-        if (!supabaseClient) {
-
-            throw new Error(
-                "Supabase مش متصل."
-            );
+        if (!window.novaSupabase) {
+            throw new Error("Supabase مش متصل.");
         }
 
-
         const { data, error } =
-            await supabaseClient.auth.signUp({
-
+            await window.novaSupabase.auth.signUp({
                 email: email,
-
                 password: password,
-
                 options: {
-
                     data: {
                         name: name
                     }
-
                 }
-
             });
 
-
-        console.log(
-            "Nova Signup:",
-            data
-        );
-
+        console.log("Nova Signup:", data);
+        console.log("Nova Signup Error:", error);
 
         if (error) {
-
             throw error;
-
         }
-
-
-        /*
-         * لو Supabase طالب تأكيد الإيميل
-         */
 
         if (!data.session) {
 
@@ -96,32 +60,19 @@ signupForm.addEventListener("submit", async function (event) {
             );
 
             signupBtn.disabled = false;
-
-            signupBtn.textContent =
-                "إنشاء الحساب";
+            signupBtn.textContent = "إنشاء الحساب";
 
             return;
         }
-
-
-        /*
-         * لو التسجيل دخل مباشرة
-         */
 
         showMessage(
             "تم إنشاء الحساب 🎉",
             "success"
         );
 
-
-        setTimeout(function () {
-
-            window.location.replace(
-                "index.html"
-            );
-
+        setTimeout(() => {
+            window.location.replace("index.html");
         }, 500);
-
 
     } catch (error) {
 
@@ -130,26 +81,16 @@ signupForm.addEventListener("submit", async function (event) {
             error
         );
 
-
         const msg =
-            String(
-                error?.message || ""
-            ).toLowerCase();
+            String(error?.message || "").toLowerCase();
 
-
-        if (
-            msg.includes(
-                "user already registered"
-            )
-        ) {
+        if (msg.includes("user already registered")) {
 
             showMessage(
                 "الإيميل ده مسجل بالفعل، جرّب تسجيل الدخول."
             );
 
-        }
-
-        else if (
+        } else if (
             msg.includes("password") &&
             msg.includes("at least")
         ) {
@@ -158,22 +99,16 @@ signupForm.addEventListener("submit", async function (event) {
                 "كلمة المرور لازم تكون 6 حروف أو أكثر."
             );
 
-        }
-
-        else {
+        } else {
 
             showMessage(
                 error?.message ||
                 "حصل خطأ أثناء إنشاء الحساب."
             );
-
         }
 
-
         signupBtn.disabled = false;
-
-        signupBtn.textContent =
-            "إنشاء الحساب";
+        signupBtn.textContent = "إنشاء الحساب";
     }
 
 });
