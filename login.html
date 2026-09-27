@@ -55,6 +55,7 @@
 
     .login-card {
       background: rgba(12, 20, 28, 0.94);
+
       border: 1px solid rgba(0, 255, 255, 0.15);
 
       border-radius: 24px;
@@ -96,13 +97,17 @@
 
     h1 {
       text-align: center;
+
       font-size: 30px;
+
       margin-bottom: 8px;
     }
 
     .subtitle {
       text-align: center;
+
       color: #91a3b2;
+
       margin-bottom: 28px;
     }
 
@@ -112,6 +117,7 @@
 
     .field label {
       display: block;
+
       margin-bottom: 8px;
 
       color: #dce7ee;
@@ -176,6 +182,7 @@
       margin-top: 8px;
 
       font-size: 16px;
+
       font-weight: bold;
 
       cursor: pointer;
@@ -198,6 +205,7 @@
 
     .main-btn:disabled {
       opacity: 0.6;
+
       cursor: not-allowed;
     }
 
@@ -213,6 +221,7 @@
 
     .switch button {
       border: 0;
+
       background: none;
 
       color: #00d9ff;
@@ -220,7 +229,17 @@
       cursor: pointer;
 
       font-size: 14px;
+
       font-weight: bold;
+
+      padding: 5px;
+
+      font-family: inherit;
+    }
+
+    .switch button:hover {
+      color: #ffffff;
+      text-decoration: underline;
     }
 
     .message {
@@ -243,13 +262,17 @@
 
     .message.error {
       background: rgba(255, 70, 70, 0.1);
+
       border: 1px solid rgba(255, 70, 70, 0.2);
+
       color: #ffaaaa;
     }
 
     .message.success {
       background: rgba(40, 220, 150, 0.1);
+
       border: 1px solid rgba(40, 220, 150, 0.2);
+
       color: #9ff0ca;
     }
 
@@ -269,6 +292,7 @@
 
 </head>
 
+
 <body>
 
   <main class="login-container">
@@ -279,9 +303,11 @@
         <i class="fa-solid fa-bolt"></i>
       </div>
 
+
       <h1 id="formTitle">
         أهلاً بيك في Nova AI 👋
       </h1>
+
 
       <p
         class="subtitle"
@@ -290,12 +316,18 @@
         سجّل دخولك وكمل مع Nova
       </p>
 
-      <form id="authForm">
+
+      <form
+        id="authForm"
+        novalidate
+      >
+
+        <!-- NAME -->
 
         <div
           class="field"
           id="nameField"
-          style="display:none;"
+          style="display: none;"
         >
 
           <label for="name">
@@ -316,6 +348,9 @@
           </div>
 
         </div>
+
+
+        <!-- EMAIL -->
 
         <div class="field">
 
@@ -338,6 +373,9 @@
           </div>
 
         </div>
+
+
+        <!-- PASSWORD -->
 
         <div class="field">
 
@@ -362,6 +400,9 @@
 
         </div>
 
+
+        <!-- MAIN BUTTON -->
+
         <button
           type="submit"
           class="main-btn"
@@ -372,10 +413,16 @@
 
       </form>
 
+
+      <!-- MESSAGE -->
+
       <div
         class="message"
         id="message"
       ></div>
+
+
+      <!-- SWITCH -->
 
       <div class="switch">
 
@@ -397,12 +444,22 @@
   </main>
 
 
+  <!-- SUPABASE -->
+
   <script
     src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
   ></script>
 
+
+  <!-- NOVA SUPABASE -->
+
   <script src="supabase.js"></script>
+
+
+  <!-- NOVA AUTH -->
+
   <script src="auth.js"></script>
+
 
 </body>
 
