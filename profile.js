@@ -1,149 +1,379 @@
-/* ==========================================
-   NOVA AI - USER PROFILE
-========================================== */
+/* =========================================================
+   NOVA AI - PROFILE SYSTEM
+   ---------------------------------------------------------
+   متوافق مع index.html الحالي
+   - لا ينشئ Profile جديد
+   - لا يكرر الحساب
+   - يفتح / يقفل القائمة
+   - يقرأ الاسم والخطة من Supabase
+   - يدعم العربية والإنجليزية
+   - Theme buttons
+   - Language
+   - Usage
+   - Settings
+   - Sign out
+========================================================= */
 
-(function () {
+(() => {
 
     "use strict";
 
 
-    const supabaseClient =
-        window.novaSupabase;
+    /* =====================================================
+       STATE
+    ===================================================== */
+
+    let supabaseClient = null;
+
+    let currentUser = null;
+
+    let currentProfile = null;
 
 
-    if (!supabaseClient) {
+    /* =====================================================
+       TRANSLATIONS
+    ===================================================== */
 
-        console.error(
-            "Nova Profile: Supabase not found."
-        );
+    const TEXT = {
 
-        return;
+        ar: {
+
+            currentPlan:
+                "الخطة الحالية",
+
+            language:
+                "اللغة",
+
+            usage:
+                "الاستخدام",
+
+            settings:
+                "الإعدادات",
+
+            signOut:
+                "تسجيل الخروج",
+
+            free:
+                "FREE",
+
+            pro:
+                "PRO",
+
+            ultra:
+                "ULTRA",
+
+            usageMessage:
+                "الخطة الحالية: {plan}",
+
+            noAccount:
+                "لم يتم العثور على الحساب.",
+
+            logoutError:
+                "حصل خطأ أثناء تسجيل الخروج."
+
+        },
+
+        en: {
+
+            currentPlan:
+                "Current plan",
+
+            language:
+                "Language",
+
+            usage:
+                "Usage",
+
+            settings:
+                "Settings",
+
+            signOut:
+                "Sign out",
+
+            free:
+                "FREE",
+
+            pro:
+                "PRO",
+
+            ultra:
+                "ULTRA",
+
+            usageMessage:
+                "Current plan: {plan}",
+
+            noAccount:
+                "Account not found.",
+
+            logoutError:
+                "An error occurred while signing out."
+
+        }
+
+    };
+
+
+    /* =====================================================
+       LANGUAGE
+    ===================================================== */
+
+    function getLanguage() {
+
+        const saved =
+            localStorage.getItem(
+                "novaLanguage"
+            );
+
+
+        /*
+         * Arabic variants
+         */
+
+        if (
+
+            saved === "ar" ||
+
+            saved === "ar-eg" ||
+
+            saved === "ar-ma"
+
+        ) {
+
+            return "ar";
+
+        }
+
+
+        /*
+         * English
+         */
+
+        if (
+            saved === "en"
+        ) {
+
+            return "en";
+
+        }
+
+
+        /*
+         * لو Auto
+         * نعتمد على dir / lang الحالية
+         */
+
+        const htmlLang =
+            document.documentElement
+                ?.getAttribute(
+                    "lang"
+                )
+                ?.toLowerCase() || "";
+
+
+        const htmlDir =
+            document.documentElement
+                ?.getAttribute(
+                    "dir"
+                )
+                ?.toLowerCase() || "";
+
+
+        if (
+            htmlLang.startsWith("ar") ||
+            htmlDir === "rtl"
+        ) {
+
+            return "ar";
+
+        }
+
+
+        return "en";
 
     }
 
 
-    const profileBtn =
-        document.getElementById(
-            "novaProfileBtn"
+    function t(
+        key
+    ) {
+
+        const lang =
+            getLanguage();
+
+
+        return (
+            TEXT[lang]?.[key] ||
+            TEXT.en[key] ||
+            key
         );
 
-    const profileMenu =
-        document.getElementById(
-            "novaProfileMenu"
-        );
-
-    const profileAvatar =
-        document.getElementById(
-            "novaProfileAvatar"
-        );
-
-    const menuAvatar =
-        document.getElementById(
-            "novaMenuAvatar"
-        );
-
-    const profileName =
-        document.getElementById(
-            "novaProfileName"
-        );
-
-    const menuName =
-        document.getElementById(
-            "novaMenuName"
-        );
-
-    const menuEmail =
-        document.getElementById(
-            "novaMenuEmail"
-        );
-
-    const profilePlan =
-        document.getElementById(
-            "novaProfilePlan"
-        );
-
-    const menuPlan =
-        document.getElementById(
-            "novaMenuPlan"
-        );
-
-    const themeOptions =
-        document.querySelectorAll(
-            ".nova-theme-option"
-        );
-
-    const logoutBtn =
-        document.getElementById(
-            "novaLogoutBtn"
-        );
-
-    const profileLanguage =
-        document.getElementById(
-            "novaProfileLanguage"
-        );
-
-    const profileUsage =
-        document.getElementById(
-            "novaProfileUsage"
-        );
-
-    const profileSettings =
-        document.getElementById(
-            "novaProfileSettings"
-        );
+    }
 
 
-    let currentUser = null;
-    let currentProfile = null;
+    /* =====================================================
+       ELEMENTS
+    ===================================================== */
+
+    function elements() {
+
+        return {
+
+            profileArea:
+                document.querySelector(
+                    ".nova-profile-area"
+                ),
+
+            profileBtn:
+                document.getElementById(
+                    "novaProfileBtn"
+                ),
+
+            profileMenu:
+                document.getElementById(
+                    "novaProfileMenu"
+                ),
+
+            profileArrow:
+                document.querySelector(
+                    ".nova-profile-arrow"
+                ),
+
+            profileAvatar:
+                document.getElementById(
+                    "novaProfileAvatar"
+                ),
+
+            profileName:
+                document.getElementById(
+                    "novaProfileName"
+                ),
+
+            profilePlan:
+                document.getElementById(
+                    "novaProfilePlan"
+                ),
+
+            menuAvatar:
+                document.getElementById(
+                    "novaMenuAvatar"
+                ),
+
+            menuName:
+                document.getElementById(
+                    "novaMenuName"
+                ),
+
+            menuEmail:
+                document.getElementById(
+                    "novaMenuEmail"
+                ),
+
+            menuPlan:
+                document.getElementById(
+                    "novaMenuPlan"
+                ),
+
+            languageBtn:
+                document.getElementById(
+                    "novaProfileLanguage"
+                ),
+
+            usageBtn:
+                document.getElementById(
+                    "novaProfileUsage"
+                ),
+
+            settingsBtn:
+                document.getElementById(
+                    "novaProfileSettings"
+                ),
+
+            logoutBtn:
+                document.getElementById(
+                    "novaLogoutBtn"
+                )
+
+        };
+
+    }
 
 
-    /* ==========================================
+    /* =====================================================
        INITIALS
-    ========================================== */
+    ===================================================== */
 
     function getInitials(
         name
     ) {
 
         if (!name) {
-            return "N";
+
+            return "NA";
+
         }
 
 
         const clean =
-            name.trim();
+            String(name)
+                .trim()
+                .replace(
+                    /\s+/g,
+                    " "
+                );
 
 
-        const words =
+        const parts =
             clean
-                .split(/\s+/)
+                .split(" ")
                 .filter(Boolean);
 
 
-        if (!words.length) {
-            return "N";
+        if (
+            parts.length >= 2
+        ) {
+
+            return (
+
+                mapInitial(
+                    parts[0]
+                ) +
+
+                mapInitial(
+                    parts[1]
+                )
+
+            );
+
         }
 
 
-        /*
-         * Arabic -> Latin initials
-         *
-         * يوسف شنوده
-         * -> YS
-         */
+        return [...parts[0]]
+            .slice(0, 2)
+            .map(
+                char =>
+                    mapInitial(char)
+            )
+            .join("");
+
+    }
+
+
+    function mapInitial(
+        char
+    ) {
 
         const arabicMap = {
 
-            "ا": "A",
             "أ": "A",
-            "إ": "A",
+            "إ": "E",
             "آ": "A",
+            "ا": "A",
 
             "ب": "B",
             "ت": "T",
             "ث": "T",
 
-            "ج": "J",
+            "ج": "G",
             "ح": "H",
             "خ": "K",
 
@@ -177,119 +407,285 @@
             "ه": "H",
             "و": "W",
 
-            "ي": "Y",
+            "ي": "Y"
 
-            "ى": "Y"
         };
 
 
-        function firstLetter(
-            word
-        ) {
-
-            const first =
-                word.charAt(0);
-
-
-            if (
-                arabicMap[first]
-            ) {
-
-                return arabicMap[
-                    first
-                ];
-
-            }
-
-
-            return first
-                .toUpperCase();
-
-        }
-
-
-        if (
-            words.length === 1
-        ) {
-
-            return firstLetter(
-                words[0]
-            );
-
-        }
-
-
         return (
-            firstLetter(words[0]) +
-            firstLetter(words[1])
-        )
-        .slice(
-            0,
-            2
+
+            arabicMap[char] ||
+
+            String(char || "")
+                .charAt(0)
+                .toUpperCase() ||
+
+            "N"
+
         );
 
     }
 
 
-    /* ==========================================
-       PLAN LABEL
-    ========================================== */
+    /* =====================================================
+       PLAN NAME
+    ===================================================== */
 
-    function formatPlan(
+    function getPlanName(
         plan
     ) {
 
-        switch (
-            String(plan)
-                .toLowerCase()
+        const value =
+            String(
+                plan || "free"
+            )
+            .toLowerCase();
+
+
+        if (
+            value === "pro"
         ) {
 
-            case "pro":
-                return "PRO";
+            return t(
+                "pro"
+            );
 
-            case "ultra":
-                return "ULTRA";
+        }
 
-            default:
-                return "FREE";
+
+        if (
+            value === "ultra"
+        ) {
+
+            return t(
+                "ultra"
+            );
+
+        }
+
+
+        return t(
+            "free"
+        );
+
+    }
+
+
+    /* =====================================================
+       LOAD PROFILE
+    ===================================================== */
+
+    async function loadProfile() {
+
+        supabaseClient =
+            window.novaSupabase;
+
+
+        if (
+            !supabaseClient
+        ) {
+
+            console.error(
+                "Nova Profile: Supabase client not found."
+            );
+
+            return;
+
+        }
+
+
+        try {
+
+            const {
+                data:
+                    sessionData,
+                error:
+                    sessionError
+            } =
+                await supabaseClient
+                    .auth
+                    .getSession();
+
+
+            if (
+                sessionError ||
+                !sessionData?.session?.user
+            ) {
+
+                console.warn(
+                    "Nova Profile: No active session."
+                );
+
+                return;
+
+            }
+
+
+            currentUser =
+                sessionData
+                    .session
+                    .user;
+
+
+            const {
+                data:
+                    profileData,
+                error:
+                    profileError
+            } =
+                await supabaseClient
+
+                    .from(
+                        "profiles"
+                    )
+
+                    .select(
+                        "id,name,avatar_url,plan,role,theme,language"
+                    )
+
+                    .eq(
+                        "id",
+                        currentUser.id
+                    )
+
+                    .maybeSingle();
+
+
+            if (
+                profileError
+            ) {
+
+                console.error(
+                    "Nova Profile Query Error:",
+                    profileError
+                );
+
+                return;
+
+            }
+
+
+            currentProfile =
+                profileData || {
+
+                    id:
+                        currentUser.id,
+
+                    name:
+                        currentUser
+                            ?.user_metadata
+                            ?.name ||
+
+                        currentUser
+                            ?.email
+                            ?.split("@")[0] ||
+
+                        "Nova User",
+
+                    avatar_url:
+                        null,
+
+                    plan:
+                        "free",
+
+                    role:
+                        "user",
+
+                    theme:
+                        "nova",
+
+                    language:
+                        "auto"
+
+                };
+
+
+            /*
+             * حفظ لغة الحساب محليًا
+             * لو عنده لغة مسجلة
+             */
+
+            if (
+                currentProfile.language &&
+                currentProfile.language !== "auto"
+            ) {
+
+                localStorage.setItem(
+
+                    "novaLanguage",
+
+                    currentProfile.language
+
+                );
+
+            }
+
+
+            /*
+             * حفظ Theme
+             */
+
+            if (
+                currentProfile.theme
+            ) {
+
+                applyTheme(
+                    currentProfile.theme
+                );
+
+            }
+
+
+            renderProfile();
+
+            updateLanguageTexts();
+
+        } catch (
+            error
+        ) {
+
+            console.error(
+                "Nova Profile Load Error:",
+                error
+            );
 
         }
 
     }
 
 
-    /* ==========================================
-       APPLY PROFILE
-    ========================================== */
+    /* =====================================================
+       RENDER PROFILE
+    ===================================================== */
 
     function renderProfile() {
 
-        if (!currentUser) {
+        if (
+            !currentUser ||
+            !currentProfile
+        ) {
+
             return;
+
         }
 
 
-        const metadata =
-            currentUser.user_metadata ||
-            {};
+        const el =
+            elements();
 
 
         const name =
-            currentProfile?.name ||
-            metadata.name ||
-            currentUser.email
+            currentProfile.name ||
+
+            currentUser
+                ?.user_metadata
+                ?.name ||
+
+            currentUser
+                ?.email
                 ?.split("@")[0] ||
+
             "Nova User";
-
-
-        const email =
-            currentUser.email ||
-            "—";
-
-
-        const plan =
-            currentProfile?.plan ||
-            "free";
 
 
         const initials =
@@ -298,320 +694,416 @@
             );
 
 
-        profileAvatar.textContent =
-            initials;
+        const plan =
+            String(
+                currentProfile.plan ||
+                "free"
+            )
+            .toLowerCase();
 
 
-        menuAvatar.textContent =
-            initials;
-
-
-        profileName.textContent =
-            name;
-
-
-        menuName.textContent =
-            name;
-
-
-        menuEmail.textContent =
-            email;
-
-
-        const planText =
-            formatPlan(
+        const planName =
+            getPlanName(
                 plan
             );
 
 
-        profilePlan.textContent =
-            planText;
+        /*
+         * Avatar
+         */
 
-
-        menuPlan.textContent =
-            planText;
-
-
-        profilePlan.classList.remove(
-            "free",
-            "pro",
-            "ultra"
-        );
-
-
-        profilePlan.classList.add(
-            String(plan)
-                .toLowerCase()
-        );
-
-
-        const activeTheme =
-            currentProfile?.theme ||
-            localStorage.getItem(
-                "novaTheme"
-            ) ||
-            "nova";
-
-
-        setActiveThemeButton(
-            activeTheme
-        );
-
-    }
-
-
-    /* ==========================================
-       LOAD PROFILE
-    ========================================== */
-
-    async function loadProfile() {
-
-        try {
-
-            const {
-                data: sessionData,
-                error: sessionError
-            } =
-                await supabaseClient.auth
-                    .getSession();
-
+        if (
+            el.profileAvatar
+        ) {
 
             if (
-                sessionError ||
-                !sessionData?.session
+                currentProfile.avatar_url
             ) {
 
-                return;
+                el.profileAvatar.innerHTML = `
 
-            }
+                    <img
+                        src="${escapeAttribute(
+                            currentProfile.avatar_url
+                        )}"
+                        alt="${escapeAttribute(
+                            name
+                        )}"
+                        style="
+                            width:100%;
+                            height:100%;
+                            object-fit:cover;
+                            border-radius:inherit;
+                            display:block;
+                        "
+                    >
 
-
-            currentUser =
-                sessionData.session.user;
-
-
-            const {
-                data,
-                error
-            } =
-                await supabaseClient
-                    .from("profiles")
-                    .select(
-                        "id, name, avatar_url, plan, theme, language"
-                    )
-                    .eq(
-                        "id",
-                        currentUser.id
-                    )
-                    .maybeSingle();
-
-
-            if (error) {
-
-                console.error(
-                    "Nova Profile DB Error:",
-                    error
-                );
-
-                /*
-                 * لو الجدول لسه مش موجود،
-                 * نكمل بـ FREE بدل ما نكسر التطبيق.
-                 */
-
-                currentProfile = {
-                    name:
-                        currentUser
-                            .user_metadata
-                            ?.name ||
-                        "",
-                    plan: "free",
-                    theme:
-                        localStorage.getItem(
-                            "novaTheme"
-                        ) ||
-                        "nova",
-                    language:
-                        localStorage.getItem(
-                            "novaLanguage"
-                        ) ||
-                        "auto"
-                };
+                `;
 
             } else {
 
-                currentProfile =
-                    data || {
-                        name:
-                            currentUser
-                                .user_metadata
-                                ?.name ||
-                            "",
-                        plan: "free",
-                        theme: "nova",
-                        language: "auto"
-                    };
+                el.profileAvatar.textContent =
+                    initials;
 
             }
 
+        }
 
-            renderProfile();
 
+        /*
+         * Menu avatar
+         */
 
-            /*
-             * لو اللغة محفوظة في Profile
-             * نستخدمها
-             */
+        if (
+            el.menuAvatar
+        ) {
 
             if (
-                currentProfile?.language
+                currentProfile.avatar_url
             ) {
 
-                localStorage.setItem(
-                    "novaLanguage",
-                    currentProfile.language
-                );
+                el.menuAvatar.innerHTML = `
+
+                    <img
+                        src="${escapeAttribute(
+                            currentProfile.avatar_url
+                        )}"
+                        alt="${escapeAttribute(
+                            name
+                        )}"
+                        style="
+                            width:100%;
+                            height:100%;
+                            object-fit:cover;
+                            border-radius:inherit;
+                            display:block;
+                        "
+                    >
+
+                `;
+
+            } else {
+
+                el.menuAvatar.textContent =
+                    initials;
 
             }
 
+        }
 
-            /*
-             * لو الثيم محفوظ
-             */
 
-            if (
-                currentProfile?.theme
-            ) {
+        /*
+         * Name
+         */
 
-                localStorage.setItem(
-                    "novaTheme",
-                    currentProfile.theme
-                );
+        if (
+            el.profileName
+        ) {
 
-                applyTheme(
-                    currentProfile.theme
-                );
+            el.profileName.textContent =
+                name;
 
-            }
+        }
 
-        } catch (error) {
 
-            console.error(
-                "Nova Profile Error:",
-                error
+        if (
+            el.menuName
+        ) {
+
+            el.menuName.textContent =
+                name;
+
+        }
+
+
+        /*
+         * Email
+         */
+
+        if (
+            el.menuEmail
+        ) {
+
+            el.menuEmail.textContent =
+                currentUser.email ||
+                "";
+
+        }
+
+
+        /*
+         * Plan
+         */
+
+        if (
+            el.profilePlan
+        ) {
+
+            el.profilePlan.textContent =
+                planName;
+
+
+            el.profilePlan.classList.remove(
+
+                "free",
+
+                "pro",
+
+                "ultra"
+
+            );
+
+
+            el.profilePlan.classList.add(
+                plan
             );
 
         }
 
+
+        if (
+            el.menuPlan
+        ) {
+
+            el.menuPlan.textContent =
+                planName;
+
+        }
+
     }
 
 
-    /* ==========================================
-       OPEN / CLOSE
-    ========================================== */
+    /* =====================================================
+       OPEN PROFILE
+    ===================================================== */
 
-    function closeProfileMenu() {
+    function openProfile() {
 
-        profileMenu?.classList.remove(
+        const el =
+            elements();
+
+
+        if (
+            !el.profileMenu ||
+            !el.profileBtn
+        ) {
+
+            console.error(
+                "Nova Profile: Profile menu/button not found."
+            );
+
+            return;
+
+        }
+
+
+        /*
+         * مهم جدًا:
+         * الـCSS عندك بيستخدم active
+         */
+
+        el.profileMenu.classList.add(
             "active"
         );
 
-        profileBtn?.classList.remove(
+
+        el.profileBtn.classList.add(
             "open"
         );
 
-        profileBtn?.setAttribute(
+
+        el.profileBtn.setAttribute(
             "aria-expanded",
-            "false"
+            "true"
         );
+
+
+        if (
+            el.profileArrow
+        ) {
+
+            el.profileArrow.style.transform =
+                "rotate(180deg)";
+
+        }
 
     }
 
 
-    profileBtn?.addEventListener(
-        "click",
-        function (event) {
+    /* =====================================================
+       CLOSE PROFILE
+    ===================================================== */
 
-            event.preventDefault();
-            event.stopPropagation();
+    function closeProfile() {
 
-
-            const isOpen =
-                profileMenu.classList.contains(
-                    "active"
-                );
+        const el =
+            elements();
 
 
-            if (isOpen) {
-
-                closeProfileMenu();
-
-            } else {
-
-                profileMenu.classList.add(
-                    "active"
-                );
-
-                profileBtn.classList.add(
-                    "open"
-                );
-
-                profileBtn.setAttribute(
-                    "aria-expanded",
-                    "true"
-                );
-
-            }
-
-        }
-    );
+        el.profileMenu
+            ?.classList.remove(
+                "active"
+            );
 
 
-    document.addEventListener(
-        "click",
-        function (event) {
-
-            if (
-                !profileMenu ||
-                !profileBtn
-            ) {
-                return;
-            }
+        el.profileBtn
+            ?.classList.remove(
+                "open"
+            );
 
 
-            if (
-                !profileMenu.contains(
-                    event.target
-                ) &&
-                !profileBtn.contains(
-                    event.target
-                )
-            ) {
+        el.profileBtn
+            ?.setAttribute(
+                "aria-expanded",
+                "false"
+            );
 
-                closeProfileMenu();
 
-            }
+        if (
+            el.profileArrow
+        ) {
+
+            el.profileArrow.style.transform =
+                "rotate(0deg)";
 
         }
-    );
+
+    }
 
 
-    /* ==========================================
+    /* =====================================================
+       TOGGLE PROFILE
+    ===================================================== */
+
+    function toggleProfile(
+        event
+    ) {
+
+        event?.preventDefault();
+
+        event?.stopPropagation();
+
+
+        const el =
+            elements();
+
+
+        if (
+            !el.profileMenu
+        ) {
+
+            return;
+
+        }
+
+
+        const opened =
+            el.profileMenu.classList.contains(
+                "active"
+            );
+
+
+        if (
+            opened
+        ) {
+
+            closeProfile();
+
+        } else {
+
+            openProfile();
+
+        }
+
+    }
+
+
+    /* =====================================================
        THEME
-    ========================================== */
+    ===================================================== */
 
     function applyTheme(
         theme
     ) {
 
-        theme =
-            theme || "nova";
+        if (!theme) {
+            return;
+        }
 
 
-        document.documentElement
-            .setAttribute(
-                "data-nova-theme",
-                theme
+        document.body.classList.remove(
+
+            "theme-nova",
+
+            "theme-purple",
+
+            "theme-emerald",
+
+            "theme-amoled",
+
+            "purple-theme",
+
+            "emerald-theme",
+
+            "amoled-theme"
+
+        );
+
+
+        if (
+            theme === "nova"
+        ) {
+
+            document.body.classList.add(
+                "theme-nova"
             );
+
+        }
+
+
+        if (
+            theme === "purple"
+        ) {
+
+            document.body.classList.add(
+                "theme-purple"
+            );
+
+            document.body.classList.add(
+                "purple-theme"
+            );
+
+        }
+
+
+        if (
+            theme === "emerald"
+        ) {
+
+            document.body.classList.add(
+                "theme-emerald"
+            );
+
+            document.body.classList.add(
+                "emerald-theme"
+            );
+
+        }
+
+
+        if (
+            theme === "amoled"
+        ) {
+
+            document.body.classList.add(
+                "theme-amoled"
+            );
+
+            document.body.classList.add(
+                "amoled-theme"
+            );
+
+        }
 
 
         localStorage.setItem(
@@ -620,28 +1112,24 @@
         );
 
 
-        setActiveThemeButton(
-            theme
-        );
+        document
+            .querySelectorAll(
+                ".nova-theme-option"
+            )
+            .forEach(
+                button => {
 
-    }
+                    button.classList.toggle(
 
+                        "active",
 
-    function setActiveThemeButton(
-        theme
-    ) {
+                        button.dataset.theme ===
+                            theme
 
-        themeOptions.forEach(
-            option => {
+                    );
 
-                option.classList.toggle(
-                    "active",
-                    option.dataset.theme ===
-                        theme
-                );
-
-            }
-        );
+                }
+            );
 
     }
 
@@ -656,6 +1144,7 @@
 
 
         if (
+            !supabaseClient ||
             !currentUser
         ) {
 
@@ -666,43 +1155,34 @@
 
         try {
 
-            const {
-                error
-            } =
-                await supabaseClient
-                    .from("profiles")
-                    .update({
+            await supabaseClient
+
+                .from(
+                    "profiles"
+                )
+
+                .update({
+
+                    theme:
                         theme,
-                        updated_at:
-                            new Date()
-                                .toISOString()
-                    })
-                    .eq(
-                        "id",
-                        currentUser.id
-                    );
 
+                    updated_at:
+                        new Date()
+                            .toISOString()
 
-            if (error) {
+                })
 
-                console.error(
-                    "Nova Theme Save Error:",
-                    error
+                .eq(
+                    "id",
+                    currentUser.id
                 );
 
-            } else if (
-                currentProfile
-            ) {
+        } catch (
+            error
+        ) {
 
-                currentProfile.theme =
-                    theme;
-
-            }
-
-        } catch (error) {
-
-            console.error(
-                "Nova Theme Exception:",
+            console.warn(
+                "Nova Theme Save Error:",
                 error
             );
 
@@ -711,119 +1191,185 @@
     }
 
 
-    themeOptions.forEach(
-        option => {
+    function bindThemeButtons() {
 
-            option.addEventListener(
-                "click",
-                function () {
+        document
+            .querySelectorAll(
+                ".nova-theme-option"
+            )
+            .forEach(
 
-                    const theme =
-                        option.dataset.theme ||
-                        "nova";
+                button => {
+
+                    if (
+                        button.dataset.profileThemeReady ===
+                        "true"
+                    ) {
+
+                        return;
+
+                    }
 
 
-                    saveTheme(
-                        theme
+                    button.dataset.profileThemeReady =
+                        "true";
+
+
+                    button.addEventListener(
+
+                        "click",
+
+                        event => {
+
+                            event.preventDefault();
+
+                            event.stopPropagation();
+
+
+                            const theme =
+                                button.dataset.theme;
+
+
+                            if (
+                                theme
+                            ) {
+
+                                saveTheme(
+                                    theme
+                                );
+
+                            }
+
+                        }
+
                     );
 
                 }
+
             );
 
-        }
-    );
+    }
 
 
-    /* ==========================================
+    /* =====================================================
        LANGUAGE
-    ========================================== */
+    ===================================================== */
 
-    profileLanguage?.addEventListener(
-        "click",
-        function () {
+    function openLanguage() {
 
-            closeProfileMenu();
+        closeProfile();
 
 
-            const languageSetting =
-                document.querySelector(
-                    '[data-setting="language"]'
-                );
-
-
-            if (
-                languageSetting
-            ) {
-
-                languageSetting.click();
-
-            }
-
-        }
-    );
-
-
-    /* ==========================================
-       SETTINGS
-    ========================================== */
-
-    profileSettings?.addEventListener(
-        "click",
-        function () {
-
-            closeProfileMenu();
-
-
-            const settingsBtn =
-                document.getElementById(
-                    "settingsBtn"
-                );
-
-
-            if (
-                settingsBtn
-            ) {
-
-                settingsBtn.click();
-
-            }
-
-        }
-    );
-
-
-    /* ==========================================
-       USAGE
-    ========================================== */
-
-    profileUsage?.addEventListener(
-        "click",
-        function () {
-
-            closeProfileMenu();
-
-
-            alert(
-                "Usage system هيتربط بالـ Free / Pro / Ultra لاحقًا."
+        const languageSetting =
+            document.querySelector(
+                '[data-setting="language"]'
             );
 
+
+        if (
+            languageSetting
+        ) {
+
+            languageSetting.click();
+
+            return;
+
         }
-    );
 
 
-    /* ==========================================
+        const languageModal =
+            document.getElementById(
+                "languageModal"
+            );
+
+
+        if (
+            languageModal
+        ) {
+
+            languageModal.classList.add(
+                "active"
+            );
+
+            return;
+
+        }
+
+
+        console.warn(
+            "Nova Language Modal not found."
+        );
+
+    }
+
+
+    /* =====================================================
+       USAGE
+    ===================================================== */
+
+    function openUsage() {
+
+        closeProfile();
+
+
+        const plan =
+            getPlanName(
+                currentProfile?.plan
+            );
+
+
+        let message =
+            t(
+                "usageMessage"
+            );
+
+
+        message =
+            message.replace(
+                "{plan}",
+                plan
+            );
+
+
+        showToast(
+            message
+        );
+
+    }
+
+
+    /* =====================================================
+       SETTINGS
+    ===================================================== */
+
+    function openSettings() {
+
+        closeProfile();
+
+
+        document
+            .getElementById(
+                "settingsBtn"
+            )
+            ?.click();
+
+    }
+
+
+    /* =====================================================
        LOGOUT
-    ========================================== */
+    ===================================================== */
 
-    logoutBtn?.addEventListener(
-        "click",
-        async function () {
+    async function logout() {
 
-            logoutBtn.disabled =
-                true;
+        closeProfile();
 
 
-            try {
+        try {
+
+            if (
+                supabaseClient
+            ) {
 
                 const {
                     error
@@ -833,549 +1379,453 @@
                         .signOut();
 
 
-                if (error) {
+                if (
+                    error
+                ) {
 
                     throw error;
 
                 }
 
+            }
 
-                localStorage.removeItem(
-                    "novaTheme"
+
+            /*
+             * مش نمسح chats هنا
+             * عشان الحساب ممكن يرجع لها محليًا.
+             */
+
+            localStorage.removeItem(
+                "novaLanguage"
+            );
+
+
+            localStorage.removeItem(
+                "novaTheme"
+            );
+
+
+            window.location.replace(
+                "login.html"
+            );
+
+        } catch (
+            error
+        ) {
+
+            console.error(
+                "Nova Logout Error:",
+                error
+            );
+
+
+            showToast(
+                t(
+                    "logoutError"
+                )
+            );
+
+        }
+
+    }
+
+
+    /* =====================================================
+       LANGUAGE TEXT UPDATE
+    ===================================================== */
+
+    function updateLanguageTexts() {
+
+        const lang =
+            getLanguage();
+
+
+        /*
+         * Current plan
+         */
+
+        const planLabel =
+            document.querySelector(
+                ".nova-plan-text span"
+            );
+
+
+        if (
+            planLabel
+        ) {
+
+            planLabel.textContent =
+                t(
+                    "currentPlan"
+                );
+
+        }
+
+
+        /*
+         * Language
+         */
+
+        const languageBtn =
+            document.getElementById(
+                "novaProfileLanguage"
+            );
+
+
+        if (
+            languageBtn
+        ) {
+
+            const span =
+                languageBtn.querySelector(
+                    "span"
                 );
 
 
-                localStorage.removeItem(
-                    "novaLanguage"
-                );
+            if (
+                span
+            ) {
 
-
-                window.location.replace(
-                    "login.html"
-                );
-
-            } catch (error) {
-
-                console.error(
-                    "Nova Logout Error:",
-                    error
-                );
-
-
-                logoutBtn.disabled =
-                    false;
-
-
-                alert(
-                    "تعذر تسجيل الخروج حاليًا."
-                );
+                span.textContent =
+                    t(
+                        "language"
+                    );
 
             }
 
         }
-    );
 
 
-    /* ==========================================
-       INIT
-    ========================================== */
+        /*
+         * Usage
+         */
 
-    if (
-        document.readyState ===
-        "loading"
-    ) {
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            loadProfile
-        );
-
-    } else {
-
-        loadProfile();
-
-    }
-
-})();
-/* =========================================================
-   NOVA AI - PROFILE
-========================================================= */
-
-(() => {
-
-    "use strict";
-
-
-    let supabaseClient = null;
-
-    let currentUser = null;
-
-    let currentProfile = null;
-
-
-    /* =====================================================
-       ELEMENTS
-    ===================================================== */
-
-    function getElements() {
-
-        return {
-
-            profileBtn:
-                document.getElementById(
-                    "novaProfileBtn"
-                ),
-
-            profileMenu:
-                document.getElementById(
-                    "novaProfileMenu"
-                ),
-
-            profileArrow:
-                document.getElementById(
-                    "novaProfileArrow"
-                ),
-
-            avatar:
-                document.getElementById(
-                    "novaProfileAvatar"
-                ),
-
-            name:
-                document.getElementById(
-                    "novaProfileName"
-                ),
-
-            plan:
-                document.getElementById(
-                    "novaProfilePlan"
-                ),
-
-            menuAvatar:
-                document.getElementById(
-                    "novaMenuAvatar"
-                ),
-
-            menuName:
-                document.getElementById(
-                    "novaMenuName"
-                ),
-
-            menuEmail:
-                document.getElementById(
-                    "novaMenuEmail"
-                ),
-
-            menuPlan:
-                document.getElementById(
-                    "novaMenuPlan"
-                ),
-
-            settings:
-                document.getElementById(
-                    "novaProfileSettingsBtn"
-                ),
-
-            language:
-                document.getElementById(
-                    "novaProfileLanguageBtn"
-                ),
-
-            logout:
-                document.getElementById(
-                    "novaProfileLogoutBtn"
-                )
-
-        };
-
-    }
-
-
-    /* =====================================================
-       INITIALS
-    ===================================================== */
-
-    function getInitials(name) {
-
-        if (!name) {
-
-            return "YS";
-
-        }
-
-
-        const parts =
-            String(name)
-                .trim()
-                .split(/\s+/)
-                .filter(Boolean);
-
-
-        if (parts.length >= 2) {
-
-            return (
-
-                getFirstLetter(
-                    parts[0]
-                ) +
-
-                getFirstLetter(
-                    parts[1]
-                )
-
+        const usageBtn =
+            document.getElementById(
+                "novaProfileUsage"
             );
-
-        }
-
-
-        return String(
-            parts[0]
-        )
-            .slice(0, 2)
-            .toUpperCase();
-
-    }
-
-
-    function getFirstLetter(
-        value
-    ) {
-
-        const char =
-            String(value)
-                .trim()
-                .charAt(0);
-
-
-        const arabicMap = {
-
-            "أ": "A",
-            "إ": "E",
-            "آ": "A",
-            "ا": "A",
-            "ب": "B",
-            "ت": "T",
-            "ج": "G",
-            "ح": "H",
-            "خ": "K",
-            "د": "D",
-            "ر": "R",
-            "ز": "Z",
-            "س": "S",
-            "ش": "S",
-            "ص": "S",
-            "ض": "D",
-            "ط": "T",
-            "ظ": "Z",
-            "ع": "A",
-            "غ": "G",
-            "ف": "F",
-            "ق": "Q",
-            "ك": "K",
-            "ل": "L",
-            "م": "M",
-            "ن": "N",
-            "ه": "H",
-            "و": "W",
-            "ي": "Y"
-
-        };
-
-
-        return (
-
-            arabicMap[char] ||
-
-            char.toUpperCase() ||
-
-            "N"
-
-        );
-
-    }
-
-
-    /* =====================================================
-       LOAD USER
-    ===================================================== */
-
-    async function loadProfile() {
-
-        supabaseClient =
-            window.novaSupabase;
-
-
-        if (!supabaseClient) {
-
-            console.error(
-                "Nova Profile: Supabase client not found."
-            );
-
-            return;
-
-        }
-
-
-        const {
-
-            data:
-                sessionData,
-
-            error:
-                sessionError
-
-        } =
-            await supabaseClient
-                .auth
-                .getSession();
 
 
         if (
-            sessionError ||
-            !sessionData?.session?.user
+            usageBtn
         ) {
 
-            console.warn(
-                "Nova Profile: no active session."
-            );
+            const span =
+                usageBtn.querySelector(
+                    "span"
+                );
 
-            return;
+
+            if (
+                span
+            ) {
+
+                span.textContent =
+                    t(
+                        "usage"
+                    );
+
+            }
 
         }
 
 
-        currentUser =
-            sessionData.session.user;
+        /*
+         * Settings
+         */
 
-
-        const {
-
-            data:
-                profileData,
-
-            error:
-                profileError
-
-        } =
-            await supabaseClient
-
-                .from("profiles")
-
-                .select(
-                    "id,name,plan,role,language"
-                )
-
-                .eq(
-                    "id",
-                    currentUser.id
-                )
-
-                .maybeSingle();
+        const settingsBtn =
+            document.getElementById(
+                "novaProfileSettings"
+            );
 
 
         if (
-            profileError
+            settingsBtn
         ) {
 
-            console.error(
-                "Nova Profile Query Error:",
-                profileError
-            );
+            const span =
+                settingsBtn.querySelector(
+                    "span"
+                );
 
-            return;
+
+            if (
+                span
+            ) {
+
+                span.textContent =
+                    t(
+                        "settings"
+                    );
+
+            }
 
         }
 
 
-        currentProfile =
-            profileData || {
+        /*
+         * Logout
+         */
 
-                name:
-                    currentUser
-                        ?.user_metadata
-                        ?.name ||
-
-                    currentUser
-                        ?.email
-                        ?.split("@")[0] ||
-
-                    "Nova User",
-
-                plan:
-                    "free",
-
-                role:
-                    "user",
-
-                language:
-                    "auto"
-
-            };
+        const logoutBtn =
+            document.getElementById(
+                "novaLogoutBtn"
+            );
 
 
-        renderProfile();
+        if (
+            logoutBtn
+        ) {
 
-    }
-
-
-    /* =====================================================
-       RENDER
-    ===================================================== */
-
-    function renderProfile() {
-
-        const el =
-            getElements();
+            const span =
+                logoutBtn.querySelector(
+                    "span"
+                );
 
 
-        const name =
-            currentProfile?.name ||
+            if (
+                span
+            ) {
 
-            currentUser
-                ?.user_metadata
-                ?.name ||
+                span.textContent =
+                    t(
+                        "signOut"
+                    );
 
-            currentUser
-                ?.email
-                ?.split("@")[0] ||
+            }
 
-            "Nova User";
+        }
 
 
-        const plan =
-            (
-                currentProfile
-                    ?.plan ||
+        /*
+         * Current plan label / value
+         */
 
-                "free"
-            )
+        if (
+            currentProfile
+        ) {
+
+            const plan =
+                String(
+                    currentProfile.plan ||
+                    "free"
+                )
                 .toLowerCase();
 
 
-        const initials =
-            getInitials(
-                name
-            );
+            if (
+                document.getElementById(
+                    "novaMenuPlan"
+                )
+            ) {
+
+                document.getElementById(
+                    "novaMenuPlan"
+                ).textContent =
+                    getPlanName(
+                        plan
+                    );
+
+            }
 
 
-        /*
-         * Avatar
-         */
+            if (
+                document.getElementById(
+                    "novaProfilePlan"
+                )
+            ) {
 
-        if (el.avatar) {
+                document.getElementById(
+                    "novaProfilePlan"
+                ).textContent =
+                    getPlanName(
+                        plan
+                    );
 
-            el.avatar.textContent =
-                initials;
-
-        }
-
-
-        if (el.menuAvatar) {
-
-            el.menuAvatar.textContent =
-                initials;
-
-        }
-
-
-        /*
-         * Name
-         */
-
-        if (el.name) {
-
-            el.name.textContent =
-                name;
-
-        }
-
-
-        if (el.menuName) {
-
-            el.menuName.textContent =
-                name;
+            }
 
         }
 
 
         /*
-         * Email
+         * Let i18n refresh the remaining UI.
          */
 
-        if (el.menuEmail) {
-
-            el.menuEmail.textContent =
-                currentUser?.email ||
-                "";
-
-        }
-
-
-        /*
-         * Plan
-         */
-
-        const planText =
-            plan === "pro"
-
-                ? "PRO"
-
-                : plan === "ultra"
-
-                    ? "ULTRA"
-
-                    : "FREE";
-
-
-        if (el.plan) {
-
-            el.plan.textContent =
-                planText;
-
-            el.plan.classList.remove(
-
-                "free",
-
-                "pro",
-
-                "ultra"
-
-            );
-
-            el.plan.classList.add(
-                plan
-            );
-
-        }
-
-
-        if (el.menuPlan) {
-
-            el.menuPlan.textContent =
-                planText;
-
-        }
+        window.dispatchEvent(
+            new CustomEvent(
+                "nova-profile-language-changed",
+                {
+                    detail: {
+                        language:
+                            lang
+                    }
+                }
+            )
+        );
 
     }
 
 
     /* =====================================================
-       OPEN / CLOSE
+       TOAST
     ===================================================== */
 
-    function toggleProfile() {
+    function showToast(
+        message
+    ) {
+
+        let toast =
+            document.getElementById(
+                "novaProfileToast"
+            );
+
+
+        if (!toast) {
+
+            toast =
+                document.createElement(
+                    "div"
+                );
+
+
+            toast.id =
+                "novaProfileToast";
+
+
+            toast.style.position =
+                "fixed";
+
+            toast.style.left =
+                "50%";
+
+            toast.style.bottom =
+                "24px";
+
+            toast.style.transform =
+                "translateX(-50%)";
+
+            toast.style.zIndex =
+                "999999";
+
+            toast.style.padding =
+                "11px 16px";
+
+            toast.style.borderRadius =
+                "13px";
+
+            toast.style.background =
+                "rgba(15,23,42,.96)";
+
+            toast.style.color =
+                "#fff";
+
+            toast.style.border =
+                "1px solid rgba(255,255,255,.1)";
+
+            toast.style.boxShadow =
+                "0 15px 40px rgba(0,0,0,.35)";
+
+            toast.style.fontSize =
+                "12px";
+
+            toast.style.fontWeight =
+                "700";
+
+            toast.style.opacity =
+                "0";
+
+            toast.style.pointerEvents =
+                "none";
+
+            toast.style.transition =
+                "opacity .2s ease";
+
+
+            document.body.appendChild(
+                toast
+            );
+
+        }
+
+
+        toast.textContent =
+            message;
+
+
+        toast.style.opacity =
+            "1";
+
+
+        clearTimeout(
+            toast._timer
+        );
+
+
+        toast._timer =
+            setTimeout(
+
+                () => {
+
+                    toast.style.opacity =
+                        "0";
+
+                },
+
+                2000
+
+            );
+
+    }
+
+
+    /* =====================================================
+       ESCAPE ATTRIBUTE
+    ===================================================== */
+
+    function escapeAttribute(
+        value
+    ) {
+
+        return String(
+            value || ""
+        )
+            .replace(
+                /&/g,
+                "&amp;"
+            )
+            .replace(
+                /"/g,
+                "&quot;"
+            )
+            .replace(
+                /</g,
+                "&lt;"
+            )
+            .replace(
+                />/g,
+                "&gt;"
+            );
+
+    }
+
+
+    /* =====================================================
+       BIND PROFILE
+    ===================================================== */
+
+    function bindProfileEvents() {
 
         const el =
-            getElements();
+            elements();
 
 
         if (
-            !el.profileBtn ||
-            !el.profileMenu
+            !el.profileBtn
         ) {
 
             console.error(
-                "Nova Profile: profile button/menu not found."
+                "Nova Profile: #novaProfileBtn not found."
             );
 
             return;
@@ -1383,127 +1833,52 @@
         }
 
 
-        const isOpen =
-            el.profileMenu.classList.contains(
-                "show"
-            );
+        if (
+            el.profileBtn.dataset.profileReady ===
+            "true"
+        ) {
+
+            return;
+
+        }
+
+
+        el.profileBtn.dataset.profileReady =
+            "true";
 
 
         /*
-         * اقفل القوائم الثانية
+         * ACCOUNT BUTTON
          */
 
-        document
-            .querySelectorAll(
-                ".nova-profile-menu.show"
-            )
-            .forEach(
-                menu => {
+        el.profileBtn.addEventListener(
 
-                    menu.classList.remove(
-                        "show"
-                    );
+            "click",
 
-                }
-            );
+            toggleProfile
+
+        );
 
 
         /*
-         * افتح / اقفل
+         * Prevent menu clicks from bubbling
          */
 
-        if (!isOpen) {
+        el.profileMenu?.addEventListener(
 
-            el.profileMenu.classList.add(
-                "show"
-            );
+            "click",
 
-            el.profileBtn.setAttribute(
-                "aria-expanded",
-                "true"
-            );
+            event => {
 
-
-            if (el.profileArrow) {
-
-                el.profileArrow.style.transform =
-                    "rotate(180deg)";
+                event.stopPropagation();
 
             }
 
-        } else {
-
-            closeProfile();
-
-        }
-
-    }
-
-
-    function closeProfile() {
-
-        const el =
-            getElements();
-
-
-        el.profileMenu
-            ?.classList.remove(
-                "show"
-            );
-
-
-        el.profileBtn
-            ?.setAttribute(
-                "aria-expanded",
-                "false"
-            );
-
-
-        if (el.profileArrow) {
-
-            el.profileArrow.style.transform =
-                "rotate(0deg)";
-
-        }
-
-    }
-
-
-    /* =====================================================
-       EVENTS
-    ===================================================== */
-
-    function bindEvents() {
-
-        const el =
-            getElements();
-
-
-        if (
-            el.profileBtn
-        ) {
-
-            el.profileBtn.addEventListener(
-
-                "click",
-
-                event => {
-
-                    event.preventDefault();
-
-                    event.stopPropagation();
-
-                    toggleProfile();
-
-                }
-
-            );
-
-        }
+        );
 
 
         /*
-         * click outside
+         * Click outside
          */
 
         document.addEventListener(
@@ -1514,8 +1889,8 @@
 
                 if (
 
-                    !event.target.closest(
-                        "#novaProfileArea"
+                    !el.profileArea?.contains(
+                        event.target
                     )
 
                 ) {
@@ -1553,10 +1928,10 @@
 
 
         /*
-         * Settings
+         * Language
          */
 
-        el.settings?.addEventListener(
+        el.languageBtn?.addEventListener(
 
             "click",
 
@@ -1566,14 +1941,7 @@
 
                 event.stopPropagation();
 
-                closeProfile();
-
-
-                document
-                    .getElementById(
-                        "settingsBtn"
-                    )
-                    ?.click();
+                openLanguage();
 
             }
 
@@ -1581,10 +1949,10 @@
 
 
         /*
-         * Language
+         * Usage
          */
 
-        el.language?.addEventListener(
+        el.usageBtn?.addEventListener(
 
             "click",
 
@@ -1594,48 +1962,28 @@
 
                 event.stopPropagation();
 
-                closeProfile();
+                openUsage();
+
+            }
+
+        );
 
 
-                const languageSetting =
-                    document.querySelector(
-                        '[data-setting="language"]'
-                    );
+        /*
+         * Settings
+         */
 
+        el.settingsBtn?.addEventListener(
 
-                if (
-                    languageSetting
-                ) {
+            "click",
 
-                    languageSetting.click();
+            event => {
 
-                    return;
+                event.preventDefault();
 
-                }
+                event.stopPropagation();
 
-
-                const languageModal =
-                    document.getElementById(
-                        "languageModal"
-                    );
-
-
-                if (
-                    languageModal
-                ) {
-
-                    languageModal.classList.add(
-                        "show"
-                    );
-
-                    return;
-
-                }
-
-
-                console.log(
-                    "Nova: language modal not found."
-                );
+                openSettings();
 
             }
 
@@ -1646,49 +1994,88 @@
          * Logout
          */
 
-        el.logout?.addEventListener(
+        el.logoutBtn?.addEventListener(
 
             "click",
 
-            async event => {
+            event => {
 
                 event.preventDefault();
 
                 event.stopPropagation();
 
-
-                closeProfile();
-
-
-                try {
-
-                    await supabaseClient
-                        ?.auth
-                        ?.signOut();
-
-                } catch (
-                    error
-                ) {
-
-                    console.error(
-                        "Nova Logout Error:",
-                        error
-                    );
-
-                }
-
-
-                localStorage.removeItem(
-                    "novaAllChats"
-                );
-
-
-                window.location.href =
-                    "login.html";
+                logout();
 
             }
 
         );
+
+
+        /*
+         * Theme buttons
+         */
+
+        bindThemeButtons();
+
+    }
+
+
+    /* =====================================================
+       AUTH STATE
+    ===================================================== */
+
+    function setupAuthListener() {
+
+        if (
+            !supabaseClient
+        ) {
+
+            return;
+
+        }
+
+
+        supabaseClient
+            .auth
+            .onAuthStateChange(
+
+                async event => {
+
+                    if (
+                        event ===
+                        "SIGNED_OUT"
+                    ) {
+
+                        currentUser =
+                            null;
+
+                        currentProfile =
+                            null;
+
+                        closeProfile();
+
+                        return;
+
+                    }
+
+
+                    if (
+
+                        event ===
+                        "SIGNED_IN" ||
+
+                        event ===
+                        "TOKEN_REFRESHED"
+
+                    ) {
+
+                        await loadProfile();
+
+                    }
+
+                }
+
+            );
 
     }
 
@@ -1699,12 +2086,18 @@
 
     async function init() {
 
-        bindEvents();
+        bindProfileEvents();
 
         await loadProfile();
 
+        setupAuthListener();
+
     }
 
+
+    /* =====================================================
+       BOOT
+    ===================================================== */
 
     if (
         document.readyState ===
