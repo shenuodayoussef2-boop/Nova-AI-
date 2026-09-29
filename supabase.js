@@ -23,3 +23,35 @@ const supabaseClient =
 
 window.novaSupabase =
     supabaseClient;
+window.novaGetAuthHeaders = async function () {
+    try {
+        const client = window.novaSupabase;
+
+        if (!client) {
+            return {};
+        }
+
+        const { data } =
+            await client.auth.getSession();
+
+        const token =
+            data?.session?.access_token;
+
+        if (!token) {
+            return {};
+        }
+
+        return {
+            Authorization:
+                `Bearer ${token}`
+        };
+
+    } catch (error) {
+        console.error(
+            "Nova Auth Header Error:",
+            error
+        );
+
+        return {};
+    }
+};
