@@ -897,3 +897,837 @@
     }
 
 })();
+/* =========================================================
+   NOVA AI - PROFILE
+========================================================= */
+
+(() => {
+
+    "use strict";
+
+
+    let supabaseClient = null;
+
+    let currentUser = null;
+
+    let currentProfile = null;
+
+
+    /* =====================================================
+       ELEMENTS
+    ===================================================== */
+
+    function getElements() {
+
+        return {
+
+            profileBtn:
+                document.getElementById(
+                    "novaProfileBtn"
+                ),
+
+            profileMenu:
+                document.getElementById(
+                    "novaProfileMenu"
+                ),
+
+            profileArrow:
+                document.getElementById(
+                    "novaProfileArrow"
+                ),
+
+            avatar:
+                document.getElementById(
+                    "novaProfileAvatar"
+                ),
+
+            name:
+                document.getElementById(
+                    "novaProfileName"
+                ),
+
+            plan:
+                document.getElementById(
+                    "novaProfilePlan"
+                ),
+
+            menuAvatar:
+                document.getElementById(
+                    "novaMenuAvatar"
+                ),
+
+            menuName:
+                document.getElementById(
+                    "novaMenuName"
+                ),
+
+            menuEmail:
+                document.getElementById(
+                    "novaMenuEmail"
+                ),
+
+            menuPlan:
+                document.getElementById(
+                    "novaMenuPlan"
+                ),
+
+            settings:
+                document.getElementById(
+                    "novaProfileSettingsBtn"
+                ),
+
+            language:
+                document.getElementById(
+                    "novaProfileLanguageBtn"
+                ),
+
+            logout:
+                document.getElementById(
+                    "novaProfileLogoutBtn"
+                )
+
+        };
+
+    }
+
+
+    /* =====================================================
+       INITIALS
+    ===================================================== */
+
+    function getInitials(name) {
+
+        if (!name) {
+
+            return "YS";
+
+        }
+
+
+        const parts =
+            String(name)
+                .trim()
+                .split(/\s+/)
+                .filter(Boolean);
+
+
+        if (parts.length >= 2) {
+
+            return (
+
+                getFirstLetter(
+                    parts[0]
+                ) +
+
+                getFirstLetter(
+                    parts[1]
+                )
+
+            );
+
+        }
+
+
+        return String(
+            parts[0]
+        )
+            .slice(0, 2)
+            .toUpperCase();
+
+    }
+
+
+    function getFirstLetter(
+        value
+    ) {
+
+        const char =
+            String(value)
+                .trim()
+                .charAt(0);
+
+
+        const arabicMap = {
+
+            "أ": "A",
+            "إ": "E",
+            "آ": "A",
+            "ا": "A",
+            "ب": "B",
+            "ت": "T",
+            "ج": "G",
+            "ح": "H",
+            "خ": "K",
+            "د": "D",
+            "ر": "R",
+            "ز": "Z",
+            "س": "S",
+            "ش": "S",
+            "ص": "S",
+            "ض": "D",
+            "ط": "T",
+            "ظ": "Z",
+            "ع": "A",
+            "غ": "G",
+            "ف": "F",
+            "ق": "Q",
+            "ك": "K",
+            "ل": "L",
+            "م": "M",
+            "ن": "N",
+            "ه": "H",
+            "و": "W",
+            "ي": "Y"
+
+        };
+
+
+        return (
+
+            arabicMap[char] ||
+
+            char.toUpperCase() ||
+
+            "N"
+
+        );
+
+    }
+
+
+    /* =====================================================
+       LOAD USER
+    ===================================================== */
+
+    async function loadProfile() {
+
+        supabaseClient =
+            window.novaSupabase;
+
+
+        if (!supabaseClient) {
+
+            console.error(
+                "Nova Profile: Supabase client not found."
+            );
+
+            return;
+
+        }
+
+
+        const {
+
+            data:
+                sessionData,
+
+            error:
+                sessionError
+
+        } =
+            await supabaseClient
+                .auth
+                .getSession();
+
+
+        if (
+            sessionError ||
+            !sessionData?.session?.user
+        ) {
+
+            console.warn(
+                "Nova Profile: no active session."
+            );
+
+            return;
+
+        }
+
+
+        currentUser =
+            sessionData.session.user;
+
+
+        const {
+
+            data:
+                profileData,
+
+            error:
+                profileError
+
+        } =
+            await supabaseClient
+
+                .from("profiles")
+
+                .select(
+                    "id,name,plan,role,language"
+                )
+
+                .eq(
+                    "id",
+                    currentUser.id
+                )
+
+                .maybeSingle();
+
+
+        if (
+            profileError
+        ) {
+
+            console.error(
+                "Nova Profile Query Error:",
+                profileError
+            );
+
+            return;
+
+        }
+
+
+        currentProfile =
+            profileData || {
+
+                name:
+                    currentUser
+                        ?.user_metadata
+                        ?.name ||
+
+                    currentUser
+                        ?.email
+                        ?.split("@")[0] ||
+
+                    "Nova User",
+
+                plan:
+                    "free",
+
+                role:
+                    "user",
+
+                language:
+                    "auto"
+
+            };
+
+
+        renderProfile();
+
+    }
+
+
+    /* =====================================================
+       RENDER
+    ===================================================== */
+
+    function renderProfile() {
+
+        const el =
+            getElements();
+
+
+        const name =
+            currentProfile?.name ||
+
+            currentUser
+                ?.user_metadata
+                ?.name ||
+
+            currentUser
+                ?.email
+                ?.split("@")[0] ||
+
+            "Nova User";
+
+
+        const plan =
+            (
+                currentProfile
+                    ?.plan ||
+
+                "free"
+            )
+                .toLowerCase();
+
+
+        const initials =
+            getInitials(
+                name
+            );
+
+
+        /*
+         * Avatar
+         */
+
+        if (el.avatar) {
+
+            el.avatar.textContent =
+                initials;
+
+        }
+
+
+        if (el.menuAvatar) {
+
+            el.menuAvatar.textContent =
+                initials;
+
+        }
+
+
+        /*
+         * Name
+         */
+
+        if (el.name) {
+
+            el.name.textContent =
+                name;
+
+        }
+
+
+        if (el.menuName) {
+
+            el.menuName.textContent =
+                name;
+
+        }
+
+
+        /*
+         * Email
+         */
+
+        if (el.menuEmail) {
+
+            el.menuEmail.textContent =
+                currentUser?.email ||
+                "";
+
+        }
+
+
+        /*
+         * Plan
+         */
+
+        const planText =
+            plan === "pro"
+
+                ? "PRO"
+
+                : plan === "ultra"
+
+                    ? "ULTRA"
+
+                    : "FREE";
+
+
+        if (el.plan) {
+
+            el.plan.textContent =
+                planText;
+
+            el.plan.classList.remove(
+
+                "free",
+
+                "pro",
+
+                "ultra"
+
+            );
+
+            el.plan.classList.add(
+                plan
+            );
+
+        }
+
+
+        if (el.menuPlan) {
+
+            el.menuPlan.textContent =
+                planText;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       OPEN / CLOSE
+    ===================================================== */
+
+    function toggleProfile() {
+
+        const el =
+            getElements();
+
+
+        if (
+            !el.profileBtn ||
+            !el.profileMenu
+        ) {
+
+            console.error(
+                "Nova Profile: profile button/menu not found."
+            );
+
+            return;
+
+        }
+
+
+        const isOpen =
+            el.profileMenu.classList.contains(
+                "show"
+            );
+
+
+        /*
+         * اقفل القوائم الثانية
+         */
+
+        document
+            .querySelectorAll(
+                ".nova-profile-menu.show"
+            )
+            .forEach(
+                menu => {
+
+                    menu.classList.remove(
+                        "show"
+                    );
+
+                }
+            );
+
+
+        /*
+         * افتح / اقفل
+         */
+
+        if (!isOpen) {
+
+            el.profileMenu.classList.add(
+                "show"
+            );
+
+            el.profileBtn.setAttribute(
+                "aria-expanded",
+                "true"
+            );
+
+
+            if (el.profileArrow) {
+
+                el.profileArrow.style.transform =
+                    "rotate(180deg)";
+
+            }
+
+        } else {
+
+            closeProfile();
+
+        }
+
+    }
+
+
+    function closeProfile() {
+
+        const el =
+            getElements();
+
+
+        el.profileMenu
+            ?.classList.remove(
+                "show"
+            );
+
+
+        el.profileBtn
+            ?.setAttribute(
+                "aria-expanded",
+                "false"
+            );
+
+
+        if (el.profileArrow) {
+
+            el.profileArrow.style.transform =
+                "rotate(0deg)";
+
+        }
+
+    }
+
+
+    /* =====================================================
+       EVENTS
+    ===================================================== */
+
+    function bindEvents() {
+
+        const el =
+            getElements();
+
+
+        if (
+            el.profileBtn
+        ) {
+
+            el.profileBtn.addEventListener(
+
+                "click",
+
+                event => {
+
+                    event.preventDefault();
+
+                    event.stopPropagation();
+
+                    toggleProfile();
+
+                }
+
+            );
+
+        }
+
+
+        /*
+         * click outside
+         */
+
+        document.addEventListener(
+
+            "click",
+
+            event => {
+
+                if (
+
+                    !event.target.closest(
+                        "#novaProfileArea"
+                    )
+
+                ) {
+
+                    closeProfile();
+
+                }
+
+            }
+
+        );
+
+
+        /*
+         * ESC
+         */
+
+        document.addEventListener(
+
+            "keydown",
+
+            event => {
+
+                if (
+                    event.key === "Escape"
+                ) {
+
+                    closeProfile();
+
+                }
+
+            }
+
+        );
+
+
+        /*
+         * Settings
+         */
+
+        el.settings?.addEventListener(
+
+            "click",
+
+            event => {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+                closeProfile();
+
+
+                document
+                    .getElementById(
+                        "settingsBtn"
+                    )
+                    ?.click();
+
+            }
+
+        );
+
+
+        /*
+         * Language
+         */
+
+        el.language?.addEventListener(
+
+            "click",
+
+            event => {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+                closeProfile();
+
+
+                const languageSetting =
+                    document.querySelector(
+                        '[data-setting="language"]'
+                    );
+
+
+                if (
+                    languageSetting
+                ) {
+
+                    languageSetting.click();
+
+                    return;
+
+                }
+
+
+                const languageModal =
+                    document.getElementById(
+                        "languageModal"
+                    );
+
+
+                if (
+                    languageModal
+                ) {
+
+                    languageModal.classList.add(
+                        "show"
+                    );
+
+                    return;
+
+                }
+
+
+                console.log(
+                    "Nova: language modal not found."
+                );
+
+            }
+
+        );
+
+
+        /*
+         * Logout
+         */
+
+        el.logout?.addEventListener(
+
+            "click",
+
+            async event => {
+
+                event.preventDefault();
+
+                event.stopPropagation();
+
+
+                closeProfile();
+
+
+                try {
+
+                    await supabaseClient
+                        ?.auth
+                        ?.signOut();
+
+                } catch (
+                    error
+                ) {
+
+                    console.error(
+                        "Nova Logout Error:",
+                        error
+                    );
+
+                }
+
+
+                localStorage.removeItem(
+                    "novaAllChats"
+                );
+
+
+                window.location.href =
+                    "login.html";
+
+            }
+
+        );
+
+    }
+
+
+    /* =====================================================
+       INIT
+    ===================================================== */
+
+    async function init() {
+
+        bindEvents();
+
+        await loadProfile();
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+
+            "DOMContentLoaded",
+
+            init,
+
+            {
+                once:
+                    true
+            }
+
+        );
+
+    } else {
+
+        init();
+
+    }
+
+})();
