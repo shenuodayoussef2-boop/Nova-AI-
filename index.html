@@ -1994,7 +1994,177 @@
 }
 
 </style>
+<script>
+(function () {
 
+    function setupNovaSettingsFix() {
+
+        const settingsBtn =
+            document.getElementById("settingsBtn");
+
+        const settingsModal =
+            document.getElementById("settingsModal");
+
+        const closeSettingsBtn =
+            document.getElementById("closeSettingsBtn");
+
+        if (
+            !settingsBtn ||
+            !settingsModal
+        ) {
+            console.error(
+                "Nova Settings: العناصر مش موجودة."
+            );
+            return;
+        }
+
+
+        // ======================================
+        // منع تكرار الـ listener
+        // ======================================
+
+        if (
+            settingsBtn.dataset.settingsReady === "true"
+        ) {
+            return;
+        }
+
+        settingsBtn.dataset.settingsReady = "true";
+
+
+        // ======================================
+        // OPEN SETTINGS
+        // ======================================
+
+        settingsBtn.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+
+                settingsModal.classList.add(
+                    "active"
+                );
+
+                document.body.classList.add(
+                    "settings-open"
+                );
+
+            },
+            true
+        );
+
+
+        // ======================================
+        // CLOSE SETTINGS
+        // ======================================
+
+        if (closeSettingsBtn) {
+
+            closeSettingsBtn.addEventListener(
+                "click",
+                function (event) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+                    settingsModal.classList.remove(
+                        "active"
+                    );
+
+                    document.body.classList.remove(
+                        "settings-open"
+                    );
+
+                },
+                true
+            );
+
+        }
+
+
+        // ======================================
+        // CLICK OUTSIDE
+        // ======================================
+
+        settingsModal.addEventListener(
+            "click",
+            function (event) {
+
+                if (
+                    event.target === settingsModal
+                ) {
+
+                    settingsModal.classList.remove(
+                        "active"
+                    );
+
+                    document.body.classList.remove(
+                        "settings-open"
+                    );
+
+                }
+
+            }
+        );
+
+
+        // ======================================
+        // ESC
+        // ======================================
+
+        document.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key === "Escape"
+                ) {
+
+                    settingsModal.classList.remove(
+                        "active"
+                    );
+
+                    document.body.classList.remove(
+                        "settings-open"
+                    );
+
+                }
+
+            }
+        );
+
+
+        console.log(
+            "Nova Settings: جاهزة ✅"
+        );
+
+    }
+
+
+    // ==========================================
+    // RUN
+    // ==========================================
+
+    if (
+        document.readyState === "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            setupNovaSettingsFix
+        );
+
+    } else {
+
+        setupNovaSettingsFix();
+
+    }
+
+})();
+</script>
 </body>
 
 </html>
