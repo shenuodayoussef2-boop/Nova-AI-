@@ -3,7 +3,167 @@
 // Global Multilingual Edition 🌍
 // ==========================================
 
-export default async function handler(req, res) {
+
+// ==========================================
+// SUPABASE QUOTA CHECK
+// ==========================================
+
+async function consumePlanQuota(
+  req,
+  feature = "messages"
+) {
+
+  const supabaseUrl =
+    process.env.SUPABASE_URL || "";
+
+  const supabaseKey =
+    process.env.SUPABASE_PUBLISHABLE_KEY || "";
+
+  if (
+    !supabaseUrl ||
+    !supabaseKey
+  ) {
+
+    console.error(
+      "NOVA QUOTA ERROR: Supabase environment variables are missing"
+    );
+
+    return {
+      allowed: false,
+      code: "SUPABASE_CONFIG_ERROR"
+    };
+
+  }
+
+  const authHeader =
+    req.headers?.authorization ||
+    req.headers?.Authorization ||
+    "";
+
+  if (
+    !authHeader.startsWith("Bearer ")
+  ) {
+
+    return {
+      allowed: false,
+      code: "UNAUTHENTICATED"
+    };
+
+  }
+
+  try {
+
+    const response =
+      await fetch(
+        `${supabaseUrl}/rest/v1/rpc/nova_check_and_consume`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            "apikey":
+              supabaseKey,
+
+            "Authorization":
+              authHeader
+          },
+
+          body:
+            JSON.stringify({
+              p_feature:
+                feature
+            })
+        }
+      );
+
+    const rawText =
+      await response.text();
+
+    let data =
+      null;
+
+    try {
+
+      data =
+        rawText
+          ? JSON.parse(rawText)
+          : null;
+
+    } catch {
+
+      data =
+        null;
+
+    }
+
+    if (!response.ok) {
+
+      console.error(
+        "NOVA QUOTA RPC ERROR:",
+        response.status,
+        rawText
+      );
+
+      return {
+        allowed: false,
+        code: "QUOTA_RPC_ERROR"
+      };
+
+    }
+
+    const result =
+      Array.isArray(data)
+        ? data[0]
+        : data;
+
+    if (
+      !result ||
+      typeof result !== "object"
+    ) {
+
+      console.error(
+        "NOVA QUOTA INVALID RESPONSE:",
+        data
+      );
+
+      return {
+        allowed: false,
+        code:
+          "QUOTA_INVALID_RESPONSE"
+      };
+
+    }
+
+    return result;
+
+  } catch (error) {
+
+    console.error(
+      "NOVA QUOTA FETCH ERROR:",
+      error
+    );
+
+    return {
+      allowed: false,
+      code:
+        "QUOTA_REQUEST_FAILED"
+    };
+
+  }
+
+}
+
+
+// ==========================================
+// CHAT HANDLER
+// ==========================================
+
+export default async function handler(
+  req,
+  res
+) {
 
   // ==========================================
   // CORS
@@ -21,26 +181,42 @@ export default async function handler(req, res) {
 
   res.setHeader(
     "Access-Control-Allow-Headers",
-    "Content-Type, x-nova-key"
+    "Content-Type, Authorization, x-nova-key"
   );
+
 
   // ==========================================
   // OPTIONS
   // ==========================================
 
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
+  if (
+    req.method === "OPTIONS"
+  ) {
+
+    return res
+      .status(200)
+      .end();
+
   }
+
 
   // ==========================================
   // POST ONLY
   // ==========================================
 
-  if (req.method !== "POST") {
-    return res.status(405).json({
-      error: "POST only"
-    });
+  if (
+    req.method !== "POST"
+  ) {
+
+    return res
+      .status(405)
+      .json({
+        error:
+          "POST only"
+      });
+
   }
+
 
   try {
 
@@ -48,7 +224,8 @@ export default async function handler(req, res) {
     // REQUEST BODY
     // ==========================================
 
-    const body = req.body || {};
+    const body =
+      req.body || {};
 
     const message =
       typeof body.message === "string"
@@ -60,15 +237,126 @@ export default async function handler(req, res) {
         ? body.history
         : [];
 
+
     // ==========================================
     // VALIDATE MESSAGE
     // ==========================================
 
     if (!message) {
-      return res.status(400).json({
-        error: "فين الرسالة؟"
-      });
+
+      return res
+        .status(400)
+        .json({
+          error:
+            "فين الرسالة؟"
+        });
+
     }
+
+
+    // ==========================================
+    // PLAN QUOTA CHECK
+    // ==========================================
+
+    const quota =
+      await consumePlanQuota(
+        req,
+        "messages"
+      );
+
+
+    if (
+      !quota.allowed
+    ) {
+
+      const status =
+        quota.code ===
+        "UNAUTHENTICATED"
+          ? 401
+          : quota.code ===
+            "LIMIT_REACHED"
+              ? 429
+              : quota.code ===
+                "FEATURE_NOT_AVAILABLE"
+                  ? 403
+                  : 500;
+
+
+      let errorMessage =
+        "حصلت مشكلة أثناء التحقق من الباقة.";
+
+
+      if (
+        quota.code ===
+        "UNAUTHENTICATED"
+      ) {
+
+        errorMessage =
+          "لازم تسجل دخولك الأول.";
+
+      }
+
+
+      else if (
+        quota.code ===
+        "LIMIT_REACHED"
+      ) {
+
+        errorMessage =
+          "وصلت للحد اليومي للرسائل.";
+
+      }
+
+
+      else if (
+        quota.code ===
+        "FEATURE_NOT_AVAILABLE"
+      ) {
+
+        errorMessage =
+          "ميزة الدردشة مش متاحة في الباقة الحالية.";
+
+      }
+
+
+      return res
+        .status(status)
+        .json({
+
+          error:
+            errorMessage,
+
+          code:
+            quota.code,
+
+          plan:
+            quota.plan ||
+            null,
+
+          feature:
+            quota.feature ||
+            "messages",
+
+          used:
+            quota.used ??
+            null,
+
+          limit:
+            quota.limit ??
+            null,
+
+          remaining:
+            quota.remaining ??
+            null,
+
+          reset_at:
+            quota.reset_at ||
+            null
+
+        });
+
+    }
+
 
     // ==========================================
     // NOVA DEVELOPER IDENTITY
@@ -129,68 +417,96 @@ export default async function handler(req, res) {
 
     ];
 
+
     const isDeveloperQuestion =
       developerQuestionPatterns.some(
-        pattern => pattern.test(message)
+        pattern =>
+          pattern.test(message)
       );
 
-    if (isDeveloperQuestion) {
 
-      return res.status(200).json({
+    if (
+      isDeveloperQuestion
+    ) {
 
-        candidates: [
-          {
-            content: {
-              parts: [
-                {
-                  text:
-                    "أنا Nova AI، والمطوّر بتاعي يوسف 😎🇪🇬"
-                }
-              ]
+      return res
+        .status(200)
+        .json({
+
+          candidates: [
+
+            {
+
+              content: {
+
+                parts: [
+
+                  {
+
+                    text:
+                      "أنا Nova AI، والمطوّر بتاعي يوسف 😎🇪🇬"
+
+                  }
+
+                ]
+
+              }
+
             }
-          }
-        ],
 
-        model: "nova-2.0-pro",
+          ],
 
-        server: "nova-developer"
+          model:
+            "nova-2.0-pro",
 
-      });
+          server:
+            "nova-developer"
+
+        });
 
     }
+
 
     // ==========================================
     // API KEYS
     // ==========================================
 
     const rawKeys =
-      process.env.GEMINI_API_KEY || "";
+      process.env.GEMINI_API_KEY ||
+      "";
 
     const apiKeys =
       rawKeys
         .split(",")
         .map(
-          key => key.trim()
+          key =>
+            key.trim()
         )
         .filter(Boolean);
 
-    if (!apiKeys.length) {
+
+    if (
+      !apiKeys.length
+    ) {
 
       console.error(
         "NOVA ERROR: GEMINI_API_KEY is missing"
       );
 
-      return res.status(500).json({
+      return res
+        .status(500)
+        .json({
 
-        error:
-          "مفتاح Gemini مش موجود في Environment Variables.",
+          error:
+            "مفتاح Gemini مش موجود في Environment Variables.",
 
-        code:
-          "MISSING_GEMINI_API_KEY"
+          code:
+            "MISSING_GEMINI_API_KEY"
 
-      });
+        });
 
     }
+
 
     // ==========================================
     // MULTILINGUAL SYSTEM PROMPT
@@ -376,16 +692,16 @@ Malayalam:
 മലയാളത്തിൽ മറുപടി നൽകുക.
 
 Kannada:
-ಕನ್ನಡದಲ್ಲಿ ಉತ್ತರಿಸಿ.
+ಕನ್ನಡದಲ್ಲಿ उत्तर दें।
 
 Punjabi:
 ਪੰਜਾਬੀ ਵਿੱਚ ਜਵਾਬ ਦਿਓ।
 
 Gujarati:
-ગુજરાતીમાં જવાબ આપો.
+ગુજરાતીમાં જવાબ આપો।
 
 Marathi:
-मराठीत उत्तर द्या.
+मराठीत उत्तर द्या।
 
 Kazakh:
 Қазақша жауап бер.
@@ -632,21 +948,29 @@ console.log("Hello");
 لو المستخدم طلب أسلوبًا محددًا،
 التزم به.
 `
+
         }
 
       ]
 
     };
 
+
     // ==========================================
     // BUILD SAFE CONTEXT
     // ==========================================
 
-    let contextText = "";
+    let contextText =
+      "";
 
-    if (history.length) {
 
-      const safeHistory = [];
+    if (
+      history.length
+    ) {
+
+      const safeHistory =
+        [];
+
 
       for (
         const item of history
@@ -656,10 +980,15 @@ console.log("Hello");
           !item ||
           typeof item !== "object"
         ) {
+
           continue;
+
         }
 
-        let text = "";
+
+        let text =
+          "";
+
 
         if (
           typeof item.content === "string"
@@ -670,6 +999,7 @@ console.log("Hello");
 
         }
 
+
         else if (
           typeof item.text === "string"
         ) {
@@ -679,9 +1009,15 @@ console.log("Hello");
 
         }
 
-        if (!text) {
+
+        if (
+          !text
+        ) {
+
           continue;
+
         }
+
 
         const role =
           item.role === "assistant" ||
@@ -689,14 +1025,17 @@ console.log("Hello");
             ? "Nova"
             : "المستخدم";
 
+
         safeHistory.push(
           `${role}: ${text}`
         );
 
       }
 
+
       const limitedHistory =
         safeHistory.slice(-20);
+
 
       if (
         limitedHistory.length
@@ -713,6 +1052,7 @@ ${limitedHistory.join("\n\n")}
       }
 
     }
+
 
     // ==========================================
     // FINAL USER PROMPT
@@ -741,11 +1081,14 @@ ${message}
 - الرد يكون مباشر وطبيعي.
 `;
 
+
     // ==========================================
     // GEMINI REQUEST
     // ==========================================
 
-    let lastError = null;
+    let lastError =
+      null;
+
 
     for (
       let i = 0;
@@ -756,11 +1099,13 @@ ${message}
       const key =
         apiKeys[i];
 
+
       try {
 
         console.log(
           `NOVA: Trying Gemini key ${i + 1}/${apiKeys.length}`
         );
+
 
         const response =
           await fetch(
@@ -768,14 +1113,18 @@ ${message}
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent",
 
             {
-              method: "POST",
+
+              method:
+                "POST",
 
               headers: {
+
                 "Content-Type":
                   "application/json",
 
                 "x-goog-api-key":
                   key
+
               },
 
               body:
@@ -786,16 +1135,21 @@ ${message}
                   contents: [
 
                     {
-                      role: "user",
+
+                      role:
+                        "user",
 
                       parts: [
 
                         {
+
                           text:
                             finalPrompt
+
                         }
 
                       ]
+
                     }
 
                   ],
@@ -806,8 +1160,10 @@ ${message}
                       8192,
 
                     thinkingConfig: {
+
                       thinkingLevel:
                         "low"
+
                     }
 
                   }
@@ -818,6 +1174,7 @@ ${message}
 
           );
 
+
         // ========================================
         // READ RESPONSE SAFELY
         // ========================================
@@ -825,8 +1182,10 @@ ${message}
         const rawText =
           await response.text();
 
+
         let data =
           null;
+
 
         try {
 
@@ -844,16 +1203,20 @@ ${message}
 
         }
 
+
         // ========================================
         // GEMINI ERROR
         // ========================================
 
-        if (!response.ok) {
+        if (
+          !response.ok
+        ) {
 
           const errorMessage =
             data?.error?.message ||
             rawText ||
             `Gemini HTTP ${response.status}`;
+
 
           console.error(
             "NOVA GEMINI ERROR:",
@@ -861,12 +1224,15 @@ ${message}
             errorMessage
           );
 
+
           lastError =
             errorMessage;
+
 
           continue;
 
         }
+
 
         // ========================================
         // EXTRACT ANSWER
@@ -879,19 +1245,25 @@ ${message}
             ?.content
             ?.parts;
 
-        if (!Array.isArray(parts)) {
+
+        if (
+          !Array.isArray(parts)
+        ) {
 
           console.error(
             "NOVA: Gemini returned no text",
             data
           );
 
+
           lastError =
             "Gemini returned no text.";
+
 
           continue;
 
         }
+
 
         const answer =
           parts
@@ -907,14 +1279,19 @@ ${message}
 
             .trim();
 
-        if (!answer) {
+
+        if (
+          !answer
+        ) {
 
           lastError =
             "Gemini returned an empty response.";
 
+
           continue;
 
         }
+
 
         // ========================================
         // SUCCESS
@@ -924,38 +1301,44 @@ ${message}
           "NOVA: Gemini response successful"
         );
 
-        return res.status(200).json({
 
-          candidates: [
+        return res
+          .status(200)
+          .json({
 
-            {
+            candidates: [
 
-              content: {
+              {
 
-                parts: [
+                content: {
 
-                  {
-                    text:
-                      answer
-                  }
+                  parts: [
 
-                ]
+                    {
+
+                      text:
+                        answer
+
+                    }
+
+                  ]
+
+                }
 
               }
 
-            }
+            ],
 
-          ],
+            model:
+              "nova-2.0-pro",
 
-          model:
-            "nova-2.0-pro",
+            server:
+              "nova-gemini"
 
-          server:
-            "nova-gemini"
-
-        });
+          });
 
       }
+
 
       catch (error) {
 
@@ -964,6 +1347,7 @@ ${message}
           error
         );
 
+
         lastError =
           error?.message ||
           "Gemini fetch failed.";
@@ -971,6 +1355,7 @@ ${message}
       }
 
     }
+
 
     // ==========================================
     // FALLBACK
@@ -981,6 +1366,7 @@ ${message}
       console.log(
         "NOVA: Trying fallback..."
       );
+
 
       const fallbackPrompt = `
 أنت Nova AI 2.0 Pro 🌍.
@@ -1023,57 +1409,66 @@ Gemini مجرد نموذج تستخدمه Nova AI.
 ${message}
 `;
 
+
       const fallbackURL =
         "https://text.pollinations.ai/" +
         encodeURIComponent(
           fallbackPrompt
         );
 
+
       const fallbackResponse =
         await fetch(
           fallbackURL
         );
 
+
       const fallbackRaw =
         await fallbackResponse.text();
+
 
       if (
         fallbackResponse.ok &&
         fallbackRaw.trim()
       ) {
 
-        return res.status(200).json({
+        return res
+          .status(200)
+          .json({
 
-          candidates: [
+            candidates: [
 
-            {
+              {
 
-              content: {
+                content: {
 
-                parts: [
+                  parts: [
 
-                  {
-                    text:
-                      fallbackRaw.trim()
-                  }
+                    {
 
-                ]
+                      text:
+                        fallbackRaw.trim()
+
+                    }
+
+                  ]
+
+                }
 
               }
 
-            }
+            ],
 
-          ],
+            model:
+              "nova-2.0-pro-fallback",
 
-          model:
-            "nova-2.0-pro-fallback",
+            server:
+              "nova-fallback"
 
-          server:
-            "nova-fallback"
-
-        });
+          });
 
       }
+
 
       console.error(
         "NOVA FALLBACK FAILED:",
@@ -1081,7 +1476,9 @@ ${message}
         fallbackRaw
       );
 
+
     }
+
 
     catch (fallbackError) {
 
@@ -1092,25 +1489,30 @@ ${message}
 
     }
 
+
     // ==========================================
     // FINAL ERROR
     // ==========================================
 
-    return res.status(502).json({
+    return res
+      .status(502)
+      .json({
 
-      error:
-        "Nova AI مش قادرة تتصل بالنموذج دلوقتي.",
+        error:
+          "Nova AI مش قادرة تتصل بالنموذج دلوقتي.",
 
-      code:
-        "GEMINI_REQUEST_FAILED",
+        code:
+          "GEMINI_REQUEST_FAILED",
 
-      details:
-        lastError ||
-        "Unknown Gemini error"
+        details:
+          lastError ||
+          "Unknown Gemini error"
 
-    });
+      });
+
 
   }
+
 
   catch (error) {
 
@@ -1123,19 +1525,22 @@ ${message}
       error
     );
 
-    return res.status(500).json({
 
-      error:
-        "حصل خطأ داخلي في Nova AI.",
+    return res
+      .status(500)
+      .json({
 
-      code:
-        "NOVA_INTERNAL_ERROR",
+        error:
+          "حصل خطأ داخلي في Nova AI.",
 
-      details:
-        error?.message ||
-        "Unknown server error"
+        code:
+          "NOVA_INTERNAL_ERROR",
 
-    });
+        details:
+          error?.message ||
+          "Unknown server error"
+
+      });
 
   }
 
