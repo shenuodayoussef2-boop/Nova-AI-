@@ -198,10 +198,7 @@
          Supabase
     ========================== -->
 
-    <script
-        src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
-    ></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
 
     <!-- =========================
@@ -312,6 +309,7 @@
 
 <div class="app-container">
 
+
     <!-- =========================
          SIDEBAR
     ========================== -->
@@ -329,7 +327,9 @@
                 title="طي / فتح القائمة"
                 type="button"
             >
+
                 <i class="fa-solid fa-bars"></i>
+
             </button>
 
             <h2 class="logo-text">
@@ -339,9 +339,7 @@
         </div>
 
 
-        <!-- =========================
-             NEW CHAT
-        ========================== -->
+        <!-- NEW CHAT -->
 
         <button
             id="newChatBtn"
@@ -358,9 +356,7 @@
         </button>
 
 
-        <!-- =========================
-             CHAT HISTORY
-        ========================== -->
+        <!-- CHAT HISTORY -->
 
         <div class="history-section">
 
@@ -371,15 +367,12 @@
             <ul
                 class="history-list"
                 id="historyList"
-            >
-            </ul>
+            ></ul>
 
         </div>
 
 
-        <!-- =========================
-             SIDEBAR FOOTER
-        ========================== -->
+        <!-- SIDEBAR FOOTER -->
 
         <div
             class="sidebar-footer-actions"
@@ -431,9 +424,7 @@
         </button>
 
 
-        <!-- =========================
-             CHAT SECTION
-        ========================== -->
+        <!-- CHAT SECTION -->
 
         <section
             id="chat-section"
@@ -563,9 +554,7 @@
             </div>
 
 
-            <!-- =========================
-                 INPUT AREA
-            ========================== -->
+            <!-- INPUT AREA -->
 
             <div class="input-area">
 
@@ -840,8 +829,6 @@
         <div class="settings-body">
 
 
-            <!-- ACTIVITY -->
-
             <div
                 class="setting-item"
                 data-setting="activity"
@@ -855,8 +842,6 @@
 
             </div>
 
-
-            <!-- PERSONAL INTELLIGENCE -->
 
             <div
                 class="setting-item"
@@ -872,8 +857,6 @@
             </div>
 
 
-            <!-- IMPORT MEMORY -->
-
             <div
                 class="setting-item"
                 data-setting="import-memory"
@@ -887,8 +870,6 @@
 
             </div>
 
-
-            <!-- AVATAR -->
 
             <div
                 class="setting-item"
@@ -904,8 +885,6 @@
             </div>
 
 
-            <!-- USAGE -->
-
             <div
                 class="setting-item"
                 data-setting="usage"
@@ -919,8 +898,6 @@
 
             </div>
 
-
-            <!-- GEMS -->
 
             <div
                 class="setting-item"
@@ -936,8 +913,6 @@
             </div>
 
 
-            <!-- PUBLIC LINKS -->
-
             <div
                 class="setting-item"
                 data-setting="public-links"
@@ -951,8 +926,6 @@
 
             </div>
 
-
-            <!-- THEME -->
 
             <div
                 class="setting-item"
@@ -988,8 +961,6 @@
             </div>
 
 
-            <!-- SUBSCRIPTIONS -->
-
             <div
                 class="setting-item"
                 data-setting="subscriptions"
@@ -1004,8 +975,6 @@
             </div>
 
 
-            <!-- NOTEBOOK -->
-
             <div
                 class="setting-item"
                 data-setting="notebook"
@@ -1019,8 +988,6 @@
 
             </div>
 
-
-            <!-- WATERMARK -->
 
             <div
                 class="setting-item"
@@ -1038,8 +1005,6 @@
             </div>
 
 
-            <!-- FEEDBACK -->
-
             <div
                 class="setting-item"
                 data-setting="feedback"
@@ -1053,8 +1018,6 @@
 
             </div>
 
-
-            <!-- HELP -->
 
             <div
                 class="setting-item"
@@ -1074,9 +1037,7 @@
 
             <!-- SMART MEMORY -->
 
-            <div
-                class="settings-section memory-section"
-            >
+            <div class="settings-section memory-section">
 
                 <div class="settings-section-title">
 
@@ -1138,6 +1099,7 @@
 
     <div class="nova-language-modal-content">
 
+
         <div class="nova-language-header">
 
             <div>
@@ -1147,7 +1109,7 @@
                 </h3>
 
                 <p>
-                    اختار اللغة اللي تحب Nova تتكلم بيها
+                    اختار اللغة اللي تحب Nova والتطبيق يستخدموها
                 </p>
 
             </div>
@@ -1169,7 +1131,7 @@
         <div class="nova-language-select-wrapper">
 
             <label for="novaLanguageSelect">
-                لغة المحادثة
+                لغة التطبيق
             </label>
 
 
@@ -1487,6 +1449,13 @@
 
 
 <!-- =========================
+     UI LANGUAGE ENGINE
+========================= -->
+
+<script src="i18n.js"></script>
+
+
+<!-- =========================
      NOVA MAIN SCRIPT
 ========================= -->
 
@@ -1494,12 +1463,15 @@
 
 
 <!-- =========================
-     LANGUAGE SETTINGS SCRIPT
+     LANGUAGE CONTROLLER
 ========================= -->
 
 <script>
 
 (function () {
+
+    "use strict";
+
 
     const languageSetting =
         document.querySelector(
@@ -1533,14 +1505,18 @@
         !languageSelect
     ) {
 
+        console.error(
+            "Nova Language: العناصر مش موجودة."
+        );
+
         return;
 
     }
 
 
-    // ========================================
-    // LOAD SAVED LANGUAGE
-    // ========================================
+    /* ==========================================
+       LOAD SAVED LANGUAGE
+    ========================================== */
 
     const savedLanguage =
         localStorage.getItem(
@@ -1552,37 +1528,47 @@
         savedLanguage;
 
 
-    // ========================================
-    // OPEN
-    // ========================================
+    /* ==========================================
+       OPEN LANGUAGE MODAL
+    ========================================== */
 
     languageSetting.addEventListener(
         "click",
-        function () {
+        function (event) {
+
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+
 
             const currentLanguage =
                 localStorage.getItem(
                     "novaLanguage"
                 ) || "auto";
 
+
             languageSelect.value =
                 currentLanguage;
+
 
             languageModal.classList.add(
                 "active"
             );
 
-        }
+        },
+        true
     );
 
 
-    // ========================================
-    // CLOSE
-    // ========================================
+    /* ==========================================
+       CLOSE
+    ========================================== */
 
     closeLanguageModal?.addEventListener(
         "click",
-        function () {
+        function (event) {
+
+            event.preventDefault();
 
             languageModal.classList.remove(
                 "active"
@@ -1592,9 +1578,9 @@
     );
 
 
-    // ========================================
-    // CLICK OUTSIDE
-    // ========================================
+    /* ==========================================
+       CLICK OUTSIDE
+    ========================================== */
 
     languageModal.addEventListener(
         "click",
@@ -1615,9 +1601,9 @@
     );
 
 
-    // ========================================
-    // SAVE
-    // ========================================
+    /* ==========================================
+       SAVE LANGUAGE
+    ========================================== */
 
     saveLanguageBtn?.addEventListener(
         "click",
@@ -1639,21 +1625,10 @@
             );
 
 
-            if (
-                typeof showToast ===
-                "function"
-            ) {
+            if (window.NovaI18n) {
 
-                const selectedText =
-                    languageSelect
-                        .selectedOptions[0]
-                        ?.textContent
-                        ?.trim() ||
-                    "Auto";
-
-
-                showToast(
-                    `تم حفظ اللغة: ${selectedText}`
+                window.NovaI18n.setLanguage(
+                    selectedLanguage
                 );
 
             }
@@ -1661,13 +1636,216 @@
         }
     );
 
+
 })();
 
 </script>
 
 
 <!-- =========================
-     LOADING SCREEN SCRIPT
+     SETTINGS FIX
+========================= -->
+
+<script>
+
+(function () {
+
+    "use strict";
+
+
+    function setupNovaSettingsFix() {
+
+        const settingsBtn =
+            document.getElementById(
+                "settingsBtn"
+            );
+
+        const settingsModal =
+            document.getElementById(
+                "settingsModal"
+            );
+
+        const closeSettingsBtn =
+            document.getElementById(
+                "closeSettingsBtn"
+            );
+
+
+        if (
+            !settingsBtn ||
+            !settingsModal
+        ) {
+
+            console.error(
+                "Nova Settings: العناصر مش موجودة."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            settingsBtn.dataset.settingsReady ===
+            "true"
+        ) {
+
+            return;
+
+        }
+
+
+        settingsBtn.dataset.settingsReady =
+            "true";
+
+
+        /* ======================================
+           OPEN
+        ====================================== */
+
+        settingsBtn.addEventListener(
+            "click",
+            function (event) {
+
+                event.preventDefault();
+                event.stopPropagation();
+                event.stopImmediatePropagation();
+
+
+                settingsModal.classList.add(
+                    "active"
+                );
+
+
+                document.body.classList.add(
+                    "settings-open"
+                );
+
+            },
+            true
+        );
+
+
+        /* ======================================
+           CLOSE
+        ====================================== */
+
+        if (closeSettingsBtn) {
+
+            closeSettingsBtn.addEventListener(
+                "click",
+                function (event) {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+
+
+                    settingsModal.classList.remove(
+                        "active"
+                    );
+
+
+                    document.body.classList.remove(
+                        "settings-open"
+                    );
+
+                },
+                true
+            );
+
+        }
+
+
+        /* ======================================
+           CLICK OUTSIDE
+        ====================================== */
+
+        settingsModal.addEventListener(
+            "click",
+            function (event) {
+
+                if (
+                    event.target ===
+                    settingsModal
+                ) {
+
+                    settingsModal.classList.remove(
+                        "active"
+                    );
+
+
+                    document.body.classList.remove(
+                        "settings-open"
+                    );
+
+                }
+
+            }
+        );
+
+
+        /* ======================================
+           ESC
+        ====================================== */
+
+        document.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key === "Escape"
+                ) {
+
+                    settingsModal.classList.remove(
+                        "active"
+                    );
+
+
+                    document.body.classList.remove(
+                        "settings-open"
+                    );
+
+
+                    languageModal?.classList.remove(
+                        "active"
+                    );
+
+                }
+
+            }
+        );
+
+
+        console.log(
+            "Nova Settings: جاهزة ✅"
+        );
+
+    }
+
+
+    if (
+        document.readyState ===
+        "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            setupNovaSettingsFix
+        );
+
+    } else {
+
+        setupNovaSettingsFix();
+
+    }
+
+})();
+
+</script>
+
+
+<!-- =========================
+     LOADING SCREEN
 ========================= -->
 
 <script>
@@ -1768,7 +1946,7 @@
 
 
 <!-- =========================
-     LANGUAGE MODAL STYLE
+     LANGUAGE + SETTINGS CSS
 ========================= -->
 
 <style>
@@ -1811,6 +1989,10 @@
     width: 100%;
 
     max-width: 520px;
+
+    max-height: 90vh;
+
+    overflow-y: auto;
 
     padding: 24px;
 
@@ -1975,6 +2157,88 @@
 
 }
 
+.settings-modal-overlay {
+
+    position: fixed !important;
+
+    inset: 0 !important;
+
+    display: none !important;
+
+    align-items: center !important;
+
+    justify-content: center !important;
+
+    width: 100vw !important;
+
+    height: 100vh !important;
+
+    background: rgba(
+        0,
+        0,
+        0,
+        0.65
+    ) !important;
+
+    backdrop-filter: blur(6px);
+
+    z-index: 99998 !important;
+
+}
+
+.settings-modal-overlay.active {
+
+    display: flex !important;
+
+}
+
+.settings-modal-content {
+
+    position: relative;
+
+    z-index: 99999;
+
+    width: 450px;
+
+    max-width: calc(
+        100vw - 30px
+    );
+
+    max-height: 85vh;
+
+    overflow-y: auto;
+
+    background: #1e293b;
+
+    border: 1px solid #334155;
+
+    border-radius: 18px;
+
+    box-shadow:
+        0 25px 80px
+        rgba(
+            0,
+            0,
+            0,
+            0.55
+        );
+
+}
+
+html[dir="ltr"] .settings-modal-overlay,
+html[dir="ltr"] .nova-language-modal {
+
+    direction: ltr;
+
+}
+
+html[dir="rtl"] .settings-modal-overlay,
+html[dir="rtl"] .nova-language-modal {
+
+    direction: rtl;
+
+}
+
 @media (max-width: 600px) {
 
     .nova-language-modal-content {
@@ -1991,246 +2255,1180 @@
 
     }
 
-}
-/* ==========================================
-   NOVA SETTINGS FIX
-========================================== */
+    .settings-modal-content {
 
-.settings-modal-overlay {
-    position: fixed !important;
-    inset: 0 !important;
+        width: 100%;
 
-    display: none !important;
-
-    align-items: center !important;
-    justify-content: center !important;
-
-    width: 100vw !important;
-    height: 100vh !important;
-
-    background: rgba(
-        0,
-        0,
-        0,
-        0.65
-    ) !important;
-
-    backdrop-filter: blur(6px);
-
-    z-index: 99999 !important;
-}
-
-.settings-modal-overlay.active {
-    display: flex !important;
-}
-
-.settings-modal-content {
-    position: relative;
-
-    z-index: 100000;
-
-    width: 450px;
-    max-width: calc(
-        100vw - 30px
-    );
-
-    max-height: 85vh;
-
-    overflow: hidden;
-
-    background: #1e293b;
-
-    border: 1px solid #334155;
-
-    border-radius: 18px;
-
-    box-shadow:
-        0 25px 80px
-        rgba(
-            0,
-            0,
-            0,
-            0.55
+        max-width: calc(
+            100vw - 20px
         );
+
+    }
+
 }
+
 </style>
 <script>
+/* ==========================================
+   NOVA AI - FULL UI LANGUAGE SYSTEM
+========================================== */
+
 (function () {
 
-    function setupNovaSettingsFix() {
+    "use strict";
 
-        const settingsBtn =
-            document.getElementById("settingsBtn");
+    const LANGUAGE_KEY =
+        "novaLanguage";
 
-        const settingsModal =
-            document.getElementById("settingsModal");
 
-        const closeSettingsBtn =
-            document.getElementById("closeSettingsBtn");
+    let currentLanguage =
+        localStorage.getItem(
+            LANGUAGE_KEY
+        ) || "auto";
 
-        if (
-            !settingsBtn ||
-            !settingsModal
-        ) {
-            console.error(
-                "Nova Settings: العناصر مش موجودة."
-            );
-            return;
+
+    let translating = false;
+
+
+    const originalTexts =
+        new WeakMap();
+
+
+    const originalAttributes =
+        new WeakMap();
+
+
+    const translatedNodes =
+        new WeakMap();
+
+
+    const translatedAttributes =
+        new WeakMap();
+
+
+    const RTL_LANGUAGES =
+        new Set([
+            "ar",
+            "ar-eg",
+            "ar-ma",
+            "fa",
+            "ur",
+            "he"
+        ]);
+
+
+    const EXCLUDED_SELECTORS = [
+        "#chatBox",
+        "#chatInput",
+        ".message",
+        ".nova-message",
+        ".user-message",
+        ".nova-loading",
+        "pre",
+        "code",
+        "script",
+        "style"
+    ];
+
+
+    /* ==========================================
+       CHECK EXCLUDED
+    ========================================== */
+
+    function isExcludedElement(
+        element
+    ) {
+
+        if (!element) {
+            return true;
         }
 
 
-        // ======================================
-        // منع تكرار الـ listener
-        // ======================================
+        return EXCLUDED_SELECTORS.some(
+            selector => {
 
-        if (
-            settingsBtn.dataset.settingsReady === "true"
-        ) {
-            return;
-        }
+                try {
 
-        settingsBtn.dataset.settingsReady = "true";
-
-
-        // ======================================
-        // OPEN SETTINGS
-        // ======================================
-
-        settingsBtn.addEventListener(
-            "click",
-            function (event) {
-
-                event.preventDefault();
-                event.stopPropagation();
-                event.stopImmediatePropagation();
-
-                settingsModal.classList.add(
-                    "active"
-                );
-
-                document.body.classList.add(
-                    "settings-open"
-                );
-
-            },
-            true
-        );
-
-
-        // ======================================
-        // CLOSE SETTINGS
-        // ======================================
-
-        if (closeSettingsBtn) {
-
-            closeSettingsBtn.addEventListener(
-                "click",
-                function (event) {
-
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    settingsModal.classList.remove(
-                        "active"
+                    return !!element.closest(
+                        selector
                     );
 
-                    document.body.classList.remove(
-                        "settings-open"
-                    );
+                } catch {
 
-                },
-                true
-            );
-
-        }
-
-
-        // ======================================
-        // CLICK OUTSIDE
-        // ======================================
-
-        settingsModal.addEventListener(
-            "click",
-            function (event) {
-
-                if (
-                    event.target === settingsModal
-                ) {
-
-                    settingsModal.classList.remove(
-                        "active"
-                    );
-
-                    document.body.classList.remove(
-                        "settings-open"
-                    );
+                    return false;
 
                 }
 
             }
-        );
-
-
-        // ======================================
-        // ESC
-        // ======================================
-
-        document.addEventListener(
-            "keydown",
-            function (event) {
-
-                if (
-                    event.key === "Escape"
-                ) {
-
-                    settingsModal.classList.remove(
-                        "active"
-                    );
-
-                    document.body.classList.remove(
-                        "settings-open"
-                    );
-
-                }
-
-            }
-        );
-
-
-        console.log(
-            "Nova Settings: جاهزة ✅"
         );
 
     }
 
 
-    // ==========================================
-    // RUN
-    // ==========================================
+    /* ==========================================
+       EFFECTIVE LANGUAGE
+    ========================================== */
+
+    function getEffectiveLanguage(
+        language
+    ) {
+
+        if (
+            language &&
+            language !== "auto"
+        ) {
+
+            return language;
+
+        }
+
+
+        const browserLanguage =
+            (
+                navigator.language ||
+                "en"
+            ).toLowerCase();
+
+
+        if (
+            browserLanguage.startsWith(
+                "ar"
+            )
+        ) {
+            return "ar";
+        }
+
+
+        if (
+            browserLanguage.startsWith(
+                "fa"
+            )
+        ) {
+            return "fa";
+        }
+
+
+        if (
+            browserLanguage.startsWith(
+                "ur"
+            )
+        ) {
+            return "ur";
+        }
+
+
+        if (
+            browserLanguage.startsWith(
+                "he"
+            )
+        ) {
+            return "he";
+        }
+
+
+        if (
+            browserLanguage.startsWith(
+                "fr"
+            )
+        ) {
+            return "fr";
+        }
+
+
+        if (
+            browserLanguage.startsWith(
+                "es"
+            )
+        ) {
+            return "es";
+        }
+
+
+        if (
+            browserLanguage.startsWith(
+                "de"
+            )
+        ) {
+            return "de";
+        }
+
+
+        if (
+            browserLanguage.startsWith(
+                "it"
+            )
+        ) {
+            return "it";
+        }
+
+
+        if (
+            browserLanguage.startsWith(
+                "pt"
+            )
+        ) {
+            return "pt";
+        }
+
+
+        if (
+            browserLanguage.startsWith(
+                "ru"
+            )
+        ) {
+            return "ru";
+        }
+
+
+        if (
+            browserLanguage.startsWith(
+                "tr"
+            )
+        ) {
+            return "tr";
+        }
+
+
+        if (
+            browserLanguage.startsWith(
+                "zh"
+            )
+        ) {
+            return "zh";
+        }
+
+
+        if (
+            browserLanguage.startsWith(
+                "ja"
+            )
+        ) {
+            return "ja";
+        }
+
+
+        if (
+            browserLanguage.startsWith(
+                "ko"
+            )
+        ) {
+            return "ko";
+        }
+
+
+        if (
+            browserLanguage.startsWith(
+                "hi"
+            )
+        ) {
+            return "hi";
+        }
+
+
+        return "en";
+
+    }
+
+
+    /* ==========================================
+       COLLECT TEXT NODES
+    ========================================== */
+
+    function collectTextNodes() {
+
+        const nodes = [];
+
+
+        const walker =
+            document.createTreeWalker(
+                document.body,
+                NodeFilter.SHOW_TEXT
+            );
+
+
+        let node;
+
+
+        while (
+            (node = walker.nextNode())
+        ) {
+
+            const parent =
+                node.parentElement;
+
+
+            if (!parent) {
+                continue;
+            }
+
+
+            if (
+                isExcludedElement(
+                    parent
+                )
+            ) {
+                continue;
+            }
+
+
+            const cleanText =
+                node.nodeValue?.trim();
+
+
+            if (!cleanText) {
+                continue;
+            }
+
+
+            if (
+                cleanText.length < 2
+            ) {
+                continue;
+            }
+
+
+            if (
+                /^[\d\s.,:;!?+\-/*=()[\]{}<>]+$/
+                    .test(cleanText)
+            ) {
+                continue;
+            }
+
+
+            if (
+                !originalTexts.has(node)
+            ) {
+
+                originalTexts.set(
+                    node,
+                    node.nodeValue
+                );
+
+            }
+
+
+            nodes.push(node);
+
+        }
+
+
+        return nodes;
+
+    }
+
+
+    /* ==========================================
+       COLLECT ATTRIBUTES
+    ========================================== */
+
+    function collectAttributes() {
+
+        const elements =
+            document.querySelectorAll(
+                "input, textarea, button, [title], [aria-label], [placeholder]"
+            );
+
+
+        const result = [];
+
+
+        elements.forEach(
+            element => {
+
+                if (
+                    isExcludedElement(
+                        element
+                    )
+                ) {
+                    return;
+                }
+
+
+                [
+                    "placeholder",
+                    "title",
+                    "aria-label"
+                ].forEach(
+                    attribute => {
+
+                        if (
+                            !element.hasAttribute(
+                                attribute
+                            )
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        if (
+                            !originalAttributes.has(
+                                element
+                            )
+                        ) {
+
+                            originalAttributes.set(
+                                element,
+                                {}
+                            );
+
+                        }
+
+
+                        const saved =
+                            originalAttributes.get(
+                                element
+                            );
+
+
+                        if (
+                            !(attribute in saved)
+                        ) {
+
+                            saved[attribute] =
+                                element.getAttribute(
+                                    attribute
+                                );
+
+                        }
+
+
+                        const value =
+                            saved[attribute];
+
+
+                        if (
+                            value &&
+                            value.trim().length >= 2
+                        ) {
+
+                            result.push({
+                                element,
+                                attribute,
+                                text:
+                                    value.trim()
+                            });
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+
+        return result;
+
+    }
+
+
+    /* ==========================================
+       CACHE
+    ========================================== */
+
+    function cacheKey(
+        language,
+        text
+    ) {
+
+        return (
+            "nova_i18n_" +
+            language +
+            "_" +
+            encodeURIComponent(
+                text
+            )
+        );
+
+    }
+
+
+    /* ==========================================
+       RESTORE ARABIC ORIGINAL
+    ========================================== */
+
+    function restoreOriginalUI() {
+
+        const nodes =
+            collectTextNodes();
+
+
+        nodes.forEach(
+            node => {
+
+                const original =
+                    originalTexts.get(
+                        node
+                    );
+
+
+                if (
+                    original != null
+                ) {
+
+                    node.nodeValue =
+                        original;
+
+                    translatedNodes.delete(
+                        node
+                    );
+
+                }
+
+            }
+        );
+
+
+        document.querySelectorAll(
+            "input, textarea, button, [title], [aria-label], [placeholder]"
+        ).forEach(
+            element => {
+
+                const saved =
+                    originalAttributes.get(
+                        element
+                    );
+
+
+                if (!saved) {
+                    return;
+                }
+
+
+                Object.entries(
+                    saved
+                ).forEach(
+                    ([attribute, value]) => {
+
+                        if (
+                            value == null
+                        ) {
+
+                            element.removeAttribute(
+                                attribute
+                            );
+
+                        } else {
+
+                            element.setAttribute(
+                                attribute,
+                                value
+                            );
+
+                        }
+
+                    }
+                );
+
+
+                translatedAttributes.delete(
+                    element
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ==========================================
+       TRANSLATE BATCH
+    ========================================== */
+
+    async function translateBatch(
+        language,
+        texts
+    ) {
+
+        const translations = {};
+
+        const missing = [];
+
+
+        texts.forEach(
+            text => {
+
+                const cached =
+                    localStorage.getItem(
+                        cacheKey(
+                            language,
+                            text
+                        )
+                    );
+
+
+                if (
+                    cached
+                ) {
+
+                    translations[text] =
+                        cached;
+
+                } else {
+
+                    missing.push(
+                        text
+                    );
+
+                }
+
+            }
+        );
+
+
+        if (!missing.length) {
+
+            return translations;
+
+        }
+
+
+        try {
+
+            const response =
+                await fetch(
+                    "/api/translate-ui",
+                    {
+                        method:
+                            "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body:
+                            JSON.stringify({
+                                language,
+                                texts:
+                                    missing
+                            })
+                    }
+                );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "UI translation API failed"
+                );
+
+            }
+
+
+            const data =
+                await response.json();
+
+
+            const serverTranslations =
+                data?.translations ||
+                {};
+
+
+            Object.entries(
+                serverTranslations
+            ).forEach(
+                ([original, translated]) => {
+
+                    if (
+                        typeof translated !==
+                        "string"
+                    ) {
+                        return;
+                    }
+
+
+                    translations[original] =
+                        translated;
+
+
+                    try {
+
+                        localStorage.setItem(
+                            cacheKey(
+                                language,
+                                original
+                            ),
+                            translated
+                        );
+
+                    } catch {}
+
+                }
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Nova UI Translation Error:",
+                error
+            );
+
+        }
+
+
+        return translations;
+
+    }
+
+
+    /* ==========================================
+       APPLY LANGUAGE
+    ========================================== */
+
+    async function applyLanguage(
+        language
+    ) {
+
+        if (translating) {
+
+            return;
+
+        }
+
+
+        translating = true;
+
+
+        currentLanguage =
+            language || "auto";
+
+
+        localStorage.setItem(
+            LANGUAGE_KEY,
+            currentLanguage
+        );
+
+
+        const effectiveLanguage =
+            getEffectiveLanguage(
+                currentLanguage
+            );
+
+
+        /* ======================================
+           DIRECTION
+        ====================================== */
+
+        const isRTL =
+            RTL_LANGUAGES.has(
+                effectiveLanguage
+            );
+
+
+        document.documentElement.lang =
+            effectiveLanguage;
+
+
+        document.documentElement.dir =
+            isRTL
+                ? "rtl"
+                : "ltr";
+
+
+        document.body.classList.toggle(
+            "nova-rtl",
+            isRTL
+        );
+
+
+        document.body.classList.toggle(
+            "nova-ltr",
+            !isRTL
+        );
+
+
+        /* ======================================
+           ARABIC ORIGINAL
+        ====================================== */
+
+        if (
+            effectiveLanguage === "ar"
+        ) {
+
+            restoreOriginalUI();
+
+            translating = false;
+
+            return;
+
+        }
+
+
+        try {
+
+            const textNodes =
+                collectTextNodes();
+
+
+            const attributes =
+                collectAttributes();
+
+
+            const texts = [];
+
+
+            textNodes.forEach(
+                node => {
+
+                    const original =
+                        originalTexts.get(
+                            node
+                        );
+
+
+                    if (!original) {
+                        return;
+                    }
+
+
+                    if (
+                        translatedNodes.get(
+                            node
+                        ) ===
+                        effectiveLanguage
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    texts.push(
+                        original.trim()
+                    );
+
+                }
+            );
+
+
+            attributes.forEach(
+                item => {
+
+                    if (
+                        translatedAttributes.get(
+                            item.element
+                        ) ===
+                        effectiveLanguage
+                    ) {
+
+                        return;
+
+                    }
+
+
+                    if (
+                        item.text
+                    ) {
+
+                        texts.push(
+                            item.text
+                        );
+
+                    }
+
+                }
+            );
+
+
+            const uniqueTexts =
+                [
+                    ...new Set(
+                        texts
+                    )
+                ];
+
+
+            if (
+                !uniqueTexts.length
+            ) {
+
+                return;
+
+            }
+
+
+            const translations =
+                await translateBatch(
+                    effectiveLanguage,
+                    uniqueTexts
+                );
+
+
+            /* ==================================
+               TEXT
+            ================================== */
+
+            textNodes.forEach(
+                node => {
+
+                    const original =
+                        originalTexts.get(
+                            node
+                        );
+
+
+                    if (!original) {
+                        return;
+                    }
+
+
+                    const key =
+                        original.trim();
+
+
+                    const translated =
+                        translations[key];
+
+
+                    if (
+                        translated
+                    ) {
+
+                        const leading =
+                            original.match(
+                                /^\s*/
+                            )?.[0] || "";
+
+
+                        const trailing =
+                            original.match(
+                                /\s*$/
+                            )?.[0] || "";
+
+
+                        node.nodeValue =
+                            leading +
+                            translated +
+                            trailing;
+
+
+                        translatedNodes.set(
+                            node,
+                            effectiveLanguage
+                        );
+
+                    }
+
+                }
+            );
+
+
+            /* ==================================
+               ATTRIBUTES
+            ================================== */
+
+            attributes.forEach(
+                item => {
+
+                    const translated =
+                        translations[
+                            item.text
+                        ];
+
+
+                    if (
+                        translated
+                    ) {
+
+                        item.element.setAttribute(
+                            item.attribute,
+                            translated
+                        );
+
+
+                        translatedAttributes.set(
+                            item.element,
+                            effectiveLanguage
+                        );
+
+                    }
+
+                }
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Nova I18n Error:",
+                error
+            );
+
+        } finally {
+
+            translating = false;
+
+        }
+
+    }
+
+
+    /* ==========================================
+       PUBLIC API
+    ========================================== */
+
+    window.NovaI18n = {
+
+        setLanguage(
+            language
+        ) {
+
+            applyLanguage(
+                language || "auto"
+            );
+
+        },
+
+
+        getLanguage() {
+
+            return currentLanguage;
+
+        },
+
+
+        getEffectiveLanguage() {
+
+            return getEffectiveLanguage(
+                currentLanguage
+            );
+
+        }
+
+    };
+
+
+    /* ==========================================
+       START
+    ========================================== */
+
+    function start() {
+
+        const languageSelect =
+            document.getElementById(
+                "novaLanguageSelect"
+            );
+
+
+        if (
+            languageSelect
+        ) {
+
+            languageSelect.value =
+                currentLanguage;
+
+        }
+
+
+        applyLanguage(
+            currentLanguage
+        );
+
+    }
+
 
     if (
-        document.readyState === "loading"
+        document.readyState ===
+        "loading"
     ) {
 
         document.addEventListener(
             "DOMContentLoaded",
-            setupNovaSettingsFix
+            start
         );
 
     } else {
 
-        setupNovaSettingsFix();
+        start();
 
     }
 
+
+    /* ==========================================
+       WATCH NEW UI
+    ========================================== */
+
+    let observerTimer =
+        null;
+
+
+    const observer =
+        new MutationObserver(
+            function (mutations) {
+
+                if (translating) {
+                    return;
+                }
+
+
+                let hasNewElements =
+                    false;
+
+
+                for (
+                    const mutation of mutations
+                ) {
+
+                    if (
+                        mutation.type ===
+                        "childList" &&
+                        mutation.addedNodes.length
+                    ) {
+
+                        hasNewElements =
+                            true;
+
+                        break;
+
+                    }
+
+                }
+
+
+                if (
+                    !hasNewElements
+                ) {
+
+                    return;
+
+                }
+
+
+                clearTimeout(
+                    observerTimer
+                );
+
+
+                observerTimer =
+                    setTimeout(
+                        function () {
+
+                            applyLanguage(
+                                currentLanguage
+                            );
+
+                        },
+                        500
+                    );
+
+            }
+        );
+
+
+    observer.observe(
+        document.body,
+        {
+            childList: true,
+            subtree: true
+        }
+    );
+
+
 })();
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js"></script>
-<script src="auth-guard.js"></script>
-
-<script src="i18n.js"></script>
-<script src="script.js"></script>
 </body>
-
 </html>
