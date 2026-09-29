@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="ltr">
+<html lang="ar" dir="rtl">
 
 <head>
 
@@ -199,6 +199,7 @@
     ========================== -->
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script src="supabase.js"></script>
 
     <!-- =========================
@@ -222,11 +223,12 @@
 
 </head>
 
+
 <body>
 
-<!-- =========================
+<!-- =========================================================
      NOVA AI LOADING SCREEN
-========================= -->
+========================================================= -->
 
 <div id="novaLoadingScreen">
 
@@ -303,21 +305,25 @@
 </div>
 
 
-<!-- =========================
+
+<!-- =========================================================
      APP
-========================= -->
+========================================================= -->
 
 <div class="app-container">
 
 
-    <!-- =========================
+    <!-- =====================================================
          SIDEBAR
-    ========================== -->
+    ====================================================== -->
 
     <aside
         class="sidebar"
         id="sidebar"
     >
+
+
+        <!-- SIDEBAR HEADER -->
 
         <div class="sidebar-header">
 
@@ -332,6 +338,7 @@
 
             </button>
 
+
             <h2 class="logo-text">
                 Nova <span>AI</span>
             </h2>
@@ -339,7 +346,10 @@
         </div>
 
 
-        <!-- NEW CHAT -->
+
+        <!-- =================================================
+             NEW CHAT
+        ================================================== -->
 
         <button
             id="newChatBtn"
@@ -356,13 +366,17 @@
         </button>
 
 
-        <!-- CHAT HISTORY -->
+
+        <!-- =================================================
+             CHAT HISTORY
+        ================================================== -->
 
         <div class="history-section">
 
             <h3 class="history-title">
                 Recents
             </h3>
+
 
             <ul
                 class="history-list"
@@ -372,7 +386,346 @@
         </div>
 
 
-        <!-- SIDEBAR FOOTER -->
+
+        <!-- =================================================
+             USER PROFILE
+        ================================================== -->
+
+        <div class="nova-profile-area">
+
+
+            <!-- PROFILE BUTTON -->
+
+            <button
+                id="novaProfileBtn"
+                class="nova-profile-btn"
+                type="button"
+                aria-expanded="false"
+            >
+
+
+                <div
+                    id="novaProfileAvatar"
+                    class="nova-profile-avatar"
+                >
+                    YS
+                </div>
+
+
+                <div class="nova-profile-info">
+
+                    <strong
+                        id="novaProfileName"
+                    >
+                        يوسف شنوده
+                    </strong>
+
+
+                    <span
+                        id="novaProfilePlan"
+                        class="nova-profile-plan free"
+                    >
+                        FREE
+                    </span>
+
+                </div>
+
+
+                <i
+                    class="fa-solid fa-chevron-up nova-profile-arrow"
+                ></i>
+
+
+            </button>
+
+
+
+            <!-- =================================================
+                 PROFILE POPUP
+            ================================================== -->
+
+            <div
+                id="novaProfileMenu"
+                class="nova-profile-menu"
+            >
+
+
+                <!-- PROFILE HEAD -->
+
+                <div class="nova-profile-head">
+
+
+                    <div
+                        id="novaMenuAvatar"
+                        class="nova-menu-avatar"
+                    >
+                        YS
+                    </div>
+
+
+                    <div>
+
+                        <strong
+                            id="novaMenuName"
+                        >
+                            يوسف شنوده
+                        </strong>
+
+
+                        <span
+                            id="novaMenuEmail"
+                        >
+                            —
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     PLAN CARD
+                ================================================== -->
+
+                <div class="nova-plan-card">
+
+
+                    <div class="nova-plan-icon">
+
+                        <i class="fa-solid fa-sparkles"></i>
+
+                    </div>
+
+
+                    <div class="nova-plan-text">
+
+                        <span>
+                            Current plan
+                        </span>
+
+
+                        <strong
+                            id="novaMenuPlan"
+                        >
+                            FREE
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     THEMES
+                ================================================== -->
+
+                <div class="nova-menu-section">
+
+
+                    <div class="nova-menu-section-title">
+
+                        <i class="fa-solid fa-palette"></i>
+
+                        <span>
+                            Themes
+                        </span>
+
+                    </div>
+
+
+
+                    <div class="nova-theme-grid">
+
+
+                        <!-- NOVA -->
+
+                        <button
+                            class="nova-theme-option active"
+                            data-theme="nova"
+                            type="button"
+                        >
+
+                            <span
+                                class="theme-preview theme-nova"
+                            ></span>
+
+
+                            <span>
+                                Nova
+                            </span>
+
+                        </button>
+
+
+
+                        <!-- PURPLE -->
+
+                        <button
+                            class="nova-theme-option"
+                            data-theme="purple"
+                            type="button"
+                        >
+
+                            <span
+                                class="theme-preview theme-purple"
+                            ></span>
+
+
+                            <span>
+                                Purple
+                            </span>
+
+                        </button>
+
+
+
+                        <!-- EMERALD -->
+
+                        <button
+                            class="nova-theme-option"
+                            data-theme="emerald"
+                            type="button"
+                        >
+
+                            <span
+                                class="theme-preview theme-emerald"
+                            ></span>
+
+
+                            <span>
+                                Emerald
+                            </span>
+
+                        </button>
+
+
+
+                        <!-- AMOLED -->
+
+                        <button
+                            class="nova-theme-option"
+                            data-theme="amoled"
+                            type="button"
+                        >
+
+                            <span
+                                class="theme-preview theme-amoled"
+                            ></span>
+
+
+                            <span>
+                                AMOLED
+                            </span>
+
+                        </button>
+
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     LANGUAGE
+                ================================================== -->
+
+                <button
+                    id="novaProfileLanguage"
+                    class="nova-profile-menu-item"
+                    type="button"
+                >
+
+                    <i class="fa-solid fa-language"></i>
+
+                    <span>
+                        Language
+                    </span>
+
+                    <i class="fa-solid fa-chevron-left"></i>
+
+                </button>
+
+
+
+                <!-- =================================================
+                     USAGE
+                ================================================== -->
+
+                <button
+                    id="novaProfileUsage"
+                    class="nova-profile-menu-item"
+                    type="button"
+                >
+
+                    <i class="fa-solid fa-chart-pie"></i>
+
+                    <span>
+                        Usage
+                    </span>
+
+                    <i class="fa-solid fa-chevron-left"></i>
+
+                </button>
+
+
+
+                <!-- =================================================
+                     SETTINGS
+                ================================================== -->
+
+                <button
+                    id="novaProfileSettings"
+                    class="nova-profile-menu-item"
+                    type="button"
+                >
+
+                    <i class="fa-solid fa-gear"></i>
+
+                    <span>
+                        Settings
+                    </span>
+
+                    <i class="fa-solid fa-chevron-left"></i>
+
+                </button>
+
+
+
+                <div class="nova-profile-divider"></div>
+
+
+
+                <!-- =================================================
+                     LOGOUT
+                ================================================== -->
+
+                <button
+                    id="novaLogoutBtn"
+                    class="nova-profile-menu-item nova-logout-item"
+                    type="button"
+                >
+
+                    <i class="fa-solid fa-right-from-bracket"></i>
+
+                    <span>
+                        Sign out
+                    </span>
+
+                </button>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             SIDEBAR FOOTER / SETTINGS
+        ================================================== -->
 
         <div
             class="sidebar-footer-actions"
@@ -386,6 +739,7 @@
             "
         >
 
+
             <button
                 class="sidebar-icon-btn"
                 id="settingsBtn"
@@ -397,14 +751,17 @@
 
             </button>
 
+
         </div>
+
 
     </aside>
 
 
-    <!-- =========================
+
+    <!-- =========================================================
          MAIN CONTENT
-    ========================== -->
+    ========================================================== -->
 
     <main class="main-content">
 
@@ -424,12 +781,16 @@
         </button>
 
 
-        <!-- CHAT SECTION -->
+
+        <!-- =================================================
+             CHAT SECTION
+        ================================================== -->
 
         <section
             id="chat-section"
             class="content-section active"
         >
+
 
             <div class="section-header">
 
@@ -440,12 +801,16 @@
             </div>
 
 
-            <!-- CHAT BOX -->
+
+            <!-- =================================================
+                 CHAT BOX
+            ================================================== -->
 
             <div
                 class="chat-box"
                 id="chatBox"
             >
+
 
                 <!-- WELCOME -->
 
@@ -454,11 +819,13 @@
                     id="novaWelcome"
                 >
 
+
                     <div class="nova-welcome-icon">
 
                         <i class="fa-solid fa-sparkles"></i>
 
                     </div>
+
 
 
                     <h1>
@@ -468,6 +835,7 @@
                         👋
 
                     </h1>
+
 
 
                     <p>
@@ -482,10 +850,13 @@
                     </p>
 
 
+
                     <!-- QUICK PROMPTS -->
 
                     <div class="quick-prompts">
 
+
+                        <!-- PROJECT -->
 
                         <button
                             type="button"
@@ -502,6 +873,9 @@
                         </button>
 
 
+
+                        <!-- AI -->
+
                         <button
                             type="button"
                             class="quick-prompt"
@@ -517,6 +891,9 @@
                         </button>
 
 
+
+                        <!-- LEARN -->
+
                         <button
                             type="button"
                             class="quick-prompt"
@@ -531,6 +908,9 @@
 
                         </button>
 
+
+
+                        <!-- STORY -->
 
                         <button
                             type="button"
@@ -549,15 +929,22 @@
 
                     </div>
 
+
                 </div>
+
 
             </div>
 
 
-            <!-- INPUT AREA -->
+
+            <!-- =================================================
+                 INPUT AREA
+            ================================================== -->
 
             <div class="input-area">
 
+
+                <!-- FILE INPUT -->
 
                 <input
                     type="file"
@@ -567,7 +954,10 @@
                 >
 
 
-                <!-- ATTACHMENTS -->
+
+                <!-- =================================================
+                     ATTACHMENTS
+                ================================================== -->
 
                 <div
                     class="attach-wrapper"
@@ -576,6 +966,7 @@
                         display: inline-block;
                     "
                 >
+
 
                     <button
                         id="attachBtn"
@@ -589,10 +980,14 @@
                     </button>
 
 
+
                     <div
                         id="attachDropdown"
                         class="attach-dropdown"
                     >
+
+
+                        <!-- UPLOAD -->
 
                         <div
                             class="dropdown-item"
@@ -608,6 +1003,9 @@
                         </div>
 
 
+
+                        <!-- IMAGE -->
+
                         <div
                             class="dropdown-item"
                             id="optImage"
@@ -622,6 +1020,9 @@
                         </div>
 
 
+
+                        <!-- VIDEO -->
+
                         <div
                             class="dropdown-item"
                             id="optVideo"
@@ -635,6 +1036,9 @@
 
                         </div>
 
+
+
+                        <!-- AUDIO -->
 
                         <div
                             class="dropdown-item"
@@ -652,10 +1056,14 @@
 
                     </div>
 
+
                 </div>
 
 
-                <!-- CHAT INPUT -->
+
+                <!-- =================================================
+                     CHAT INPUT
+                ================================================== -->
 
                 <textarea
                     id="chatInput"
@@ -666,10 +1074,15 @@
                 ></textarea>
 
 
-                <!-- INPUT ACTIONS -->
+
+                <!-- =================================================
+                     INPUT ACTIONS
+                ================================================== -->
 
                 <div class="input-actions-right">
 
+
+                    <!-- MICROPHONE -->
 
                     <button
                         id="micBtn"
@@ -681,6 +1094,9 @@
 
                     </button>
 
+
+
+                    <!-- LIVE VOICE -->
 
                     <button
                         id="liveVoiceBtn"
@@ -701,6 +1117,9 @@
                     </button>
 
 
+
+                    <!-- SEND -->
+
                     <button
                         id="sendChatBtn"
                         type="button"
@@ -714,23 +1133,29 @@
 
                 </div>
 
+
             </div>
+
 
         </section>
 
+
     </main>
+
 
 </div>
 
 
-<!-- =========================
+
+<!-- =========================================================
      VOICE OVERLAY
-========================= -->
+========================================================= -->
 
 <div
     id="voiceOverlay"
     class="voice-overlay"
 >
+
 
     <button
         id="closeVoiceBtn"
@@ -744,6 +1169,7 @@
     </button>
 
 
+
     <div class="voice-header">
 
         <span>
@@ -751,6 +1177,7 @@
         </span>
 
     </div>
+
 
 
     <div class="orb-container">
@@ -763,7 +1190,9 @@
     </div>
 
 
+
     <div class="voice-controls">
+
 
         <button
             id="toggleMuteBtn"
@@ -777,6 +1206,7 @@
         </button>
 
 
+
         <button
             id="endVoiceCallBtn"
             class="voice-ctrl-btn close-call"
@@ -788,28 +1218,36 @@
 
         </button>
 
+
     </div>
+
 
 </div>
 
 
-<!-- =========================
+
+<!-- =========================================================
      SETTINGS MODAL
-========================= -->
+========================================================= -->
 
 <div
     id="settingsModal"
     class="settings-modal-overlay"
 >
 
+
     <div class="settings-modal-content">
 
 
+        <!-- SETTINGS HEADER -->
+
         <div class="settings-header">
+
 
             <h3>
                 الإعدادات
             </h3>
+
 
 
             <button
@@ -823,11 +1261,17 @@
 
             </button>
 
+
         </div>
 
 
+
+        <!-- SETTINGS BODY -->
+
         <div class="settings-body">
 
+
+            <!-- ACTIVITY -->
 
             <div
                 class="setting-item"
@@ -843,6 +1287,9 @@
             </div>
 
 
+
+            <!-- PERSONAL INTELLIGENCE -->
+
             <div
                 class="setting-item"
                 data-setting="personal-intelligence"
@@ -856,6 +1303,9 @@
 
             </div>
 
+
+
+            <!-- IMPORT MEMORY -->
 
             <div
                 class="setting-item"
@@ -871,6 +1321,9 @@
             </div>
 
 
+
+            <!-- AVATAR -->
+
             <div
                 class="setting-item"
                 data-setting="avatar"
@@ -884,6 +1337,9 @@
 
             </div>
 
+
+
+            <!-- USAGE -->
 
             <div
                 class="setting-item"
@@ -899,6 +1355,9 @@
             </div>
 
 
+
+            <!-- GEMS -->
+
             <div
                 class="setting-item"
                 data-setting="gems"
@@ -912,6 +1371,9 @@
 
             </div>
 
+
+
+            <!-- PUBLIC LINKS -->
 
             <div
                 class="setting-item"
@@ -927,6 +1389,9 @@
             </div>
 
 
+
+            <!-- THEME -->
+
             <div
                 class="setting-item"
                 data-setting="theme"
@@ -941,6 +1406,7 @@
                 <i class="fa-solid fa-chevron-left arrow"></i>
 
             </div>
+
 
 
             <!-- LANGUAGE -->
@@ -961,6 +1427,9 @@
             </div>
 
 
+
+            <!-- SUBSCRIPTIONS -->
+
             <div
                 class="setting-item"
                 data-setting="subscriptions"
@@ -975,6 +1444,9 @@
             </div>
 
 
+
+            <!-- NOTEBOOK -->
+
             <div
                 class="setting-item"
                 data-setting="notebook"
@@ -988,6 +1460,9 @@
 
             </div>
 
+
+
+            <!-- WATERMARK -->
 
             <div
                 class="setting-item"
@@ -1005,6 +1480,9 @@
             </div>
 
 
+
+            <!-- FEEDBACK -->
+
             <div
                 class="setting-item"
                 data-setting="feedback"
@@ -1018,6 +1496,9 @@
 
             </div>
 
+
+
+            <!-- HELP -->
 
             <div
                 class="setting-item"
@@ -1035,9 +1516,15 @@
             </div>
 
 
-            <!-- SMART MEMORY -->
 
-            <div class="settings-section memory-section">
+            <!-- =================================================
+                 SMART MEMORY
+            ================================================== -->
+
+            <div
+                class="settings-section memory-section"
+            >
+
 
                 <div class="settings-section-title">
 
@@ -1050,6 +1537,7 @@
                 </div>
 
 
+
                 <p class="settings-description">
 
                     المعلومات التي طلبت من Nova
@@ -1058,10 +1546,12 @@
                 </p>
 
 
+
                 <div
                     id="memoryList"
                     class="memory-list"
                 ></div>
+
 
 
                 <button
@@ -1078,29 +1568,35 @@
 
                 </button>
 
+
             </div>
 
 
         </div>
 
+
     </div>
+
 
 </div>
 
 
-<!-- =========================
+
+<!-- =========================================================
      LANGUAGE MODAL
-========================= -->
+========================================================= -->
 
 <div
     id="languageModal"
     class="nova-language-modal"
 >
 
+
     <div class="nova-language-modal-content">
 
 
         <div class="nova-language-header">
+
 
             <div>
 
@@ -1108,11 +1604,13 @@
                     🌐 لغة Nova
                 </h3>
 
+
                 <p>
                     اختار اللغة اللي تحب Nova والتطبيق يستخدموها
                 </p>
 
             </div>
+
 
 
             <button
@@ -1125,19 +1623,24 @@
 
             </button>
 
+
         </div>
 
 
+
         <div class="nova-language-select-wrapper">
+
 
             <label for="novaLanguageSelect">
                 لغة التطبيق
             </label>
 
 
+
             <select
                 id="novaLanguageSelect"
             >
+
 
                 <option value="auto">
                     🌍 Auto — اكتشاف تلقائي
@@ -1423,9 +1926,12 @@
                     🇮🇪 Gaeilge
                 </option>
 
+
             </select>
 
+
         </div>
+
 
 
         <button
@@ -1436,35 +1942,49 @@
             حفظ اللغة
         </button>
 
+
     </div>
+
 
 </div>
 
 
-<!-- =========================
+
+<!-- =========================================================
      AUTH GUARD
-========================= -->
+========================================================= -->
 
 <script src="auth-guard.js"></script>
 
 
-<!-- =========================
+
+<!-- =========================================================
      UI LANGUAGE ENGINE
-========================= -->
+========================================================= -->
 
 <script src="i18n.js"></script>
 
 
-<!-- =========================
-     NOVA MAIN SCRIPT
-========================= -->
+
+<!-- =========================================================
+     MAIN SCRIPT
+========================================================= -->
 
 <script src="script.js"></script>
 
 
-<!-- =========================
+
+<!-- =========================================================
+     PROFILE SCRIPT
+========================================================= -->
+
+<script src="profile.js"></script>
+
+
+
+<!-- =========================================================
      LANGUAGE CONTROLLER
-========================= -->
+========================================================= -->
 
 <script>
 
@@ -1478,20 +1998,24 @@
             '[data-setting="language"]'
         );
 
+
     const languageModal =
         document.getElementById(
             "languageModal"
         );
+
 
     const closeLanguageModal =
         document.getElementById(
             "closeLanguageModal"
         );
 
+
     const saveLanguageBtn =
         document.getElementById(
             "saveLanguageBtn"
         );
+
 
     const languageSelect =
         document.getElementById(
@@ -1506,7 +2030,7 @@
     ) {
 
         console.error(
-            "Nova Language: العناصر مش موجودة."
+            "Nova Language: عناصر اللغة مش موجودة."
         );
 
         return;
@@ -1515,21 +2039,17 @@
 
 
     /* ==========================================
-       LOAD SAVED LANGUAGE
+       LOAD
     ========================================== */
 
-    const savedLanguage =
+    languageSelect.value =
         localStorage.getItem(
             "novaLanguage"
         ) || "auto";
 
 
-    languageSelect.value =
-        savedLanguage;
-
-
     /* ==========================================
-       OPEN LANGUAGE MODAL
+       OPEN
     ========================================== */
 
     languageSetting.addEventListener(
@@ -1541,14 +2061,10 @@
             event.stopImmediatePropagation();
 
 
-            const currentLanguage =
+            languageSelect.value =
                 localStorage.getItem(
                     "novaLanguage"
                 ) || "auto";
-
-
-            languageSelect.value =
-                currentLanguage;
 
 
             languageModal.classList.add(
@@ -1566,9 +2082,7 @@
 
     closeLanguageModal?.addEventListener(
         "click",
-        function (event) {
-
-            event.preventDefault();
+        function () {
 
             languageModal.classList.remove(
                 "active"
@@ -1579,7 +2093,7 @@
 
 
     /* ==========================================
-       CLICK OUTSIDE
+       OUTSIDE
     ========================================== */
 
     languageModal.addEventListener(
@@ -1602,7 +2116,7 @@
 
 
     /* ==========================================
-       SAVE LANGUAGE
+       SAVE
     ========================================== */
 
     saveLanguageBtn?.addEventListener(
@@ -1625,7 +2139,9 @@
             );
 
 
-            if (window.NovaI18n) {
+            if (
+                window.NovaI18n
+            ) {
 
                 window.NovaI18n.setLanguage(
                     selectedLanguage
@@ -1642,9 +2158,10 @@
 </script>
 
 
-<!-- =========================
+
+<!-- =========================================================
      SETTINGS FIX
-========================= -->
+========================================================= -->
 
 <script>
 
@@ -1653,21 +2170,29 @@
     "use strict";
 
 
-    function setupNovaSettingsFix() {
+    function setupNovaSettings() {
 
         const settingsBtn =
             document.getElementById(
                 "settingsBtn"
             );
 
+
         const settingsModal =
             document.getElementById(
                 "settingsModal"
             );
 
+
         const closeSettingsBtn =
             document.getElementById(
                 "closeSettingsBtn"
+            );
+
+
+        const languageModal =
+            document.getElementById(
+                "languageModal"
             );
 
 
@@ -1700,7 +2225,7 @@
 
 
         /* ======================================
-           OPEN
+           OPEN SETTINGS
         ====================================== */
 
         settingsBtn.addEventListener(
@@ -1730,34 +2255,30 @@
            CLOSE
         ====================================== */
 
-        if (closeSettingsBtn) {
+        closeSettingsBtn?.addEventListener(
+            "click",
+            function (event) {
 
-            closeSettingsBtn.addEventListener(
-                "click",
-                function (event) {
-
-                    event.preventDefault();
-                    event.stopPropagation();
+                event.preventDefault();
+                event.stopPropagation();
 
 
-                    settingsModal.classList.remove(
-                        "active"
-                    );
+                settingsModal.classList.remove(
+                    "active"
+                );
 
 
-                    document.body.classList.remove(
-                        "settings-open"
-                    );
+                document.body.classList.remove(
+                    "settings-open"
+                );
 
-                },
-                true
-            );
-
-        }
+            },
+            true
+        );
 
 
         /* ======================================
-           CLICK OUTSIDE
+           OUTSIDE
         ====================================== */
 
         settingsModal.addEventListener(
@@ -1793,24 +2314,28 @@
             function (event) {
 
                 if (
-                    event.key === "Escape"
+                    event.key !==
+                    "Escape"
                 ) {
 
-                    settingsModal.classList.remove(
-                        "active"
-                    );
-
-
-                    document.body.classList.remove(
-                        "settings-open"
-                    );
-
-
-                    languageModal?.classList.remove(
-                        "active"
-                    );
+                    return;
 
                 }
+
+
+                settingsModal.classList.remove(
+                    "active"
+                );
+
+
+                languageModal?.classList.remove(
+                    "active"
+                );
+
+
+                document.body.classList.remove(
+                    "settings-open"
+                );
 
             }
         );
@@ -1830,12 +2355,12 @@
 
         document.addEventListener(
             "DOMContentLoaded",
-            setupNovaSettingsFix
+            setupNovaSettings
         );
 
     } else {
 
-        setupNovaSettingsFix();
+        setupNovaSettings();
 
     }
 
@@ -1844,9 +2369,10 @@
 </script>
 
 
-<!-- =========================
-     LOADING SCREEN
-========================= -->
+
+<!-- =========================================================
+     LOADING SCREEN SCRIPT
+========================================================= -->
 
 <script>
 
@@ -1857,10 +2383,12 @@
             "novaLoadingScreen"
         );
 
+
     const progressBar =
         document.getElementById(
             "novaProgressBar"
         );
+
 
     const progressText =
         document.getElementById(
@@ -1884,6 +2412,7 @@
 
     progressBar.style.width =
         "1%";
+
 
     progressText.textContent =
         "1%";
@@ -1930,26 +2459,35 @@
                                 700
                             );
 
+
                         },
                         350
                     );
 
+
                 }
+
 
             },
             35
         );
+
 
 })();
 
 </script>
 
 
-<!-- =========================
-     LANGUAGE + SETTINGS CSS
-========================= -->
+
+<!-- =========================================================
+     LANGUAGE + SETTINGS + PROFILE CSS
+========================================================= -->
 
 <style>
+
+/* =========================================================
+   LANGUAGE MODAL
+========================================================= */
 
 .nova-language-modal {
 
@@ -1965,24 +2503,28 @@
 
     padding: 20px;
 
-    background: rgba(
-        0,
-        0,
-        0,
-        0.65
-    );
+    background:
+        rgba(
+            0,
+            0,
+            0,
+            0.65
+        );
 
-    backdrop-filter: blur(10px);
+    backdrop-filter:
+        blur(10px);
 
     z-index: 99999;
 
 }
+
 
 .nova-language-modal.active {
 
     display: flex;
 
 }
+
 
 .nova-language-modal-content {
 
@@ -2000,7 +2542,8 @@
 
     background: #0b141d;
 
-    border: 1px solid
+    border:
+        1px solid
         rgba(
             0,
             229,
@@ -2019,6 +2562,7 @@
 
 }
 
+
 .nova-language-header {
 
     display: flex;
@@ -2033,6 +2577,7 @@
 
 }
 
+
 .nova-language-header h3 {
 
     margin: 0 0 6px;
@@ -2043,6 +2588,7 @@
 
 }
 
+
 .nova-language-header p {
 
     margin: 0;
@@ -2052,6 +2598,7 @@
     font-size: 13px;
 
 }
+
 
 #closeLanguageModal {
 
@@ -2077,11 +2624,13 @@
 
 }
 
+
 .nova-language-select-wrapper {
 
     margin-bottom: 18px;
 
 }
+
 
 .nova-language-select-wrapper label {
 
@@ -2095,6 +2644,7 @@
 
 }
 
+
 #novaLanguageSelect {
 
     width: 100%;
@@ -2103,7 +2653,9 @@
 
     border-radius: 14px;
 
-    border: 1px solid #29404e;
+    border:
+        1px solid
+        #29404e;
 
     background: #09121a;
 
@@ -2115,9 +2667,11 @@
 
 }
 
+
 #novaLanguageSelect:focus {
 
-    border-color: #00d9ff;
+    border-color:
+        #00d9ff;
 
     box-shadow:
         0 0 0 3px
@@ -2129,6 +2683,7 @@
         );
 
 }
+
 
 .nova-save-language-btn {
 
@@ -2157,6 +2712,11 @@
 
 }
 
+
+/* =========================================================
+   SETTINGS
+========================================================= */
+
 .settings-modal-overlay {
 
     position: fixed !important;
@@ -2173,24 +2733,29 @@
 
     height: 100vh !important;
 
-    background: rgba(
-        0,
-        0,
-        0,
-        0.65
-    ) !important;
+    background:
+        rgba(
+            0,
+            0,
+            0,
+            0.65
+        ) !important;
 
-    backdrop-filter: blur(6px);
+    backdrop-filter:
+        blur(6px);
 
-    z-index: 99998 !important;
+    z-index:
+        99998 !important;
 
 }
+
 
 .settings-modal-overlay.active {
 
     display: flex !important;
 
 }
+
 
 .settings-modal-content {
 
@@ -2200,9 +2765,10 @@
 
     width: 450px;
 
-    max-width: calc(
-        100vw - 30px
-    );
+    max-width:
+        calc(
+            100vw - 30px
+        );
 
     max-height: 85vh;
 
@@ -2210,7 +2776,9 @@
 
     background: #1e293b;
 
-    border: 1px solid #334155;
+    border:
+        1px solid
+        #334155;
 
     border-radius: 18px;
 
@@ -2225,21 +2793,778 @@
 
 }
 
-html[dir="ltr"] .settings-modal-overlay,
-html[dir="ltr"] .nova-language-modal {
 
-    direction: ltr;
+/* =========================================================
+   PROFILE
+========================================================= */
+
+.nova-profile-area {
+
+    position: relative;
+
+    width: 100%;
+
+    padding:
+        0 12px 10px;
 
 }
 
-html[dir="rtl"] .settings-modal-overlay,
-html[dir="rtl"] .nova-language-modal {
+
+.nova-profile-btn {
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 9px;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.08
+        );
+
+    border-radius: 15px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.035
+        );
+
+    color: #fff;
+
+    cursor: pointer;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        transform .2s ease;
+
+}
+
+
+.nova-profile-btn:hover {
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.07
+        );
+
+    border-color:
+        rgba(
+            0,
+            229,
+            255,
+            0.25
+        );
+
+}
+
+
+.nova-profile-btn:active {
+
+    transform:
+        scale(.98);
+
+}
+
+
+.nova-profile-avatar,
+.nova-menu-avatar {
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-weight: 800;
+
+    color: #fff;
+
+    background:
+        linear-gradient(
+            135deg,
+            #00e5ff,
+            #008cff
+        );
+
+}
+
+
+.nova-profile-avatar {
+
+    width: 42px;
+
+    height: 42px;
+
+    border-radius: 12px;
+
+    font-size: 14px;
+
+}
+
+
+.nova-profile-info {
+
+    min-width: 0;
+
+    flex: 1;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 2px;
+
+}
+
+
+.nova-profile-info strong {
+
+    max-width: 150px;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+    font-size: 14px;
+
+}
+
+
+.nova-profile-plan {
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: .7px;
+
+}
+
+
+.nova-profile-plan.free {
+
+    color: #b9c5ce;
+
+}
+
+
+.nova-profile-plan.pro {
+
+    color: #00e5ff;
+
+}
+
+
+.nova-profile-plan.ultra {
+
+    color: #ffd166;
+
+}
+
+
+.nova-profile-arrow {
+
+    font-size: 11px;
+
+    color: #81909b;
+
+    transition:
+        transform .2s ease;
+
+}
+
+
+.nova-profile-btn.open
+.nova-profile-arrow {
+
+    transform:
+        rotate(180deg);
+
+}
+
+
+.nova-profile-menu {
+
+    position: absolute;
+
+    left: 12px;
+
+    right: 12px;
+
+    bottom:
+        calc(
+            100% + 10px
+        );
+
+    padding: 12px;
+
+    border-radius: 18px;
+
+    background:
+        rgba(
+            10,
+            20,
+            29,
+            .98
+        );
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .09
+        );
+
+    box-shadow:
+        0 25px 70px
+        rgba(
+            0,
+            0,
+            0,
+            .45
+        );
+
+    backdrop-filter:
+        blur(18px);
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    pointer-events: none;
+
+    transform:
+        translateY(8px);
+
+    transition:
+        opacity .2s ease,
+        transform .2s ease,
+        visibility .2s ease;
+
+    z-index: 10000;
+
+}
+
+
+.nova-profile-menu.active {
+
+    opacity: 1;
+
+    visibility: visible;
+
+    pointer-events: auto;
+
+    transform:
+        translateY(0);
+
+}
+
+
+.nova-profile-head {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+    padding:
+        8px 5px 13px;
+
+}
+
+
+.nova-menu-avatar {
+
+    width: 46px;
+
+    height: 46px;
+
+    border-radius: 14px;
+
+    font-size: 14px;
+
+}
+
+
+.nova-profile-head strong {
+
+    display: block;
+
+    color: #fff;
+
+    font-size: 14px;
+
+}
+
+
+.nova-profile-head span {
+
+    display: block;
+
+    margin-top: 3px;
+
+    max-width: 190px;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+    color: #8798a5;
+
+    font-size: 11px;
+
+}
+
+
+.nova-plan-card {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 11px;
+
+    margin-bottom: 10px;
+
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(
+                0,
+                229,
+                255,
+                .08
+            ),
+            rgba(
+                0,
+                140,
+                255,
+                .03
+            )
+        );
+
+    border:
+        1px solid
+        rgba(
+            0,
+            229,
+            255,
+            .12
+        );
+
+}
+
+
+.nova-plan-icon {
+
+    width: 34px;
+
+    height: 34px;
+
+    border-radius: 10px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background:
+        rgba(
+            0,
+            229,
+            255,
+            .1
+        );
+
+    color:
+        #00e5ff;
+
+}
+
+
+.nova-plan-text {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+
+}
+
+
+.nova-plan-text span {
+
+    color: #81929f;
+
+    font-size: 10px;
+
+}
+
+
+.nova-plan-text strong {
+
+    color: #fff;
+
+    font-size: 12px;
+
+    letter-spacing: .6px;
+
+}
+
+
+.nova-menu-section {
+
+    padding:
+        6px 3px 10px;
+
+}
+
+
+.nova-menu-section-title {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-bottom: 9px;
+
+    color: #a9bac4;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+}
+
+
+.nova-menu-section-title i {
+
+    color:
+        #00d9ff;
+
+}
+
+
+.nova-theme-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap: 7px;
+
+}
+
+
+.nova-theme-option {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 8px;
+
+    border-radius: 10px;
+
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .06
+        );
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .025
+        );
+
+    color: #c4d0d7;
+
+    font-size: 10px;
+
+    cursor: pointer;
+
+}
+
+
+.nova-theme-option:hover {
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .06
+        );
+
+}
+
+
+.nova-theme-option.active {
+
+    border-color:
+        rgba(
+            0,
+            229,
+            255,
+            .45
+        );
+
+}
+
+
+.theme-preview {
+
+    width: 20px;
+
+    height: 20px;
+
+    border-radius: 6px;
+
+    display: block;
+
+}
+
+
+.theme-nova {
+
+    background:
+        linear-gradient(
+            135deg,
+            #00e5ff,
+            #008cff
+        );
+
+}
+
+
+.theme-purple {
+
+    background:
+        linear-gradient(
+            135deg,
+            #a855f7,
+            #6366f1
+        );
+
+}
+
+
+.theme-emerald {
+
+    background:
+        linear-gradient(
+            135deg,
+            #10b981,
+            #06b6d4
+        );
+
+}
+
+
+.theme-amoled {
+
+    background: #000;
+
+    border:
+        1px solid
+        #333;
+
+}
+
+
+.nova-profile-menu-item {
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding:
+        10px 9px;
+
+    border: 0;
+
+    border-radius: 11px;
+
+    background: transparent;
+
+    color: #c9d4da;
+
+    cursor: pointer;
+
+    text-align: inherit;
+
+    font-size: 12px;
+
+}
+
+
+.nova-profile-menu-item:hover {
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .055
+        );
+
+    color: #fff;
+
+}
+
+
+.nova-profile-menu-item
+i:first-child {
+
+    width: 17px;
+
+    color: #8fa1ad;
+
+}
+
+
+.nova-profile-menu-item
+i:last-child {
+
+    margin-inline-start: auto;
+
+    font-size: 9px;
+
+    color: #667783;
+
+}
+
+
+.nova-logout-item {
+
+    color: #ff8f8f;
+
+}
+
+
+.nova-logout-item
+i:first-child {
+
+    color: #ff7777;
+
+}
+
+
+.nova-profile-divider {
+
+    height: 1px;
+
+    margin:
+        5px 4px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .07
+        );
+
+}
+
+
+/* =========================================================
+   RTL / LTR
+========================================================= */
+
+html[dir="rtl"]
+.nova-profile-menu {
 
     direction: rtl;
 
 }
 
-@media (max-width: 600px) {
+
+html[dir="ltr"]
+.nova-profile-menu {
+
+    direction: ltr;
+
+}
+
+
+html[dir="rtl"]
+.nova-language-modal {
+
+    direction: rtl;
+
+}
+
+
+html[dir="ltr"]
+.nova-language-modal {
+
+    direction: ltr;
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (
+    max-width: 600px
+) {
 
     .nova-language-modal-content {
 
@@ -2249,1186 +3574,827 @@ html[dir="rtl"] .nova-language-modal {
 
     }
 
+
     .nova-language-header h3 {
 
         font-size: 18px;
 
     }
 
+
     .settings-modal-content {
 
         width: 100%;
 
-        max-width: calc(
-            100vw - 20px
-        );
+        max-width:
+            calc(
+                100vw - 20px
+            );
+
+    }
+
+
+    .nova-profile-menu {
+
+        left: 10px;
+
+        right: 10px;
 
     }
 
 }
-
-</style>
-<script>
 /* ==========================================
-   NOVA AI - FULL UI LANGUAGE SYSTEM
+   NOVA PROFILE
 ========================================== */
 
-(function () {
+.nova-profile-area {
 
-    "use strict";
+    position: relative;
 
-    const LANGUAGE_KEY =
-        "novaLanguage";
+    width: 100%;
 
+    padding: 0 12px 10px;
 
-    let currentLanguage =
-        localStorage.getItem(
-            LANGUAGE_KEY
-        ) || "auto";
+}
 
 
-    let translating = false;
+/* ==========================================
+   PROFILE BUTTON
+========================================== */
 
+.nova-profile-btn {
 
-    const originalTexts =
-        new WeakMap();
+    width: 100%;
 
+    display: flex;
 
-    const originalAttributes =
-        new WeakMap();
+    align-items: center;
 
+    gap: 10px;
 
-    const translatedNodes =
-        new WeakMap();
+    padding: 9px;
 
-
-    const translatedAttributes =
-        new WeakMap();
-
-
-    const RTL_LANGUAGES =
-        new Set([
-            "ar",
-            "ar-eg",
-            "ar-ma",
-            "fa",
-            "ur",
-            "he"
-        ]);
-
-
-    const EXCLUDED_SELECTORS = [
-        "#chatBox",
-        "#chatInput",
-        ".message",
-        ".nova-message",
-        ".user-message",
-        ".nova-loading",
-        "pre",
-        "code",
-        "script",
-        "style"
-    ];
-
-
-    /* ==========================================
-       CHECK EXCLUDED
-    ========================================== */
-
-    function isExcludedElement(
-        element
-    ) {
-
-        if (!element) {
-            return true;
-        }
-
-
-        return EXCLUDED_SELECTORS.some(
-            selector => {
-
-                try {
-
-                    return !!element.closest(
-                        selector
-                    );
-
-                } catch {
-
-                    return false;
-
-                }
-
-            }
-        );
-
-    }
-
-
-    /* ==========================================
-       EFFECTIVE LANGUAGE
-    ========================================== */
-
-    function getEffectiveLanguage(
-        language
-    ) {
-
-        if (
-            language &&
-            language !== "auto"
-        ) {
-
-            return language;
-
-        }
-
-
-        const browserLanguage =
-            (
-                navigator.language ||
-                "en"
-            ).toLowerCase();
-
-
-        if (
-            browserLanguage.startsWith(
-                "ar"
-            )
-        ) {
-            return "ar";
-        }
-
-
-        if (
-            browserLanguage.startsWith(
-                "fa"
-            )
-        ) {
-            return "fa";
-        }
-
-
-        if (
-            browserLanguage.startsWith(
-                "ur"
-            )
-        ) {
-            return "ur";
-        }
-
-
-        if (
-            browserLanguage.startsWith(
-                "he"
-            )
-        ) {
-            return "he";
-        }
-
-
-        if (
-            browserLanguage.startsWith(
-                "fr"
-            )
-        ) {
-            return "fr";
-        }
-
-
-        if (
-            browserLanguage.startsWith(
-                "es"
-            )
-        ) {
-            return "es";
-        }
-
-
-        if (
-            browserLanguage.startsWith(
-                "de"
-            )
-        ) {
-            return "de";
-        }
-
-
-        if (
-            browserLanguage.startsWith(
-                "it"
-            )
-        ) {
-            return "it";
-        }
-
-
-        if (
-            browserLanguage.startsWith(
-                "pt"
-            )
-        ) {
-            return "pt";
-        }
-
-
-        if (
-            browserLanguage.startsWith(
-                "ru"
-            )
-        ) {
-            return "ru";
-        }
-
-
-        if (
-            browserLanguage.startsWith(
-                "tr"
-            )
-        ) {
-            return "tr";
-        }
-
-
-        if (
-            browserLanguage.startsWith(
-                "zh"
-            )
-        ) {
-            return "zh";
-        }
-
-
-        if (
-            browserLanguage.startsWith(
-                "ja"
-            )
-        ) {
-            return "ja";
-        }
-
-
-        if (
-            browserLanguage.startsWith(
-                "ko"
-            )
-        ) {
-            return "ko";
-        }
-
-
-        if (
-            browserLanguage.startsWith(
-                "hi"
-            )
-        ) {
-            return "hi";
-        }
-
-
-        return "en";
-
-    }
-
-
-    /* ==========================================
-       COLLECT TEXT NODES
-    ========================================== */
-
-    function collectTextNodes() {
-
-        const nodes = [];
-
-
-        const walker =
-            document.createTreeWalker(
-                document.body,
-                NodeFilter.SHOW_TEXT
-            );
-
-
-        let node;
-
-
-        while (
-            (node = walker.nextNode())
-        ) {
-
-            const parent =
-                node.parentElement;
-
-
-            if (!parent) {
-                continue;
-            }
-
-
-            if (
-                isExcludedElement(
-                    parent
-                )
-            ) {
-                continue;
-            }
-
-
-            const cleanText =
-                node.nodeValue?.trim();
-
-
-            if (!cleanText) {
-                continue;
-            }
-
-
-            if (
-                cleanText.length < 2
-            ) {
-                continue;
-            }
-
-
-            if (
-                /^[\d\s.,:;!?+\-/*=()[\]{}<>]+$/
-                    .test(cleanText)
-            ) {
-                continue;
-            }
-
-
-            if (
-                !originalTexts.has(node)
-            ) {
-
-                originalTexts.set(
-                    node,
-                    node.nodeValue
-                );
-
-            }
-
-
-            nodes.push(node);
-
-        }
-
-
-        return nodes;
-
-    }
-
-
-    /* ==========================================
-       COLLECT ATTRIBUTES
-    ========================================== */
-
-    function collectAttributes() {
-
-        const elements =
-            document.querySelectorAll(
-                "input, textarea, button, [title], [aria-label], [placeholder]"
-            );
-
-
-        const result = [];
-
-
-        elements.forEach(
-            element => {
-
-                if (
-                    isExcludedElement(
-                        element
-                    )
-                ) {
-                    return;
-                }
-
-
-                [
-                    "placeholder",
-                    "title",
-                    "aria-label"
-                ].forEach(
-                    attribute => {
-
-                        if (
-                            !element.hasAttribute(
-                                attribute
-                            )
-                        ) {
-
-                            return;
-
-                        }
-
-
-                        if (
-                            !originalAttributes.has(
-                                element
-                            )
-                        ) {
-
-                            originalAttributes.set(
-                                element,
-                                {}
-                            );
-
-                        }
-
-
-                        const saved =
-                            originalAttributes.get(
-                                element
-                            );
-
-
-                        if (
-                            !(attribute in saved)
-                        ) {
-
-                            saved[attribute] =
-                                element.getAttribute(
-                                    attribute
-                                );
-
-                        }
-
-
-                        const value =
-                            saved[attribute];
-
-
-                        if (
-                            value &&
-                            value.trim().length >= 2
-                        ) {
-
-                            result.push({
-                                element,
-                                attribute,
-                                text:
-                                    value.trim()
-                            });
-
-                        }
-
-                    }
-                );
-
-            }
-        );
-
-
-        return result;
-
-    }
-
-
-    /* ==========================================
-       CACHE
-    ========================================== */
-
-    function cacheKey(
-        language,
-        text
-    ) {
-
-        return (
-            "nova_i18n_" +
-            language +
-            "_" +
-            encodeURIComponent(
-                text
-            )
-        );
-
-    }
-
-
-    /* ==========================================
-       RESTORE ARABIC ORIGINAL
-    ========================================== */
-
-    function restoreOriginalUI() {
-
-        const nodes =
-            collectTextNodes();
-
-
-        nodes.forEach(
-            node => {
-
-                const original =
-                    originalTexts.get(
-                        node
-                    );
-
-
-                if (
-                    original != null
-                ) {
-
-                    node.nodeValue =
-                        original;
-
-                    translatedNodes.delete(
-                        node
-                    );
-
-                }
-
-            }
-        );
-
-
-        document.querySelectorAll(
-            "input, textarea, button, [title], [aria-label], [placeholder]"
-        ).forEach(
-            element => {
-
-                const saved =
-                    originalAttributes.get(
-                        element
-                    );
-
-
-                if (!saved) {
-                    return;
-                }
-
-
-                Object.entries(
-                    saved
-                ).forEach(
-                    ([attribute, value]) => {
-
-                        if (
-                            value == null
-                        ) {
-
-                            element.removeAttribute(
-                                attribute
-                            );
-
-                        } else {
-
-                            element.setAttribute(
-                                attribute,
-                                value
-                            );
-
-                        }
-
-                    }
-                );
-
-
-                translatedAttributes.delete(
-                    element
-                );
-
-            }
-        );
-
-    }
-
-
-    /* ==========================================
-       TRANSLATE BATCH
-    ========================================== */
-
-    async function translateBatch(
-        language,
-        texts
-    ) {
-
-        const translations = {};
-
-        const missing = [];
-
-
-        texts.forEach(
-            text => {
-
-                const cached =
-                    localStorage.getItem(
-                        cacheKey(
-                            language,
-                            text
-                        )
-                    );
-
-
-                if (
-                    cached
-                ) {
-
-                    translations[text] =
-                        cached;
-
-                } else {
-
-                    missing.push(
-                        text
-                    );
-
-                }
-
-            }
-        );
-
-
-        if (!missing.length) {
-
-            return translations;
-
-        }
-
-
-        try {
-
-            const response =
-                await fetch(
-                    "/api/translate-ui",
-                    {
-                        method:
-                            "POST",
-
-                        headers: {
-                            "Content-Type":
-                                "application/json"
-                        },
-
-                        body:
-                            JSON.stringify({
-                                language,
-                                texts:
-                                    missing
-                            })
-                    }
-                );
-
-
-            if (!response.ok) {
-
-                throw new Error(
-                    "UI translation API failed"
-                );
-
-            }
-
-
-            const data =
-                await response.json();
-
-
-            const serverTranslations =
-                data?.translations ||
-                {};
-
-
-            Object.entries(
-                serverTranslations
-            ).forEach(
-                ([original, translated]) => {
-
-                    if (
-                        typeof translated !==
-                        "string"
-                    ) {
-                        return;
-                    }
-
-
-                    translations[original] =
-                        translated;
-
-
-                    try {
-
-                        localStorage.setItem(
-                            cacheKey(
-                                language,
-                                original
-                            ),
-                            translated
-                        );
-
-                    } catch {}
-
-                }
-            );
-
-
-        } catch (error) {
-
-            console.error(
-                "Nova UI Translation Error:",
-                error
-            );
-
-        }
-
-
-        return translations;
-
-    }
-
-
-    /* ==========================================
-       APPLY LANGUAGE
-    ========================================== */
-
-    async function applyLanguage(
-        language
-    ) {
-
-        if (translating) {
-
-            return;
-
-        }
-
-
-        translating = true;
-
-
-        currentLanguage =
-            language || "auto";
-
-
-        localStorage.setItem(
-            LANGUAGE_KEY,
-            currentLanguage
-        );
-
-
-        const effectiveLanguage =
-            getEffectiveLanguage(
-                currentLanguage
-            );
-
-
-        /* ======================================
-           DIRECTION
-        ====================================== */
-
-        const isRTL =
-            RTL_LANGUAGES.has(
-                effectiveLanguage
-            );
-
-
-        document.documentElement.lang =
-            effectiveLanguage;
-
-
-        document.documentElement.dir =
-            isRTL
-                ? "rtl"
-                : "ltr";
-
-
-        document.body.classList.toggle(
-            "nova-rtl",
-            isRTL
-        );
-
-
-        document.body.classList.toggle(
-            "nova-ltr",
-            !isRTL
-        );
-
-
-        /* ======================================
-           ARABIC ORIGINAL
-        ====================================== */
-
-        if (
-            effectiveLanguage === "ar"
-        ) {
-
-            restoreOriginalUI();
-
-            translating = false;
-
-            return;
-
-        }
-
-
-        try {
-
-            const textNodes =
-                collectTextNodes();
-
-
-            const attributes =
-                collectAttributes();
-
-
-            const texts = [];
-
-
-            textNodes.forEach(
-                node => {
-
-                    const original =
-                        originalTexts.get(
-                            node
-                        );
-
-
-                    if (!original) {
-                        return;
-                    }
-
-
-                    if (
-                        translatedNodes.get(
-                            node
-                        ) ===
-                        effectiveLanguage
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    texts.push(
-                        original.trim()
-                    );
-
-                }
-            );
-
-
-            attributes.forEach(
-                item => {
-
-                    if (
-                        translatedAttributes.get(
-                            item.element
-                        ) ===
-                        effectiveLanguage
-                    ) {
-
-                        return;
-
-                    }
-
-
-                    if (
-                        item.text
-                    ) {
-
-                        texts.push(
-                            item.text
-                        );
-
-                    }
-
-                }
-            );
-
-
-            const uniqueTexts =
-                [
-                    ...new Set(
-                        texts
-                    )
-                ];
-
-
-            if (
-                !uniqueTexts.length
-            ) {
-
-                return;
-
-            }
-
-
-            const translations =
-                await translateBatch(
-                    effectiveLanguage,
-                    uniqueTexts
-                );
-
-
-            /* ==================================
-               TEXT
-            ================================== */
-
-            textNodes.forEach(
-                node => {
-
-                    const original =
-                        originalTexts.get(
-                            node
-                        );
-
-
-                    if (!original) {
-                        return;
-                    }
-
-
-                    const key =
-                        original.trim();
-
-
-                    const translated =
-                        translations[key];
-
-
-                    if (
-                        translated
-                    ) {
-
-                        const leading =
-                            original.match(
-                                /^\s*/
-                            )?.[0] || "";
-
-
-                        const trailing =
-                            original.match(
-                                /\s*$/
-                            )?.[0] || "";
-
-
-                        node.nodeValue =
-                            leading +
-                            translated +
-                            trailing;
-
-
-                        translatedNodes.set(
-                            node,
-                            effectiveLanguage
-                        );
-
-                    }
-
-                }
-            );
-
-
-            /* ==================================
-               ATTRIBUTES
-            ================================== */
-
-            attributes.forEach(
-                item => {
-
-                    const translated =
-                        translations[
-                            item.text
-                        ];
-
-
-                    if (
-                        translated
-                    ) {
-
-                        item.element.setAttribute(
-                            item.attribute,
-                            translated
-                        );
-
-
-                        translatedAttributes.set(
-                            item.element,
-                            effectiveLanguage
-                        );
-
-                    }
-
-                }
-            );
-
-
-        } catch (error) {
-
-            console.error(
-                "Nova I18n Error:",
-                error
-            );
-
-        } finally {
-
-            translating = false;
-
-        }
-
-    }
-
-
-    /* ==========================================
-       PUBLIC API
-    ========================================== */
-
-    window.NovaI18n = {
-
-        setLanguage(
-            language
-        ) {
-
-            applyLanguage(
-                language || "auto"
-            );
-
-        },
-
-
-        getLanguage() {
-
-            return currentLanguage;
-
-        },
-
-
-        getEffectiveLanguage() {
-
-            return getEffectiveLanguage(
-                currentLanguage
-            );
-
-        }
-
-    };
-
-
-    /* ==========================================
-       START
-    ========================================== */
-
-    function start() {
-
-        const languageSelect =
-            document.getElementById(
-                "novaLanguageSelect"
-            );
-
-
-        if (
-            languageSelect
-        ) {
-
-            languageSelect.value =
-                currentLanguage;
-
-        }
-
-
-        applyLanguage(
-            currentLanguage
-        );
-
-    }
-
-
-    if (
-        document.readyState ===
-        "loading"
-    ) {
-
-        document.addEventListener(
-            "DOMContentLoaded",
-            start
-        );
-
-    } else {
-
-        start();
-
-    }
-
-
-    /* ==========================================
-       WATCH NEW UI
-    ========================================== */
-
-    let observerTimer =
-        null;
-
-
-    const observer =
-        new MutationObserver(
-            function (mutations) {
-
-                if (translating) {
-                    return;
-                }
-
-
-                let hasNewElements =
-                    false;
-
-
-                for (
-                    const mutation of mutations
-                ) {
-
-                    if (
-                        mutation.type ===
-                        "childList" &&
-                        mutation.addedNodes.length
-                    ) {
-
-                        hasNewElements =
-                            true;
-
-                        break;
-
-                    }
-
-                }
-
-
-                if (
-                    !hasNewElements
-                ) {
-
-                    return;
-
-                }
-
-
-                clearTimeout(
-                    observerTimer
-                );
-
-
-                observerTimer =
-                    setTimeout(
-                        function () {
-
-                            applyLanguage(
-                                currentLanguage
-                            );
-
-                        },
-                        500
-                    );
-
-            }
-        );
-
-
-    observer.observe(
-        document.body,
-        {
-            childList: true,
-            subtree: true
-        }
+    border: 1px solid rgba(
+        255,
+        255,
+        255,
+        0.08
     );
 
+    border-radius: 15px;
 
-})();
-</script>
+    background: rgba(
+        255,
+        255,
+        255,
+        0.035
+    );
+
+    color: #fff;
+
+    cursor: pointer;
+
+    transition:
+        background .2s ease,
+        border-color .2s ease,
+        transform .2s ease;
+
+}
+
+
+.nova-profile-btn:hover {
+
+    background: rgba(
+        255,
+        255,
+        255,
+        0.07
+    );
+
+    border-color: rgba(
+        0,
+        229,
+        255,
+        0.25
+    );
+
+}
+
+
+.nova-profile-btn:active {
+
+    transform: scale(
+        .98
+    );
+
+}
+
+
+/* ==========================================
+   AVATAR
+========================================== */
+
+.nova-profile-avatar,
+.nova-menu-avatar {
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-weight: 800;
+
+    color: #fff;
+
+    background:
+        linear-gradient(
+            135deg,
+            #00e5ff,
+            #008cff
+        );
+
+}
+
+
+.nova-profile-avatar {
+
+    width: 42px;
+
+    height: 42px;
+
+    border-radius: 12px;
+
+    font-size: 14px;
+
+}
+
+
+.nova-profile-info {
+
+    min-width: 0;
+
+    flex: 1;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 2px;
+
+}
+
+
+.nova-profile-info strong {
+
+    max-width: 150px;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+    font-size: 14px;
+
+}
+
+
+.nova-profile-plan {
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: .7px;
+
+}
+
+
+.nova-profile-plan.free {
+
+    color: #b9c5ce;
+
+}
+
+
+.nova-profile-plan.pro {
+
+    color: #00e5ff;
+
+}
+
+
+.nova-profile-plan.ultra {
+
+    color: #ffd166;
+
+}
+
+
+.nova-profile-arrow {
+
+    font-size: 11px;
+
+    color: #81909b;
+
+    transition:
+        transform .2s ease;
+
+}
+
+
+.nova-profile-btn.open
+.nova-profile-arrow {
+
+    transform: rotate(
+        180deg
+    );
+
+}
+
+
+/* ==========================================
+   PROFILE POPUP
+========================================== */
+
+.nova-profile-menu {
+
+    position: absolute;
+
+    left: 12px;
+
+    right: 12px;
+
+    bottom: calc(
+        100% + 10px
+    );
+
+    padding: 12px;
+
+    border-radius: 18px;
+
+    background:
+        rgba(
+            10,
+            20,
+            29,
+            .98
+        );
+
+    border: 1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .09
+        );
+
+    box-shadow:
+        0 25px 70px
+        rgba(
+            0,
+            0,
+            0,
+            .45
+        );
+
+    backdrop-filter:
+        blur(18px);
+
+    opacity: 0;
+
+    visibility: hidden;
+
+    pointer-events: none;
+
+    transform:
+        translateY(
+            8px
+        );
+
+    transition:
+        opacity .2s ease,
+        transform .2s ease,
+        visibility .2s ease;
+
+    z-index: 10000;
+
+}
+
+
+.nova-profile-menu.active {
+
+    opacity: 1;
+
+    visibility: visible;
+
+    pointer-events: auto;
+
+    transform:
+        translateY(
+            0
+        );
+
+}
+
+
+/* ==========================================
+   HEAD
+========================================== */
+
+.nova-profile-head {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 11px;
+
+    padding: 8px 5px 13px;
+
+}
+
+
+.nova-menu-avatar {
+
+    width: 46px;
+
+    height: 46px;
+
+    border-radius: 14px;
+
+    font-size: 14px;
+
+}
+
+
+.nova-profile-head strong {
+
+    display: block;
+
+    color: #fff;
+
+    font-size: 14px;
+
+}
+
+
+.nova-profile-head span {
+
+    display: block;
+
+    margin-top: 3px;
+
+    max-width: 190px;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+
+    color: #8798a5;
+
+    font-size: 11px;
+
+}
+
+
+/* ==========================================
+   PLAN CARD
+========================================== */
+
+.nova-plan-card {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 11px;
+
+    margin-bottom: 10px;
+
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(
+                0,
+                229,
+                255,
+                .08
+            ),
+            rgba(
+                0,
+                140,
+                255,
+                .03
+            )
+        );
+
+    border: 1px solid
+        rgba(
+            0,
+            229,
+            255,
+            .12
+        );
+
+}
+
+
+.nova-plan-icon {
+
+    width: 34px;
+
+    height: 34px;
+
+    border-radius: 10px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background:
+        rgba(
+            0,
+            229,
+            255,
+            .1
+        );
+
+    color: #00e5ff;
+
+}
+
+
+.nova-plan-text {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 2px;
+
+}
+
+
+.nova-plan-text span {
+
+    color: #81929f;
+
+    font-size: 10px;
+
+}
+
+
+.nova-plan-text strong {
+
+    color: #fff;
+
+    font-size: 12px;
+
+    letter-spacing: .6px;
+
+}
+
+
+/* ==========================================
+   MENU SECTION
+========================================== */
+
+.nova-menu-section {
+
+    padding: 6px 3px 10px;
+
+}
+
+
+.nova-menu-section-title {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    margin-bottom: 9px;
+
+    color: #a9bac4;
+
+    font-size: 11px;
+
+    font-weight: 700;
+
+}
+
+
+.nova-menu-section-title i {
+
+    color: #00d9ff;
+
+}
+
+
+/* ==========================================
+   THEMES
+========================================== */
+
+.nova-theme-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(
+                0,
+                1fr
+            )
+        );
+
+    gap: 7px;
+
+}
+
+
+.nova-theme-option {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 8px;
+
+    border-radius: 10px;
+
+    border: 1px solid
+        rgba(
+            255,
+            255,
+            255,
+            .06
+        );
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .025
+        );
+
+    color: #c4d0d7;
+
+    font-size: 10px;
+
+    cursor: pointer;
+
+}
+
+
+.nova-theme-option:hover {
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .06
+        );
+
+}
+
+
+.nova-theme-option.active {
+
+    border-color:
+        rgba(
+            0,
+            229,
+            255,
+            .45
+        );
+
+}
+
+
+.theme-preview {
+
+    width: 20px;
+
+    height: 20px;
+
+    border-radius: 6px;
+
+    display: block;
+
+}
+
+
+.theme-nova {
+
+    background:
+        linear-gradient(
+            135deg,
+            #00e5ff,
+            #008cff
+        );
+
+}
+
+
+.theme-purple {
+
+    background:
+        linear-gradient(
+            135deg,
+            #a855f7,
+            #6366f1
+        );
+
+}
+
+
+.theme-emerald {
+
+    background:
+        linear-gradient(
+            135deg,
+            #10b981,
+            #06b6d4
+        );
+
+}
+
+
+.theme-amoled {
+
+    background:
+        #000;
+
+    border:
+        1px solid
+        #333;
+
+}
+
+
+/* ==========================================
+   MENU ITEMS
+========================================== */
+
+.nova-profile-menu-item {
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 10px 9px;
+
+    border: 0;
+
+    border-radius: 11px;
+
+    background: transparent;
+
+    color: #c9d4da;
+
+    cursor: pointer;
+
+    text-align: inherit;
+
+    font-size: 12px;
+
+}
+
+
+.nova-profile-menu-item:hover {
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .055
+        );
+
+    color: #fff;
+
+}
+
+
+.nova-profile-menu-item i:first-child {
+
+    width: 17px;
+
+    color: #8fa1ad;
+
+}
+
+
+.nova-profile-menu-item
+i:last-child {
+
+    margin-inline-start: auto;
+
+    font-size: 9px;
+
+    color: #667783;
+
+}
+
+
+.nova-logout-item {
+
+    color: #ff8f8f;
+
+}
+
+
+.nova-logout-item i:first-child {
+
+    color: #ff7777;
+
+}
+
+
+.nova-profile-divider {
+
+    height: 1px;
+
+    margin: 5px 4px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            .07
+        );
+
+}
+
+
+/* ==========================================
+   LTR
+========================================== */
+
+html[dir="ltr"]
+.nova-profile-menu {
+
+    text-align: left;
+
+}
+
+
+html[dir="ltr"]
+.nova-profile-menu-item {
+
+    text-align: left;
+
+}
+
+
+/* ==========================================
+   MOBILE
+========================================== */
+
+@media (
+    max-width: 768px
+) {
+
+    .nova-profile-menu {
+
+        left: 10px;
+
+        right: 10px;
+
+    }
+
+}
+</style>
+
+<script src="auth-guard.js"></script>
+<script src="i18n.js"></script>
+<script src="script.js"></script>
+<script src="profile.js"></script>
 </body>
+
 </html>
