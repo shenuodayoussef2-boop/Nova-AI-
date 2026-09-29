@@ -70,7 +70,7 @@
     >
 
     <!-- =========================
-         Open Graph / Facebook / WhatsApp
+         Open Graph
     ========================== -->
 
     <meta
@@ -224,6 +224,7 @@
     </script>
 
 </head>
+
 <body>
 
 <!-- =========================
@@ -328,9 +329,7 @@
                 title="طي / فتح القائمة"
                 type="button"
             >
-
                 <i class="fa-solid fa-bars"></i>
-
             </button>
 
             <h2 class="logo-text">
@@ -373,10 +372,6 @@
                 class="history-list"
                 id="historyList"
             >
-                <!--
-                    يتم توليد المحادثات
-                    تلقائيًا بواسطة script.js
-                -->
             </ul>
 
         </div>
@@ -421,9 +416,7 @@
     <main class="main-content">
 
 
-        <!-- =========================
-             MOBILE MENU
-        ========================== -->
+        <!-- MOBILE MENU -->
 
         <button
             id="mobileMenuBtn"
@@ -456,18 +449,14 @@
             </div>
 
 
-            <!-- =========================
-                 CHAT BOX
-            ========================== -->
+            <!-- CHAT BOX -->
 
             <div
                 class="chat-box"
                 id="chatBox"
             >
 
-                <!-- =========================
-                     WELCOME SCREEN
-                ========================== -->
+                <!-- WELCOME -->
 
                 <div
                     class="nova-welcome"
@@ -502,9 +491,7 @@
                     </p>
 
 
-                    <!-- =========================
-                         QUICK PROMPTS
-                    ========================== -->
+                    <!-- QUICK PROMPTS -->
 
                     <div class="quick-prompts">
 
@@ -583,8 +570,6 @@
             <div class="input-area">
 
 
-                <!-- FILE INPUT -->
-
                 <input
                     type="file"
                     id="fileInput"
@@ -593,9 +578,7 @@
                 >
 
 
-                <!-- =========================
-                     ATTACHMENTS
-                ========================== -->
+                <!-- ATTACHMENTS -->
 
                 <div
                     class="attach-wrapper"
@@ -617,13 +600,10 @@
                     </button>
 
 
-                    <!-- DROPDOWN -->
-
                     <div
                         id="attachDropdown"
                         class="attach-dropdown"
                     >
-
 
                         <div
                             class="dropdown-item"
@@ -686,9 +666,7 @@
                 </div>
 
 
-                <!-- =========================
-                     CHAT INPUT
-                ========================== -->
+                <!-- CHAT INPUT -->
 
                 <textarea
                     id="chatInput"
@@ -699,14 +677,10 @@
                 ></textarea>
 
 
-                <!-- =========================
-                     INPUT ACTIONS
-                ========================== -->
+                <!-- INPUT ACTIONS -->
 
                 <div class="input-actions-right">
 
-
-                    <!-- MICROPHONE -->
 
                     <button
                         id="micBtn"
@@ -718,8 +692,6 @@
 
                     </button>
 
-
-                    <!-- LIVE VOICE -->
 
                     <button
                         id="liveVoiceBtn"
@@ -739,8 +711,6 @@
 
                     </button>
 
-
-                    <!-- SEND -->
 
                     <button
                         id="sendChatBtn"
@@ -773,9 +743,6 @@
     class="voice-overlay"
 >
 
-
-    <!-- CLOSE -->
-
     <button
         id="closeVoiceBtn"
         class="close-voice-btn"
@@ -788,8 +755,6 @@
     </button>
 
 
-    <!-- HEADER -->
-
     <div class="voice-header">
 
         <span>
@@ -798,8 +763,6 @@
 
     </div>
 
-
-    <!-- ORB -->
 
     <div class="orb-container">
 
@@ -811,10 +774,7 @@
     </div>
 
 
-    <!-- CONTROLS -->
-
     <div class="voice-controls">
-
 
         <button
             id="toggleMuteBtn"
@@ -839,7 +799,6 @@
 
         </button>
 
-
     </div>
 
 </div>
@@ -856,10 +815,6 @@
 
     <div class="settings-modal-content">
 
-
-        <!-- =========================
-             SETTINGS HEADER
-        ========================== -->
 
         <div class="settings-header">
 
@@ -881,10 +836,6 @@
 
         </div>
 
-
-        <!-- =========================
-             SETTINGS BODY
-        ========================== -->
 
         <div class="settings-body">
 
@@ -1019,6 +970,24 @@
             </div>
 
 
+            <!-- LANGUAGE -->
+
+            <div
+                class="setting-item"
+                data-setting="language"
+            >
+
+                <i class="fa-solid fa-language"></i>
+
+                <span>
+                    Language
+                </span>
+
+                <i class="fa-solid fa-chevron-left arrow"></i>
+
+            </div>
+
+
             <!-- SUBSCRIPTIONS -->
 
             <div
@@ -1103,14 +1072,11 @@
             </div>
 
 
-            <!-- =========================
-                 SMART MEMORY
-            ========================== -->
+            <!-- SMART MEMORY -->
 
             <div
                 class="settings-section memory-section"
             >
-
 
                 <div class="settings-section-title">
 
@@ -1131,15 +1097,11 @@
                 </p>
 
 
-                <!-- MEMORY LIST -->
-
                 <div
                     id="memoryList"
                     class="memory-list"
                 ></div>
 
-
-                <!-- CLEAR MEMORY -->
 
                 <button
                     id="clearMemoryBtn"
@@ -1155,11 +1117,362 @@
 
                 </button>
 
-
             </div>
 
 
         </div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     LANGUAGE MODAL
+========================= -->
+
+<div
+    id="languageModal"
+    class="nova-language-modal"
+>
+
+    <div class="nova-language-modal-content">
+
+        <div class="nova-language-header">
+
+            <div>
+
+                <h3>
+                    🌐 لغة Nova
+                </h3>
+
+                <p>
+                    اختار اللغة اللي تحب Nova تتكلم بيها
+                </p>
+
+            </div>
+
+
+            <button
+                id="closeLanguageModal"
+                type="button"
+                aria-label="إغلاق"
+            >
+
+                <i class="fa-solid fa-xmark"></i>
+
+            </button>
+
+        </div>
+
+
+        <div class="nova-language-select-wrapper">
+
+            <label for="novaLanguageSelect">
+                لغة المحادثة
+            </label>
+
+
+            <select
+                id="novaLanguageSelect"
+            >
+
+                <option value="auto">
+                    🌍 Auto — اكتشاف تلقائي
+                </option>
+
+                <option value="ar-eg">
+                    🇪🇬 العربية المصرية
+                </option>
+
+                <option value="ar-ma">
+                    🇲🇦 الدارجة المغربية
+                </option>
+
+                <option value="ar">
+                    🟢 العربية
+                </option>
+
+                <option value="en">
+                    🇬🇧 English
+                </option>
+
+                <option value="fr">
+                    🇫🇷 Français
+                </option>
+
+                <option value="es">
+                    🇪🇸 Español
+                </option>
+
+                <option value="de">
+                    🇩🇪 Deutsch
+                </option>
+
+                <option value="it">
+                    🇮🇹 Italiano
+                </option>
+
+                <option value="pt">
+                    🇵🇹 Português
+                </option>
+
+                <option value="nl">
+                    🇳🇱 Nederlands
+                </option>
+
+                <option value="pl">
+                    🇵🇱 Polski
+                </option>
+
+                <option value="ru">
+                    🇷🇺 Русский
+                </option>
+
+                <option value="uk">
+                    🇺🇦 Українська
+                </option>
+
+                <option value="tr">
+                    🇹🇷 Türkçe
+                </option>
+
+                <option value="el">
+                    🇬🇷 Ελληνικά
+                </option>
+
+                <option value="he">
+                    🇮🇱 עברית
+                </option>
+
+                <option value="fa">
+                    🇮🇷 فارسی
+                </option>
+
+                <option value="ur">
+                    🇵🇰 اردو
+                </option>
+
+                <option value="hi">
+                    🇮🇳 हिन्दी
+                </option>
+
+                <option value="bn">
+                    🇧🇩 বাংলা
+                </option>
+
+                <option value="ta">
+                    🇮🇳 தமிழ்
+                </option>
+
+                <option value="te">
+                    🇮🇳 తెలుగు
+                </option>
+
+                <option value="mr">
+                    🇮🇳 मराठी
+                </option>
+
+                <option value="gu">
+                    🇮🇳 ગુજરાતી
+                </option>
+
+                <option value="pa">
+                    🇮🇳 ਪੰਜਾਬੀ
+                </option>
+
+                <option value="ml">
+                    🇮🇳 മലയാളം
+                </option>
+
+                <option value="kn">
+                    🇮🇳 ಕನ್ನಡ
+                </option>
+
+                <option value="ne">
+                    🇳🇵 नेपाली
+                </option>
+
+                <option value="id">
+                    🇮🇩 Bahasa Indonesia
+                </option>
+
+                <option value="ms">
+                    🇲🇾 Bahasa Melayu
+                </option>
+
+                <option value="th">
+                    🇹🇭 ไทย
+                </option>
+
+                <option value="vi">
+                    🇻🇳 Tiếng Việt
+                </option>
+
+                <option value="zh">
+                    🇨🇳 中文
+                </option>
+
+                <option value="ja">
+                    🇯🇵 日本語
+                </option>
+
+                <option value="ko">
+                    🇰🇷 한국어
+                </option>
+
+                <option value="sv">
+                    🇸🇪 Svenska
+                </option>
+
+                <option value="no">
+                    🇳🇴 Norsk
+                </option>
+
+                <option value="da">
+                    🇩🇰 Dansk
+                </option>
+
+                <option value="fi">
+                    🇫🇮 Suomi
+                </option>
+
+                <option value="cs">
+                    🇨🇿 Čeština
+                </option>
+
+                <option value="sk">
+                    🇸🇰 Slovenčina
+                </option>
+
+                <option value="hu">
+                    🇭🇺 Magyar
+                </option>
+
+                <option value="ro">
+                    🇷🇴 Română
+                </option>
+
+                <option value="bg">
+                    🇧🇬 Български
+                </option>
+
+                <option value="sr">
+                    🇷🇸 Српски
+                </option>
+
+                <option value="hr">
+                    🇭🇷 Hrvatski
+                </option>
+
+                <option value="sl">
+                    🇸🇮 Slovenščina
+                </option>
+
+                <option value="lt">
+                    🇱🇹 Lietuvių
+                </option>
+
+                <option value="lv">
+                    🇱🇻 Latviešu
+                </option>
+
+                <option value="et">
+                    🇪🇪 Eesti
+                </option>
+
+                <option value="is">
+                    🇮🇸 Íslenska
+                </option>
+
+                <option value="sw">
+                    🇰🇪 Kiswahili
+                </option>
+
+                <option value="am">
+                    🇪🇹 አማርኛ
+                </option>
+
+                <option value="af">
+                    🇿🇦 Afrikaans
+                </option>
+
+                <option value="sq">
+                    🇦🇱 Shqip
+                </option>
+
+                <option value="hy">
+                    🇦🇲 Հայերեն
+                </option>
+
+                <option value="az">
+                    🇦🇿 Azərbaycan
+                </option>
+
+                <option value="ka">
+                    🇬🇪 ქართული
+                </option>
+
+                <option value="kk">
+                    🇰🇿 Қазақша
+                </option>
+
+                <option value="uz">
+                    🇺🇿 O‘zbekcha
+                </option>
+
+                <option value="mn">
+                    🇲🇳 Монгол
+                </option>
+
+                <option value="km">
+                    🇰🇭 ខ្មែរ
+                </option>
+
+                <option value="lo">
+                    🇱🇦 ລາວ
+                </option>
+
+                <option value="my">
+                    🇲🇲 မြန်မာ
+                </option>
+
+                <option value="fil">
+                    🇵🇭 Filipino
+                </option>
+
+                <option value="ca">
+                    🇪🇸 Català
+                </option>
+
+                <option value="eu">
+                    🇪🇸 Euskara
+                </option>
+
+                <option value="gl">
+                    🇪🇸 Galego
+                </option>
+
+                <option value="cy">
+                    🏴 Welsh
+                </option>
+
+                <option value="ga">
+                    🇮🇪 Gaeilge
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <button
+            id="saveLanguageBtn"
+            class="nova-save-language-btn"
+            type="button"
+        >
+            حفظ اللغة
+        </button>
 
     </div>
 
@@ -1178,6 +1491,179 @@
 ========================= -->
 
 <script src="script.js"></script>
+
+
+<!-- =========================
+     LANGUAGE SETTINGS SCRIPT
+========================= -->
+
+<script>
+
+(function () {
+
+    const languageSetting =
+        document.querySelector(
+            '[data-setting="language"]'
+        );
+
+    const languageModal =
+        document.getElementById(
+            "languageModal"
+        );
+
+    const closeLanguageModal =
+        document.getElementById(
+            "closeLanguageModal"
+        );
+
+    const saveLanguageBtn =
+        document.getElementById(
+            "saveLanguageBtn"
+        );
+
+    const languageSelect =
+        document.getElementById(
+            "novaLanguageSelect"
+        );
+
+
+    if (
+        !languageSetting ||
+        !languageModal ||
+        !languageSelect
+    ) {
+
+        return;
+
+    }
+
+
+    // ========================================
+    // LOAD SAVED LANGUAGE
+    // ========================================
+
+    const savedLanguage =
+        localStorage.getItem(
+            "novaLanguage"
+        ) || "auto";
+
+
+    languageSelect.value =
+        savedLanguage;
+
+
+    // ========================================
+    // OPEN
+    // ========================================
+
+    languageSetting.addEventListener(
+        "click",
+        function () {
+
+            const currentLanguage =
+                localStorage.getItem(
+                    "novaLanguage"
+                ) || "auto";
+
+            languageSelect.value =
+                currentLanguage;
+
+            languageModal.classList.add(
+                "active"
+            );
+
+        }
+    );
+
+
+    // ========================================
+    // CLOSE
+    // ========================================
+
+    closeLanguageModal?.addEventListener(
+        "click",
+        function () {
+
+            languageModal.classList.remove(
+                "active"
+            );
+
+        }
+    );
+
+
+    // ========================================
+    // CLICK OUTSIDE
+    // ========================================
+
+    languageModal.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                event.target ===
+                languageModal
+            ) {
+
+                languageModal.classList.remove(
+                    "active"
+                );
+
+            }
+
+        }
+    );
+
+
+    // ========================================
+    // SAVE
+    // ========================================
+
+    saveLanguageBtn?.addEventListener(
+        "click",
+        function () {
+
+            const selectedLanguage =
+                languageSelect.value ||
+                "auto";
+
+
+            localStorage.setItem(
+                "novaLanguage",
+                selectedLanguage
+            );
+
+
+            languageModal.classList.remove(
+                "active"
+            );
+
+
+            if (
+                typeof showToast ===
+                "function"
+            ) {
+
+                const selectedText =
+                    languageSelect
+                        .selectedOptions[0]
+                        ?.textContent
+                        ?.trim() ||
+                    "Auto";
+
+
+                showToast(
+                    `تم حفظ اللغة: ${selectedText}`
+                );
+
+            }
+
+        }
+    );
+
+})();
+
+</script>
 
 
 <!-- =========================
@@ -1226,56 +1712,289 @@
 
 
     const loadingInterval =
-        setInterval(function () {
+        setInterval(
+            function () {
 
-            progress++;
-
-
-            progressBar.style.width =
-                progress + "%";
+                progress++;
 
 
-            progressText.textContent =
-                progress + "%";
+                progressBar.style.width =
+                    progress + "%";
 
 
-            if (
-                progress >= 100
-            ) {
-
-                clearInterval(
-                    loadingInterval
-                );
+                progressText.textContent =
+                    progress + "%";
 
 
-                setTimeout(
-                    function () {
+                if (
+                    progress >= 100
+                ) {
 
-                        loadingScreen.classList.add(
-                            "loaded"
-                        );
+                    clearInterval(
+                        loadingInterval
+                    );
 
 
-                        setTimeout(
-                            function () {
+                    setTimeout(
+                        function () {
 
-                                loadingScreen.remove();
+                            loadingScreen.classList.add(
+                                "loaded"
+                            );
 
-                            },
-                            700
-                        );
 
-                    },
-                    350
-                );
+                            setTimeout(
+                                function () {
 
-            }
+                                    loadingScreen.remove();
 
-        }, 35);
+                                },
+                                700
+                            );
+
+                        },
+                        350
+                    );
+
+                }
+
+            },
+            35
+        );
 
 })();
 
 </script>
 
+
+<!-- =========================
+     LANGUAGE MODAL STYLE
+========================= -->
+
+<style>
+
+.nova-language-modal {
+
+    position: fixed;
+
+    inset: 0;
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    background: rgba(
+        0,
+        0,
+        0,
+        0.65
+    );
+
+    backdrop-filter: blur(10px);
+
+    z-index: 99999;
+
+}
+
+.nova-language-modal.active {
+
+    display: flex;
+
+}
+
+.nova-language-modal-content {
+
+    width: 100%;
+
+    max-width: 520px;
+
+    padding: 24px;
+
+    border-radius: 22px;
+
+    background: #0b141d;
+
+    border: 1px solid
+        rgba(
+            0,
+            229,
+            255,
+            0.16
+        );
+
+    box-shadow:
+        0 25px 80px
+        rgba(
+            0,
+            0,
+            0,
+            0.45
+        );
+
+}
+
+.nova-language-header {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-bottom: 24px;
+
+}
+
+.nova-language-header h3 {
+
+    margin: 0 0 6px;
+
+    font-size: 21px;
+
+    color: #fff;
+
+}
+
+.nova-language-header p {
+
+    margin: 0;
+
+    color: #8ea0ad;
+
+    font-size: 13px;
+
+}
+
+#closeLanguageModal {
+
+    width: 40px;
+
+    height: 40px;
+
+    border: 0;
+
+    border-radius: 12px;
+
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.06
+        );
+
+    color: #fff;
+
+    cursor: pointer;
+
+}
+
+.nova-language-select-wrapper {
+
+    margin-bottom: 18px;
+
+}
+
+.nova-language-select-wrapper label {
+
+    display: block;
+
+    margin-bottom: 9px;
+
+    color: #dfeaf0;
+
+    font-size: 14px;
+
+}
+
+#novaLanguageSelect {
+
+    width: 100%;
+
+    padding: 14px 16px;
+
+    border-radius: 14px;
+
+    border: 1px solid #29404e;
+
+    background: #09121a;
+
+    color: #fff;
+
+    outline: none;
+
+    font-size: 15px;
+
+}
+
+#novaLanguageSelect:focus {
+
+    border-color: #00d9ff;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(
+            0,
+            217,
+            255,
+            0.08
+        );
+
+}
+
+.nova-save-language-btn {
+
+    width: 100%;
+
+    padding: 14px;
+
+    border: 0;
+
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #00e5ff,
+            #008cff
+        );
+
+    color: #031016;
+
+    font-size: 15px;
+
+    font-weight: 700;
+
+    cursor: pointer;
+
+}
+
+@media (max-width: 600px) {
+
+    .nova-language-modal-content {
+
+        padding: 18px;
+
+        border-radius: 18px;
+
+    }
+
+    .nova-language-header h3 {
+
+        font-size: 18px;
+
+    }
+
+}
+
+</style>
+
 </body>
+
 </html>
