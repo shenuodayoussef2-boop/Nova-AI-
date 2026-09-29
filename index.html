@@ -4389,6 +4389,264 @@ html[dir="ltr"]
     }
 
 }
+/* =========================================================
+   NOVA OWNER PLAN PREVIEW
+========================================================= */
+
+.nova-owner-preview-item {
+    position: relative;
+}
+
+.nova-owner-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-inline-start: auto;
+    padding: 3px 7px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
+    background: rgba(99, 102, 241, 0.15);
+    color: #8b5cf6;
+    border: 1px solid rgba(139, 92, 246, 0.25);
+}
+
+#novaOwnerPreviewModal {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(12px);
+}
+
+#novaOwnerPreviewModal.show {
+    display: flex;
+}
+
+.nova-owner-preview-card {
+    width: min(520px, 100%);
+    max-height: min(760px, 92vh);
+    overflow-y: auto;
+    border-radius: 24px;
+    padding: 22px;
+    background: var(--card-bg, #111827);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow:
+        0 30px 100px rgba(0, 0, 0, 0.5),
+        0 0 50px rgba(99, 102, 241, 0.12);
+}
+
+.nova-owner-preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 18px;
+}
+
+.nova-owner-preview-title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.nova-owner-preview-title i {
+    color: #f59e0b;
+    font-size: 21px;
+}
+
+.nova-owner-preview-title h3 {
+    margin: 0;
+    font-size: 18px;
+}
+
+.nova-owner-preview-subtitle {
+    margin: 5px 0 0;
+    opacity: 0.65;
+    font-size: 12px;
+}
+
+.nova-owner-preview-close {
+    width: 38px;
+    height: 38px;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.07);
+    color: inherit;
+    font-size: 16px;
+}
+
+.nova-owner-preview-current {
+    padding: 14px;
+    margin-bottom: 16px;
+    border-radius: 18px;
+    background: rgba(99, 102, 241, 0.1);
+    border: 1px solid rgba(99, 102, 241, 0.18);
+}
+
+.nova-owner-preview-current-label {
+    font-size: 11px;
+    opacity: 0.65;
+    margin-bottom: 5px;
+}
+
+.nova-owner-preview-current-plan {
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.nova-owner-preview-current-owner {
+    margin-top: 4px;
+    color: #f59e0b;
+    font-size: 11px;
+    font-weight: 800;
+}
+
+.nova-owner-plan-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+.nova-owner-plan-btn {
+    position: relative;
+    padding: 15px 10px;
+    border-radius: 18px;
+    border: 1px solid rgba(255,255,255,0.09);
+    background: rgba(255,255,255,0.035);
+    color: inherit;
+    cursor: pointer;
+    text-align: center;
+    transition: 0.2s ease;
+}
+
+.nova-owner-plan-btn:hover {
+    transform: translateY(-2px);
+    border-color: rgba(139, 92, 246, 0.45);
+}
+
+.nova-owner-plan-btn.active {
+    border-color: #8b5cf6;
+    background: rgba(139, 92, 246, 0.12);
+    box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.15);
+}
+
+.nova-owner-plan-name {
+    font-size: 15px;
+    font-weight: 900;
+}
+
+.nova-owner-plan-price {
+    margin-top: 4px;
+    font-size: 11px;
+    opacity: 0.65;
+}
+
+.nova-owner-plan-desc {
+    margin-top: 6px;
+    font-size: 10px;
+    opacity: 0.55;
+    line-height: 1.4;
+}
+
+.nova-owner-preview-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 16px;
+}
+
+.nova-owner-stat {
+    padding: 13px;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.035);
+    border: 1px solid rgba(255,255,255,0.07);
+}
+
+.nova-owner-stat-label {
+    font-size: 10px;
+    opacity: 0.6;
+}
+
+.nova-owner-stat-value {
+    margin-top: 3px;
+    font-size: 14px;
+    font-weight: 800;
+}
+
+.nova-owner-feature-list {
+    margin-top: 16px;
+    display: grid;
+    gap: 8px;
+}
+
+.nova-owner-feature {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 12px;
+}
+
+.nova-owner-feature i {
+    width: 18px;
+    text-align: center;
+}
+
+.nova-owner-feature.enabled i {
+    color: #22c55e;
+}
+
+.nova-owner-feature.disabled i {
+    color: #ef4444;
+}
+
+.nova-owner-reset {
+    width: 100%;
+    margin-top: 16px;
+    padding: 12px;
+    border: 0;
+    border-radius: 14px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.07);
+    color: inherit;
+    font-weight: 800;
+}
+
+.nova-owner-preview-note {
+    margin-top: 12px;
+    text-align: center;
+    font-size: 10px;
+    line-height: 1.6;
+    opacity: 0.55;
+}
+
+body.nova-plan-preview-free {
+    --nova-preview-accent: #64748b;
+}
+
+body.nova-plan-preview-pro {
+    --nova-preview-accent: #8b5cf6;
+}
+
+body.nova-plan-preview-ultra {
+    --nova-preview-accent: #f59e0b;
+}
+
+@media (max-width: 520px) {
+    .nova-owner-plan-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .nova-owner-preview-stats {
+        grid-template-columns: 1fr;
+    }
+}
+
 </style>
 
 <script src="auth-guard.js"></script>
