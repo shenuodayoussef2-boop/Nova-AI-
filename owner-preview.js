@@ -1,395 +1,292 @@
 /* =========================================================
-   NOVA AI - OWNER PLAN PREVIEW
-   OWNER ONLY
+   NOVA AI
+   OWNER PREVIEW + PROFILE FALLBACK
    ---------------------------------------------------------
-   - لا يغيّر profiles.plan الحقيقي
-   - لا يغيّر profiles.role
-   - يعمل كـ Preview محلي للمالك فقط
-   - يقرأ role من Supabase
-   - المستخدم العادي لا يرى زر المعاينة
-   - يدعم FREE / PRO / ULTRA
-   - يحاكي حدود الرسائل والصور والفيديو
+   - ينشئ زر الحساب لو مش موجود
+   - زر الحساب يفتح popup
+   - يتحقق من role من Supabase
+   - معاينة الخطط للـ OWNER فقط
+   - FREE / PRO / ULTRA
+   - لا يغيّر plan الحقيقي
 ========================================================= */
 
 (() => {
     "use strict";
 
-    /* =====================================================
-       STORAGE
-    ===================================================== */
-
-    const STORAGE_KEY =
+    const PREVIEW_STORAGE =
         "novaOwnerPreviewPlan";
 
-    const USAGE_KEY =
+    const USAGE_STORAGE =
         "novaOwnerPreviewUsage";
 
 
-    /* =====================================================
-       DEFAULT PLANS
-       fallback فقط لو plans table لم تُقرأ
-    ===================================================== */
+    let supabaseClient = null;
+    let user = null;
+    let profile = null;
+    let isOwner = false;
 
-    const PLAN_DEFAULTS = {
+    let previewPlan = "owner";
+    let previewUsage = null;
+
+    const plans = {
 
         free: {
-
             code: "free",
-
             name: "FREE",
-
             price: "0 EGP",
-
-            description:
-                "الخطة المجانية",
-
-            daily_messages:
-                50,
-
-            daily_images:
-                5,
-
-            daily_videos:
-                0,
-
-            memory_limit:
-                20,
-
-            workspace_enabled:
-                true,
-
-            voice_enabled:
-                true,
-
-            web_search_enabled:
-                false,
-
-            file_upload_enabled:
-                true,
-
-            priority_support:
-                false
-
+            description: "الخطة المجانية",
+            daily_messages: 50,
+            daily_images: 5,
+            daily_videos: 0,
+            memory_limit: 20,
+            workspace_enabled: true,
+            voice_enabled: true,
+            web_search_enabled: false,
+            file_upload_enabled: true,
+            priority_support: false
         },
-
 
         pro: {
-
             code: "pro",
-
             name: "PRO",
-
             price: "99 EGP",
-
-            description:
-                "الخطة الاحترافية",
-
-            daily_messages:
-                500,
-
-            daily_images:
-                50,
-
-            daily_videos:
-                10,
-
-            memory_limit:
-                200,
-
-            workspace_enabled:
-                true,
-
-            voice_enabled:
-                true,
-
-            web_search_enabled:
-                true,
-
-            file_upload_enabled:
-                true,
-
-            priority_support:
-                false
-
+            description: "الخطة الاحترافية",
+            daily_messages: 500,
+            daily_images: 50,
+            daily_videos: 10,
+            memory_limit: 200,
+            workspace_enabled: true,
+            voice_enabled: true,
+            web_search_enabled: true,
+            file_upload_enabled: true,
+            priority_support: false
         },
 
-
         ultra: {
-
             code: "ultra",
-
             name: "ULTRA",
-
             price: "249 EGP",
-
-            description:
-                "أقصى إمكانيات Nova",
-
-            daily_messages:
-                2000,
-
-            daily_images:
-                200,
-
-            daily_videos:
-                50,
-
-            memory_limit:
-                1000,
-
-            workspace_enabled:
-                true,
-
-            voice_enabled:
-                true,
-
-            web_search_enabled:
-                true,
-
-            file_upload_enabled:
-                true,
-
-            priority_support:
-                true
-
+            description: "أقصى إمكانيات Nova",
+            daily_messages: 2000,
+            daily_images: 200,
+            daily_videos: 50,
+            memory_limit: 1000,
+            workspace_enabled: true,
+            voice_enabled: true,
+            web_search_enabled: true,
+            file_upload_enabled: true,
+            priority_support: true
         }
 
     };
 
 
     /* =====================================================
-       STATE
-    ===================================================== */
-
-    let ownerProfile =
-        null;
-
-    let plans = {
-        ...PLAN_DEFAULTS
-    };
-
-    let previewPlan =
-        "owner";
-
-    let previewUsage =
-        null;
-
-    let initialized =
-        false;
-
-    let sendMessageWrapped =
-        false;
-
-
-    /* =====================================================
-       DATE KEY
+       HELPERS
     ===================================================== */
 
     function todayKey() {
 
-        const date =
-            new Date();
+        const d = new Date();
 
         return [
-
-            date.getFullYear(),
-
-            String(
-                date.getMonth() + 1
-            ).padStart(
-                2,
-                "0"
-            ),
-
-            String(
-                date.getDate()
-            ).padStart(
-                2,
-                "0"
-            )
-
+            d.getFullYear(),
+            String(d.getMonth() + 1).padStart(2, "0"),
+            String(d.getDate()).padStart(2, "0")
         ].join("-");
 
     }
 
 
-    /* =====================================================
-       SAFE LOCAL STORAGE
-    ===================================================== */
+    function getInitials(name) {
 
-    function safeGetStorage(
-        key
-    ) {
+        if (!name) {
+            return "YS";
+        }
+
+        const clean =
+            String(name)
+                .trim()
+                .replace(/\s+/g, " ");
+
+        const parts =
+            clean.split(" ").filter(Boolean);
+
+        if (parts.length >= 2) {
+
+            return (
+                getLatinInitial(parts[0]) +
+                getLatinInitial(parts[1])
+            );
+
+        }
+
+        const chars =
+            [...parts[0]];
+
+        return chars
+            .slice(0, 2)
+            .map(getLatinInitial)
+            .join("");
+
+    }
+
+
+    function getLatinInitial(char) {
+
+        const map = {
+
+            "أ": "A",
+            "إ": "E",
+            "آ": "A",
+            "ا": "A",
+            "ب": "B",
+            "ت": "T",
+            "ث": "T",
+            "ج": "G",
+            "ح": "H",
+            "خ": "K",
+            "د": "D",
+            "ذ": "D",
+            "ر": "R",
+            "ز": "Z",
+            "س": "S",
+            "ش": "S",
+            "ص": "S",
+            "ض": "D",
+            "ط": "T",
+            "ظ": "Z",
+            "ع": "A",
+            "غ": "G",
+            "ف": "F",
+            "ق": "Q",
+            "ك": "K",
+            "ل": "L",
+            "م": "M",
+            "ن": "N",
+            "ه": "H",
+            "و": "W",
+            "ي": "Y"
+        };
+
+        return (
+            map[char] ||
+            String(char || "").charAt(0).toUpperCase() ||
+            "N"
+        );
+
+    }
+
+
+    function safeGet(key) {
 
         try {
-
-            return localStorage.getItem(
-                key
-            );
-
-        } catch (error) {
-
-            console.warn(
-                "Nova Owner Preview Storage Read Error:",
-                error
-            );
-
+            return localStorage.getItem(key);
+        } catch {
             return null;
-
         }
 
     }
 
 
-    function safeSetStorage(
-        key,
-        value
-    ) {
+    function safeSet(key, value) {
 
         try {
-
             localStorage.setItem(
                 key,
                 value
             );
-
-        } catch (error) {
-
-            console.warn(
-                "Nova Owner Preview Storage Write Error:",
-                error
-            );
-
-        }
+        } catch {}
 
     }
 
 
-    function safeRemoveStorage(
-        key
-    ) {
+    function safeRemove(key) {
 
         try {
-
-            localStorage.removeItem(
-                key
-            );
-
-        } catch (error) {
-
-            console.warn(
-                "Nova Owner Preview Storage Remove Error:",
-                error
-            );
-
-        }
+            localStorage.removeItem(key);
+        } catch {}
 
     }
 
 
     /* =====================================================
-       USAGE
+       LOAD USAGE
     ===================================================== */
 
-    function createEmptyUsage() {
+    function loadPreviewUsage() {
 
-        return {
-
-            date:
-                todayKey(),
-
-            messages_used:
-                0,
-
-            images_used:
-                0,
-
-            videos_used:
-                0
-
-        };
-
-    }
-
-
-    function loadUsage() {
-
-        let saved =
-            null;
+        let saved = null;
 
         try {
 
             saved =
                 JSON.parse(
-                    safeGetStorage(
-                        USAGE_KEY
+                    safeGet(
+                        USAGE_STORAGE
                     )
                 );
 
         } catch {
 
-            saved =
-                null;
+            saved = null;
 
         }
 
 
         if (
-
             saved &&
-
-            saved.date ===
-                todayKey()
-
+            saved.date === todayKey()
         ) {
 
-            previewUsage =
-                {
+            previewUsage = {
 
-                    date:
-                        saved.date,
+                date: saved.date,
 
-                    messages_used:
-                        Number(
-                            saved.messages_used
-                        ) || 0,
+                messages_used:
+                    Number(
+                        saved.messages_used
+                    ) || 0,
 
-                    images_used:
-                        Number(
-                            saved.images_used
-                        ) || 0,
+                images_used:
+                    Number(
+                        saved.images_used
+                    ) || 0,
 
-                    videos_used:
-                        Number(
-                            saved.videos_used
-                        ) || 0
+                videos_used:
+                    Number(
+                        saved.videos_used
+                    ) || 0
 
-                };
+            };
 
-        } else {
-
-            previewUsage =
-                createEmptyUsage();
-
-            saveUsage();
+            return;
 
         }
+
+
+        previewUsage = {
+
+            date: todayKey(),
+
+            messages_used: 0,
+
+            images_used: 0,
+
+            videos_used: 0
+
+        };
+
+        savePreviewUsage();
 
     }
 
 
-    function saveUsage() {
+    function savePreviewUsage() {
 
-        if (!previewUsage) {
+        safeSet(
 
-            previewUsage =
-                createEmptyUsage();
-
-        }
-
-        safeSetStorage(
-
-            USAGE_KEY,
+            USAGE_STORAGE,
 
             JSON.stringify(
                 previewUsage
@@ -406,27 +303,18 @@
 
     function getActivePlan() {
 
-        /*
-         * الوضع الحقيقي للمالك
-         */
-
         if (
-
-            previewPlan ===
-                "owner"
-
+            !isOwner ||
+            previewPlan === "owner"
         ) {
 
             return {
 
-                code:
-                    "owner",
+                code: "owner",
 
-                name:
-                    "OWNER",
+                name: "OWNER",
 
-                price:
-                    "غير محدود",
+                price: "غير محدود",
 
                 description:
                     "صلاحيات المالك الكاملة",
@@ -443,624 +331,279 @@
                 memory_limit:
                     Infinity,
 
-                workspace_enabled:
-                    true,
+                workspace_enabled: true,
 
-                voice_enabled:
-                    true,
+                voice_enabled: true,
 
-                web_search_enabled:
-                    true,
+                web_search_enabled: true,
 
-                file_upload_enabled:
-                    true,
+                file_upload_enabled: true,
 
-                priority_support:
-                    true
+                priority_support: true
 
             };
 
         }
 
 
-        /*
-         * Preview Plan
-         */
-
         return (
-
-            plans[
-                previewPlan
-            ] ||
-
-            PLAN_DEFAULTS[
-                previewPlan
-            ] ||
-
-            PLAN_DEFAULTS.free
-
+            plans[previewPlan] ||
+            plans.free
         );
 
     }
 
 
     /* =====================================================
-       LIMIT HELPERS
+       CREATE PROFILE UI
     ===================================================== */
 
-    function getUsageValue(
-        kind
-    ) {
+    function injectProfileUI() {
 
-        if (!previewUsage) {
-
-            loadUsage();
-
-        }
-
-
-        switch (kind) {
-
-            case "messages":
-
-                return (
-                    Number(
-                        previewUsage.messages_used
-                    ) || 0
-                );
-
-
-            case "images":
-
-                return (
-                    Number(
-                        previewUsage.images_used
-                    ) || 0
-                );
-
-
-            case "videos":
-
-                return (
-                    Number(
-                        previewUsage.videos_used
-                    ) || 0
-                );
-
-
-            default:
-
-                return 0;
-
-        }
-
-    }
-
-
-    function getLimit(
-        kind
-    ) {
-
-        const plan =
-            getActivePlan();
-
-
-        switch (kind) {
-
-            case "messages":
-
-                return plan.daily_messages;
-
-
-            case "images":
-
-                return plan.daily_images;
-
-
-            case "videos":
-
-                return plan.daily_videos;
-
-
-            default:
-
-                return Infinity;
-
-        }
-
-    }
-
-
-    function formatLimit(
-        value
-    ) {
-
-        if (
-            value ===
-            Infinity
-        ) {
-
-            return "∞";
-
-        }
-
-
-        if (
-            value ===
-            null ||
-            value ===
-            undefined
-        ) {
-
-            return "0";
-
-        }
-
-
-        return String(
-            value
-        );
-
-    }
-
-
-    /* =====================================================
-       OWNER CHECK
-    ===================================================== */
-
-    function isOwner() {
-
-        return Boolean(
-
-            ownerProfile &&
-
-            ownerProfile.role ===
-                "owner"
-
-        );
-
-    }
-
-
-    /* =====================================================
-       PREVIEW PLAN SET
-    ===================================================== */
-
-    function setPreviewPlan(
-        plan
-    ) {
-
-        /*
-         * حماية أولى
-         */
-
-        if (!isOwner()) {
-
-            console.warn(
-                "Nova Owner Preview: access denied."
-            );
-
-            return false;
-
-        }
-
-
-        /*
-         * allowed values
-         */
-
-        const allowedPlans = [
-
-            "owner",
-
-            "free",
-
-            "pro",
-
-            "ultra"
-
-        ];
-
-
-        if (
-            !allowedPlans.includes(
-                plan
-            )
-        ) {
-
-            return false;
-
-        }
-
-
-        previewPlan =
-            plan;
-
-
-        if (
-            plan ===
-                "owner"
-        ) {
-
-            safeRemoveStorage(
-                STORAGE_KEY
-            );
-
-        } else {
-
-            safeSetStorage(
-
-                STORAGE_KEY,
-
-                plan
-
-            );
-
-        }
-
-
-        applyPreviewState();
-
-        renderPreviewModal();
-
-
-        showPreviewToast(
-
-            plan === "owner"
-
-                ? "رجعنا للوضع الحقيقي للمالك 👑"
-
-                : `تم تشغيل معاينة ${getActivePlan().name}`
-
-        );
-
-
-        return true;
-
-    }
-
-
-    /* =====================================================
-       PUBLIC SET PREVIEW
-    ===================================================== */
-
-    window.novaOwnerSetPreviewPlan =
-        function (
-            plan
-        ) {
-
-            return setPreviewPlan(
-                plan
-            );
-
-        };
-
-
-    /* =====================================================
-       PUBLIC GET ACTIVE PLAN
-    ===================================================== */
-
-    window.novaGetEffectivePlan =
-        function () {
-
-            return getActivePlan();
-
-        };
-
-
-    /* =====================================================
-       CHECK USAGE
-    ===================================================== */
-
-    window.novaOwnerPreviewCanUse =
-        function (
-            kind
-        ) {
-
-            /*
-             * أي مستخدم عادي
-             * لا يدخل نظام الـ preview
-             */
-
-            if (
-                !isOwner()
-            ) {
-
-                return true;
-
-            }
-
-
-            /*
-             * الوضع الحقيقي للمالك
-             */
-
-            if (
-                previewPlan ===
-                    "owner"
-            ) {
-
-                return true;
-
-            }
-
-
-            const used =
-                getUsageValue(
-                    kind
-                );
-
-            const limit =
-                getLimit(
-                    kind
-                );
-
-
-            if (
-
-                limit !==
-                    Infinity &&
-
-                used >=
-                    limit
-
-            ) {
-
-                const labels = {
-
-                    messages:
-                        "الرسائل",
-
-                    images:
-                        "الصور",
-
-                    videos:
-                        "الفيديوهات"
-
-                };
-
-
-                const label =
-                    labels[
-                        kind
-                    ] ||
-                    "الاستخدام";
-
-
-                showPreviewToast(
-
-                    `خلصت حصة ${label} في معاينة خطة ${getActivePlan().name} اليوم.`
-
-                );
-
-
-                return false;
-
-            }
-
-
-            return true;
-
-        };
-
-
-    /* =====================================================
-       CONSUME USAGE
-    ===================================================== */
-
-    window.novaOwnerPreviewConsume =
-        function (
-            kind
-        ) {
-
-            /*
-             * non-owner
-             */
-
-            if (
-                !isOwner()
-            ) {
-
-                return;
-
-            }
-
-
-            /*
-             * الحقيقي
-             */
-
-            if (
-                previewPlan ===
-                    "owner"
-            ) {
-
-                return;
-
-            }
-
-
-            if (!previewUsage) {
-
-                loadUsage();
-
-            }
-
-
-            if (
-                kind ===
-                    "messages"
-            ) {
-
-                previewUsage.messages_used++;
-
-            }
-
-
-            if (
-                kind ===
-                    "images"
-            ) {
-
-                previewUsage.images_used++;
-
-            }
-
-
-            if (
-                kind ===
-                    "videos"
-            ) {
-
-                previewUsage.videos_used++;
-
-            }
-
-
-            saveUsage();
-
-            renderPreviewModal();
-
-            applyPreviewState();
-
-        };
-
-
-    /* =====================================================
-       PREVIEW TOAST
-    ===================================================== */
-
-    function showPreviewToast(
-        message
-    ) {
-
-        let toast =
+        let profileArea =
             document.getElementById(
-                "novaOwnerPreviewToast"
+                "novaProfileArea"
             );
 
 
-        if (!toast) {
+        if (!profileArea) {
 
-            toast =
+            profileArea =
                 document.createElement(
                     "div"
                 );
 
+            profileArea.id =
+                "novaProfileArea";
 
-            toast.id =
-                "novaOwnerPreviewToast";
+            profileArea.className =
+                "nova-profile-area";
 
 
-            toast.style.position =
-                "fixed";
+            profileArea.innerHTML = `
 
-            toast.style.left =
-                "50%";
+                <button
+                    type="button"
+                    id="novaProfileButton"
+                    class="nova-profile-btn"
+                    aria-label="الحساب"
+                >
 
-            toast.style.bottom =
-                "24px";
+                    <span
+                        id="novaProfileAvatar"
+                        class="nova-profile-avatar"
+                    >
+                        YS
+                    </span>
 
-            toast.style.transform =
-                "translateX(-50%)";
+                    <span
+                        class="nova-profile-info"
+                    >
 
-            toast.style.zIndex =
-                "100000";
+                        <strong
+                            id="novaProfileName"
+                        >
+                            يوسف شنوده
+                        </strong>
 
-            toast.style.padding =
-                "12px 16px";
+                        <small
+                            id="novaProfilePlan"
+                            class="nova-profile-plan free"
+                        >
+                            FREE
+                        </small>
 
-            toast.style.borderRadius =
-                "14px";
+                    </span>
 
-            toast.style.background =
-                "#111827";
+                    <i
+                        class="fa-solid fa-chevron-up nova-profile-chevron"
+                    ></i>
 
-            toast.style.border =
-                "1px solid rgba(255,255,255,.1)";
+                </button>
 
-            toast.style.color =
-                "#fff";
 
-            toast.style.fontSize =
-                "12px";
+                <div
+                    id="novaProfileMenu"
+                    class="nova-profile-menu"
+                >
 
-            toast.style.fontWeight =
-                "700";
+                    <div
+                        class="nova-profile-menu-head"
+                    >
 
-            toast.style.boxShadow =
-                "0 15px 40px rgba(0,0,0,.35)";
+                        <div
+                            id="novaMenuAvatar"
+                            class="nova-menu-avatar"
+                        >
+                            YS
+                        </div>
 
-            toast.style.pointerEvents =
-                "none";
+                        <div>
 
-            toast.style.transition =
-                "opacity .25s ease";
+                            <strong
+                                id="novaMenuName"
+                            >
+                                يوسف شنوده
+                            </strong>
 
-            document.body.appendChild(
-                toast
-            );
+                            <small
+                                id="novaMenuEmail"
+                            >
+                                حساب Nova AI
+                            </small>
+
+                        </div>
+
+                    </div>
+
+
+                    <div
+                        class="nova-plan-card"
+                    >
+
+                        <span>
+                            الخطة
+                        </span>
+
+                        <strong
+                            id="novaMenuPlan"
+                        >
+                            FREE
+                        </strong>
+
+                    </div>
+
+
+                    <button
+                        type="button"
+                        class="nova-menu-item"
+                        id="novaLanguageProfileBtn"
+                    >
+
+                        <i
+                            class="fa-solid fa-language"
+                        ></i>
+
+                        <span>
+                            اللغة
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="nova-menu-item"
+                        id="novaUsageProfileBtn"
+                    >
+
+                        <i
+                            class="fa-solid fa-chart-pie"
+                        ></i>
+
+                        <span>
+                            الاستخدام
+                        </span>
+
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="nova-menu-item"
+                        id="novaSettingsProfileBtn"
+                    >
+
+                        <i
+                            class="fa-solid fa-gear"
+                        ></i>
+
+                        <span>
+                            الإعدادات
+                        </span>
+
+                    </button>
+
+
+                    <div
+                        id="novaOwnerPreviewMenuItem"
+                    ></div>
+
+
+                    <button
+                        type="button"
+                        class="nova-menu-item nova-logout-item"
+                        id="novaProfileLogoutBtn"
+                    >
+
+                        <i
+                            class="fa-solid fa-right-from-bracket"
+                        ></i>
+
+                        <span>
+                            تسجيل الخروج
+                        </span>
+
+                    </button>
+
+                </div>
+
+            `;
+
+
+            const footer =
+                document.querySelector(
+                    ".sidebar-footer-actions"
+                );
+
+
+            if (footer) {
+
+                footer.prepend(
+                    profileArea
+                );
+
+            } else {
+
+                document
+                    .querySelector(
+                        "#sidebar"
+                    )
+                    ?.appendChild(
+                        profileArea
+                    );
+
+            }
 
         }
 
 
-        toast.textContent =
-            message;
-
-
-        toast.style.opacity =
-            "1";
-
-
-        clearTimeout(
-            toast._timer
-        );
-
-
-        toast._timer =
-            setTimeout(
-
-                () => {
-
-                    toast.style.opacity =
-                        "0";
-
-                },
-
-                2200
-
-            );
+        bindProfileButton();
 
     }
 
 
     /* =====================================================
-       INJECT PROFILE BUTTON
+       PROFILE BUTTON CLICK
     ===================================================== */
 
-    function injectProfileButton() {
+    function bindProfileButton() {
 
-        /*
-         * حماية
-         */
-
-        if (!isOwner()) {
-
-            return;
-
-        }
+        const button =
+            document.getElementById(
+                "novaProfileButton"
+            );
 
 
-        /*
-         * لا تكرر الزر
-         */
+        const menu =
+            document.getElementById(
+                "novaProfileMenu"
+            );
+
 
         if (
-
-            document.getElementById(
-                "openOwnerPreviewBtn"
-            )
-
+            !button ||
+            !menu
         ) {
 
             return;
@@ -1068,10 +611,240 @@
         }
 
 
-        const menu =
-            document.querySelector(
-                ".nova-profile-menu"
+        if (
+            button.dataset.bound ===
+            "true"
+        ) {
+
+            return;
+
+        }
+
+
+        button.dataset.bound =
+            "true";
+
+
+        button.addEventListener(
+
+            "click",
+
+            event => {
+
+                event.preventDefault();
+                event.stopPropagation();
+
+
+                menu.classList.toggle(
+                    "show"
+                );
+
+            }
+
+        );
+
+
+        document.addEventListener(
+
+            "click",
+
+            event => {
+
+                if (
+
+                    !profileAreaContains(
+                        event.target
+                    )
+
+                ) {
+
+                    menu.classList.remove(
+                        "show"
+                    );
+
+                }
+
+            }
+
+        );
+
+    }
+
+
+    function profileAreaContains(
+        target
+    ) {
+
+        const area =
+            document.getElementById(
+                "novaProfileArea"
             );
+
+        return Boolean(
+            area &&
+            area.contains(target)
+        );
+
+    }
+
+
+    /* =====================================================
+       RENDER PROFILE
+    ===================================================== */
+
+    function renderProfile() {
+
+        if (!profile) {
+            return;
+        }
+
+
+        const name =
+            profile.name ||
+            user?.user_metadata?.name ||
+            user?.email?.split("@")[0] ||
+            "Nova User";
+
+
+        const initials =
+            getInitials(name);
+
+
+        const planName =
+            getActivePlan().name;
+
+
+        const avatar =
+            document.getElementById(
+                "novaProfileAvatar"
+            );
+
+        const nameElement =
+            document.getElementById(
+                "novaProfileName"
+            );
+
+        const planElement =
+            document.getElementById(
+                "novaProfilePlan"
+            );
+
+        const menuAvatar =
+            document.getElementById(
+                "novaMenuAvatar"
+            );
+
+        const menuName =
+            document.getElementById(
+                "novaMenuName"
+            );
+
+        const menuEmail =
+            document.getElementById(
+                "novaMenuEmail"
+            );
+
+        const menuPlan =
+            document.getElementById(
+                "novaMenuPlan"
+            );
+
+
+        if (avatar) {
+
+            avatar.textContent =
+                initials;
+
+        }
+
+
+        if (menuAvatar) {
+
+            menuAvatar.textContent =
+                initials;
+
+        }
+
+
+        if (nameElement) {
+
+            nameElement.textContent =
+                name;
+
+        }
+
+
+        if (menuName) {
+
+            menuName.textContent =
+                name;
+
+        }
+
+
+        if (menuEmail) {
+
+            menuEmail.textContent =
+                user?.email ||
+                "حساب Nova AI";
+
+        }
+
+
+        if (planElement) {
+
+            planElement.textContent =
+                planName;
+
+            planElement.classList.remove(
+                "free",
+                "pro",
+                "ultra",
+                "owner"
+            );
+
+            planElement.classList.add(
+                getActivePlan().code
+            );
+
+        }
+
+
+        if (menuPlan) {
+
+            menuPlan.textContent =
+                planName;
+
+        }
+
+    }
+
+
+    /* =====================================================
+       OWNER PREVIEW MENU
+    ===================================================== */
+
+    function renderOwnerMenuItem() {
+
+        const holder =
+            document.getElementById(
+                "novaOwnerPreviewMenuItem"
+            );
+
+
+        if (!holder) {
+            return;
+        }
+
+
+        holder.innerHTML = "";
+
+
+        if (!isOwner) {
+
+            return;
+
+        }
 
 
         const button =
@@ -1080,12 +853,12 @@
             );
 
 
-        button.id =
-            "openOwnerPreviewBtn";
-
-
         button.type =
             "button";
+
+
+        button.id =
+            "openOwnerPreviewBtn";
 
 
         button.className =
@@ -1094,13 +867,17 @@
 
         button.innerHTML = `
 
-            <i class="fa-solid fa-flask"></i>
+            <i
+                class="fa-solid fa-flask"
+            ></i>
 
             <span>
                 معاينة الخطط
             </span>
 
-            <span class="nova-owner-badge">
+            <span
+                class="nova-owner-badge"
+            >
                 OWNER
             </span>
 
@@ -1117,98 +894,38 @@
 
                 event.stopPropagation();
 
-                showPreviewModal();
+                document
+                    .getElementById(
+                        "novaProfileMenu"
+                    )
+                    ?.classList.remove(
+                        "show"
+                    );
+
+                openPreviewModal();
 
             }
 
         );
 
 
-        /*
-         * الأفضل:
-         * داخل profile menu
-         */
-
-        if (menu) {
-
-            menu.appendChild(
-                button
-            );
-
-            return;
-
-        }
-
-
-        /*
-         * fallback
-         */
-
-        const sidebarFooter =
-            document.querySelector(
-                ".sidebar-footer-actions"
-            );
-
-
-        if (sidebarFooter) {
-
-            sidebarFooter.appendChild(
-                button
-            );
-
-        }
+        holder.appendChild(
+            button
+        );
 
     }
 
 
     /* =====================================================
-       REMOVE OWNER UI
+       MODAL
     ===================================================== */
 
-    function removeOwnerUI() {
-
-        document
-            .getElementById(
-                "openOwnerPreviewBtn"
-            )
-            ?.remove();
-
-
-        document
-            .getElementById(
-                "novaOwnerPreviewModal"
-            )
-            ?.remove();
-
-
-        document
-            .getElementById(
-                "novaOwnerPreviewToast"
-            )
-            ?.remove();
-
-    }
-
-
-    /* =====================================================
-       INJECT MODAL
-    ===================================================== */
-
-    function injectModal() {
-
-        if (!isOwner()) {
-
-            return;
-
-        }
-
+    function injectPreviewModal() {
 
         if (
-
             document.getElementById(
                 "novaOwnerPreviewModal"
             )
-
         ) {
 
             return;
@@ -1230,40 +947,31 @@
 
             <div
                 class="nova-owner-preview-card"
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="novaOwnerPreviewTitle"
             >
 
                 <div
                     class="nova-owner-preview-header"
                 >
 
-                    <div>
+                    <div
+                        class="nova-owner-preview-title"
+                    >
 
-                        <div
-                            class="nova-owner-preview-title"
-                        >
+                        <i
+                            class="fa-solid fa-flask"
+                        ></i>
 
-                            <i
-                                class="fa-solid fa-flask"
-                            ></i>
+                        <div>
 
-                            <div>
+                            <h3>
+                                معاينة خطط Nova
+                            </h3>
 
-                                <h3
-                                    id="novaOwnerPreviewTitle"
-                                >
-                                    معاينة خطط Nova
-                                </h3>
-
-                                <p
-                                    class="nova-owner-preview-subtitle"
-                                >
-                                    وضع تجريبي للمالك فقط
-                                </p>
-
-                            </div>
+                            <p
+                                class="nova-owner-preview-subtitle"
+                            >
+                                وضع تجريبي للمالك فقط
+                            </p>
 
                         </div>
 
@@ -1271,15 +979,9 @@
 
 
                     <button
-
                         type="button"
-
-                        class="nova-owner-preview-close"
-
                         id="novaOwnerPreviewClose"
-
-                        aria-label="إغلاق"
-
+                        class="nova-owner-preview-close"
                     >
 
                         <i
@@ -1298,7 +1000,7 @@
                     <div
                         class="nova-owner-preview-current-label"
                     >
-                        وضع الخطة الحالي
+                        الخطة في المعاينة
                     </div>
 
                     <div
@@ -1347,9 +1049,8 @@
                 <div
                     class="nova-owner-preview-note"
                 >
-                    المعاينة لا تغيّر plan أو role في
-                    Supabase. هي مخصصة لاختبار تجربة
-                    الخطط والخصائص قبل الإطلاق.
+                    المعاينة لا تغيّر خطة حسابك الحقيقية
+                    ولا تغيّر role في Supabase.
                 </div>
 
             </div>
@@ -1362,10 +1063,6 @@
         );
 
 
-        /*
-         * Click outside
-         */
-
         modal.addEventListener(
 
             "click",
@@ -1377,7 +1074,7 @@
                     modal
                 ) {
 
-                    hidePreviewModal();
+                    closePreviewModal();
 
                 }
 
@@ -1385,10 +1082,6 @@
 
         );
 
-
-        /*
-         * Close
-         */
 
         document
             .getElementById(
@@ -1398,14 +1091,10 @@
 
                 "click",
 
-                hidePreviewModal
+                closePreviewModal
 
             );
 
-
-        /*
-         * Reset
-         */
 
         document
             .getElementById(
@@ -1425,57 +1114,19 @@
 
             );
 
-
-        /*
-         * ESC
-         */
-
-        document.addEventListener(
-
-            "keydown",
-
-            event => {
-
-                if (
-                    event.key ===
-                    "Escape"
-                ) {
-
-                    hidePreviewModal();
-
-                }
-
-            }
-
-        );
-
     }
 
 
-    /* =====================================================
-       SHOW / HIDE MODAL
-    ===================================================== */
+    function openPreviewModal() {
 
-    function showPreviewModal() {
-
-        if (!isOwner()) {
+        if (!isOwner) {
 
             return;
 
         }
 
 
-        const modal =
-            document.getElementById(
-                "novaOwnerPreviewModal"
-            );
-
-
-        if (!modal) {
-
-            injectModal();
-
-        }
+        injectPreviewModal();
 
 
         document
@@ -1492,7 +1143,7 @@
     }
 
 
-    function hidePreviewModal() {
+    function closePreviewModal() {
 
         document
             .getElementById(
@@ -1506,35 +1157,169 @@
 
 
     /* =====================================================
-       RENDER MODAL
+       SET PREVIEW
     ===================================================== */
 
-    function renderPreviewModal() {
+    function setPreviewPlan(
+        plan
+    ) {
 
-        if (!isOwner()) {
+        if (!isOwner) {
+
+            console.warn(
+                "Nova: Preview denied."
+            );
 
             return;
 
         }
 
 
-        const currentPlanElement =
+        if (
+
+            ![
+                "owner",
+                "free",
+                "pro",
+                "ultra"
+            ].includes(plan)
+
+        ) {
+
+            return;
+
+        }
+
+
+        previewPlan =
+            plan;
+
+
+        if (
+            plan === "owner"
+        ) {
+
+            safeRemove(
+                PREVIEW_STORAGE
+            );
+
+        } else {
+
+            safeSet(
+                PREVIEW_STORAGE,
+                plan
+            );
+
+        }
+
+
+        applyPreviewState();
+
+        renderPreviewModal();
+
+    }
+
+
+    /* =====================================================
+       APPLY PREVIEW
+    ===================================================== */
+
+    function applyPreviewState() {
+
+        document.body.classList.remove(
+
+            "nova-plan-preview-free",
+
+            "nova-plan-preview-pro",
+
+            "nova-plan-preview-ultra"
+
+        );
+
+
+        if (
+
+            previewPlan === "free" ||
+            previewPlan === "pro" ||
+            previewPlan === "ultra"
+
+        ) {
+
+            document.body.classList.add(
+
+                `nova-plan-preview-${previewPlan}`
+
+            );
+
+        }
+
+
+        window.novaEffectivePlan =
+            getActivePlan();
+
+
+        window.novaIsPlanPreviewActive =
+            (
+                isOwner &&
+                previewPlan !==
+                "owner"
+            );
+
+
+        renderProfile();
+
+
+        window.dispatchEvent(
+
+            new CustomEvent(
+                "nova-plan-preview-changed",
+                {
+                    detail: {
+                        plan:
+                            previewPlan,
+
+                        effectivePlan:
+                            getActivePlan(),
+
+                        owner:
+                            isOwner,
+
+                        usage:
+                            previewUsage
+                    }
+                }
+            )
+
+        );
+
+    }
+
+
+    /* =====================================================
+       RENDER PREVIEW MODAL
+    ===================================================== */
+
+    function renderPreviewModal() {
+
+        if (!isOwner) {
+            return;
+        }
+
+
+        const current =
             document.getElementById(
                 "novaOwnerPreviewCurrentPlan"
             );
-
 
         const grid =
             document.getElementById(
                 "novaOwnerPlanGrid"
             );
 
-
         const stats =
             document.getElementById(
                 "novaOwnerPreviewStats"
             );
-
 
         const features =
             document.getElementById(
@@ -1543,12 +1328,10 @@
 
 
         if (
-
-            !currentPlanElement ||
+            !current ||
             !grid ||
             !stats ||
             !features
-
         ) {
 
             return;
@@ -1560,79 +1343,56 @@
             getActivePlan();
 
 
-        /*
-         * Current plan
-         */
-
-        currentPlanElement.textContent =
+        current.textContent =
             active.name;
 
 
-        /*
-         * PLAN BUTTONS
-         */
-
-        const buttonPlans = [
+        const planCodes = [
 
             "free",
-
             "pro",
-
             "ultra"
 
         ];
 
 
         grid.innerHTML =
-            buttonPlans
+            planCodes
                 .map(
-
                     code => {
 
-                        const plan =
-                            plans[
-                                code
-                            ] ||
-
-                            PLAN_DEFAULTS[
-                                code
-                            ];
+                        const p =
+                            plans[code];
 
 
                         return `
 
                             <button
-
                                 type="button"
-
                                 class="nova-owner-plan-btn ${
                                     previewPlan === code
                                         ? "active"
                                         : ""
                                 }"
-
-                                data-owner-preview-plan="${code}"
-
+                                data-preview-plan="${code}"
                             >
 
                                 <div
                                     class="nova-owner-plan-name"
                                 >
-                                    ${plan.name}
+                                    ${p.name}
                                 </div>
-
 
                                 <div
                                     class="nova-owner-plan-price"
                                 >
-                                    ${plan.price}
+                                    ${p.price}
                                 </div>
-
 
                                 <div
                                     class="nova-owner-plan-desc"
                                 >
-                                    ${plan.description}
+                                    ${p.description}
                                 </div>
 
                             </button>
@@ -1640,21 +1400,15 @@
                         `;
 
                     }
-
                 )
                 .join("");
 
 
-        /*
-         * PLAN EVENTS
-         */
-
         grid
             .querySelectorAll(
-                "[data-owner-preview-plan]"
+                "[data-preview-plan]"
             )
             .forEach(
-
                 button => {
 
                     button.addEventListener(
@@ -1663,12 +1417,11 @@
 
                         () => {
 
-                            const plan =
-                                button.dataset
-                                    .ownerPreviewPlan;
-
                             setPreviewPlan(
-                                plan
+
+                                button.dataset
+                                    .previewPlan
+
                             );
 
                         }
@@ -1676,24 +1429,7 @@
                     );
 
                 }
-
             );
-
-
-        /*
-         * STATS
-         */
-
-        const messageLimit =
-            active.daily_messages;
-
-
-        const imageLimit =
-            active.daily_images;
-
-
-        const videoLimit =
-            active.daily_videos;
 
 
         stats.innerHTML = `
@@ -1711,7 +1447,9 @@
                 <div
                     class="nova-owner-stat-value"
                 >
-                    ${formatLimit(messageLimit)}
+                    ${formatLimit(
+                        active.daily_messages
+                    )}
                 </div>
 
             </div>
@@ -1730,7 +1468,9 @@
                 <div
                     class="nova-owner-stat-value"
                 >
-                    ${formatLimit(imageLimit)}
+                    ${formatLimit(
+                        active.daily_images
+                    )}
                 </div>
 
             </div>
@@ -1749,7 +1489,9 @@
                 <div
                     class="nova-owner-stat-value"
                 >
-                    ${formatLimit(videoLimit)}
+                    ${formatLimit(
+                        active.daily_videos
+                    )}
                 </div>
 
             </div>
@@ -1783,7 +1525,7 @@
                 <div
                     class="nova-owner-stat-label"
                 >
-                    الرسائل المستخدمة
+                    رسائل مستخدمة
                 </div>
 
                 <div
@@ -1791,10 +1533,8 @@
                 >
                     ${
                         previewPlan === "owner"
-
                             ? "غير محدود"
-
-                            : `${getUsageValue("messages")} / ${formatLimit(messageLimit)}`
+                            : `${previewUsage.messages_used} / ${formatLimit(active.daily_messages)}`
                     }
                 </div>
 
@@ -1808,7 +1548,7 @@
                 <div
                     class="nova-owner-stat-label"
                 >
-                    الصور المستخدمة
+                    صور مستخدمة
                 </div>
 
                 <div
@@ -1816,10 +1556,8 @@
                 >
                     ${
                         previewPlan === "owner"
-
                             ? "غير محدود"
-
-                            : `${getUsageValue("images")} / ${formatLimit(imageLimit)}`
+                            : `${previewUsage.images_used} / ${formatLimit(active.daily_images)}`
                     }
                 </div>
 
@@ -1833,7 +1571,7 @@
                 <div
                     class="nova-owner-stat-label"
                 >
-                    الفيديوهات المستخدمة
+                    فيديوهات مستخدمة
                 </div>
 
                 <div
@@ -1841,10 +1579,8 @@
                 >
                     ${
                         previewPlan === "owner"
-
                             ? "غير محدود"
-
-                            : `${getUsageValue("videos")} / ${formatLimit(videoLimit)}`
+                            : `${previewUsage.videos_used} / ${formatLimit(active.daily_videos)}`
                     }
                 </div>
 
@@ -1853,11 +1589,7 @@
         `;
 
 
-        /*
-         * FEATURES
-         */
-
-        const featureData = [
+        const featureList = [
 
             [
                 "workspace_enabled",
@@ -1888,16 +1620,13 @@
 
 
         features.innerHTML =
-            featureData
+            featureList
                 .map(
-
                     ([key, label]) => {
 
                         const enabled =
                             Boolean(
-                                active[
-                                    key
-                                ]
+                                active[key]
                             );
 
 
@@ -1928,175 +1657,490 @@
                         `;
 
                     }
-
                 )
                 .join("");
 
     }
 
 
-    /* =====================================================
-       APPLY PREVIEW STATE
-    ===================================================== */
-
-    function applyPreviewState() {
-
-        /*
-         * remove previous preview classes
-         */
-
-        document.body.classList.remove(
-
-            "nova-plan-preview-free",
-
-            "nova-plan-preview-pro",
-
-            "nova-plan-preview-ultra"
-
-        );
-
-
-        /*
-         * add active preview class
-         */
+    function formatLimit(
+        value
+    ) {
 
         if (
-
-            previewPlan ===
-                "free" ||
-
-            previewPlan ===
-                "pro" ||
-
-            previewPlan ===
-                "ultra"
-
+            value === Infinity
         ) {
 
-            document.body.classList.add(
+            return "∞";
 
-                `nova-plan-preview-${previewPlan}`
+        }
 
+        return String(
+            value ?? 0
+        );
+
+    }
+
+
+    /* =====================================================
+       USAGE CHECK
+    ===================================================== */
+
+    function getUsage(
+        type
+    ) {
+
+        if (!previewUsage) {
+            loadPreviewUsage();
+        }
+
+
+        if (
+            type === "messages"
+        ) {
+
+            return previewUsage.messages_used;
+
+        }
+
+
+        if (
+            type === "images"
+        ) {
+
+            return previewUsage.images_used;
+
+        }
+
+
+        if (
+            type === "videos"
+        ) {
+
+            return previewUsage.videos_used;
+
+        }
+
+
+        return 0;
+
+    }
+
+
+    function getLimit(
+        type
+    ) {
+
+        const plan =
+            getActivePlan();
+
+
+        if (
+            type === "messages"
+        ) {
+
+            return plan.daily_messages;
+
+        }
+
+
+        if (
+            type === "images"
+        ) {
+
+            return plan.daily_images;
+
+        }
+
+
+        if (
+            type === "videos"
+        ) {
+
+            return plan.daily_videos;
+
+        }
+
+
+        return Infinity;
+
+    }
+
+
+    window.novaOwnerPreviewCanUse =
+        function (
+            type
+        ) {
+
+            /*
+             * غير المالك:
+             * لا preview
+             */
+
+            if (!isOwner) {
+
+                return true;
+
+            }
+
+
+            /*
+             * Owner الحقيقي
+             */
+
+            if (
+                previewPlan ===
+                "owner"
+            ) {
+
+                return true;
+
+            }
+
+
+            const used =
+                getUsage(
+                    type
+                );
+
+            const limit =
+                getLimit(
+                    type
+                );
+
+
+            if (
+
+                limit !== Infinity &&
+                used >= limit
+
+            ) {
+
+                showToast(
+
+                    `وصلت لحد ${type} في معاينة ${getActivePlan().name}`
+
+                );
+
+                return false;
+
+            }
+
+
+            return true;
+
+        };
+
+
+    window.novaOwnerPreviewConsume =
+        function (
+            type
+        ) {
+
+            if (!isOwner) {
+                return;
+            }
+
+
+            if (
+                previewPlan ===
+                "owner"
+            ) {
+
+                return;
+
+            }
+
+
+            if (
+                type === "messages"
+            ) {
+
+                previewUsage.messages_used++;
+
+            }
+
+
+            if (
+                type === "images"
+            ) {
+
+                previewUsage.images_used++;
+
+            }
+
+
+            if (
+                type === "videos"
+            ) {
+
+                previewUsage.videos_used++;
+
+            }
+
+
+            savePreviewUsage();
+
+            renderPreviewModal();
+
+        };
+
+
+    /* =====================================================
+       TOAST
+    ===================================================== */
+
+    function showToast(
+        message
+    ) {
+
+        let toast =
+            document.getElementById(
+                "novaPreviewToast"
+            );
+
+
+        if (!toast) {
+
+            toast =
+                document.createElement(
+                    "div"
+                );
+
+            toast.id =
+                "novaPreviewToast";
+
+
+            toast.style.position =
+                "fixed";
+
+            toast.style.left =
+                "50%";
+
+            toast.style.bottom =
+                "25px";
+
+            toast.style.transform =
+                "translateX(-50%)";
+
+            toast.style.zIndex =
+                "999999";
+
+            toast.style.padding =
+                "12px 17px";
+
+            toast.style.borderRadius =
+                "14px";
+
+            toast.style.background =
+                "#111827";
+
+            toast.style.color =
+                "#fff";
+
+            toast.style.fontSize =
+                "13px";
+
+            toast.style.fontWeight =
+                "700";
+
+            toast.style.boxShadow =
+                "0 15px 50px rgba(0,0,0,.4)";
+
+            document.body.appendChild(
+                toast
             );
 
         }
 
 
-        /*
-         * Global effective plan
-         */
+        toast.textContent =
+            message;
 
-        window.novaEffectivePlan =
-            getActivePlan();
+        toast.style.opacity =
+            "1";
 
 
-        window.novaIsPlanPreviewActive =
-            (
-                previewPlan !==
-                "owner"
+        clearTimeout(
+            toast._timer
+        );
+
+
+        toast._timer =
+            setTimeout(
+
+                () => {
+
+                    toast.style.opacity =
+                        "0";
+
+                },
+
+                2200
+
             );
 
+    }
 
-        /*
-         * Event
-         */
 
-        window.dispatchEvent(
+    /* =====================================================
+       LANGUAGE
+    ===================================================== */
 
-            new CustomEvent(
+    function bindLanguageButton() {
 
-                "nova-plan-preview-changed",
+        document
+            .getElementById(
+                "novaLanguageProfileBtn"
+            )
+            ?.addEventListener(
 
-                {
+                "click",
 
-                    detail: {
+                event => {
 
-                        plan:
-                            previewPlan,
+                    event.preventDefault();
 
-                        effectivePlan:
-                            getActivePlan(),
+                    event.stopPropagation();
 
-                        usage:
-                            previewUsage,
 
-                        owner:
-                            true
+                    document
+                        .getElementById(
+                            "novaProfileMenu"
+                        )
+                        ?.classList.remove(
+                            "show"
+                        );
+
+
+                    const languageItem =
+                        document.querySelector(
+                            '[data-setting="language"]'
+                        );
+
+
+                    if (
+                        languageItem
+                    ) {
+
+                        languageItem.click();
+
+                        return;
+
+                    }
+
+
+                    const languageModal =
+                        document.getElementById(
+                            "languageModal"
+                        );
+
+
+                    if (
+                        languageModal
+                    ) {
+
+                        languageModal.classList.add(
+                            "show"
+                        );
+
+                        return;
+
+                    }
+
+
+                    showToast(
+                        "افتح إعدادات اللغة من الإعدادات."
+                    );
+
+                }
+
+            );
+
+    }
+
+
+    /* =====================================================
+       SETTINGS
+    ===================================================== */
+
+    function bindSettingsButton() {
+
+        document
+            .getElementById(
+                "novaSettingsProfileBtn"
+            )
+            ?.addEventListener(
+
+                "click",
+
+                event => {
+
+                    event.preventDefault();
+
+                    event.stopPropagation();
+
+
+                    document
+                        .getElementById(
+                            "novaProfileMenu"
+                        )
+                        ?.classList.remove(
+                            "show"
+                        );
+
+
+                    const settingsButton =
+                        document.getElementById(
+                            "settingsBtn"
+                        );
+
+
+                    if (
+                        settingsButton
+                    ) {
+
+                        settingsButton.click();
 
                     }
 
                 }
 
-            )
-
-        );
-
-
-        /*
-         * Update visible profile
-         */
-
-        updateExistingProfileUI();
+            );
 
     }
 
 
     /* =====================================================
-       UPDATE PROFILE UI
+       USAGE
     ===================================================== */
 
-    function updateExistingProfileUI() {
-
-        const active =
-            getActivePlan();
-
+    function bindUsageButton() {
 
         document
-            .querySelectorAll(
-                ".nova-profile-plan"
+            .getElementById(
+                "novaUsageProfileBtn"
             )
-            .forEach(
+            ?.addEventListener(
 
-                element => {
+                "click",
 
-                    element.textContent =
-                        active.name;
+                event => {
+
+                    event.preventDefault();
+
+                    event.stopPropagation();
 
 
-                    element.classList.remove(
+                    const plan =
+                        getActivePlan();
 
-                        "free",
 
-                        "pro",
+                    showToast(
 
-                        "ultra",
-
-                        "owner"
+                        `${plan.name}: ${formatLimit(plan.daily_messages)} رسالة / ${formatLimit(plan.daily_images)} صورة / ${formatLimit(plan.daily_videos)} فيديو يوميًا`
 
                     );
-
-
-                    element.classList.add(
-
-                        active.code
-
-                    );
-
-                }
-
-            );
-
-
-        document
-            .querySelectorAll(
-                "[data-nova-plan-label]"
-            )
-            .forEach(
-
-                element => {
-
-                    element.textContent =
-                        active.name;
 
                 }
 
@@ -2106,65 +2150,124 @@
 
 
     /* =====================================================
-       READ OWNER FROM SUPABASE
+       LOGOUT
     ===================================================== */
 
-    async function loadOwnerProfile() {
+    function bindLogout() {
 
-        const client =
+        document
+            .getElementById(
+                "novaProfileLogoutBtn"
+            )
+            ?.addEventListener(
+
+                "click",
+
+                async event => {
+
+                    event.preventDefault();
+
+                    event.stopPropagation();
+
+
+                    try {
+
+                        if (
+                            supabaseClient
+                        ) {
+
+                            await supabaseClient
+                                .auth
+                                .signOut();
+
+                        }
+
+                    } catch (
+                        error
+                    ) {
+
+                        console.error(
+                            "Nova Logout Error:",
+                            error
+                        );
+
+                    }
+
+
+                    safeRemove(
+                        PREVIEW_STORAGE
+                    );
+
+                    safeRemove(
+                        USAGE_STORAGE
+                    );
+
+
+                    window.location.href =
+                        "login.html";
+
+                }
+
+            );
+
+    }
+
+
+    /* =====================================================
+       LOAD FROM SUPABASE
+    ===================================================== */
+
+    async function loadAccount() {
+
+        supabaseClient =
             window.novaSupabase;
 
 
-        if (!client) {
+        if (!supabaseClient) {
 
             console.error(
-                "Nova Owner Preview: Supabase client not found."
+                "Nova: Supabase not found."
             );
 
-            return null;
+            return false;
 
         }
 
 
         const {
-            data: sessionData,
-            error: sessionError
+            data:
+                sessionData,
+            error:
+                sessionError
         } =
-            await client.auth.getSession();
+            await supabaseClient
+                .auth
+                .getSession();
 
 
         if (
-
             sessionError ||
-
             !sessionData?.session?.user
-
         ) {
 
-            return null;
+            return false;
 
         }
 
 
-        const user =
-            sessionData
-                .session
-                .user;
+        user =
+            sessionData.session.user;
 
-
-        /*
-         * اقرأ profile الحقيقي
-         */
 
         const {
-            data: profile,
-            error: profileError
+            data:
+                profileData,
+            error:
+                profileError
         } =
-            await client
+            await supabaseClient
 
-                .from(
-                    "profiles"
-                )
+                .from("profiles")
 
                 .select(
                     "id,name,plan,role"
@@ -2183,174 +2286,71 @@
         ) {
 
             console.error(
-
-                "Nova Owner Preview: profile query failed.",
-
+                "Nova Profile Error:",
                 profileError
-
             );
 
-            return null;
+            return false;
 
         }
 
 
-        if (!profile) {
+        if (!profileData) {
 
-            return null;
+            return false;
 
         }
 
 
-        return profile;
+        profile =
+            profileData;
+
+
+        /*
+         * أهم سطر:
+         * الصلاحية من Supabase
+         */
+
+        isOwner =
+            profile.role ===
+            "owner";
+
+
+        return true;
 
     }
 
 
     /* =====================================================
-       LOAD PLANS FROM SUPABASE
+       LOAD OWNER PREVIEW STATE
     ===================================================== */
 
-    async function loadPlans() {
+    function loadPreviewState() {
 
-        const client =
-            window.novaSupabase;
+        if (!isOwner) {
 
-
-        if (!client) {
+            previewPlan =
+                "owner";
 
             return;
 
         }
 
 
-        try {
+        loadPreviewUsage();
 
-            const {
-                data: planRows,
-                error
-            } =
-                await client
-
-                    .from(
-                        "plans"
-                    )
-
-                    .select(
-                        "*"
-                    )
-
-                    .in(
-                        "code",
-                        [
-                            "free",
-                            "pro",
-                            "ultra"
-                        ]
-                    );
-
-
-            if (
-                error
-            ) {
-
-                console.warn(
-
-                    "Nova Owner Preview: plans query failed, using defaults.",
-
-                    error
-
-                );
-
-                return;
-
-            }
-
-
-            if (
-                Array.isArray(
-                    planRows
-                )
-            ) {
-
-                planRows.forEach(
-
-                    plan => {
-
-                        if (
-
-                            plan &&
-
-                            (
-                                plan.code ===
-                                    "free" ||
-
-                                plan.code ===
-                                    "pro" ||
-
-                                plan.code ===
-                                    "ultra"
-                            )
-
-                        ) {
-
-                            plans[
-                                plan.code
-                            ] = {
-
-                                ...PLAN_DEFAULTS[
-                                    plan.code
-                                ],
-
-                                ...plan
-
-                            };
-
-                        }
-
-                    }
-
-                );
-
-            }
-
-        } catch (error) {
-
-            console.warn(
-
-                "Nova Owner Preview: plans loading exception.",
-
-                error
-
-            );
-
-        }
-
-    }
-
-
-    /* =====================================================
-       LOAD SAVED PREVIEW
-    ===================================================== */
-
-    function loadSavedPreview() {
 
         const saved =
-            safeGetStorage(
-                STORAGE_KEY
+            safeGet(
+                PREVIEW_STORAGE
             );
 
 
         if (
 
-            saved ===
-                "free" ||
-
-            saved ===
-                "pro" ||
-
-            saved ===
-                "ultra"
+            saved === "free" ||
+            saved === "pro" ||
+            saved === "ultra"
 
         ) {
 
@@ -2368,413 +2368,28 @@
 
 
     /* =====================================================
-       INSTALL SEND MESSAGE GUARD
+       SECURITY CLEANUP
     ===================================================== */
 
-    function installSendMessagePreviewGuard() {
+    function cleanupIfNotOwner() {
 
-        /*
-         * لا نركب wrapper أكثر من مرة
-         */
-
-        if (
-            sendMessageWrapped
-        ) {
-
+        if (isOwner) {
             return;
-
         }
 
 
-        /*
-         * sendMessage قد يظهر
-         * بعد تحميل script.js
-         */
-
-        if (
-
-            typeof window.sendMessage !==
-            "function"
-
-        ) {
-
-            return;
-
-        }
-
-
-        const originalSendMessage =
-            window.sendMessage;
-
-
-        async function wrappedSendMessage(
-
-            customText = null,
-
-            options = {}
-
-        ) {
-
-            /*
-             * النص المستخدم
-             */
-
-            let text =
-                "";
-
-
-            if (
-                customText !==
-                null
-            ) {
-
-                text =
-                    String(
-                        customText
-                    ).trim();
-
-            } else {
-
-                text = (
-
-                    document
-                        .getElementById(
-                            "chatInput"
-                        )
-                        ?.value ||
-
-                    ""
-
-                ).trim();
-
-            }
-
-
-            /*
-             * لو مش Owner
-             * لا تدخل preview
-             */
-
-            if (
-                !isOwner()
-            ) {
-
-                return originalSendMessage(
-
-                    customText,
-
-                    options
-
-                );
-
-            }
-
-
-            /*
-             * الوضع الحقيقي
-             */
-
-            if (
-
-                !window
-                    .novaIsPlanPreviewActive
-
-            ) {
-
-                return originalSendMessage(
-
-                    customText,
-
-                    options
-
-                );
-
-            }
-
-
-            /*
-             * حد الرسائل
-             */
-
-            if (
-
-                !window
-                    .novaOwnerPreviewCanUse(
-                        "messages"
-                    )
-
-            ) {
-
-                return;
-
-            }
-
-
-            const lower =
-                text.toLowerCase();
-
-
-            /*
-             * Image detection
-             */
-
-            const isImage =
-
-                lower.includes(
-                    "صورة"
-                ) ||
-
-                lower.includes(
-                    "صوره"
-                ) ||
-
-                lower.includes(
-                    "ارسم"
-                ) ||
-
-                lower.includes(
-                    "رسم"
-                ) ||
-
-                lower.includes(
-                    "صمم صورة"
-                ) ||
-
-                lower.includes(
-                    "اعمل صورة"
-                ) ||
-
-                lower.includes(
-                    "توليد صورة"
-                ) ||
-
-                lower.includes(
-                    "توليد صوره"
-                ) ||
-
-                lower.includes(
-                    "generate image"
-                ) ||
-
-                lower.includes(
-                    "create image"
-                ) ||
-
-                lower.includes(
-                    "draw an image"
-                );
-
-
-            /*
-             * Video detection
-             */
-
-            const isVideo =
-
-                lower.includes(
-                    "فيديو"
-                ) ||
-
-                lower.includes(
-                    "مشهد متحرك"
-                ) ||
-
-                lower.includes(
-                    "اعمل فيديو"
-                ) ||
-
-                lower.includes(
-                    "سوي فيديو"
-                ) ||
-
-                lower.includes(
-                    "توليد فيديو"
-                ) ||
-
-                lower.includes(
-                    "generate video"
-                ) ||
-
-                lower.includes(
-                    "create video"
-                );
-
-
-            /*
-             * Image limit
-             */
-
-            if (
-                isImage &&
-
-                !window
-                    .novaOwnerPreviewCanUse(
-                        "images"
-                    )
-
-            ) {
-
-                return;
-
-            }
-
-
-            /*
-             * Video limit
-             */
-
-            if (
-                isVideo &&
-
-                !window
-                    .novaOwnerPreviewCanUse(
-                        "videos"
-                    )
-
-            ) {
-
-                return;
-
-            }
-
-
-            /*
-             * Consume message
-             */
-
-            window
-                .novaOwnerPreviewConsume(
-                    "messages"
-                );
-
-
-            /*
-             * Consume image
-             */
-
-            if (
-                isImage
-            ) {
-
-                window
-                    .novaOwnerPreviewConsume(
-                        "images"
-                    );
-
-            }
-
-
-            /*
-             * Consume video
-             */
-
-            if (
-                isVideo
-            ) {
-
-                window
-                    .novaOwnerPreviewConsume(
-                        "videos"
-                    );
-
-            }
-
-
-            /*
-             * Run original
-             */
-
-            return originalSendMessage(
-
-                customText,
-
-                options
-
-            );
-
-        }
-
-
-        wrappedSendMessage
-            .__novaOwnerPreviewWrapped =
-                true;
-
-
-        window.sendMessage =
-            wrappedSendMessage;
-
-
-        sendMessageWrapped =
-            true;
-
-
-        console.log(
-            "Nova Owner Preview: sendMessage guard installed 👑"
+        safeRemove(
+            PREVIEW_STORAGE
         );
 
-    }
 
-
-    /* =====================================================
-       RETRY WRAPPER INSTALLATION
-    ===================================================== */
-
-    function waitForSendMessage() {
-
-        if (
-            sendMessageWrapped
-        ) {
-
-            return;
-
-        }
-
-
-        installSendMessagePreviewGuard();
-
-
-        if (
-            sendMessageWrapped
-        ) {
-
-            return;
-
-        }
-
-
-        setTimeout(
-
-            waitForSendMessage,
-
-            500
-
+        safeRemove(
+            USAGE_STORAGE
         );
-
-    }
-
-
-    /* =====================================================
-       SECURITY CLEANUP FOR NON-OWNER
-    ===================================================== */
-
-    function denyNonOwnerPreview() {
-
-        ownerProfile =
-            null;
 
 
         previewPlan =
             "owner";
-
-
-        safeRemoveStorage(
-            STORAGE_KEY
-        );
-
-
-        safeRemoveStorage(
-            USAGE_KEY
-        );
 
 
         window.novaIsPlanPreviewActive =
@@ -2785,164 +2400,99 @@
             null;
 
 
-        removeOwnerUI();
+        document
+            .getElementById(
+                "openOwnerPreviewBtn"
+            )
+            ?.remove();
+
+
+        document
+            .getElementById(
+                "novaOwnerPreviewModal"
+            )
+            ?.remove();
 
     }
 
 
     /* =====================================================
-       MAIN INITIALIZATION
+       INITIALIZE
     ===================================================== */
 
-    async function initOwnerPreview() {
+    async function init() {
+
+        const ok =
+            await loadAccount();
+
 
         /*
-         * don't initialize twice
+         * حتى لو الحساب عادي:
+         * اعمل زر الحساب.
          */
 
-        if (
-            initialized
-        ) {
+        injectProfileUI();
+
+
+        if (!ok) {
 
             return;
 
         }
 
 
-        initialized =
-            true;
+        cleanupIfNotOwner();
 
 
-        try {
+        /*
+         * OWNER فقط
+         */
 
-            /*
-             * Load profile
-             */
+        if (isOwner) {
 
-            const profile =
-                await loadOwnerProfile();
+            loadPreviewState();
 
+            injectPreviewModal();
 
-            /*
-             * Profile missing
-             */
+            renderOwnerMenuItem();
 
-            if (!profile) {
+            bindLanguageButton();
 
-                denyNonOwnerPreview();
+            bindSettingsButton();
 
-                return;
+            bindUsageButton();
 
-            }
-
-
-            /*
-             * OWNER ONLY
-             */
-
-            if (
-                profile.role !==
-                    "owner"
-            ) {
-
-                console.log(
-
-                    "Nova Owner Preview: access denied for non-owner."
-
-                );
-
-                denyNonOwnerPreview();
-
-                return;
-
-            }
-
-
-            /*
-             * OWNER CONFIRMED
-             */
-
-            ownerProfile =
-                profile;
-
-
-            /*
-             * Load plans
-             */
-
-            await loadPlans();
-
-
-            /*
-             * Usage
-             */
-
-            loadUsage();
-
-
-            /*
-             * Saved preview
-             */
-
-            loadSavedPreview();
-
-
-            /*
-             * Build UI
-             */
-
-            injectModal();
-
-            injectProfileButton();
-
-
-            /*
-             * Apply state
-             */
+            bindLogout();
 
             applyPreviewState();
 
             renderPreviewModal();
 
 
+            console.log(
+                "Nova Owner Preview: OWNER ACCESS ✅"
+            );
+
+        } else {
+
             /*
-             * Install message guard
+             * حساب عادي
              */
 
-            waitForSendMessage();
+            renderProfile();
+
+            bindLanguageButton();
+
+            bindSettingsButton();
+
+            bindUsageButton();
+
+            bindLogout();
 
 
             console.log(
-
-                "Nova Owner Preview Ready 👑",
-
-                {
-
-                    owner:
-                        true,
-
-                    realPlan:
-                        profile.plan,
-
-                    previewPlan:
-                        previewPlan
-
-                }
-
+                "Nova Owner Preview: regular user"
             );
-
-        } catch (error) {
-
-            console.error(
-
-                "Nova Owner Preview Initialization Error:",
-
-                error
-
-            );
-
-
-            denyNonOwnerPreview();
 
         }
 
@@ -2950,18 +2500,13 @@
 
 
     /* =====================================================
-       SUPABASE AUTH STATE LISTENER
-       لو حصل Logout / Login من نفس الصفحة
+       AUTH STATE CHANGES
     ===================================================== */
 
-    function installAuthListener() {
-
-        const client =
-            window.novaSupabase;
-
+    async function setupAuthListener() {
 
         if (
-            !client
+            !supabaseClient
         ) {
 
             return;
@@ -2969,78 +2514,41 @@
         }
 
 
-        try {
+        supabaseClient
+            .auth
+            .onAuthStateChange(
 
-            client.auth.onAuthStateChange(
-
-                async (
-                    event
-                ) => {
-
-                    /*
-                     * logout
-                     */
+                async event => {
 
                     if (
-
                         event ===
-                            "SIGNED_OUT"
-
+                        "SIGNED_OUT"
                     ) {
 
-                        denyNonOwnerPreview();
+                        cleanupIfNotOwner();
 
                         return;
 
                     }
 
 
-                    /*
-                     * login / token refresh
-                     */
-
                     if (
 
                         event ===
-                            "SIGNED_IN" ||
+                        "SIGNED_IN" ||
 
                         event ===
-                            "TOKEN_REFRESHED" ||
-
-                        event ===
-                            "INITIAL_SESSION"
+                        "TOKEN_REFRESHED"
 
                     ) {
 
-                        /*
-                         * إعادة التحقق من role
-                         */
-
-                        initialized =
-                            false;
-
-                        ownerProfile =
-                            null;
-
-                        await initOwnerPreview();
+                        await init();
 
                     }
 
                 }
 
             );
-
-        } catch (error) {
-
-            console.warn(
-
-                "Nova Owner Preview Auth Listener Error:",
-
-                error
-
-            );
-
-        }
 
     }
 
@@ -3051,28 +2559,17 @@
 
     async function boot() {
 
-        /*
-         * لو الـDOM مش جاهز
-         */
-
         if (
             document.readyState ===
             "loading"
         ) {
 
             document.addEventListener(
-
                 "DOMContentLoaded",
-
                 boot,
-
                 {
-
-                    once:
-                        true
-
+                    once: true
                 }
-
             );
 
             return;
@@ -3081,21 +2578,25 @@
 
 
         /*
-         * Give Supabase / profile.js / script.js
-         * فرصة بسيطة للتهيئة
+         * استنى شوية عشان:
+         * Supabase
+         * auth-guard
+         * script.js
+         * profile.js
+         * يكونوا بدأوا
          */
 
         setTimeout(
 
             async () => {
 
-                await initOwnerPreview();
+                await init();
 
-                installAuthListener();
+                await setupAuthListener();
 
             },
 
-            250
+            400
 
         );
 
@@ -3103,5 +2604,6 @@
 
 
     boot();
+
 
 })();
