@@ -7,6 +7,17 @@
         return;
     }
 
+    let redirecting = false;
+
+    const redirectToLogin = () => {
+        if (redirecting) return;
+        redirecting = true;
+
+        if (!window.location.pathname.endsWith("login.html")) {
+            window.location.replace("login.html");
+        }
+    };
+
     try {
         // ننتظر تحميل الجلسة المحفوظة
         const {
@@ -15,15 +26,19 @@
         } = await supabaseClient.auth.getSession();
 
         if (error) {
-            console.error("Nova Auth Session Error:", error);
-            window.location.replace("login.html");
+            console.error(
+                "Nova Auth Session Error:",
+                error
+            );
+
+            redirectToLogin();
             return;
         }
 
         // مفيش تسجيل دخول
-        if (!session) {
+        if (!session || !session.user) {
             console.log("Nova: No active session.");
-            window.location.replace("login.html");
+            redirectToLogin();
             return;
         }
 
@@ -44,15 +59,24 @@
                     event
                 );
 
-                if (
-                    event === "SIGNED_OUT" ||
-                    !newSession
-                ) {
-                    window.location.replace(
-                        "login.html"
-                    );
+                // تسجيل الخروج
+                if (event === "SIGNED_OUT") {
+                    window.novaUser = null;
+                    redirectToLogin();
+                    return;
                 }
 
+                // انتهت الجلسة أو لم تعد موجودة
+                if (!newSession) {
+                    window.novaUser = null;
+                    redirectToLogin();
+                    return;
+                }
+
+                // تحديث بيانات المستخدم
+                if (newSession.user) {
+                    window.novaUser = newSession.user;
+                }
             }
         );
 
@@ -63,8 +87,6 @@
             error
         );
 
-        window.location.replace(
-            "login.html"
-        );
+        redirectToLogin();
     }
 })();
