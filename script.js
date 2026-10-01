@@ -1491,41 +1491,7 @@ async function sendMessage(
                 const conversationHistory =
                     getConversationHistory();
 
-
-                response =
-                    await fetch(
-                        "/api/chat",
-                        {
-
-                            method:
-                                "POST",
-
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
-
-                            signal:
-                                currentAbortController
-                                    .signal,
-
-                            body:
-                                JSON.stringify({
-
-                                    message:
-                                        text,
-
-                                    history:
-                                        conversationHistory
-                                            .slice(
-                                                0,
-                                                -1
-                                            )
-
-                                })
-
-                        }
-                    );
+"/api/chat"
 
 
                 data =
