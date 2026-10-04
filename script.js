@@ -1256,7 +1256,6 @@ async function sendMessage(
         }
 
         return;
-
     }
 
 
@@ -1284,7 +1283,8 @@ async function sendMessage(
 
         if (chatInput) {
 
-            chatInput.value = "";
+            chatInput.value =
+                "";
 
             chatInput.style.height =
                 "auto";
@@ -1304,7 +1304,6 @@ async function sendMessage(
 
 
         return;
-
     }
 
 
@@ -1322,7 +1321,8 @@ async function sendMessage(
         customText === null
     ) {
 
-        chatInput.value = "";
+        chatInput.value =
+            "";
 
         chatInput.style.height =
             "auto";
@@ -1374,7 +1374,6 @@ async function sendMessage(
         );
 
         return;
-
     }
 
 
@@ -1409,11 +1408,12 @@ async function sendMessage(
         );
 
         return;
-
     }
 
 
-
+    // ======================================
+    // DEMO MODE
+    // ======================================
 
     if (DEMO_MODE) {
 
@@ -1425,412 +1425,493 @@ async function sendMessage(
         appendLoadingMessage();
 
 
-        await delay(
-            900
+        try {
+
+            await delay(
+                900
+            );
+
+
+            removeLoadingMessage();
+
+
+            createAssistantMessage(
+                getDemoReply(
+                    text
+                )
+            );
+
+
+            saveCurrentChat(
+                text
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Nova Demo Error:",
+                error
+            );
+
+
+            removeLoadingMessage();
+
+
+            createAssistantMessage(
+                "حصل خطأ في Demo Mode."
+            );
+
+
+        } finally {
+
+            updateSendButtonState(
+                false
+            );
+
+        }
+
+
+        return;
+    }
+
+
+    // ======================================
+    // REAL API
+    // ======================================
+
+    appendLoadingMessage();
+
+
+    updateSendButtonState(
+        true
+    );
+
+
+    currentAbortController =
+        new AbortController();
+
+
+    try {
+
+        let response =
+            null;
+
+        let data =
+            null;
+
+
+        // ==================================
+        // API REQUEST WITH RETRY
+        // ==================================
+
+        for (
+            let attempt = 1;
+            attempt <= 3;
+            attempt++
+        ) {
+
+            try {
+
+                const conversationHistory =
+                    getConversationHistory();
+
+
+                response =
+                    await fetch(
+                        "/api/chat",
+                        {
+                            method:
+                                "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/json"
+                            },
+
+                            body:
+                                JSON.stringify({
+                                    messages:
+                                        conversationHistory
+                                }),
+
+                            signal:
+                                currentAbortController.signal
+                        }
+                    );
+
+
+                if (
+                    !response.ok
+                ) {
+
+                    throw new Error(
+                        `Nova API Error: ${response.status} ${response.statusText}`
+                    );
+
+                }
+
+
+                data =
+                    await response.json();
+
+
+                break;
+
+
+            } catch (error) {
+
+                if (
+                    error &&
+                    error.name ===
+                    "AbortError"
+                ) {
+
+                    throw error;
+
+                }
+
+
+                console.error(
+                    `Nova API attempt ${attempt} failed:`,
+                    error
+                );
+
+
+                if (
+                    attempt === 3
+                ) {
+
+                    throw error;
+
+                }
+
+
+                await new Promise(
+                    resolve =>
+                        setTimeout(
+                            resolve,
+                            1500
+                        )
+                );
+
+            }
+
+        }
+
+
+        // ==================================
+        // CHECK RESPONSE
+        // ==================================
+
+        if (
+            !response ||
+            !response.ok
+        ) {
+
+            throw new Error(
+                "Nova API did not return a successful response."
+            );
+
+        }
+
+
+        // ==================================
+        // CHECK DATA
+        // ==================================
+
+        if (!data) {
+
+            throw new Error(
+                "Nova API returned empty data."
+            );
+
+        }
+
+
+        console.log(
+            "Nova API Response:",
+            data
+        );
+
+
+        // ==================================
+        // EXTRACT RESPONSE
+        // ==================================
+
+        let reply =
+            "";
+
+
+        let groundingMetadata =
+            null;
+
+
+        let sources =
+            [];
+
+
+        // ==================================
+        // TEXT RESPONSE
+        // ==================================
+
+        if (
+            typeof data?.text ===
+                "string" &&
+            data.text.trim()
+        ) {
+
+            reply =
+                data.text.trim();
+
+        }
+
+
+        // ==================================
+        // REPLY RESPONSE
+        // ==================================
+
+        else if (
+            typeof data?.reply ===
+                "string" &&
+            data.reply.trim()
+        ) {
+
+            reply =
+                data.reply.trim();
+
+        }
+
+
+        // ==================================
+        // RESPONSE FIELD
+        // ==================================
+
+        else if (
+            typeof data?.response ===
+                "string" &&
+            data.response.trim()
+        ) {
+
+            reply =
+                data.response.trim();
+
+        }
+
+
+        // ==================================
+        // MESSAGE FIELD
+        // ==================================
+
+        else if (
+            typeof data?.message ===
+                "string" &&
+            data.message.trim()
+        ) {
+
+            reply =
+                data.message.trim();
+
+        }
+
+
+        // ==================================
+        // GEMINI RESPONSE
+        // ==================================
+
+        else if (
+            data?.candidates?.[0]
+        ) {
+
+            const candidate =
+                data.candidates[0];
+
+
+            const parts =
+                candidate?.content?.parts ||
+                [];
+
+
+            reply =
+                parts
+                    .map(
+                        part =>
+                            typeof part?.text ===
+                            "string"
+                                ? part.text
+                                : ""
+                    )
+                    .join("")
+                    .trim();
+
+
+            groundingMetadata =
+                candidate?.groundingMetadata ||
+                null;
+
+
+            if (
+                typeof extractSearchSources ===
+                "function"
+            ) {
+
+                sources =
+                    extractSearchSources(
+                        groundingMetadata
+                    ) || [];
+
+            }
+
+        }
+
+
+        // ==================================
+        // STRING RESPONSE
+        // ==================================
+
+        else if (
+            typeof data ===
+            "string"
+        ) {
+
+            reply =
+                data.trim();
+
+        }
+
+
+        // ==================================
+        // REMOVE LOADING
+        // ==================================
+
+        removeLoadingMessage();
+
+
+        // ==================================
+        // DISPLAY RESPONSE
+        // ==================================
+
+        if (!reply) {
+
+            console.error(
+                "Nova: Empty AI reply. Full data:",
+                data
+            );
+
+
+            createAssistantMessage(
+                "وصل رد فاضي من السيرفر. افتح F12 وشوف Console لمعرفة الرد الحقيقي."
+            );
+
+        } else {
+
+            createAssistantMessage(
+                reply,
+                {
+                    sources
+                }
+            );
+
+
+            // ==============================
+            // CODE WORKSPACE
+            // ==============================
+
+            if (
+                isWorkspaceRequest(text)
+            ) {
+
+                const workspaceCode =
+                    extractWorkspaceCode(
+                        reply
+                    );
+
+
+                if (
+                    workspaceCode
+                ) {
+
+                    setTimeout(
+                        () => {
+
+                            openCodeWorkspace(
+                                workspaceCode
+                            );
+
+                        },
+                        100
+                    );
+
+                }
+
+            }
+
+        }
+
+
+        // ==================================
+        // SAVE CHAT
+        // ==================================
+
+        saveCurrentChat(
+            text
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "Nova AI Request Error:",
+            error
         );
 
 
         removeLoadingMessage();
 
 
-        createAssistantMessage(
-            getDemoReply(
-                text
-            )
-        );
-
-
-        updateSendButtonState(
-            false
-        );
-
-
-// ======================================
-// REAL API
-// ======================================
-
-appendLoadingMessage();
-
-updateSendButtonState(true);
-
-currentAbortController =
-    new AbortController();
-
-let completed = false;
-
-try {
-
-    let response = null;
-    let data = null;
-
-    // ======================================
-    // API REQUEST WITH RETRY
-    // ======================================
-
-    for (
-        let attempt = 1;
-        attempt <= 3;
-        attempt++
-    ) {
-
-        try {
-
-            const conversationHistory =
-                getConversationHistory();
-
-            response = await fetch(
-                "/api/chat",
-                {
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
-
-                    body: JSON.stringify({
-                        messages:
-                            conversationHistory
-                    }),
-
-                    signal:
-                        currentAbortController.signal
-                }
-            );
-
-            if (!response.ok) {
-
-                throw new Error(
-                    `Nova API Error: ${response.status} ${response.statusText}`
-                );
-
-            }
-
-            data =
-                await response.json();
-
-            completed = true;
-
-            break;
-
-        } catch (error) {
-
-            if (
-                error &&
-                error.name ===
-                "AbortError"
-            ) {
-
-                throw error;
-
-            }
-
-            console.error(
-                `Nova API attempt ${attempt} failed:`,
-                error
-            );
-
-            if (attempt === 3) {
-
-                throw error;
-
-            }
-
-            await new Promise(
-                resolve =>
-                    setTimeout(
-                        resolve,
-                        1500
-                    )
-            );
-        }
-    }
-
-
-    // ======================================
-    // CHECK RESPONSE
-    // ======================================
-
-    if (
-        !completed ||
-        !response
-    ) {
-
-        throw new Error(
-            "Nova API did not return a response."
-        );
-
-    }
-
-
-    // ======================================
-    // CHECK DATA
-    // ======================================
-
-    if (!data) {
-
-        throw new Error(
-            "Nova API returned empty data."
-        );
-
-    }
-
-    console.log(
-        "Nova API Response:",
-        data
-    );
-
-
-    // ======================================
-    // GET NOVA RESPONSE
-    // ======================================
-
-    let reply = "";
-
-    let groundingMetadata = null;
-
-    let sources = [];
-
-
-    // --------------------------------------
-    // { text: "..." }
-    // --------------------------------------
-
-    if (
-        typeof data?.text ===
-        "string" &&
-        data.text.trim()
-    ) {
-
-        reply =
-            data.text.trim();
-
-    }
-
-
-    // --------------------------------------
-    // { reply: "..." }
-    // --------------------------------------
-
-    else if (
-        typeof data?.reply ===
-        "string" &&
-        data.reply.trim()
-    ) {
-
-        reply =
-            data.reply.trim();
-
-    }
-
-
-    // --------------------------------------
-    // { response: "..." }
-    // --------------------------------------
-
-    else if (
-        typeof data?.response ===
-        "string" &&
-        data.response.trim()
-    ) {
-
-        reply =
-            data.response.trim();
-
-    }
-
-
-    // --------------------------------------
-    // { message: "..." }
-    // --------------------------------------
-
-    else if (
-        typeof data?.message ===
-        "string" &&
-        data.message.trim()
-    ) {
-
-        reply =
-            data.message.trim();
-
-    }
-
-
-    // --------------------------------------
-    // Gemini format
-    // --------------------------------------
-
-    else if (
-        data?.candidates?.[0]
-    ) {
-
-        const candidate =
-            data.candidates[0];
-
-        const parts =
-            candidate?.content?.parts ||
-            [];
-
-        reply =
-            parts
-                .map(
-                    part =>
-                        typeof part?.text ===
-                        "string"
-                            ? part.text
-                            : ""
-                )
-                .join("")
-                .trim();
-
-        groundingMetadata =
-            candidate?.groundingMetadata ||
-            null;
-
-        if (
-            typeof extractSearchSources ===
-            "function"
-        ) {
-
-            sources =
-                extractSearchSources(
-                    groundingMetadata
-                ) || [];
-
-        }
-
-    }
-
-
-    // --------------------------------------
-    // String response
-    // --------------------------------------
-
-    else if (
-        typeof data ===
-        "string"
-    ) {
-
-        reply =
-            data.trim();
-
-    }
-
-
-    // ======================================
-    // REMOVE LOADING
-    // ======================================
-
-    removeLoadingMessage();
-
-
-    // ======================================
-    // DISPLAY RESPONSE
-    // ======================================
-
-    if (!reply) {
-
-        console.error(
-            "Nova: Empty AI reply. Full data:",
-            data
-        );
-
-        createAssistantMessage(
-            "وصل رد فاضي من السيرفر. افتح F12 وشوف Console لمعرفة الرد الحقيقي."
-        );
-
-    } else {
-
-        createAssistantMessage(
-            reply,
-            {
-                sources
-            }
-        );
-
-    }
-
-
-    // ======================================
-    // SAVE CHAT
-    // ======================================
-
-    saveCurrentChat();
-
-
-} catch (error) {
-
-    console.error(
-        "Nova AI Request Error:",
-        error
-    );
-
-    removeLoadingMessage();
-
-
-    // ======================================
-    // REQUEST CANCELLED
-    // ======================================
-
-    if (
-        error &&
-        error.name ===
-        "AbortError"
-    ) {
-
-        createAssistantMessage(
-            "تم إلغاء الرد بواسطة المستخدم."
-        );
-
-    }
-
-
-    // ======================================
-    // API ERROR
-    // ======================================
-
-    else {
-
-        let errorMessage =
-            "حصل خطأ أثناء الاتصال بـ Nova AI. حاول مرة ثانية.";
-
+        // ==================================
+        // REQUEST CANCELLED
+        // ==================================
 
         if (
             error &&
-            typeof error.message ===
-            "string" &&
-            error.message.trim()
+            error.name ===
+            "AbortError"
         ) {
 
-            console.error(
-                "Nova API Error Details:",
-                error.message
+            createAssistantMessage(
+                "تم إلغاء الرد بواسطة المستخدم."
             );
 
         }
 
 
-        createAssistantMessage(
-            errorMessage
+        // ==================================
+        // API ERROR
+        // ==================================
+
+        else {
+
+            console.error(
+                "Nova API Error Details:",
+                error?.message ||
+                error
+            );
+
+
+            createAssistantMessage(
+                "حصل خطأ أثناء الاتصال بـ Nova AI. حاول مرة ثانية."
+            );
+
+        }
+
+
+        saveCurrentChat(
+            text
         );
 
-    }
 
-
-    saveCurrentChat();
-
-
-} finally {
-
-    updateSendButtonState(
-        false
-    );
-
-    currentAbortController =
-        null;
-
-}
-
+    } finally {
 
         updateSendButtonState(
             false
@@ -1853,7 +1934,6 @@ try {
     }
 
 }
-
 
 // ==========================================
 // 11. DEMO REPLY
