@@ -1447,13 +1447,6 @@ async function sendMessage(
         );
 
 
-        saveCurrentChat();
-
-        return;
-
-    }
-
-
     // ======================================
     // REAL API
     // ======================================
@@ -1464,21 +1457,16 @@ async function sendMessage(
         true
     );
 
-
     currentAbortController =
         new AbortController();
-
 
     let completed =
         false;
 
-
     try {
 
         let response = null;
-
         let data = null;
-
 
         for (
             let attempt = 1;
@@ -1491,12 +1479,36 @@ async function sendMessage(
                 const conversationHistory =
                     getConversationHistory();
 
-"/api/chat"
+                // إرسال الرسالة إلى Nova API
+                response = await fetch("/api/chat", {
+                    method: "POST",
 
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
 
+                    body: JSON.stringify({
+                        messages: conversationHistory
+                    }),
+
+                    signal:
+                        currentAbortController.signal
+                });
+
+                // التأكد أن السيرفر رد بنجاح
+                if (!response.ok) {
+
+                    throw new Error(
+                        `Nova API Error: ${response.status} ${response.statusText}`
+                    );
+
+                }
+
+                // قراءة JSON بعد التأكد أن response موجود
                 data =
                     await response.json();
 
+                completed = true;
 
                 break;
 
@@ -1508,7 +1520,28 @@ async function sendMessage(
                     error.name ===
                     "AbortError"
                 ) {
+                    throw error;
+                }
 
+                console.error(
+                    `Nova API attempt ${attempt} failed:`,
+                    error
+                );
+
+                if (attempt === 3) {
+                    throw error;
+                }
+
+                // انتظار بسيط قبل إعادة المحاولة
+                await new Promise(
+                    resolve =>
+                        setTimeout(
+                            resolve,
+                            1000
+                        )
+                );
+            }
+        }
                     throw error;
 
                 }
