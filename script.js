@@ -1834,12 +1834,6 @@ try {
 }
 
 
-        saveCurrentChat();
-
-    }
-
-    finally {
-
         updateSendButtonState(
             false
         );
