@@ -1526,10 +1526,10 @@ response = await fetch(
             "Content-Type": "application/json"
         },
 
-        body: JSON.stringify({
-            message: text,
-            history: conversationHistory
-        }),
+body: JSON.stringify({
+    message: text,
+    history: conversationHistory
+}),
 
         signal:
             currentAbortController.signal
