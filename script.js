@@ -1517,29 +1517,24 @@ async function sendMessage(
                     getConversationHistory();
 
 
-                response =
-                    await fetch(
-                        "/api/chat",
-                        {
-                            method:
-                                "POST",
+response = await fetch(
+    "/api/chat",
+    {
+        method: "POST",
 
-                            headers: {
-                                "Content-Type":
-                                    "application/json"
-                            },
+        headers: {
+            "Content-Type": "application/json"
+        },
 
-                            body:
-                                JSON.stringify({
-                                    messages:
-                                        conversationHistory
-                                }),
+        body: JSON.stringify({
+            message: text,
+            history: conversationHistory
+        }),
 
-                            signal:
-                                currentAbortController.signal
-                        }
-                    );
-
+        signal:
+            currentAbortController.signal
+    }
+);
 
                 if (
                     !response.ok
