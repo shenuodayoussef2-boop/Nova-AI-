@@ -1447,122 +1447,186 @@ async function sendMessage(
         );
 
 
-    // ======================================
-    // REAL API
-    // ======================================
+// ======================================
+// REAL API
+// ======================================
 
-    appendLoadingMessage();
+appendLoadingMessage();
 
-    updateSendButtonState(
-        true
-    );
+updateSendButtonState(true);
 
-    currentAbortController =
-        new AbortController();
+currentAbortController =
+    new AbortController();
 
-    let completed =
-        false;
+let completed = false;
 
-    try {
+try {
 
-        let response = null;
-        let data = null;
+    let response = null;
+    let data = null;
 
-        for (
-            let attempt = 1;
-            attempt <= 3;
-            attempt++
-        ) {
+    for (
+        let attempt = 1;
+        attempt <= 3;
+        attempt++
+    ) {
 
-            try {
+        try {
 
-                const conversationHistory =
-                    getConversationHistory();
+            const conversationHistory =
+                getConversationHistory();
 
-                // إرسال الرسالة إلى Nova API
-                response = await fetch("/api/chat", {
+            response = await fetch(
+                "/api/chat",
+                {
                     method: "POST",
 
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type":
+                            "application/json"
                     },
 
                     body: JSON.stringify({
-                        messages: conversationHistory
+                        messages:
+                            conversationHistory
                     }),
 
                     signal:
                         currentAbortController.signal
-                });
-
-                // التأكد أن السيرفر رد بنجاح
-                if (!response.ok) {
-
-                    throw new Error(
-                        `Nova API Error: ${response.status} ${response.statusText}`
-                    );
-
                 }
+            );
 
-                // قراءة JSON بعد التأكد أن response موجود
-                data =
-                    await response.json();
+            if (!response.ok) {
 
-                completed = true;
-
-                break;
+                throw new Error(
+                    `Nova API Error: ${response.status} ${response.statusText}`
+                );
 
             }
 
-            catch (error) {
+            data =
+                await response.json();
 
-                if (
-                    error.name ===
-                    "AbortError"
-                ) {
-                    throw error;
-                }
+            completed = true;
 
-                console.error(
-                    `Nova API attempt ${attempt} failed:`,
-                    error
-                );
+            break;
 
-                if (attempt === 3) {
-                    throw error;
-                }
+        } catch (error) {
 
-                // انتظار بسيط قبل إعادة المحاولة
-                await new Promise(
-                    resolve =>
-                        setTimeout(
-                            resolve,
-                            1000
-                        )
-                );
+            if (
+                error.name ===
+                "AbortError"
+            ) {
+                throw error;
             }
+
+            console.error(
+                `Nova API attempt ${attempt} failed:`,
+                error
+            );
+
+            if (attempt === 3) {
+                throw error;
+            }
+
+            await new Promise(
+                resolve =>
+                    setTimeout(
+                        resolve,
+                        1500
+                    )
+            );
         }
-                    throw error;
+    }
 
-                }
+    // ======================================
+    // CHECK RESPONSE
+    // ======================================
 
+    if (
+        !completed ||
+        !response
+    ) {
 
-                if (
-                    attempt === 3
-                ) {
+        throw new Error(
+            "Nova API did not return a response."
+        );
 
-                    throw error;
+    }
 
-                }
+    // ======================================
+    // REMOVE LOADING
+    // ======================================
 
+    removeLoadingMessage();
 
-                await delay(
-                    1500
-                );
+    // ======================================
+    // CHECK DATA
+    // ======================================
 
-            }
+    if (!data) {
 
-        }
+        throw new Error(
+            "Nova API returned empty data."
+        );
+
+    }
+
+    console.log(
+        "Nova API response:",
+        data
+    );
+
+    // ======================================
+    // GET NOVA RESPONSE
+    // ======================================
+
+    const aiMessage =
+        data.reply ||
+        data.message ||
+        data.response ||
+        data.content;
+
+    if (!aiMessage) {
+
+        throw new Error(
+            "Nova API returned no AI message."
+        );
+
+    }
+
+    // ======================================
+    // DISPLAY NOVA MESSAGE
+    // ======================================
+
+    appendAIMessage(
+        aiMessage
+    );
+
+    saveCurrentChat();
+
+} catch (error) {
+
+    console.error(
+        "Nova AI Request Error:",
+        error
+    );
+
+    removeLoadingMessage();
+
+    appendAIMessage(
+        "حصل خطأ أثناء الاتصال بـ Nova AI. حاول مرة ثانية."
+    );
+
+} finally {
+
+    updateSendButtonState(
+        false
+    );
+
+    currentAbortController =
+        null;
+}
 
 
         removeLoadingMessage();
