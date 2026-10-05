@@ -3215,7 +3215,15 @@ Make it visually appealing, detailed, coherent and polished.
 
 
         saveCurrentChat();
-
+if (
+    existing.title === "محادثة جديدة" &&
+    firstUserMessage
+) {
+    existing.title =
+        window.generateSmartChatTitle(
+            firstUserMessage
+        );
+}
     }
 
     catch (error) {
