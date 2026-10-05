@@ -45,11 +45,9 @@ try {
 
 
 let currentChatId = null;
-
 let currentAbortController = null;
-
 let pendingVisionImage = null;
-
+let novaSearchEnabled = false;
 
 // ==========================================
 // 2. DOM REFERENCES
