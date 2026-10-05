@@ -5322,5 +5322,68 @@ body.nova-plan-preview-ultra {
 })();
 
 </script>
+<script>
+(function () {
+
+    "use strict";
+
+    /* ==========================================
+       🧠 NOVA SMART CHAT TITLE
+    ========================================== */
+
+    window.generateSmartChatTitle = function (text) {
+
+        if (!text) {
+            return "محادثة جديدة";
+        }
+
+        let title = String(text)
+            .replace(/https?:\/\/\S+/gi, "")
+            .replace(/www\.\S+/gi, "")
+            .replace(/```[\s\S]*?```/g, "")
+            .replace(/[#*_~`]/g, "")
+            .replace(/\s+/g, " ")
+            .trim();
+
+        if (!title) {
+            return "محادثة جديدة";
+        }
+
+        title = title
+            .replace(
+                /^[،,.!?؟:;؛\-–—\s]+/,
+                ""
+            )
+            .replace(
+                /[،,.!?؟:;؛\-–—\s]+$/,
+                ""
+            )
+            .trim();
+
+        if (!title) {
+            return "محادثة جديدة";
+        }
+
+        const words = title.split(" ");
+
+        if (words.length > 7) {
+            title =
+                words
+                    .slice(0, 7)
+                    .join(" ") + "...";
+        }
+
+        if (title.length > 42) {
+            title =
+                title
+                    .substring(0, 42)
+                    .trim() + "...";
+        }
+
+        return title || "محادثة جديدة";
+    };
+
+})();
+</script>
 </body>
 </html>
