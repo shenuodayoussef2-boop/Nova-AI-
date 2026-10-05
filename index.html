@@ -4648,6 +4648,679 @@ body.nova-plan-preview-ultra {
 }
 
 </style>
-</body>
+```html
+<!-- =========================================================
+     NOVA SOCIAL MEDIA
+========================================================= -->
 
+<div
+    id="novaSocialModal"
+    class="nova-social-modal"
+    aria-hidden="true"
+>
+
+    <div class="nova-social-card">
+
+        <div class="nova-social-header">
+
+            <div>
+                <h3>تابع Nova AI 🚀</h3>
+
+                <p>
+                    تابعنا على منصات التواصل الاجتماعي
+                </p>
+            </div>
+
+            <button
+                id="closeNovaSocialModal"
+                class="nova-social-close"
+                type="button"
+                aria-label="إغلاق"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+
+        <div class="nova-social-links">
+
+            <!-- FACEBOOK -->
+
+            <a
+                class="nova-social-link facebook"
+                href="https://www.facebook.com/share/19U8X5i6tZ/"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+
+                <span class="nova-social-icon">
+                    <i class="fa-brands fa-facebook-f"></i>
+                </span>
+
+                <span class="nova-social-info">
+
+                    <strong>
+                        Facebook
+                    </strong>
+
+                    <small>
+                        تابعنا على فيسبوك
+                    </small>
+
+                </span>
+
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+
+            </a>
+
+
+            <!-- TIKTOK -->
+
+            <a
+                class="nova-social-link tiktok"
+                href="https://www.tiktok.com/@youssefcodes5"
+                target="_blank"
+                rel="noopener noreferrer"
+            >
+
+                <span class="nova-social-icon">
+                    <i class="fa-brands fa-tiktok"></i>
+                </span>
+
+                <span class="nova-social-info">
+
+                    <strong>
+                        TikTok
+                    </strong>
+
+                    <small>
+                        تابعنا على تيك توك
+                    </small>
+
+                </span>
+
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+
+            </a>
+
+
+            <!-- INSTAGRAM - COMING SOON -->
+
+            <div
+                class="nova-social-link instagram disabled"
+                aria-disabled="true"
+            >
+
+            </div>
+
+        </div>
+
+
+        <div class="nova-social-footer">
+            <span class="nova-social-dot"></span>
+
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<style>
+
+/* =========================================================
+   NOVA SOCIAL MODAL
+========================================================= */
+
+.nova-social-modal {
+
+    position: fixed;
+
+    inset: 0;
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    background:
+        rgba(0, 0, 0, 0.68);
+
+    backdrop-filter:
+        blur(10px);
+
+    z-index: 999999;
+
+}
+
+
+.nova-social-modal.active {
+
+    display: flex;
+
+}
+
+
+.nova-social-card {
+
+    width: 100%;
+
+    max-width: 460px;
+
+    padding: 22px;
+
+    border-radius: 24px;
+
+    background:
+        #0b141d;
+
+    border:
+        1px solid
+        rgba(0, 229, 255, 0.14);
+
+    box-shadow:
+        0 30px 100px
+        rgba(0, 0, 0, 0.55);
+
+    animation:
+        novaSocialIn .22s ease;
+
+}
+
+
+@keyframes novaSocialIn {
+
+    from {
+
+        opacity: 0;
+
+        transform:
+            translateY(12px)
+            scale(.97);
+
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+
+    }
+
+}
+
+
+.nova-social-header {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 15px;
+
+    margin-bottom: 20px;
+
+}
+
+
+.nova-social-header h3 {
+
+    margin: 0 0 6px;
+
+    color: #fff;
+
+    font-size: 20px;
+
+}
+
+
+.nova-social-header p {
+
+    margin: 0;
+
+    color: #8ea0ad;
+
+    font-size: 12px;
+
+}
+
+
+.nova-social-close {
+
+    width: 38px;
+
+    height: 38px;
+
+    flex-shrink: 0;
+
+    border: 0;
+
+    border-radius: 12px;
+
+    background:
+        rgba(255,255,255,.06);
+
+    color: #fff;
+
+    cursor: pointer;
+
+}
+
+
+.nova-social-links {
+
+    display: grid;
+
+    gap: 10px;
+
+}
+
+
+.nova-social-link {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    width: 100%;
+
+    min-height: 64px;
+
+    padding: 10px 12px;
+
+    box-sizing: border-box;
+
+    border-radius: 16px;
+
+    border:
+        1px solid
+        rgba(255,255,255,.07);
+
+    background:
+        rgba(255,255,255,.035);
+
+    color: #fff;
+
+    text-decoration: none;
+
+    transition:
+        transform .2s ease,
+        background .2s ease,
+        border-color .2s ease;
+
+}
+
+
+.nova-social-link:hover {
+
+    transform:
+        translateY(-2px);
+
+    background:
+        rgba(255,255,255,.065);
+
+}
+
+
+.nova-social-icon {
+
+    width: 42px;
+
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 13px;
+
+    font-size: 19px;
+
+}
+
+
+.nova-social-link.facebook
+.nova-social-icon {
+
+    background:
+        rgba(24,119,242,.15);
+
+    color:
+        #1877f2;
+
+}
+
+
+.nova-social-link.tiktok
+.nova-social-icon {
+
+    background:
+        rgba(255,255,255,.08);
+
+    color:
+        #fff;
+
+}
+
+
+.nova-social-link.instagram
+.nova-social-icon {
+
+    background:
+        rgba(225,48,108,.12);
+
+    color:
+        #e1306c;
+
+}
+
+
+.nova-social-info {
+
+    flex: 1;
+
+    min-width: 0;
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 4px;
+
+}
+
+
+.nova-social-info strong {
+
+    font-size: 14px;
+
+}
+
+
+.nova-social-info small {
+
+    color: #81929f;
+
+    font-size: 11px;
+
+}
+
+
+.nova-social-link >
+.fa-arrow-up-right-from-square {
+
+    color: #71818d;
+
+    font-size: 11px;
+
+}
+
+
+.nova-social-link.disabled {
+
+    opacity: .65;
+
+    cursor: default;
+
+}
+
+
+.nova-social-link.disabled:hover {
+
+    transform: none;
+
+    background:
+        rgba(255,255,255,.035);
+
+}
+
+
+.nova-social-coming-soon {
+
+    padding:
+        5px 9px;
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(225,48,108,.1);
+
+    border:
+        1px solid
+        rgba(225,48,108,.2);
+
+    color:
+        #e86b9b;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+}
+
+
+.nova-social-footer {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    margin-top: 17px;
+
+    color: #6f818d;
+
+    font-size: 10px;
+
+}
+
+
+.nova-social-dot {
+
+    width: 6px;
+
+    height: 6px;
+
+    border-radius: 50%;
+
+    background:
+        #00e5ff;
+
+    box-shadow:
+        0 0 10px
+        rgba(0,229,255,.7);
+
+}
+
+
+/* =========================================================
+   MOBILE
+========================================================= */
+
+@media (max-width: 600px) {
+
+    .nova-social-card {
+
+        padding: 18px;
+
+        border-radius: 20px;
+
+    }
+
+    .nova-social-header h3 {
+
+        font-size: 18px;
+
+    }
+
+}
+
+</style>
+
+
+<script>
+
+(function () {
+
+    "use strict";
+
+
+    const publicLinksSetting =
+        document.querySelector(
+            '[data-setting="public-links"]'
+        );
+
+
+    const socialModal =
+        document.getElementById(
+            "novaSocialModal"
+        );
+
+
+    const closeSocialModal =
+        document.getElementById(
+            "closeNovaSocialModal"
+        );
+
+
+    if (
+        !publicLinksSetting ||
+        !socialModal
+    ) {
+
+        console.error(
+            "Nova Social: عناصر السوشيال ميديا غير موجودة."
+        );
+
+        return;
+
+    }
+
+
+    /* ==========================================
+       OPEN
+    ========================================== */
+
+    publicLinksSetting.addEventListener(
+        "click",
+        function (event) {
+
+            event.preventDefault();
+            event.stopPropagation();
+            event.stopImmediatePropagation();
+
+            socialModal.classList.add(
+                "active"
+            );
+
+            socialModal.setAttribute(
+                "aria-hidden",
+                "false"
+            );
+
+        },
+        true
+    );
+
+
+    /* ==========================================
+       CLOSE
+    ========================================== */
+
+    closeSocialModal?.addEventListener(
+        "click",
+        function () {
+
+            socialModal.classList.remove(
+                "active"
+            );
+
+            socialModal.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+        }
+    );
+
+
+    /* ==========================================
+       OUTSIDE
+    ========================================== */
+
+    socialModal.addEventListener(
+        "click",
+        function (event) {
+
+            if (
+                event.target ===
+                socialModal
+            ) {
+
+                socialModal.classList.remove(
+                    "active"
+                );
+
+                socialModal.setAttribute(
+                    "aria-hidden",
+                    "true"
+                );
+
+            }
+
+        }
+    );
+
+
+    /* ==========================================
+       ESC
+    ========================================== */
+
+    document.addEventListener(
+        "keydown",
+        function (event) {
+
+            if (
+                event.key === "Escape"
+            ) {
+
+                socialModal.classList.remove(
+                    "active"
+                );
+
+                socialModal.setAttribute(
+                    "aria-hidden",
+                    "true"
+                );
+
+            }
+
+        }
+    );
+
+
+})();
+
+</script>
+</body>
 </html>
