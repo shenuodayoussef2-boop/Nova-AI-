@@ -23,7 +23,7 @@
         const {
             data: { session },
             error
-        } = await supabaseClient.auth.getSession();
+        } = await window.novaSupabase.auth.getSession();
 
         if (error) {
             console.error(
