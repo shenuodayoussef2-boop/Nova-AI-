@@ -1517,25 +1517,43 @@ async function sendMessage(
                     getConversationHistory();
 
 
+const {
+    data: {
+        session
+    }
+} = await supabase.auth.getSession();
+
+if (!session?.access_token) {
+    throw new Error(
+        "UNAUTHENTICATED"
+    );
+}
+
 response = await fetch(
     "/api/chat",
     {
         method: "POST",
 
         headers: {
-            "Content-Type": "application/json"
+            "Content-Type":
+                "application/json",
+
+            "Authorization":
+                `Bearer ${session.access_token}`
         },
 
-body: JSON.stringify({
-    message: text,
-    history: conversationHistory
-}),
+        body: JSON.stringify({
+            message: text,
+            history: conversationHistory,
+
+            // حالة Nova Search
+            search: novaSearchEnabled
+        }),
 
         signal:
             currentAbortController.signal
     }
 );
-
                 if (
                     !response.ok
                 ) {
