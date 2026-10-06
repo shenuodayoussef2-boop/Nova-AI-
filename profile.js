@@ -6,6 +6,7 @@
    - لا يكرر الحساب
    - يفتح / يقفل القائمة
    - يقرأ الاسم والخطة من Supabase
+   - يدعم FREE / GO / PRO / ULTRA
    - يدعم العربية والإنجليزية
    - Theme buttons
    - Language
@@ -56,6 +57,9 @@
             free:
                 "FREE",
 
+            go:
+                "GO",
+
             pro:
                 "PRO",
 
@@ -92,6 +96,9 @@
 
             free:
                 "FREE",
+
+            go:
+                "GO",
 
             pro:
                 "PRO",
@@ -443,6 +450,17 @@
 
 
         if (
+            value === "go"
+        ) {
+
+            return t(
+                "go"
+            );
+
+        }
+
+
+        if (
             value === "pro"
         ) {
 
@@ -694,6 +712,10 @@
             );
 
 
+        /*
+         * Normalize plan
+         */
+
         const plan =
             String(
                 currentProfile.plan ||
@@ -846,6 +868,8 @@
             el.profilePlan.classList.remove(
 
                 "free",
+
+                "go",
 
                 "pro",
 
@@ -1636,12 +1660,34 @@
                 )
             ) {
 
-                document.getElementById(
-                    "novaProfilePlan"
-                ).textContent =
+                const profilePlan =
+                    document.getElementById(
+                        "novaProfilePlan"
+                    );
+
+
+                profilePlan.textContent =
                     getPlanName(
                         plan
                     );
+
+
+                profilePlan.classList.remove(
+
+                    "free",
+
+                    "go",
+
+                    "pro",
+
+                    "ultra"
+
+                );
+
+
+                profilePlan.classList.add(
+                    plan
+                );
 
             }
 
