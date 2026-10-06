@@ -110,10 +110,10 @@ if (profile?.role === "partner") {
                 error
             );
 
-            showMessage(
-                "البريد الإلكتروني أو كلمة المرور غير صحيحة.",
-                "error"
-            );
+showMessage(
+    error.message || "حدث خطأ أثناء تسجيل الدخول.",
+    "error"
+);
 
             loginBtn.disabled = false;
 
