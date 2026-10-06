@@ -3713,6 +3713,290 @@ body.nova-plan-preview-ultra {
 })();
 
 </script>
+<!-- ==========================================
+     💎 NOVA AI - SUBSCRIPTIONS MODAL
+========================================== -->
 
+<div
+    id="novaSubscriptionsModal"
+    class="nova-subscriptions-modal"
+    aria-hidden="true"
+>
+    <div
+        class="nova-subscriptions-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="novaSubscriptionsTitle"
+    >
+
+        <!-- Header -->
+        <div class="nova-subscriptions-header">
+
+            <div>
+                <span class="nova-subscriptions-kicker">
+                    NOVA AI
+                </span>
+
+                <h2 id="novaSubscriptionsTitle">
+                    اختر باقتك
+                </h2>
+
+                <p>
+                    اختار الباقة المناسبة لطريقة استخدامك لـ Nova AI.
+                </p>
+            </div>
+
+            <button
+                type="button"
+                id="closeSubscriptionsModal"
+                class="nova-subscriptions-close"
+                aria-label="إغلاق"
+            >
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+        </div>
+
+
+        <!-- Plans -->
+        <div class="nova-plans-grid">
+
+            <!-- FREE -->
+            <article
+                class="nova-plan-card"
+                data-plan="free"
+            >
+                <div class="nova-plan-icon">
+                    <i class="fa-solid fa-gift"></i>
+                </div>
+
+                <span class="nova-plan-badge">
+                    مجاني
+                </span>
+
+                <h3>Free</h3>
+
+                <p class="nova-plan-description">
+                    البداية المثالية لتجربة Nova AI.
+                </p>
+
+                <div class="nova-plan-price">
+                    <strong>مجاني</strong>
+                </div>
+
+                <ul class="nova-plan-features">
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        محادثات AI الأساسية
+                    </li>
+
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        حفظ المحادثات
+                    </li>
+
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        الميزات الأساسية
+                    </li>
+
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        مناسب للاستخدام الخفيف
+                    </li>
+                </ul>
+
+                <button
+                    type="button"
+                    class="nova-plan-button current"
+                    data-plan-action="free"
+                >
+                    الباقة الحالية
+                </button>
+            </article>
+
+
+            <!-- PRO -->
+            <article
+                class="nova-plan-card featured"
+                data-plan="pro"
+            >
+                <div class="nova-plan-popular">
+                    الأكثر شعبية
+                </div>
+
+                <div class="nova-plan-icon">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+
+                <span class="nova-plan-badge">
+                    للمستخدمين النشطين
+                </span>
+
+                <h3>Pro</h3>
+
+                <p class="nova-plan-description">
+                    إمكانيات أكبر للاستخدام اليومي.
+                </p>
+
+                <div class="nova-plan-price">
+                    <strong>Pro</strong>
+                </div>
+
+                <ul class="nova-plan-features">
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        حدود استخدام أعلى
+                    </li>
+
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        أولوية أفضل في الاستخدام
+                    </li>
+
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        رفع ملفات أكبر
+                    </li>
+
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        ميزات AI متقدمة
+                    </li>
+                </ul>
+
+                <button
+                    type="button"
+                    class="nova-plan-button"
+                    data-plan-action="pro"
+                >
+                    اشترك في Pro
+                </button>
+            </article>
+
+
+            <!-- ULTRA -->
+            <article
+                class="nova-plan-card"
+                data-plan="ultra"
+            >
+                <div class="nova-plan-icon">
+                    <i class="fa-solid fa-rocket"></i>
+                </div>
+
+                <span class="nova-plan-badge">
+                    للمستخدمين المكثفين
+                </span>
+
+                <h3>Ultra</h3>
+
+                <p class="nova-plan-description">
+                    تجربة Nova AI بأعلى مستوى.
+                </p>
+
+                <div class="nova-plan-price">
+                    <strong>Ultra</strong>
+                </div>
+
+                <ul class="nova-plan-features">
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        حدود استخدام كبيرة
+                    </li>
+
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        أولوية عالية
+                    </li>
+
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        دعم الملفات الكبيرة
+                    </li>
+
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        الوصول للميزات المتقدمة
+                    </li>
+                </ul>
+
+                <button
+                    type="button"
+                    class="nova-plan-button"
+                    data-plan-action="ultra"
+                >
+                    اشترك في Ultra
+                </button>
+            </article>
+
+
+            <!-- GO -->
+            <article
+                class="nova-plan-card"
+                data-plan="go"
+            >
+                <div class="nova-plan-icon">
+                    <i class="fa-solid fa-gem"></i>
+                </div>
+
+                <span class="nova-plan-badge">
+                    سريع ومرن
+                </span>
+
+                <h3>Go</h3>
+
+                <p class="nova-plan-description">
+                    باقة بسيطة لمن يريد أكثر من الاستخدام الأساسي.
+                </p>
+
+                <div class="nova-plan-price">
+                    <strong>Go</strong>
+                </div>
+
+                <ul class="nova-plan-features">
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        حدود أعلى من Free
+                    </li>
+
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        وصول لميزات مختارة
+                    </li>
+
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        تجربة أسرع
+                    </li>
+
+                    <li>
+                        <i class="fa-solid fa-check"></i>
+                        مناسب للاستخدام اليومي
+                    </li>
+                </ul>
+
+                <button
+                    type="button"
+                    class="nova-plan-button"
+                    data-plan-action="go"
+                >
+                    اشترك في Go
+                </button>
+            </article>
+
+        </div>
+
+
+        <!-- Footer -->
+        <div class="nova-subscriptions-footer">
+            <i class="fa-solid fa-shield-halved"></i>
+
+            <span>
+                إدارة الباقة والاشتراك ستكون مرتبطة بحساب Nova AI الخاص بك.
+            </span>
+        </div>
+
+    </div>
+</div>
 </body>
 </html>
