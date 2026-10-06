@@ -1748,16 +1748,11 @@ async function sendMessage(
 
                             },
 
-                            body:
-                                JSON.stringify({
-
-                                    message:
-                                        text,
-
-                                    history:
-                                        conversationHistory
-
-                                }),
+        body: JSON.stringify({
+        message: text,
+    history: conversationHistory,
+    chatId: currentChatId
+})
 
                             signal:
                                 currentAbortController.signal
@@ -1777,13 +1772,59 @@ async function sendMessage(
                 }
 
 
-                data =
-                    await response.json();
+data =
+    await response.json();
 
 
-                break;
+// ==========================================
+// NOVA CHAT QUOTA
+// ==========================================
 
-            }
+if (
+    response.status === 429 &&
+    data?.code === "LIMIT_REACHED"
+) {
+
+    updateNovaQuota({
+
+        allowed: false,
+
+        used:
+            data.used ?? 0,
+
+        limit:
+            data.limit ?? 0,
+
+        remaining:
+            0,
+
+        reset_at:
+            data.reset_at || null,
+
+        plan:
+            data.plan || null
+
+    });
+
+    return;
+}
+
+
+// ==========================================
+// UPDATE QUOTA
+// ==========================================
+
+if (data?.quota) {
+
+    updateNovaQuota(
+        data.quota
+    );
+}
+
+
+break;
+
+}
 
             catch (error) {
 
