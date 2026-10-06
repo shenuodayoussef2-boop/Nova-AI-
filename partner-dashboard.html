@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Nova AI - Partner Dashboard</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            font-family: Arial, "Tajawal", sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at top,
+                    #102b3d,
+                    #071018 55%,
+                    #04080c
+                );
+
+            color: white;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+
+            margin: auto;
+
+            padding: 30px 20px;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+            font-size: 30px;
+        }
+
+        .header p {
+            margin: 0;
+            color: #91a3b2;
+        }
+
+        .stats {
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fit,
+                    minmax(200px, 1fr)
+                );
+
+            gap: 20px;
+        }
+
+        .card {
+            padding: 24px;
+
+            border-radius: 20px;
+
+            background:
+                rgba(12, 20, 28, 0.94);
+
+            border:
+                1px solid
+                rgba(0, 255, 255, 0.12);
+
+            box-shadow:
+                0 20px 50px
+                rgba(0, 0, 0, 0.25);
+        }
+
+        .card-title {
+            color: #91a3b2;
+
+            font-size: 14px;
+
+            margin-bottom: 12px;
+        }
+
+        .card-number {
+            font-size: 36px;
+
+            font-weight: bold;
+        }
+
+        #error {
+            display: none;
+
+            margin-bottom: 20px;
+
+            padding: 14px;
+
+            border-radius: 12px;
+
+            background:
+                rgba(255, 70, 70, 0.1);
+
+            border:
+                1px solid
+                rgba(255, 70, 70, 0.25);
+
+            color: #ffaaaa;
+        }
+
+        #loading {
+            color: #91a3b2;
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="container">
+
+        <header class="header">
+
+            <h1>
+                Nova AI Partner Dashboard
+            </h1>
+
+            <p>
+                إحصائيات المشروع
+            </p>
+
+        </header>
+
+
+        <div id="error"></div>
+
+
+        <div id="loading">
+            جاري تحميل الإحصائيات...
+        </div>
+
+
+        <section
+            id="stats"
+            class="stats"
+            style="display: none;"
+        >
+
+            <div class="card">
+
+                <div class="card-title">
+                    إجمالي المستخدمين
+                </div>
+
+                <div
+                    id="totalUsers"
+                    class="card-number"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-title">
+                    Free
+                </div>
+
+                <div
+                    id="freeUsers"
+                    class="card-number"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-title">
+                    GO
+                </div>
+
+                <div
+                    id="goUsers"
+                    class="card-number"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-title">
+                    PRO
+                </div>
+
+                <div
+                    id="proUsers"
+                    class="card-number"
+                >
+                    0
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-title">
+                    ULTRA
+                </div>
+
+                <div
+                    id="ultraUsers"
+                    class="card-number"
+                >
+                    0
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="supabase.js"></script>
+<script>
+
+"use strict";
+
+async function loadPartnerStats() {
+
+    const loading =
+        document.getElementById("loading");
+
+    const stats =
+        document.getElementById("stats");
+
+    const errorBox =
+        document.getElementById("error");
+
+    try {
+
+        const {
+            data: {
+                user
+            }
+        } =
+            await window.novaSupabase
+                .auth
+                .getUser();
+
+        if (!user) {
+
+            window.location.href =
+                "login.html";
+
+            return;
+        }
+
+
+        const {
+            data,
+            error
+        } =
+            await window.novaSupabase
+                .rpc("get_partner_stats");
+
+
+        if (error) {
+            throw error;
+        }
+
+
+        document
+            .getElementById("totalUsers")
+            .textContent =
+            data.total_users ?? 0;
+
+        document
+            .getElementById("freeUsers")
+            .textContent =
+            data.free_users ?? 0;
+
+        document
+            .getElementById("goUsers")
+            .textContent =
+            data.go_users ?? 0;
+
+        document
+            .getElementById("proUsers")
+            .textContent =
+            data.pro_users ?? 0;
+
+        document
+            .getElementById("ultraUsers")
+            .textContent =
+            data.ultra_users ?? 0;
+
+
+        loading.style.display =
+            "none";
+
+        stats.style.display =
+            "grid";
+
+
+    } catch (error) {
+
+        console.error(
+            "Partner Dashboard Error:",
+            error
+        );
+
+        loading.style.display =
+            "none";
+
+        errorBox.style.display =
+            "block";
+
+        errorBox.textContent =
+            "ليس لديك صلاحية للوصول إلى لوحة الشريك.";
+    }
+}
+
+
+loadPartnerStats();
+
+</script>
+</body>
+</html>
