@@ -5,10 +5,14 @@
 
 
 // ==========================================
-// SUPABASE QUOTA CHECK
+// SUPABASE CHAT QUOTA CHECK
 // ==========================================
 
-async function consumePlanQuota(req, feature = "messages") {
+async function consumeChatQuota(
+    req,
+    chatId,
+    feature = "messages"
+) {
 
     const supabaseUrl =
         process.env.SUPABASE_URL || "";
@@ -28,12 +32,33 @@ async function consumePlanQuota(req, feature = "messages") {
         };
     }
 
+
+    // ==========================================
+    // CHAT ID REQUIRED
+    // ==========================================
+
+    if (
+        !chatId ||
+        typeof chatId !== "string" ||
+        !chatId.trim()
+    ) {
+
+        return {
+            allowed: false,
+            code: "CHAT_ID_REQUIRED"
+        };
+    }
+
+
     const authHeader =
         req.headers?.authorization ||
         req.headers?.Authorization ||
         "";
 
-    if (!authHeader.startsWith("Bearer ")) {
+
+    if (
+        !authHeader.startsWith("Bearer ")
+    ) {
 
         return {
             allowed: false,
@@ -41,43 +66,63 @@ async function consumePlanQuota(req, feature = "messages") {
         };
     }
 
+
     try {
 
-        const response = await fetch(
-            `${supabaseUrl}/rest/v1/rpc/nova_check_and_consume`,
-            {
-                method: "POST",
+        const response =
+            await fetch(
+                `${supabaseUrl}/rest/v1/rpc/nova_check_and_consume_chat`,
+                {
+                    method: "POST",
 
-                headers: {
-                    "Content-Type": "application/json",
-                    "apikey": supabaseKey,
-                    "Authorization": authHeader
-                },
+                    headers: {
+                        "Content-Type":
+                            "application/json",
 
-                body: JSON.stringify({
-                    p_feature: feature
-                })
-            }
-        );
+                        "apikey":
+                            supabaseKey,
+
+                        "Authorization":
+                            authHeader
+                    },
+
+                    body:
+                        JSON.stringify({
+
+                            p_chat_id:
+                                chatId.trim(),
+
+                            p_feature:
+                                feature
+                        })
+                }
+            );
+
 
         const rawText =
             await response.text();
 
+
         let data = null;
 
+
         try {
+
             data =
                 rawText
                     ? JSON.parse(rawText)
                     : null;
+
         } catch {
+
             data = null;
         }
+
 
         if (!response.ok) {
 
             console.error(
-                "NOVA QUOTA RPC ERROR:",
+                "NOVA CHAT QUOTA RPC ERROR:",
                 response.status,
                 rawText
             );
@@ -88,36 +133,44 @@ async function consumePlanQuota(req, feature = "messages") {
             };
         }
 
+
         const result =
             Array.isArray(data)
                 ? data[0]
                 : data;
 
-        if (!result || typeof result !== "object") {
+
+        if (
+            !result ||
+            typeof result !== "object"
+        ) {
 
             console.error(
-                "NOVA QUOTA INVALID RESPONSE:",
+                "NOVA CHAT QUOTA INVALID RESPONSE:",
                 data
             );
 
             return {
                 allowed: false,
-                code: "QUOTA_INVALID_RESPONSE"
+                code:
+                    "QUOTA_INVALID_RESPONSE"
             };
         }
+
 
         return result;
 
     } catch (error) {
 
         console.error(
-            "NOVA QUOTA FETCH ERROR:",
+            "NOVA CHAT QUOTA FETCH ERROR:",
             error
         );
 
         return {
             allowed: false,
-            code: "QUOTA_REQUEST_FAILED"
+            code:
+                "QUOTA_REQUEST_FAILED"
         };
     }
 }
@@ -129,9 +182,14 @@ async function consumePlanQuota(req, feature = "messages") {
 
 function extractMessage(body) {
 
-    if (!body || typeof body !== "object") {
+    if (
+        !body ||
+        typeof body !== "object"
+    ) {
+
         return "";
     }
+
 
     // ------------------------------------------
     // Standard format
@@ -166,10 +224,13 @@ function extractMessage(body) {
     // { messages: [...] }
     // ------------------------------------------
 
-    if (Array.isArray(body.messages)) {
+    if (
+        Array.isArray(body.messages)
+    ) {
 
         const userMessages =
             body.messages
+
                 .filter(item =>
                     item &&
                     typeof item === "object" &&
@@ -178,51 +239,74 @@ function extractMessage(body) {
                         !item.role
                     )
                 )
+
                 .map(item => {
 
                     if (
-                        typeof item.content === "string"
+                        typeof item.content ===
+                        "string"
                     ) {
+
                         return item.content.trim();
                     }
 
+
                     if (
-                        typeof item.text === "string"
+                        typeof item.text ===
+                        "string"
                     ) {
+
                         return item.text.trim();
                     }
 
+
                     if (
-                        Array.isArray(item.content)
+                        Array.isArray(
+                            item.content
+                        )
                     ) {
 
                         return item.content
+
                             .map(part => {
 
                                 if (
-                                    typeof part === "string"
+                                    typeof part ===
+                                    "string"
                                 ) {
+
                                     return part;
                                 }
 
+
                                 if (
                                     part &&
-                                    typeof part.text === "string"
+                                    typeof part.text ===
+                                    "string"
                                 ) {
+
                                     return part.text;
                                 }
 
+
                                 return "";
                             })
+
                             .join(" ")
+
                             .trim();
                     }
 
+
                     return "";
                 })
+
                 .filter(Boolean);
 
-        if (userMessages.length) {
+
+        if (
+            userMessages.length
+        ) {
 
             return userMessages[
                 userMessages.length - 1
@@ -237,7 +321,8 @@ function extractMessage(body) {
     // ------------------------------------------
 
     if (
-        typeof body.content === "string" &&
+        typeof body.content ===
+        "string" &&
         body.content.trim()
     ) {
 
@@ -255,18 +340,30 @@ function extractMessage(body) {
 
 function extractHistory(body) {
 
-    if (!body || typeof body !== "object") {
+    if (
+        !body ||
+        typeof body !== "object"
+    ) {
+
         return [];
     }
 
-    if (Array.isArray(body.history)) {
+
+    if (
+        Array.isArray(body.history)
+    ) {
+
         return body.history;
     }
 
-    if (Array.isArray(body.messages)) {
+
+    if (
+        Array.isArray(body.messages)
+    ) {
 
         return body.messages.slice(0, -1);
     }
+
 
     return [];
 }
@@ -328,8 +425,10 @@ function isDeveloperQuestion(message) {
         /nova.*kim.*yaptı/i
     ];
 
+
     return patterns.some(
-        pattern => pattern.test(message)
+        pattern =>
+            pattern.test(message)
     );
 }
 
@@ -343,6 +442,7 @@ const systemInstruction = {
     parts: [
 
         {
+
             text: `
 أنت Nova AI 2.0 Pro 🌍.
 
@@ -491,7 +591,10 @@ AI Apps
 // CHAT HANDLER
 // ==========================================
 
-export default async function handler(req, res) {
+export default async function handler(
+    req,
+    res
+) {
 
     // ==========================================
     // CORS
@@ -517,7 +620,9 @@ export default async function handler(req, res) {
     // OPTIONS
     // ==========================================
 
-    if (req.method === "OPTIONS") {
+    if (
+        req.method === "OPTIONS"
+    ) {
 
         return res
             .status(200)
@@ -529,7 +634,9 @@ export default async function handler(req, res) {
     // POST ONLY
     // ==========================================
 
-    if (req.method !== "POST") {
+    if (
+        req.method !== "POST"
+    ) {
 
         return res
             .status(405)
@@ -545,14 +652,25 @@ export default async function handler(req, res) {
         // REQUEST BODY
         // ==========================================
 
-        let body = req.body || {};
+        let body =
+            req.body || {};
 
-        // بعض إعدادات Vercel قد تعطي body كنص
-        if (typeof body === "string") {
+
+        // بعض إعدادات Vercel
+        // قد تعطي body كنص
+
+        if (
+            typeof body ===
+            "string"
+        ) {
 
             try {
-                body = JSON.parse(body);
+
+                body =
+                    JSON.parse(body);
+
             } catch {
+
                 body = {};
             }
         }
@@ -562,6 +680,18 @@ export default async function handler(req, res) {
             "NOVA REQUEST BODY:",
             JSON.stringify(body)
         );
+
+
+        // ==========================================
+        // CHAT ID
+        // ==========================================
+
+        const chatId =
+            body.chatId ||
+            body.chat_id ||
+            body.conversationId ||
+            body.conversation_id ||
+            "";
 
 
         // ==========================================
@@ -581,9 +711,39 @@ export default async function handler(req, res) {
 
 
         console.log(
+            "NOVA CHAT ID:",
+            chatId
+        );
+
+
+        console.log(
             "NOVA MESSAGE:",
             message
         );
+
+
+        // ==========================================
+        // VALIDATE CHAT ID
+        // ==========================================
+
+        if (
+            !chatId ||
+            typeof chatId !==
+            "string" ||
+            !chatId.trim()
+        ) {
+
+            return res
+                .status(400)
+                .json({
+
+                    error:
+                        "معرف المحادثة غير موجود.",
+
+                    code:
+                        "CHAT_ID_REQUIRED"
+                });
+        }
 
 
         // ==========================================
@@ -604,7 +764,8 @@ export default async function handler(req, res) {
 
                     received:
                         body &&
-                        typeof body === "object"
+                        typeof body ===
+                        "object"
                             ? Object.keys(body)
                             : []
                 });
@@ -612,31 +773,62 @@ export default async function handler(req, res) {
 
 
         // ==========================================
-        // PLAN QUOTA CHECK
+        // CHAT QUOTA CHECK
         // ==========================================
 
         const quota =
-            await consumePlanQuota(
+            await consumeChatQuota(
                 req,
+                chatId,
                 "messages"
             );
 
 
-        if (!quota.allowed) {
+        console.log(
+            "NOVA CHAT QUOTA:",
+            quota
+        );
+
+
+        // ==========================================
+        // QUOTA BLOCK
+        // ==========================================
+
+        if (
+            !quota.allowed
+        ) {
 
             const status =
-                quota.code === "UNAUTHENTICATED"
+                quota.code ===
+                "UNAUTHENTICATED"
+
                     ? 401
-                    : quota.code === "LIMIT_REACHED"
+
+                    : quota.code ===
+                      "LIMIT_REACHED"
+
                         ? 429
-                        : quota.code === "FEATURE_NOT_AVAILABLE"
+
+                        : quota.code ===
+                          "FEATURE_NOT_AVAILABLE"
+
                             ? 403
-                            : 500;
+
+                            : quota.code ===
+                              "CHAT_ID_REQUIRED"
+
+                                ? 400
+
+                                : 500;
 
 
             let errorMessage =
-                "حصلت مشكلة أثناء التحقق من الباقة.";
+                "حصلت مشكلة أثناء التحقق من حد المحادثة.";
 
+
+            // --------------------------------------
+            // Unauthenticated
+            // --------------------------------------
 
             if (
                 quota.code ===
@@ -648,15 +840,23 @@ export default async function handler(req, res) {
             }
 
 
+            // --------------------------------------
+            // Limit reached
+            // --------------------------------------
+
             else if (
                 quota.code ===
                 "LIMIT_REACHED"
             ) {
 
                 errorMessage =
-                    "وصلت للحد اليومي للرسائل.";
+                    "وصلت للحد المسموح به في المحادثة الحالية.";
             }
 
+
+            // --------------------------------------
+            // Feature unavailable
+            // --------------------------------------
 
             else if (
                 quota.code ===
@@ -665,6 +865,20 @@ export default async function handler(req, res) {
 
                 errorMessage =
                     "ميزة الدردشة مش متاحة في الباقة الحالية.";
+            }
+
+
+            // --------------------------------------
+            // Chat ID
+            // --------------------------------------
+
+            else if (
+                quota.code ===
+                "CHAT_ID_REQUIRED"
+            ) {
+
+                errorMessage =
+                    "معرف المحادثة غير موجود.";
             }
 
 
@@ -686,6 +900,9 @@ export default async function handler(req, res) {
                         quota.feature ||
                         "messages",
 
+                    chat_id:
+                        chatId,
+
                     used:
                         quota.used ??
                         null,
@@ -700,6 +917,10 @@ export default async function handler(req, res) {
 
                     reset_at:
                         quota.reset_at ||
+                        null,
+
+                    reset_time:
+                        quota.reset_time ||
                         null
                 });
         }
@@ -710,7 +931,9 @@ export default async function handler(req, res) {
         // ==========================================
 
         if (
-            isDeveloperQuestion(message)
+            isDeveloperQuestion(
+                message
+            )
         ) {
 
             return res
@@ -741,7 +964,26 @@ export default async function handler(req, res) {
                         "nova-2.0-pro",
 
                     server:
-                        "nova-developer"
+                        "nova-developer",
+
+                    quota: {
+
+                        used:
+                            quota.used ??
+                            null,
+
+                        limit:
+                            quota.limit ??
+                            null,
+
+                        remaining:
+                            quota.remaining ??
+                            null,
+
+                        reset_at:
+                            quota.reset_at ||
+                            null
+                    }
                 });
         }
 
@@ -754,14 +996,23 @@ export default async function handler(req, res) {
             process.env.GEMINI_API_KEY ||
             "";
 
+
         const apiKeys =
             rawKeys
+
                 .split(",")
-                .map(key => key.trim())
+
+                .map(
+                    key =>
+                        key.trim()
+                )
+
                 .filter(Boolean);
 
 
-        if (!apiKeys.length) {
+        if (
+            !apiKeys.length
+        ) {
 
             console.error(
                 "NOVA ERROR: GEMINI_API_KEY is missing"
@@ -784,29 +1035,39 @@ export default async function handler(req, res) {
         // BUILD SAFE CONTEXT
         // ==========================================
 
-        let contextText = "";
+        let contextText =
+            "";
 
 
-        if (history.length) {
+        if (
+            history.length
+        ) {
 
-            const safeHistory = [];
+            const safeHistory =
+                [];
 
 
-            for (const item of history) {
+            for (
+                const item of history
+            ) {
 
                 if (
                     !item ||
-                    typeof item !== "object"
+                    typeof item !==
+                    "object"
                 ) {
+
                     continue;
                 }
 
 
-                let text = "";
+                let text =
+                    "";
 
 
                 if (
-                    typeof item.content === "string"
+                    typeof item.content ===
+                    "string"
                 ) {
 
                     text =
@@ -815,7 +1076,8 @@ export default async function handler(req, res) {
 
 
                 else if (
-                    typeof item.text === "string"
+                    typeof item.text ===
+                    "string"
                 ) {
 
                     text =
@@ -824,14 +1086,19 @@ export default async function handler(req, res) {
 
 
                 if (!text) {
+
                     continue;
                 }
 
 
                 const role =
-                    item.role === "assistant" ||
-                    item.role === "model"
+                    item.role ===
+                    "assistant" ||
+                    item.role ===
+                    "model"
+
                         ? "Nova"
+
                         : "المستخدم";
 
 
@@ -842,10 +1109,14 @@ export default async function handler(req, res) {
 
 
             const limitedHistory =
-                safeHistory.slice(-20);
+                safeHistory.slice(
+                    -20
+                );
 
 
-            if (limitedHistory.length) {
+            if (
+                limitedHistory.length
+            ) {
 
                 contextText = `
 
@@ -892,7 +1163,8 @@ ${message}
         // GEMINI REQUEST
         // ==========================================
 
-        let lastError = null;
+        let lastError =
+            null;
 
 
         for (
@@ -919,7 +1191,8 @@ ${message}
 
                         {
 
-                            method: "POST",
+                            method:
+                                "POST",
 
                             headers: {
 
@@ -979,19 +1252,23 @@ ${message}
                     await response.text();
 
 
-                let data = null;
+                let data =
+                    null;
 
 
                 try {
 
                     data =
                         rawText
-                            ? JSON.parse(rawText)
+                            ? JSON.parse(
+                                rawText
+                            )
                             : null;
 
                 } catch {
 
-                    data = null;
+                    data =
+                        null;
                 }
 
 
@@ -999,10 +1276,14 @@ ${message}
                 // GEMINI ERROR
                 // ==========================================
 
-                if (!response.ok) {
+                if (
+                    !response.ok
+                ) {
 
                     const errorMessage =
-                        data?.error?.message ||
+                        data
+                            ?.error
+                            ?.message ||
                         rawText ||
                         `Gemini HTTP ${response.status}`;
 
@@ -1034,7 +1315,11 @@ ${message}
                         ?.parts;
 
 
-                if (!Array.isArray(parts)) {
+                if (
+                    !Array.isArray(
+                        parts
+                    )
+                ) {
 
                     console.error(
                         "NOVA: Gemini returned no text",
@@ -1052,12 +1337,17 @@ ${message}
 
                 const answer =
                     parts
-                        .map(part =>
-                            typeof part?.text === "string"
-                                ? part.text
-                                : ""
+
+                        .map(
+                            part =>
+                                typeof part?.text ===
+                                "string"
+                                    ? part.text
+                                    : ""
                         )
+
                         .join("")
+
                         .trim();
 
 
@@ -1108,7 +1398,26 @@ ${message}
                             "nova-2.0-pro",
 
                         server:
-                            "nova-gemini"
+                            "nova-gemini",
+
+                        quota: {
+
+                            used:
+                                quota.used ??
+                                null,
+
+                            limit:
+                                quota.limit ??
+                                null,
+
+                            remaining:
+                                quota.remaining ??
+                                null,
+
+                            reset_at:
+                                quota.reset_at ||
+                                null
+                        }
                     });
             }
 
@@ -1239,7 +1548,26 @@ ${message}
                             "nova-2.0-pro-fallback",
 
                         server:
-                            "nova-fallback"
+                            "nova-fallback",
+
+                        quota: {
+
+                            used:
+                                quota.used ??
+                                null,
+
+                            limit:
+                                quota.limit ??
+                                null,
+
+                            remaining:
+                                quota.remaining ??
+                                null,
+
+                            reset_at:
+                                quota.reset_at ||
+                                null
+                        }
                     });
             }
 
@@ -1253,7 +1581,9 @@ ${message}
         }
 
 
-        catch (fallbackError) {
+        catch (
+            fallbackError
+        ) {
 
             console.error(
                 "NOVA FALLBACK ERROR:",
@@ -1309,7 +1639,7 @@ ${message}
 
                 details:
                     error?.message ||
-                    "Unknown server error"
+                    "Unknown error"
             });
     }
 }
