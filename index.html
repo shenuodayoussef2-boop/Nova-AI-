@@ -4851,154 +4851,107 @@ body.nova-plan-preview-ultra {
 
     "use strict";
 
-
     function setupSubscriptions() {
 
         const modal =
-            document.getElementById(
-                "novaSubscriptionsModal"
-            );
+            document.getElementById("novaSubscriptionsModal");
 
-        const profileButton =
-            document.getElementById(
-                "novaProfileSubscriptions"
-            );
+        const profileBtn =
+            document.getElementById("novaProfileSubscriptions");
 
-        const settingsButton =
+        const settingsBtn =
             document.querySelector(
                 '[data-setting="subscriptions"]'
             );
 
-        const closeButton =
+        const closeBtn =
             document.getElementById(
                 "closeSubscriptionsModal"
             );
 
-
-        if (
-            !modal ||
-            !closeButton
-        ) {
-
+        if (!modal || !closeBtn) {
             console.error(
-                "Nova Subscriptions: عناصر الاشتراكات مش موجودة."
+                "Nova Subscriptions: العناصر الأساسية مش موجودة."
             );
-
             return;
-
         }
-
-
-        if (
-            modal.dataset.subscriptionsReady ===
-            "true"
-        ) {
-
-            return;
-
-        }
-
-
-        modal.dataset.subscriptionsReady =
-            "true";
-
 
         function openSubscriptions(event) {
 
             if (event) {
-
                 event.preventDefault();
-
                 event.stopPropagation();
-
                 event.stopImmediatePropagation();
-
             }
 
-
-            modal.classList.add(
-                "active"
-            );
-
+            modal.classList.add("active");
 
             modal.setAttribute(
                 "aria-hidden",
                 "false"
             );
 
-
             document.body.classList.add(
                 "subscriptions-open"
             );
-
         }
-
 
         function closeSubscriptions(event) {
 
             if (event) {
-
                 event.preventDefault();
-
                 event.stopPropagation();
-
+                event.stopImmediatePropagation();
             }
 
-
-            modal.classList.remove(
-                "active"
-            );
-
+            modal.classList.remove("active");
 
             modal.setAttribute(
                 "aria-hidden",
                 "true"
             );
 
-
             document.body.classList.remove(
                 "subscriptions-open"
+            );
+        }
+
+        if (profileBtn) {
+
+            profileBtn.addEventListener(
+                "click",
+                openSubscriptions,
+                true
             );
 
         }
 
+        if (settingsBtn) {
 
-        profileButton?.addEventListener(
-            "click",
-            openSubscriptions,
-            true
-        );
+            settingsBtn.addEventListener(
+                "click",
+                openSubscriptions,
+                true
+            );
 
+        }
 
-        settingsButton?.addEventListener(
-            "click",
-            openSubscriptions,
-            true
-        );
-
-
-        closeButton.addEventListener(
+        closeBtn.addEventListener(
             "click",
             closeSubscriptions,
             true
         );
 
-
         modal.addEventListener(
             "click",
             function (event) {
 
-                if (
-                    event.target === modal
-                ) {
-
+                if (event.target === modal) {
                     closeSubscriptions();
-
                 }
 
             }
         );
-
 
         document.addEventListener(
             "keydown",
@@ -5008,58 +4961,15 @@ body.nova-plan-preview-ultra {
                     event.key === "Escape" &&
                     modal.classList.contains("active")
                 ) {
-
                     closeSubscriptions();
-
                 }
 
             }
         );
 
-
-        const planButtons =
-            modal.querySelectorAll(
-                "[data-plan-action]"
-            );
-
-
-        planButtons.forEach(
-            function (button) {
-
-                button.addEventListener(
-                    "click",
-                    function () {
-
-                        const plan =
-                            button.dataset.planAction;
-
-
-                        if (
-                            !plan ||
-                            plan === "free"
-                        ) {
-
-                            return;
-
-                        }
-
-
-                        console.log(
-                            "Nova plan selected:",
-                            plan
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-
         console.log(
             "Nova Subscriptions: جاهزة ✅"
         );
-
     }
 
 
