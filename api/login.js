@@ -88,13 +88,17 @@ loginForm.addEventListener(
                 throw profileError;
             }
 
-            if (profile?.role === "partner") {
+if (profile?.role === "partner") {
 
-                window.location.href =
-                    "partner-dashboard.html";
+    showMessage(
+        "تم تسجيل الدخول كـ Partner بنجاح ✅",
+        "success"
+    );
 
-                return;
-            }
+    console.log("Partner login confirmed:", profile.role);
+
+    return;
+}
 
             window.location.href =
                 "index.html";
