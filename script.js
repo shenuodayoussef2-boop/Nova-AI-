@@ -3490,197 +3490,235 @@ Make it visually appealing, detailed, coherent and polished.
 
 
 // ==========================================
-// 28. EDIT IMAGE
+// 28. GENERATE IMAGE
 // ==========================================
 
-async function editImageWithPrompt(
-    text,
-    imageSrc
-) {
+async function generateImage(text, options = {}) {
 
     appendLoadingMessage();
-
 
     try {
 
         const translated =
-            await translateToEnglishIfNeeded(
-                text
-            );
+            await translateToEnglishIfNeeded(text);
 
+        const prompt = `
+Create the image requested by the user.
+
+USER REQUEST:
+${translated}
+
+STRICT INSTRUCTIONS:
+- Follow the user's request exactly.
+- Do not add unrelated objects, people, text, locations, or events.
+- Do not change important details requested by the user.
+- Preserve the requested composition, subject, style, and context.
+- If the request describes a specific person, preserve the requested identity
+  and important visual characteristics.
+- If a reference image is supplied, treat it as the primary visual reference.
+- Do not invent changes that the user did not request.
+- Keep all requested elements coherent and visually consistent.
+- Produce a polished, detailed, high-quality result.
+`;
+
+        const body = {
+            prompt
+        };
+
+        if (options.width) {
+            body.width = options.width;
+        }
+
+        if (options.height) {
+            body.height = options.height;
+        }
+
+        if (options.aspectRatio) {
+            body.aspectRatio = options.aspectRatio;
+        }
+
+        if (options.quality) {
+            body.quality = options.quality;
+        }
 
         const response =
-            await fetch(
-                "/api/edit-image",
-                {
+            await fetch("/api/generate-image", {
+                method: "POST",
 
-                    method:
-                        "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
+                body: JSON.stringify(body)
+            });
 
-                    body:
-                        JSON.stringify({
+        let data = null;
 
-                            image:
-                                imageSrc,
-
-                            prompt:
-                                translated
-
-                        })
-
-                }
-            );
-
-
-        const data =
-            await response.json();
-
+        try {
+            data = await response.json();
+        } catch (jsonError) {
+            data = null;
+        }
 
         removeLoadingMessage();
 
+        if (!response.ok || data?.success === false) {
 
-        if (
-            !response.ok
-        ) {
+            console.error(
+                "Nova AI - Image API Error:",
+                data
+            );
 
             throw new Error(
                 data?.error ||
-                "Image editing failed"
+                "فشل توليد الصورة"
             );
-
         }
-
 
         const imageUrl =
             data?.imageUrl ||
             data?.url ||
             data?.image;
 
-
         if (!imageUrl) {
 
-            throw new Error(
-                "لم يتم استلام الصورة المعدلة"
+            console.error(
+                "Nova AI - No image returned:",
+                data
             );
 
+            throw new Error(
+                "لم يتم استلام الصورة من الخادم"
+            );
         }
 
-
         appendMediaMessage(
-            "الصورة بعد التعديل",
+            "الصورة الناتجة",
             imageUrl,
             text,
             "image"
         );
 
+        saveCurrentChat(text);
 
-        saveCurrentChat(
-            text
-        );
-
-    }
-
-    catch (error) {
+    } catch (error) {
 
         removeLoadingMessage();
 
-
         console.error(
-            "Edit Image Error:",
+            "Nova AI - Generate Image Error:",
             error
         );
 
-
         createAssistantMessage(
-            "حصل خطأ أثناء تعديل الصورة."
+            "حصل خطأ أثناء توليد الصورة. حاول مرة ثانية."
         );
 
-
-        saveCurrentChat(
-            text
-        );
-
+        saveCurrentChat(text);
     }
-
 }
-
 
 // ==========================================
 // 29. GENERATE VIDEO
 // ==========================================
 
-async function generateVideo(
-    text
-) {
+async function generateVideo(text, options = {}) {
 
     appendLoadingMessage();
-
 
     try {
 
         const translated =
-            await translateToEnglishIfNeeded(
-                text
-            );
+            await translateToEnglishIfNeeded(text);
 
+        const prompt = `
+Create a video based ONLY on the user's request.
 
-        const prompt =
-            encodeURIComponent(
-                translated +
-                ", cinematic video still, realistic lighting, cinematic composition, highly detailed"
-            );
+User request:
+${translated}
 
+IMPORTANT:
+- Follow the user's requested action exactly.
+- Do not add unrelated objects, people, text, locations or events.
+- Preserve the intended subject and visual identity.
+- If a reference image is provided, preserve the person's identity,
+  facial features, clothing details and important visual characteristics
+  unless the user explicitly asks to change them.
+- Keep the scene coherent from beginning to end.
+- Do not reinterpret the request unnecessarily.
+`;
 
-        const imageUrl =
-            `https://image.pollinations.ai/prompt/${prompt}?width=1280&height=720&nologo=true`;
+        const body = {
+            prompt,
+            duration: options.duration || 5,
+            aspectRatio: options.aspectRatio || "16:9"
+        };
 
+        if (options.image) {
+            body.image = options.image;
+        }
 
-        await delay(
-            2500
-        );
+        const response =
+            await fetch("/api/generate-video", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)
+            });
 
+        const data =
+            await response.json();
 
         removeLoadingMessage();
 
+        if (!response.ok || data?.success === false) {
+
+            throw new Error(
+                data?.error ||
+                "Video generation failed"
+            );
+
+        }
+
+        const videoUrl =
+            data?.videoUrl ||
+            data?.url ||
+            data?.video;
+
+        if (!videoUrl) {
+
+            throw new Error(
+                "لم يتم استلام الفيديو"
+            );
+
+        }
 
         appendMediaMessage(
-            "مشهد الفيديو",
-            imageUrl,
+            "الفيديو الناتج",
+            videoUrl,
             text,
             "video"
         );
 
-
-        saveCurrentChat(
-            text
-        );
+        saveCurrentChat(text);
 
     }
 
     catch (error) {
 
         removeLoadingMessage();
-
 
         console.error(
             "Generate Video Error:",
             error
         );
 
-
         createAssistantMessage(
-            "حصل خطأ أثناء تجهيز المشهد."
+            "حصل خطأ أثناء توليد الفيديو. حاول مرة ثانية."
         );
 
-
-        saveCurrentChat(
-            text
-        );
+        saveCurrentChat(text);
 
     }
 
@@ -3702,20 +3740,48 @@ function appendMediaMessage(
         return;
     }
 
-
     const message =
-        document.createElement(
-            "div"
-        );
-
+        document.createElement("div");
 
     message.className =
-        "message bot-message nova-message";
-
+        "message bot-message nova-message nova-media-message";
 
     const isVideo =
         type === "video";
 
+    const safeSrc =
+        escapeAttribute(src);
+
+    const safeTitle =
+        escapeHtml(title);
+
+    const safeAlt =
+        escapeAttribute(altText);
+
+    const mediaHTML =
+        isVideo
+            ? `
+                <video
+                    class="nova-generated-media nova-generated-video"
+                    controls
+                    playsinline
+                    preload="metadata"
+                >
+                    <source
+                        src="${safeSrc}"
+                        type="video/mp4"
+                    >
+                    المتصفح لا يدعم تشغيل الفيديو.
+                </video>
+            `
+            : `
+                <img
+                    src="${safeSrc}"
+                    alt="${safeAlt}"
+                    class="nova-generated-media nova-generated-image"
+                    loading="lazy"
+                >
+            `;
 
     message.innerHTML = `
 
@@ -3723,29 +3789,70 @@ function appendMediaMessage(
             <span>✦</span>
         </div>
 
-
         <div class="nova-message-body">
 
             <div class="nova-message-content">
 
                 <div class="nova-media-card">
 
-                    <div class="nova-media-title">
-                        ${escapeHtml(title)}
+                    <div class="nova-media-header">
+
+                        <div class="nova-media-title">
+                            ${safeTitle}
+                        </div>
+
+                        <div class="nova-media-type">
+                            ${
+                                isVideo
+                                    ? "VIDEO"
+                                    : "IMAGE"
+                            }
+                        </div>
+
                     </div>
 
-                    <img
-                        src="${escapeAttribute(src)}"
-                        alt="${escapeAttribute(altText)}"
-                        class="nova-generated-media"
-                        loading="lazy"
-                    >
+                    <div class="nova-media-preview">
+                        ${mediaHTML}
+                    </div>
+
+                    <div class="nova-media-actions">
+
+                        <button
+                            type="button"
+                            class="nova-media-action nova-open-media"
+                            title="فتح"
+                        >
+                            <i class="fas fa-expand"></i>
+                            <span>فتح</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            class="nova-media-action nova-copy-media-url"
+                            title="نسخ الرابط"
+                        >
+                            <i class="fas fa-link"></i>
+                            <span>نسخ الرابط</span>
+                        </button>
+
+                        <a
+                            class="nova-media-action nova-download-media"
+                            href="${safeSrc}"
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <i class="fas fa-download"></i>
+                            <span>حفظ</span>
+                        </a>
+
+                    </div>
 
                     ${
                         isVideo
                             ? `
                                 <div class="nova-media-note">
-                                    🎬 تم إنشاء مشهد بصري للفكرة.
+                                    🎬 تم إنشاء الفيديو حسب وصفك.
                                 </div>
                             `
                             : ""
@@ -3755,34 +3862,38 @@ function appendMediaMessage(
 
             </div>
 
-
-            <div class="message-actions">
-
-                <button
-                    class="message-action copy-media-url"
-                    type="button"
-                    title="نسخ الرابط"
-                >
-                    <i class="fas fa-link"></i>
-                </button>
-
-            </div>
-
         </div>
 
     `;
 
+    chatBox.appendChild(message);
 
-    chatBox.appendChild(
-        message
-    );
+    const openButton =
+        message.querySelector(
+            ".nova-open-media"
+        );
 
+    if (openButton) {
+
+        openButton.addEventListener(
+            "click",
+            () => {
+
+                window.open(
+                    src,
+                    "_blank",
+                    "noopener,noreferrer"
+                );
+
+            }
+        );
+
+    }
 
     const copyButton =
         message.querySelector(
-            ".copy-media-url"
+            ".nova-copy-media-url"
         );
-
 
     if (copyButton) {
 
@@ -3796,9 +3907,10 @@ function appendMediaMessage(
                         src
                     );
 
-
                     showToast(
-                        "تم نسخ رابط الصورة!"
+                        isVideo
+                            ? "تم نسخ رابط الفيديو!"
+                            : "تم نسخ رابط الصورة!"
                     );
 
                 }
@@ -3815,7 +3927,6 @@ function appendMediaMessage(
         );
 
     }
-
 
     chatBox.scrollTop =
         chatBox.scrollHeight;
