@@ -1,67 +1,225 @@
+// ==========================================
+// NOVA AI - IMAGE GENERATION API
+// api/generate-image.js
+// ==========================================
+
 export default async function handler(req, res) {
-  // السماح بطلبات POST فقط
-  if (req.method !== "POST") {
-    return res.status(405).json({
-      error: "يسمح بطلبات POST فقط"
-    });
-  }
 
-  try {
-    const { prompt } = req.body || {};
+    // ==========================================
+    // METHOD
+    // ==========================================
 
-    // التحقق من الوصف
-    if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
-      return res.status(400).json({
-        error: "وصف الصورة فارغ"
-      });
+    if (req.method !== "POST") {
+        return res.status(405).json({
+            success: false,
+            error: "يسمح بطلبات POST فقط"
+        });
     }
 
-    // قراءة مفتاح fal.ai من Vercel
-    const apiKey = process.env.FAL_KEY;
+    try {
 
-    if (!apiKey) {
-      return res.status(500).json({
-        error: "مفتاح fal.ai غير موجود في إعدادات Vercel"
-      });
+        // ==========================================
+        // REQUEST DATA
+        // ==========================================
+
+        const {
+            prompt,
+            width,
+            height,
+            aspectRatio,
+            quality
+        } = req.body || {};
+
+        // ==========================================
+        // VALIDATE PROMPT
+        // ==========================================
+
+        if (
+            !prompt ||
+            typeof prompt !== "string" ||
+            !prompt.trim()
+        ) {
+            return res.status(400).json({
+                success: false,
+                error: "وصف الصورة فارغ"
+            });
+        }
+
+        // ==========================================
+        // FAL KEY
+        // ==========================================
+
+        const apiKey = process.env.FAL_KEY;
+
+        if (!apiKey) {
+            console.error(
+                "Nova AI: FAL_KEY is missing"
+            );
+
+            return res.status(500).json({
+                success: false,
+                error: "خدمة توليد الصور غير مهيأة حاليًا"
+            });
+        }
+
+        // ==========================================
+        // IMAGE SIZE
+        // ==========================================
+
+        let imageSize = "landscape_4_3";
+
+        if (
+            aspectRatio === "1:1"
+        ) {
+            imageSize = "square_hd";
+
+        } else if (
+            aspectRatio === "16:9"
+        ) {
+            imageSize = "landscape_16_9";
+
+        } else if (
+            aspectRatio === "9:16"
+        ) {
+            imageSize = "portrait_16_9";
+
+        } else if (
+            aspectRatio === "4:3"
+        ) {
+            imageSize = "landscape_4_3";
+
+        } else if (
+            aspectRatio === "3:4"
+        ) {
+            imageSize = "portrait_4_3";
+        }
+
+        // ==========================================
+        // FAL.AI REQUEST
+        // ==========================================
+
+        const response = await fetch(
+            "https://fal.run/fal-ai/flux/dev",
+            {
+                method: "POST",
+
+                headers: {
+                    "Authorization": `Key ${apiKey}`,
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+
+                    prompt: prompt.trim(),
+
+                    image_size: imageSize,
+
+                    num_images: 1,
+
+                    enable_safety_checker: true
+
+                })
+            }
+        );
+
+        // ==========================================
+        // RESPONSE
+        // ==========================================
+
+        let data = null;
+
+        try {
+            data = await response.json();
+        } catch (error) {
+
+            console.error(
+                "Nova AI: Invalid fal.ai JSON response"
+            );
+
+            return res.status(502).json({
+                success: false,
+                error: "استجابة غير صالحة من خدمة الصور"
+            });
+        }
+
+        // ==========================================
+        // FAL ERROR
+        // ==========================================
+
+        if (!response.ok) {
+
+            console.error(
+                "fal.ai STATUS:",
+                response.status
+            );
+
+            console.error(
+                "fal.ai RESPONSE:",
+                data
+            );
+
+            return res.status(502).json({
+                success: false,
+                error: "حدث خطأ أثناء توليد الصورة"
+            });
+        }
+
+        // ==========================================
+        // EXTRACT IMAGE
+        // ==========================================
+
+        const imageUrl =
+            data?.images?.[0]?.url ||
+            data?.image?.url ||
+            null;
+
+        if (!imageUrl) {
+
+            console.error(
+                "Nova AI: No image returned",
+                data
+            );
+
+            return res.status(502).json({
+                success: false,
+                error: "لم يتم استلام الصورة من خدمة التوليد"
+            });
+        }
+
+        // ==========================================
+        // SUCCESS
+        // ==========================================
+
+        return res.status(200).json({
+
+            success: true,
+
+            image: imageUrl,
+
+            imageUrl: imageUrl,
+
+            url: imageUrl,
+
+            meta: {
+                model: "fal-ai/flux/dev",
+                aspectRatio:
+                    aspectRatio || "4:3",
+                quality:
+                    quality || "standard"
+            }
+
+        });
+
+    } catch (error) {
+
+        console.error(
+            "Nova AI - Image Generation Error:",
+            error
+        );
+
+        return res.status(500).json({
+            success: false,
+            error: "حدث خطأ أثناء توليد الصورة"
+        });
     }
-
-    // طلب توليد الصورة من fal.ai
-    const response = await fetch("https://fal.run/fal-ai/flux/dev", {
-      method: "POST",
-      headers: {
-        "Authorization": `Key ${apiKey}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        prompt: prompt.trim(),
-        image_size: "landscape_4_3",
-        num_images: 1,
-        enable_safety_checker: true
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return res.status(response.status).json({
-        error: "حدث خطأ من fal.ai",
-        details: data
-      });
-    }
-
-    // إرجاع بيانات الصورة إلى الواجهة
-    return res.status(200).json({
-      success: true,
-      image: data.images?.[0]?.url || null,
-      data
-    });
-
-  } catch (error) {
-    console.error("fal.ai API Error:", error);
-
-    return res.status(500).json({
-      error: "حدث خطأ أثناء توليد الصورة",
-      details: error.message
-    });
-  }
 }
