@@ -4811,3 +4811,58 @@ body {
         max-height: 340px;
     }
 }
+/* ==========================================
+   NOVA QUOTA BANNER
+   ========================================== */
+
+.nova-quota-banner {
+    width: 100%;
+    display: none;
+    align-items: center;
+    gap: 12px;
+
+    padding: 10px 14px;
+    margin-bottom: 8px;
+
+    border-radius: 12px;
+
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    color: #e5e7eb;
+}
+
+
+.nova-quota-icon {
+    font-size: 18px;
+}
+
+
+.nova-quota-content {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+
+    font-size: 13px;
+}
+
+
+.nova-quota-content strong {
+    font-weight: 600;
+}
+
+
+.nova-quota-content span {
+    color: #9ca3af;
+}
+
+
+.nova-quota-content small {
+    color: #9ca3af;
+}
+
+
+#sendChatBtn.quota-disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
