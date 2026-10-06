@@ -47,7 +47,20 @@ try {
 let currentChatId = null;
 let currentAbortController = null;
 let pendingVisionImage = null;
+// ==========================================
+// NOVA CHAT QUOTA STATE
+// ==========================================
 
+let novaQuota = {
+    allowed: true,
+    used: 0,
+    limit: null,
+    remaining: null,
+    resetAt: null,
+    plan: null
+};
+
+let novaQuotaTimer = null;
 
 // ==========================================
 // 2. DOM REFERENCES
