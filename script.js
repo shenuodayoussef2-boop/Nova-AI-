@@ -47,7 +47,7 @@ try {
 let currentChatId = null;
 let currentAbortController = null;
 let pendingVisionImage = null;
-let novaSearchEnabled = false;
+
 
 // ==========================================
 // 2. DOM REFERENCES
@@ -99,9 +99,7 @@ document.addEventListener(
 
         renderHistoryList();
 
-        if (
-            chatsArray.length > 0
-        ) {
+        if (chatsArray.length > 0) {
 
             loadChat(
                 chatsArray[0].id
@@ -125,6 +123,10 @@ document.addEventListener(
 
         setupQuickPrompts();
 
+        setupSubscriptions();
+
+        setupMemory();
+
     }
 );
 
@@ -139,6 +141,7 @@ function startNewChat() {
         Date.now().toString();
 
     pendingVisionImage = null;
+
 
     if (
         currentAbortController
@@ -155,7 +158,10 @@ function startNewChat() {
 
     }
 
-    updateSendButtonState(false);
+
+    updateSendButtonState(
+        false
+    );
 
 
     if (chatBox) {
@@ -176,7 +182,6 @@ function startNewChat() {
                     مساعدك الذكي للبرمجة، الكتابة، التعلم والإبداع.
                     ابدأ محادثتك واكتشف إمكانيات Nova.
                 </p>
-
 
                 <div class="quick-prompts">
 
@@ -291,6 +296,10 @@ function saveCurrentChat(
         );
 
 
+    // ======================================
+    // EXISTING CHAT
+    // ======================================
+
     if (
         existingIndex !== -1
     ) {
@@ -301,27 +310,47 @@ function saveCurrentChat(
             ];
 
 
+        /*
+         * Smart Chat Title
+         *
+         * الاسم بيتغير تلقائيًا فقط
+         * لو المحادثة لسه باسم "محادثة جديدة".
+         *
+         * لو المستخدم عمل Rename يدوي:
+         * الاسم لن يتم تغييره.
+         */
+
         if (
             existing.title ===
-            "محادثة جديدة"
+                "محادثة جديدة" &&
+            firstUserMessage &&
+            firstUserMessage !==
+                "محادثة جديدة"
         ) {
 
-            const cleanTitle =
-                String(
-                    firstUserMessage ||
-                    "محادثة جديدة"
-                )
-                .trim()
-                .substring(
-                    0,
-                    25
-                );
+            if (
+                typeof window.generateSmartChatTitle ===
+                "function"
+            ) {
 
+                existing.title =
+                    window.generateSmartChatTitle(
+                        firstUserMessage
+                    );
 
-            existing.title =
-                cleanTitle
-                    ? cleanTitle + "..."
-                    : "محادثة جديدة";
+            } else {
+
+                existing.title =
+                    String(
+                        firstUserMessage
+                    )
+                    .trim()
+                    .substring(
+                        0,
+                        25
+                    );
+
+            }
 
         }
 
@@ -332,31 +361,48 @@ function saveCurrentChat(
         existing.updatedAt =
             Date.now();
 
-    } else {
+    }
+
+
+    // ======================================
+    // NEW CHAT
+    // ======================================
+
+    else {
 
         let title =
-            String(
-                firstUserMessage ||
-                "محادثة جديدة"
-            )
-            .trim();
+            "محادثة جديدة";
 
 
         if (
-            title ===
-            "محادثة جديدة"
+            firstUserMessage &&
+            firstUserMessage !==
+                "محادثة جديدة"
         ) {
 
-            title =
-                "محادثة جديدة";
+            if (
+                typeof window.generateSmartChatTitle ===
+                "function"
+            ) {
 
-        } else {
+                title =
+                    window.generateSmartChatTitle(
+                        firstUserMessage
+                    );
 
-            title =
-                title.substring(
-                    0,
-                    25
-                ) + "...";
+            } else {
+
+                title =
+                    String(
+                        firstUserMessage
+                    )
+                    .trim()
+                    .substring(
+                        0,
+                        25
+                    );
+
+            }
 
         }
 
@@ -572,6 +618,7 @@ function renderHistoryList() {
 
                     event.stopPropagation();
 
+
                     const button =
                         event.target.closest(
                             "button"
@@ -598,16 +645,20 @@ function renderHistoryList() {
                             )
                             .then(
                                 () => {
+
                                     showToast(
                                         "تم نسخ رابط الصفحة!"
                                     );
+
                                 }
                             )
                             .catch(
                                 () => {
+
                                     showToast(
                                         "تعذر نسخ الرابط"
                                     );
+
                                 }
                             );
 
@@ -857,9 +908,11 @@ function closeAllMenus() {
         )
         .forEach(
             menu => {
+
                 menu.classList.remove(
                     "show"
                 );
+
             }
         );
 
@@ -990,6 +1043,8 @@ function getConversationHistory() {
     );
 
 }
+
+
 // ==========================================
 // CODE WORKSPACE INTEGRATION
 // ==========================================
@@ -1000,12 +1055,17 @@ function isWorkspaceRequest(text) {
         return false;
     }
 
-    const lower = String(text).toLowerCase();
+
+    const lower =
+        String(text).toLowerCase();
+
 
     const keywords = [
+
         "code workspace",
         "code-workspace",
         "workspace",
+
         "اكتب في workspace",
         "اكتب في الوورك سبيس",
         "حط الكود في workspace",
@@ -1019,11 +1079,17 @@ function isWorkspaceRequest(text) {
         "افتح الـworkspace",
         "افتح الوورك سبيس",
         "في مساحة الكود"
+
     ];
 
-    return keywords.some(keyword =>
-        lower.includes(keyword.toLowerCase())
+
+    return keywords.some(
+        keyword =>
+            lower.includes(
+                keyword.toLowerCase()
+            )
     );
+
 }
 
 
@@ -1033,147 +1099,200 @@ function extractWorkspaceCode(reply) {
         return null;
     }
 
+
     const blocks = [];
+
 
     const regex =
         /```([a-zA-Z0-9_+#.-]*)\s*\n?([\s\S]*?)```/g;
 
+
     let match;
 
-    while ((match = regex.exec(reply)) !== null) {
+
+    while (
+        (match =
+            regex.exec(reply)) !== null
+    ) {
 
         const language =
-            String(match[1] || "")
-                .toLowerCase()
-                .trim();
+            String(
+                match[1] || ""
+            )
+            .toLowerCase()
+            .trim();
+
 
         const code =
-            String(match[2] || "")
-                .trim();
+            String(
+                match[2] || ""
+            )
+            .trim();
+
 
         if (!code) {
             continue;
         }
 
+
         blocks.push({
+
             language,
+
             code
+
         });
+
     }
+
 
     if (!blocks.length) {
         return null;
     }
 
+
     let html = "";
     let css = "";
     let js = "";
 
-    blocks.forEach(block => {
 
-        const language = block.language;
+    blocks.forEach(
+        block => {
 
-        if (
-            language === "html" ||
-            language === "htm" ||
-            language === "xml"
-        ) {
+            const language =
+                block.language;
 
-            html +=
-                (html ? "\n\n" : "") +
+
+            if (
+                language === "html" ||
+                language === "htm" ||
+                language === "xml"
+            ) {
+
+                html +=
+                    (html ? "\n\n" : "") +
+                    block.code;
+
+            }
+
+            else if (
+                language === "css"
+            ) {
+
+                css +=
+                    (css ? "\n\n" : "") +
+                    block.code;
+
+            }
+
+            else if (
+                language === "js" ||
+                language === "javascript" ||
+                language === "typescript" ||
+                language === "ts"
+            ) {
+
+                js +=
+                    (js ? "\n\n" : "") +
+                    block.code;
+
+            }
+
+        }
+    );
+
+
+    blocks.forEach(
+        block => {
+
+            if (
+                block.language &&
+                [
+                    "html",
+                    "htm",
+                    "xml",
+                    "css",
+                    "js",
+                    "javascript",
+                    "typescript",
+                    "ts"
+                ].includes(
+                    block.language
+                )
+            ) {
+
+                return;
+
+            }
+
+
+            const code =
                 block.code;
 
-        }
 
-        else if (
-            language === "css"
-        ) {
+            if (
+                /<!doctype html/i.test(
+                    code
+                ) ||
+                /<html[\s>]/i.test(
+                    code
+                ) ||
+                /<body[\s>]/i.test(
+                    code
+                )
+            ) {
 
-            css +=
-                (css ? "\n\n" : "") +
-                block.code;
+                html +=
+                    (html ? "\n\n" : "") +
+                    code;
 
-        }
+            }
 
-        else if (
-            language === "js" ||
-            language === "javascript" ||
-            language === "typescript" ||
-            language === "ts"
-        ) {
+            else if (
+                /[.#]?[a-zA-Z][\w-]*\s*\{[\s\S]*\}/.test(
+                    code
+                )
+            ) {
 
-            js +=
-                (js ? "\n\n" : "") +
-                block.code;
+                css +=
+                    (css ? "\n\n" : "") +
+                    code;
 
-        }
+            }
 
-    });
+            else {
 
-    // لو AI كتب بلوكات غير مسماة أو بلغة غير واضحة
-    // نحاول نعرف نوع الكود تلقائيًا.
+                js +=
+                    (js ? "\n\n" : "") +
+                    code;
 
-    blocks.forEach(block => {
-
-        if (
-            block.language &&
-            [
-                "html",
-                "htm",
-                "xml",
-                "css",
-                "js",
-                "javascript",
-                "typescript",
-                "ts"
-            ].includes(block.language)
-        ) {
-            return;
-        }
-
-        const code = block.code;
-
-        if (
-            /<!doctype html/i.test(code) ||
-            /<html[\s>]/i.test(code) ||
-            /<body[\s>]/i.test(code)
-        ) {
-
-            html +=
-                (html ? "\n\n" : "") +
-                code;
+            }
 
         }
+    );
 
-        else if (
-            /[.#]?[a-zA-Z][\w-]*\s*\{[\s\S]*\}/.test(code)
-        ) {
 
-            css +=
-                (css ? "\n\n" : "") +
-                code;
+    if (
+        !html &&
+        !css &&
+        !js
+    ) {
 
-        }
-
-        else {
-
-            js +=
-                (js ? "\n\n" : "") +
-                code;
-
-        }
-
-    });
-
-    if (!html && !css && !js) {
         return null;
+
     }
 
+
     return {
+
         html,
+
         css,
+
         js
+
     };
+
 }
 
 
@@ -1183,25 +1302,38 @@ function openCodeWorkspace(code) {
         return;
     }
 
+
     try {
 
         localStorage.setItem(
             "novaWorkspaceTransfer",
             JSON.stringify({
-                html: code.html || "",
-                css: code.css || "",
-                js: code.js || "",
-                createdAt: Date.now()
+
+                html:
+                    code.html || "",
+
+                css:
+                    code.css || "",
+
+                js:
+                    code.js || "",
+
+                createdAt:
+                    Date.now()
+
             })
         );
 
+
         const workspaceUrl =
             "code-workspace.html?from=nova";
+
 
         window.open(
             workspaceUrl,
             "_blank"
         );
+
 
         showToast(
             "تم فتح Code Workspace بالكود 🚀"
@@ -1216,12 +1348,15 @@ function openCodeWorkspace(code) {
             error
         );
 
+
         showToast(
             "تعذر فتح Code Workspace"
         );
 
     }
+
 }
+
 
 // ==========================================
 // 10. SEND MESSAGE
@@ -1232,8 +1367,13 @@ async function sendMessage(
     options = {}
 ) {
 
-    if (!chatInput && !customText) {
+    if (
+        !chatInput &&
+        !customText
+    ) {
+
         return;
+
     }
 
 
@@ -1254,6 +1394,7 @@ async function sendMessage(
         }
 
         return;
+
     }
 
 
@@ -1302,6 +1443,56 @@ async function sendMessage(
 
 
         return;
+
+    }
+
+
+    // ======================================
+    // MEMORY COMMAND
+    // ======================================
+
+    const memoryResult =
+        handleMemoryCommand(
+            text
+        );
+
+
+    if (
+        memoryResult &&
+        memoryResult.handled
+    ) {
+
+        appendUserMessage(
+            text
+        );
+
+
+        createAssistantMessage(
+            memoryResult.reply
+        );
+
+
+        if (
+            chatInput &&
+            customText === null
+        ) {
+
+            chatInput.value =
+                "";
+
+            chatInput.style.height =
+                "auto";
+
+        }
+
+
+        saveCurrentChat(
+            text
+        );
+
+
+        return;
+
     }
 
 
@@ -1372,6 +1563,7 @@ async function sendMessage(
         );
 
         return;
+
     }
 
 
@@ -1406,6 +1598,7 @@ async function sendMessage(
         );
 
         return;
+
     }
 
 
@@ -1444,8 +1637,9 @@ async function sendMessage(
                 text
             );
 
+        }
 
-        } catch (error) {
+        catch (error) {
 
             console.error(
                 "Nova Demo Error:",
@@ -1460,8 +1654,9 @@ async function sendMessage(
                 "حصل خطأ في Demo Mode."
             );
 
+        }
 
-        } finally {
+        finally {
 
             updateSendButtonState(
                 false
@@ -1471,6 +1666,7 @@ async function sendMessage(
 
 
         return;
+
     }
 
 
@@ -1515,43 +1711,61 @@ async function sendMessage(
                     getConversationHistory();
 
 
-const {
-    data: {
-        session
-    }
-} = await window.novaSupabase.auth.getSession()
+                const {
+                    data: {
+                        session
+                    }
+                } =
+                    await window.novaSupabase.auth.getSession();
 
-if (!session?.access_token) {
-    throw new Error(
-        "UNAUTHENTICATED"
-    );
-}
 
-response = await fetch(
-    "/api/chat",
-    {
-        method: "POST",
+                if (
+                    !session?.access_token
+                ) {
 
-        headers: {
-            "Content-Type":
-                "application/json",
+                    throw new Error(
+                        "UNAUTHENTICATED"
+                    );
 
-            "Authorization":
-                `Bearer ${session.access_token}`
-        },
+                }
 
-        body: JSON.stringify({
-            message: text,
-            history: conversationHistory,
 
-            // حالة Nova Search
-            search: novaSearchEnabled
-        }),
+                response =
+                    await fetch(
+                        "/api/chat",
+                        {
 
-        signal:
-            currentAbortController.signal
-    }
-);
+                            method:
+                                "POST",
+
+                            headers: {
+
+                                "Content-Type":
+                                    "application/json",
+
+                                "Authorization":
+                                    `Bearer ${session.access_token}`
+
+                            },
+
+                            body:
+                                JSON.stringify({
+
+                                    message:
+                                        text,
+
+                                    history:
+                                        conversationHistory
+
+                                }),
+
+                            signal:
+                                currentAbortController.signal
+
+                        }
+                    );
+
+
                 if (
                     !response.ok
                 ) {
@@ -1569,8 +1783,9 @@ response = await fetch(
 
                 break;
 
+            }
 
-            } catch (error) {
+            catch (error) {
 
                 if (
                     error &&
@@ -1814,7 +2029,9 @@ response = await fetch(
                 "وصل رد فاضي من السيرفر. افتح F12 وشوف Console لمعرفة الرد الحقيقي."
             );
 
-        } else {
+        }
+
+        else {
 
             createAssistantMessage(
                 reply,
@@ -1868,8 +2085,9 @@ response = await fetch(
             text
         );
 
+    }
 
-    } catch (error) {
+    catch (error) {
 
         console.error(
             "Nova AI Request Error:",
@@ -1892,6 +2110,22 @@ response = await fetch(
 
             createAssistantMessage(
                 "تم إلغاء الرد بواسطة المستخدم."
+            );
+
+        }
+
+
+        // ==================================
+        // AUTH ERROR
+        // ==================================
+
+        else if (
+            error?.message ===
+            "UNAUTHENTICATED"
+        ) {
+
+            createAssistantMessage(
+                "لازم تكون مسجل دخول في Nova AI عشان تستخدم المحادثة."
             );
 
         }
@@ -1921,8 +2155,9 @@ response = await fetch(
             text
         );
 
+    }
 
-    } finally {
+    finally {
 
         updateSendButtonState(
             false
@@ -1933,9 +2168,7 @@ response = await fetch(
             null;
 
 
-        if (
-            chatBox
-        ) {
+        if (chatBox) {
 
             chatBox.scrollTop =
                 chatBox.scrollHeight;
@@ -1945,6 +2178,7 @@ response = await fetch(
     }
 
 }
+
 
 // ==========================================
 // 11. DEMO REPLY
@@ -2431,6 +2665,20 @@ function setupSearchSourceLinks(
 
     sourceButtons.forEach(
         button => {
+
+            if (
+                button.dataset.bound ===
+                "true"
+            ) {
+
+                return;
+
+            }
+
+
+            button.dataset.bound =
+                "true";
+
 
             button.addEventListener(
                 "click",
@@ -3126,10 +3374,6 @@ async function generateImage(
     text
 ) {
 
-    const loadingText =
-        "جاري تجهيز الصورة... 🎨";
-
-
     appendLoadingMessage();
 
 
@@ -3214,16 +3458,10 @@ Make it visually appealing, detailed, coherent and polished.
         );
 
 
-        saveCurrentChat();
-if (
-    existing.title === "محادثة جديدة" &&
-    firstUserMessage
-) {
-    existing.title =
-        window.generateSmartChatTitle(
-            firstUserMessage
+        saveCurrentChat(
+            text
         );
-}
+
     }
 
     catch (error) {
@@ -3242,7 +3480,9 @@ if (
         );
 
 
-        saveCurrentChat();
+        saveCurrentChat(
+            text
+        );
 
     }
 
@@ -3339,7 +3579,9 @@ async function editImageWithPrompt(
         );
 
 
-        saveCurrentChat();
+        saveCurrentChat(
+            text
+        );
 
     }
 
@@ -3359,7 +3601,9 @@ async function editImageWithPrompt(
         );
 
 
-        saveCurrentChat();
+        saveCurrentChat(
+            text
+        );
 
     }
 
@@ -3384,12 +3628,6 @@ async function generateVideo(
                 text
             );
 
-
-        /*
-         * ملاحظة:
-         * الرابط التالي يولد صورة سينمائية
-         * وليس فيديو حقيقي.
-         */
 
         const prompt =
             encodeURIComponent(
@@ -3418,7 +3656,9 @@ async function generateVideo(
         );
 
 
-        saveCurrentChat();
+        saveCurrentChat(
+            text
+        );
 
     }
 
@@ -3438,7 +3678,9 @@ async function generateVideo(
         );
 
 
-        saveCurrentChat();
+        saveCurrentChat(
+            text
+        );
 
     }
 
@@ -4154,9 +4396,10 @@ function setupVoice() {
         );
 
 
+    // ID الصحيح الموجود في index.html
     const endVoiceBtn =
         document.getElementById(
-            "endVoiceBtn"
+            "endVoiceCallBtn"
         );
 
 
@@ -4416,7 +4659,10 @@ async function sendVoiceMessageAndReply(
         );
 
 
-        saveCurrentChat();
+        saveCurrentChat(
+            text
+        );
+
 
         return;
 
@@ -4432,6 +4678,33 @@ async function sendVoiceMessageAndReply(
             getConversationHistory();
 
 
+        // ==================================
+        // SUPABASE AUTH
+        // ==================================
+
+        const {
+            data: {
+                session
+            }
+        } =
+            await window.novaSupabase.auth.getSession();
+
+
+        if (
+            !session?.access_token
+        ) {
+
+            throw new Error(
+                "UNAUTHENTICATED"
+            );
+
+        }
+
+
+        // ==================================
+        // VOICE API
+        // ==================================
+
         const response =
             await fetch(
                 "/api/chat",
@@ -4441,8 +4714,13 @@ async function sendVoiceMessageAndReply(
                         "POST",
 
                     headers: {
+
                         "Content-Type":
-                            "application/json"
+                            "application/json",
+
+                        "Authorization":
+                            `Bearer ${session.access_token}`
+
                     },
 
                     body:
@@ -4482,16 +4760,57 @@ async function sendVoiceMessageAndReply(
         }
 
 
-        const reply =
-            data?.candidates?.[0]
-                ?.content?.parts
-                ?.map(
-                    part =>
-                        part?.text ||
-                        ""
-                )
-                .join("")
-                .trim();
+        let reply =
+            "";
+
+
+        if (
+            typeof data?.text ===
+                "string" &&
+            data.text.trim()
+        ) {
+
+            reply =
+                data.text.trim();
+
+        }
+
+        else if (
+            typeof data?.reply ===
+                "string" &&
+            data.reply.trim()
+        ) {
+
+            reply =
+                data.reply.trim();
+
+        }
+
+        else if (
+            typeof data?.response ===
+                "string" &&
+            data.response.trim()
+        ) {
+
+            reply =
+                data.response.trim();
+
+        }
+
+        else {
+
+            reply =
+                data?.candidates?.[0]
+                    ?.content?.parts
+                    ?.map(
+                        part =>
+                            part?.text ||
+                            ""
+                    )
+                    .join("")
+                    .trim();
+
+        }
 
 
         if (!reply) {
@@ -4523,7 +4842,9 @@ async function sendVoiceMessageAndReply(
         );
 
 
-        saveCurrentChat();
+        saveCurrentChat(
+            text
+        );
 
     }
 
@@ -4538,12 +4859,29 @@ async function sendVoiceMessageAndReply(
         );
 
 
-        createAssistantMessage(
-            "حصل خطأ أثناء معالجة الرسالة الصوتية."
+        if (
+            error?.message ===
+            "UNAUTHENTICATED"
+        ) {
+
+            createAssistantMessage(
+                "لازم تكون مسجل دخول في Nova AI عشان تستخدم الصوت."
+            );
+
+        }
+
+        else {
+
+            createAssistantMessage(
+                "حصل خطأ أثناء معالجة الرسالة الصوتية."
+            );
+
+        }
+
+
+        saveCurrentChat(
+            text
         );
-
-
-        saveCurrentChat();
 
     }
 
@@ -5421,13 +5759,17 @@ window.addEventListener(
     }
 );
 
+
 // ==========================================
 // NOVA AI - SMART MEMORY
 // ==========================================
 
-const MEMORY_STORAGE_KEY = "novaSmartMemory";
+const MEMORY_STORAGE_KEY =
+    "novaSmartMemory";
 
-let novaMemory = loadNovaMemory();
+
+let novaMemory =
+    loadNovaMemory();
 
 
 // ==========================================
@@ -5439,27 +5781,42 @@ function loadNovaMemory() {
     try {
 
         const saved =
-            localStorage.getItem(MEMORY_STORAGE_KEY);
+            localStorage.getItem(
+                MEMORY_STORAGE_KEY
+            );
+
 
         if (!saved) {
             return [];
         }
 
-        const parsed = JSON.parse(saved);
 
-        return Array.isArray(parsed)
+        const parsed =
+            JSON.parse(
+                saved
+            );
+
+
+        return Array.isArray(
+            parsed
+        )
             ? parsed
             : [];
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
         console.error(
             "Memory Load Error:",
             error
         );
 
+
         return [];
+
     }
+
 }
 
 
@@ -5473,16 +5830,22 @@ function saveNovaMemory() {
 
         localStorage.setItem(
             MEMORY_STORAGE_KEY,
-            JSON.stringify(novaMemory)
+            JSON.stringify(
+                novaMemory
+            )
         );
 
-    } catch (error) {
+    }
+
+    catch (error) {
 
         console.error(
             "Memory Save Error:",
             error
         );
+
     }
+
 }
 
 
@@ -5490,46 +5853,68 @@ function saveNovaMemory() {
 // ADD MEMORY
 // ==========================================
 
-function addNovaMemory(text) {
+function addNovaMemory(
+    text
+) {
 
     if (
-        typeof text !== "string" ||
+        typeof text !==
+            "string" ||
         !text.trim()
     ) {
+
         return false;
+
     }
 
-    const cleanText = text.trim();
 
-    const exists = novaMemory.some(
-        memory =>
-            memory.text.toLowerCase() ===
-            cleanText.toLowerCase()
-    );
+    const cleanText =
+        text.trim();
+
+
+    const exists =
+        novaMemory.some(
+            memory =>
+                memory.text
+                    .toLowerCase() ===
+                cleanText.toLowerCase()
+        );
+
 
     if (exists) {
         return false;
     }
 
+
     const memory = {
 
         id:
             Date.now().toString() +
-            Math.random().toString(36).slice(2),
+            Math.random()
+                .toString(36)
+                .slice(2),
 
-        text: cleanText,
+        text:
+            cleanText,
 
-        createdAt: Date.now()
+        createdAt:
+            Date.now()
 
     };
 
-    novaMemory.unshift(memory);
+
+    novaMemory.unshift(
+        memory
+    );
+
 
     saveNovaMemory();
 
     renderNovaMemory();
 
+
     return true;
+
 }
 
 
@@ -5537,18 +5922,26 @@ function addNovaMemory(text) {
 // DELETE MEMORY
 // ==========================================
 
-function deleteNovaMemory(id) {
+function deleteNovaMemory(
+    id
+) {
 
     novaMemory =
         novaMemory.filter(
-            memory => memory.id !== id
+            memory =>
+                memory.id !== id
         );
+
 
     saveNovaMemory();
 
     renderNovaMemory();
 
-    showToast("تم حذف الذكرى 🗑️");
+
+    showToast(
+        "تم حذف الذكرى 🗑️"
+    );
+
 }
 
 
@@ -5565,25 +5958,33 @@ function clearAllNovaMemory() {
         );
 
         return;
+
     }
 
-    const confirmed = confirm(
-        "هل أنت متأكد من حذف جميع ذكريات Nova؟"
-    );
+
+    const confirmed =
+        confirm(
+            "هل أنت متأكد من حذف جميع ذكريات Nova؟"
+        );
+
 
     if (!confirmed) {
         return;
     }
 
+
     novaMemory = [];
+
 
     saveNovaMemory();
 
     renderNovaMemory();
 
+
     showToast(
         "تم مسح جميع الذكريات 🧹"
     );
+
 }
 
 
@@ -5598,76 +5999,109 @@ function renderNovaMemory() {
             "memoryList"
         );
 
+
     if (!memoryList) {
         return;
     }
 
+
     if (!novaMemory.length) {
 
         memoryList.innerHTML = `
+
             <div class="memory-empty">
+
                 <i class="fas fa-brain"></i>
 
                 <span>
                     لا توجد ذكريات محفوظة حاليًا.
                 </span>
+
             </div>
+
         `;
 
         return;
+
     }
 
+
     memoryList.innerHTML =
-        novaMemory.map(memory => {
+        novaMemory
+            .map(
+                memory => {
 
-            return `
-                <div
-                    class="memory-item"
-                    data-memory-id="${escapeAttribute(memory.id)}"
-                >
+                    return `
 
-                    <div class="memory-icon">
-                        <i class="fas fa-brain"></i>
-                    </div>
+                        <div
+                            class="memory-item"
+                            data-memory-id="${escapeAttribute(memory.id)}"
+                        >
 
-                    <div class="memory-content">
-                        <div class="memory-text">
-                            ${escapeHTML(memory.text)}
+                            <div class="memory-icon">
+
+                                <i class="fas fa-brain"></i>
+
+                            </div>
+
+
+                            <div class="memory-content">
+
+                                <div class="memory-text">
+                                    ${escapeHtml(
+                                        memory.text
+                                    )}
+                                </div>
+
+                            </div>
+
+
+                            <button
+                                class="memory-delete-btn"
+                                type="button"
+                                title="حذف الذكرى"
+                                data-memory-delete="${escapeAttribute(memory.id)}"
+                            >
+
+                                <i class="fas fa-trash"></i>
+
+                            </button>
+
                         </div>
-                    </div>
 
-                    <button
-                        class="memory-delete-btn"
-                        type="button"
-                        title="حذف الذكرى"
-                        data-memory-delete="${escapeAttribute(memory.id)}"
-                    >
-                        <i class="fas fa-trash"></i>
-                    </button>
+                    `;
 
-                </div>
-            `;
+                }
+            )
+            .join("");
 
-        }).join("");
 
     memoryList
         .querySelectorAll(
             "[data-memory-delete]"
         )
-        .forEach(button => {
+        .forEach(
+            button => {
 
-            button.addEventListener(
-                "click",
-                () => {
+                button.addEventListener(
+                    "click",
+                    () => {
 
-                    const id =
-                        button.dataset.memoryDelete;
+                        const id =
+                            button.dataset
+                                .memoryDelete;
 
-                    deleteNovaMemory(id);
-                }
-            );
 
-        });
+                        deleteNovaMemory(
+                            id
+                        );
+
+                    }
+                );
+
+            }
+        );
+
 }
 
 
@@ -5681,9 +6115,14 @@ function getNovaMemoryForAI() {
         return "";
     }
 
+
     return novaMemory
-        .map(memory => `- ${memory.text}`)
+        .map(
+            memory =>
+                `- ${memory.text}`
+        )
         .join("\n");
+
 }
 
 
@@ -5691,22 +6130,36 @@ function getNovaMemoryForAI() {
 // MEMORY COMMAND DETECTION
 // ==========================================
 
-function detectMemoryCommand(text) {
+function detectMemoryCommand(
+    text
+) {
 
     if (
-        typeof text !== "string" ||
+        typeof text !==
+            "string" ||
         !text.trim()
     ) {
+
         return {
-            type: "none",
-            value: ""
+
+            type:
+                "none",
+
+            value:
+                ""
+
         };
+
     }
+
 
     const cleanText =
         text.trim();
 
-    // حفظ ذاكرة
+
+    // ======================================
+    // SAVE MEMORY
+    // ======================================
 
     const rememberPatterns = [
 
@@ -5726,22 +6179,38 @@ function detectMemoryCommand(text) {
 
     ];
 
-    for (const pattern of rememberPatterns) {
+
+    for (
+        const pattern of
+        rememberPatterns
+    ) {
 
         const match =
-            cleanText.match(pattern);
+            cleanText.match(
+                pattern
+            );
+
 
         if (match) {
 
             return {
-                type: "save",
-                value: match[1].trim()
+
+                type:
+                    "save",
+
+                value:
+                    match[1].trim()
+
             };
+
         }
+
     }
 
 
-    // حذف ذاكرة
+    // ======================================
+    // FORGET MEMORY
+    // ======================================
 
     const forgetPatterns = [
 
@@ -5757,22 +6226,38 @@ function detectMemoryCommand(text) {
 
     ];
 
-    for (const pattern of forgetPatterns) {
+
+    for (
+        const pattern of
+        forgetPatterns
+    ) {
 
         const match =
-            cleanText.match(pattern);
+            cleanText.match(
+                pattern
+            );
+
 
         if (match) {
 
             return {
-                type: "forget",
-                value: match[1].trim()
+
+                type:
+                    "forget",
+
+                value:
+                    match[1].trim()
+
             };
+
         }
+
     }
 
 
-    // عرض الذكريات
+    // ======================================
+    // SHOW MEMORY
+    // ======================================
 
     const showPatterns = [
 
@@ -5788,10 +6273,15 @@ function detectMemoryCommand(text) {
 
     ];
 
+
     const normalized =
         cleanText
             .toLowerCase()
-            .replace(/[؟?]/g, "");
+            .replace(
+                /[؟?]/g,
+                ""
+            );
+
 
     if (
         showPatterns.some(
@@ -5802,16 +6292,28 @@ function detectMemoryCommand(text) {
     ) {
 
         return {
-            type: "show",
-            value: ""
+
+            type:
+                "show",
+
+            value:
+                ""
+
         };
+
     }
 
 
     return {
-        type: "none",
-        value: ""
+
+        type:
+            "none",
+
+        value:
+            ""
+
     };
+
 }
 
 
@@ -5819,56 +6321,74 @@ function detectMemoryCommand(text) {
 // FIND MEMORY TO DELETE
 // ==========================================
 
-function findMemoryToDelete(searchText) {
+function findMemoryToDelete(
+    searchText
+) {
 
     if (!searchText) {
         return null;
     }
+
 
     const normalized =
         searchText
             .toLowerCase()
             .trim();
 
-    // تطابق كامل
 
     let found =
         novaMemory.find(
             memory =>
                 memory.text
                     .toLowerCase()
-                    .includes(normalized)
+                    .includes(
+                        normalized
+                    )
         );
+
 
     if (found) {
         return found;
     }
 
-    // محاولة مطابقة الكلمات
 
     const words =
         normalized
-            .split(/\s+/)
-            .filter(Boolean);
+            .split(
+                /\s+/
+            )
+            .filter(
+                Boolean
+            );
+
 
     if (!words.length) {
         return null;
     }
 
+
     found =
-        novaMemory.find(memory => {
+        novaMemory.find(
+            memory => {
 
-            const memoryText =
-                memory.text.toLowerCase();
+                const memoryText =
+                    memory.text
+                        .toLowerCase();
 
-            return words.every(
-                word =>
-                    memoryText.includes(word)
-            );
 
-        });
+                return words.every(
+                    word =>
+                        memoryText.includes(
+                            word
+                        )
+                );
+
+            }
+        );
+
 
     return found || null;
+
 }
 
 
@@ -5876,115 +6396,170 @@ function findMemoryToDelete(searchText) {
 // HANDLE MEMORY COMMAND
 // ==========================================
 
-function handleMemoryCommand(text) {
+function handleMemoryCommand(
+    text
+) {
 
     const command =
-        detectMemoryCommand(text);
+        detectMemoryCommand(
+            text
+        );
 
-    if (command.type === "none") {
+
+    if (
+        command.type ===
+        "none"
+    ) {
+
         return null;
+
     }
 
 
-    // ==========================
+    // ======================================
     // SAVE
-    // ==========================
+    // ======================================
 
-    if (command.type === "save") {
+    if (
+        command.type ===
+        "save"
+    ) {
 
         const added =
-            addNovaMemory(command.value);
+            addNovaMemory(
+                command.value
+            );
+
 
         if (added) {
 
             return {
-                handled: true,
+
+                handled:
+                    true,
 
                 reply:
-                    `تمام 🧠 حفظت دي في ذاكرتي:\n\n` +
-                    `**${command.value}**`
+                    `تمام 🧠 حفظت دي في ذاكرتي:\n\n**${command.value}**`
+
             };
 
         }
 
+
         return {
-            handled: true,
+
+            handled:
+                true,
 
             reply:
                 "المعلومة دي موجودة بالفعل في ذاكرتي 🧠"
+
         };
+
     }
 
 
-    // ==========================
+    // ======================================
     // FORGET
-    // ==========================
+    // ======================================
 
-    if (command.type === "forget") {
+    if (
+        command.type ===
+        "forget"
+    ) {
 
         const memory =
             findMemoryToDelete(
                 command.value
             );
 
+
         if (!memory) {
 
             return {
-                handled: true,
+
+                handled:
+                    true,
 
                 reply:
                     "مش لاقي المعلومة دي في ذاكرتي."
+
             };
+
         }
+
 
         deleteNovaMemorySilently(
             memory.id
         );
 
+
         return {
-            handled: true,
+
+            handled:
+                true,
 
             reply:
-                `تمام 🧹 نسيت المعلومة دي:\n\n` +
-                `**${memory.text}**`
+                `تمام 🧹 نسيت المعلومة دي:\n\n**${memory.text}**`
+
         };
+
     }
 
 
-    // ==========================
+    // ======================================
     // SHOW
-    // ==========================
+    // ======================================
 
-    if (command.type === "show") {
+    if (
+        command.type ===
+        "show"
+    ) {
 
         if (!novaMemory.length) {
 
             return {
-                handled: true,
+
+                handled:
+                    true,
 
                 reply:
                     "لسه مفيش أي معلومات محفوظة في ذاكرتي 🧠"
+
             };
+
         }
+
 
         const list =
             novaMemory
                 .map(
-                    (memory, index) =>
+                    (
+                        memory,
+                        index
+                    ) =>
                         `${index + 1}. ${memory.text}`
                 )
-                .join("\n");
+                .join(
+                    "\n"
+                );
+
 
         return {
-            handled: true,
+
+            handled:
+                true,
 
             reply:
                 `دي المعلومات اللي محفوظة عندي 🧠:\n\n${list}`
+
         };
+
     }
 
 
     return null;
+
 }
 
 
@@ -5992,7 +6567,9 @@ function handleMemoryCommand(text) {
 // SILENT DELETE
 // ==========================================
 
-function deleteNovaMemorySilently(id) {
+function deleteNovaMemorySilently(
+    id
+) {
 
     novaMemory =
         novaMemory.filter(
@@ -6000,9 +6577,11 @@ function deleteNovaMemorySilently(id) {
                 memory.id !== id
         );
 
+
     saveNovaMemory();
 
     renderNovaMemory();
+
 }
 
 
@@ -6014,10 +6593,12 @@ function setupMemory() {
 
     renderNovaMemory();
 
+
     const clearMemoryBtn =
         document.getElementById(
             "clearMemoryBtn"
         );
+
 
     if (clearMemoryBtn) {
 
@@ -6025,8 +6606,289 @@ function setupMemory() {
             "click",
             clearAllNovaMemory
         );
+
     }
+
 }
+
+
+// ==========================================
+// 50. SUBSCRIPTIONS
+// ==========================================
+
+function setupSubscriptions() {
+
+    const subscriptionsModal =
+        document.getElementById(
+            "novaSubscriptionsModal"
+        );
+
+
+    const openSubscriptionsBtn =
+        document.getElementById(
+            "novaProfileSubscriptions"
+        );
+
+
+    const closeSubscriptionsBtn =
+        document.getElementById(
+            "closeSubscriptionsModal"
+        );
+
+
+    if (
+        !subscriptionsModal ||
+        !openSubscriptionsBtn ||
+        !closeSubscriptionsBtn
+    ) {
+
+        return;
+
+    }
+
+
+    function openSubscriptions() {
+
+        subscriptionsModal.classList.add(
+            "active"
+        );
+
+
+        subscriptionsModal.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+
+        document.body.classList.add(
+            "subscriptions-open"
+        );
+
+    }
+
+
+    function closeSubscriptions() {
+
+        subscriptionsModal.classList.remove(
+            "active"
+        );
+
+
+        subscriptionsModal.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+
+        document.body.classList.remove(
+            "subscriptions-open"
+        );
+
+    }
+
+
+    openSubscriptionsBtn.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+
+            event.stopPropagation();
+
+            openSubscriptions();
+
+        }
+    );
+
+
+    closeSubscriptionsBtn.addEventListener(
+        "click",
+        event => {
+
+            event.preventDefault();
+
+            closeSubscriptions();
+
+        }
+    );
+
+
+    subscriptionsModal.addEventListener(
+        "click",
+        event => {
+
+            if (
+                event.target ===
+                subscriptionsModal
+            ) {
+
+                closeSubscriptions();
+
+            }
+
+        }
+    );
+
+
+    document.addEventListener(
+        "keydown",
+        event => {
+
+            if (
+                event.key ===
+                    "Escape" &&
+                subscriptionsModal.classList.contains(
+                    "active"
+                )
+            ) {
+
+                closeSubscriptions();
+
+            }
+
+        }
+    );
+
+}
+
+
+// ==========================================
+// 51. SMART CHAT TITLE FALLBACK
+// ==========================================
+
+if (
+    typeof window.generateSmartChatTitle !==
+    "function"
+) {
+
+    window.generateSmartChatTitle =
+        function (
+            text
+        ) {
+
+            if (!text) {
+                return "محادثة جديدة";
+            }
+
+
+            let title =
+                String(text)
+                    .replace(
+                        /https?:\/\/\S+/gi,
+                        ""
+                    )
+                    .replace(
+                        /www\.\S+/gi,
+                        ""
+                    )
+                    .replace(
+                        /```[\s\S]*?```/g,
+                        ""
+                    )
+                    .replace(
+                        /[#*_~`]/g,
+                        ""
+                    )
+                    .replace(
+                        /\s+/g,
+                        " "
+                    )
+                    .trim();
+
+
+            if (!title) {
+                return "محادثة جديدة";
+            }
+
+
+            title =
+                title
+                    .replace(
+                        /^[،,.!?؟:;؛\-–—\s]+/,
+                        ""
+                    )
+                    .replace(
+                        /[،,.!?؟:;؛\-–—\s]+$/,
+                        ""
+                    )
+                    .trim();
+
+
+            if (!title) {
+                return "محادثة جديدة";
+            }
+
+
+            const words =
+                title.split(
+                    " "
+                );
+
+
+            if (
+                words.length >
+                7
+            ) {
+
+                title =
+                    words
+                        .slice(
+                            0,
+                            7
+                        )
+                        .join(
+                            " "
+                        ) +
+                    "...";
+
+            }
+
+
+            if (
+                title.length >
+                42
+            ) {
+
+                title =
+                    title
+                        .substring(
+                            0,
+                            42
+                        )
+                        .trim() +
+                    "...";
+
+            }
+
+
+            return (
+                title ||
+                "محادثة جديدة"
+            );
+
+        };
+
+}
+
+
+// ==========================================
+// 52. COMPATIBILITY ALIAS
+// ==========================================
+
+// بعض أجزاء الواجهة القديمة تستخدم
+// escapeHTML بدل escapeHtml.
+// نخلي الاثنين شغالين.
+
+if (
+    typeof window.escapeHTML !==
+    "function"
+) {
+
+    window.escapeHTML =
+        escapeHtml;
+
+}
+
 
 // ==========================================
 // NOVA AI
