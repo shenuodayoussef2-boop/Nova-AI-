@@ -3998,5 +3998,152 @@ body.nova-plan-preview-ultra {
 
     </div>
 </div>
+<script>
+(function () {
+
+    "use strict";
+
+    function setupSubscriptions() {
+
+        const modal =
+            document.getElementById("novaSubscriptionsModal");
+
+        const openBtn =
+            document.getElementById("novaProfileSubscriptions");
+
+        const closeBtn =
+            document.getElementById("closeSubscriptionsModal");
+
+        if (!modal || !openBtn || !closeBtn) {
+
+            console.error(
+                "Nova Subscriptions: عناصر الاشتراكات مش موجودة."
+            );
+
+            return;
+        }
+
+        if (
+            openBtn.dataset.subscriptionsReady === "true"
+        ) {
+            return;
+        }
+
+        openBtn.dataset.subscriptionsReady = "true";
+
+
+        function openSubscriptions(event) {
+
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            modal.classList.add("active");
+
+            modal.setAttribute(
+                "aria-hidden",
+                "false"
+            );
+
+            document.body.classList.add(
+                "subscriptions-open"
+            );
+
+        }
+
+
+        function closeSubscriptions(event) {
+
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            modal.classList.remove("active");
+
+            modal.setAttribute(
+                "aria-hidden",
+                "true"
+            );
+
+            document.body.classList.remove(
+                "subscriptions-open"
+            );
+
+        }
+
+
+        openBtn.addEventListener(
+            "click",
+            openSubscriptions,
+            true
+        );
+
+
+        closeBtn.addEventListener(
+            "click",
+            closeSubscriptions,
+            true
+        );
+
+
+        modal.addEventListener(
+            "click",
+            function (event) {
+
+                if (
+                    event.target === modal
+                ) {
+
+                    closeSubscriptions();
+
+                }
+
+            }
+        );
+
+
+        document.addEventListener(
+            "keydown",
+            function (event) {
+
+                if (
+                    event.key === "Escape" &&
+                    modal.classList.contains("active")
+                ) {
+
+                    closeSubscriptions();
+
+                }
+
+            }
+        );
+
+
+        console.log(
+            "Nova Subscriptions: جاهزة ✅"
+        );
+
+    }
+
+
+    if (
+        document.readyState === "loading"
+    ) {
+
+        document.addEventListener(
+            "DOMContentLoaded",
+            setupSubscriptions
+        );
+
+    } else {
+
+        setupSubscriptions();
+
+    }
+
+})();
+</script>
 </body>
 </html>
