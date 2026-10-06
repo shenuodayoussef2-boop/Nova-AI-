@@ -319,8 +319,6 @@
         id="sidebar"
     >
 
-        <!-- SIDEBAR HEADER -->
-
         <div class="sidebar-header">
 
             <button
@@ -342,8 +340,6 @@
         </div>
 
 
-        <!-- NEW CHAT -->
-
         <button
             id="newChatBtn"
             class="new-chat-btn"
@@ -359,8 +355,6 @@
         </button>
 
 
-        <!-- CHAT HISTORY -->
-
         <div class="history-section">
 
             <h3 class="history-title">
@@ -375,7 +369,9 @@
         </div>
 
 
-        <!-- USER PROFILE -->
+        <!-- =================================================
+             PROFILE
+        ================================================== -->
 
         <div class="nova-profile-area">
 
@@ -416,8 +412,6 @@
             </button>
 
 
-            <!-- PROFILE POPUP -->
-
             <div
                 id="novaProfileMenu"
                 class="nova-profile-menu"
@@ -447,8 +441,6 @@
                 </div>
 
 
-                <!-- PLAN CARD -->
-
                 <div class="nova-plan-card">
 
                     <div class="nova-plan-icon">
@@ -469,8 +461,6 @@
 
                 </div>
 
-
-                <!-- THEMES -->
 
                 <div class="nova-menu-section">
 
@@ -555,8 +545,6 @@
                 </div>
 
 
-                <!-- LANGUAGE -->
-
                 <button
                     id="novaProfileLanguage"
                     class="nova-profile-menu-item"
@@ -574,8 +562,6 @@
                 </button>
 
 
-                <!-- USAGE -->
-
                 <button
                     id="novaProfileUsage"
                     class="nova-profile-menu-item"
@@ -591,13 +577,26 @@
                     <i class="fa-solid fa-chevron-left"></i>
 
                 </button>
-        <button class="nova-profile-menu-btn" id="novaProfileSubscriptions" type="button">
-        <i class="fa-solid fa-crown"></i>
-        <span>الباقات والاشتراك</span>
-        <i class="fa-solid fa-chevron-left"></i>
-        </button>
 
-                <!-- SETTINGS -->
+
+                <!-- SUBSCRIPTIONS -->
+
+                <button
+                    id="novaProfileSubscriptions"
+                    class="nova-profile-menu-item"
+                    type="button"
+                >
+
+                    <i class="fa-solid fa-crown"></i>
+
+                    <span>
+                        الباقات والاشتراك
+                    </span>
+
+                    <i class="fa-solid fa-chevron-left"></i>
+
+                </button>
+
 
                 <button
                     id="novaProfileSettings"
@@ -619,8 +618,6 @@
                 <div class="nova-profile-divider"></div>
 
 
-                <!-- LOGOUT -->
-
                 <button
                     id="novaLogoutBtn"
                     class="nova-profile-menu-item nova-logout-item"
@@ -639,8 +636,6 @@
 
         </div>
 
-
-        <!-- SIDEBAR FOOTER -->
 
         <div
             class="sidebar-footer-actions"
@@ -672,7 +667,7 @@
 
 
     <!-- =========================================================
-         MAIN CONTENT
+         MAIN
     ========================================================== -->
 
     <main class="main-content">
@@ -690,8 +685,6 @@
         </button>
 
 
-        <!-- CHAT SECTION -->
-
         <section
             id="chat-section"
             class="content-section active"
@@ -706,14 +699,10 @@
             </div>
 
 
-            <!-- CHAT BOX -->
-
             <div
                 class="chat-box"
                 id="chatBox"
             >
-
-                <!-- WELCOME -->
 
                 <div
                     class="nova-welcome"
@@ -737,8 +726,6 @@
                         ابدأ محادثتك واكتشف إمكانيات Nova.
                     </p>
 
-
-                    <!-- QUICK PROMPTS -->
 
                     <div class="quick-prompts">
 
@@ -808,8 +795,6 @@
             </div>
 
 
-            <!-- INPUT AREA -->
-
             <div class="input-area">
 
                 <input
@@ -819,8 +804,6 @@
                     multiple
                 >
 
-
-                <!-- ATTACHMENTS -->
 
                 <div
                     class="attach-wrapper"
@@ -916,8 +899,6 @@
                 </div>
 
 
-                <!-- CHAT INPUT -->
-
                 <textarea
                     id="chatInput"
                     rows="1"
@@ -926,8 +907,6 @@
                     spellcheck="true"
                 ></textarea>
 
-
-                <!-- INPUT ACTIONS -->
 
                 <div class="input-actions-right">
 
@@ -1913,7 +1892,7 @@
 
 
 <!-- =========================================================
-     LANGUAGE + SETTINGS + PROFILE CSS
+     LANGUAGE / SETTINGS / PROFILE CSS
 ========================================================= -->
 
 <style>
@@ -1926,9 +1905,12 @@
 
     position: fixed;
     inset: 0;
+
     display: none;
+
     align-items: center;
     justify-content: center;
+
     padding: 20px;
 
     background:
@@ -1938,6 +1920,7 @@
         blur(10px);
 
     z-index: 99999;
+
 }
 
 .nova-language-modal.active {
@@ -1948,9 +1931,13 @@
 
     width: 100%;
     max-width: 520px;
+
     max-height: 90vh;
+
     overflow-y: auto;
+
     padding: 24px;
+
     border-radius: 22px;
 
     background: #0b141d;
@@ -1962,43 +1949,59 @@
     box-shadow:
         0 25px 80px
         rgba(0, 0, 0, 0.45);
+
 }
 
 .nova-language-header {
 
     display: flex;
+
     align-items: flex-start;
+
     justify-content: space-between;
+
     gap: 15px;
+
     margin-bottom: 24px;
+
 }
 
 .nova-language-header h3 {
 
     margin: 0 0 6px;
+
     font-size: 21px;
+
     color: #fff;
+
 }
 
 .nova-language-header p {
 
     margin: 0;
+
     color: #8ea0ad;
+
     font-size: 13px;
+
 }
 
 #closeLanguageModal {
 
     width: 40px;
     height: 40px;
+
     border: 0;
+
     border-radius: 12px;
 
     background:
         rgba(255, 255, 255, 0.06);
 
     color: #fff;
+
     cursor: pointer;
+
 }
 
 .nova-language-select-wrapper {
@@ -2008,15 +2011,21 @@
 .nova-language-select-wrapper label {
 
     display: block;
+
     margin-bottom: 9px;
+
     color: #dfeaf0;
+
     font-size: 14px;
+
 }
 
 #novaLanguageSelect {
 
     width: 100%;
+
     padding: 14px 16px;
+
     border-radius: 14px;
 
     border:
@@ -2024,9 +2033,13 @@
         #29404e;
 
     background: #09121a;
+
     color: #fff;
+
     outline: none;
+
     font-size: 15px;
+
 }
 
 #novaLanguageSelect:focus {
@@ -2036,13 +2049,17 @@
     box-shadow:
         0 0 0 3px
         rgba(0, 217, 255, 0.08);
+
 }
 
 .nova-save-language-btn {
 
     width: 100%;
+
     padding: 14px;
+
     border: 0;
+
     border-radius: 14px;
 
     background:
@@ -2053,9 +2070,13 @@
         );
 
     color: #031016;
+
     font-size: 15px;
+
     font-weight: 700;
+
     cursor: pointer;
+
 }
 
 
@@ -2066,12 +2087,17 @@
 .settings-modal-overlay {
 
     position: fixed !important;
+
     inset: 0 !important;
+
     display: none !important;
+
     align-items: center !important;
+
     justify-content: center !important;
 
     width: 100vw !important;
+
     height: 100vh !important;
 
     background:
@@ -2082,6 +2108,7 @@
 
     z-index:
         99998 !important;
+
 }
 
 .settings-modal-overlay.active {
@@ -2091,11 +2118,16 @@
 .settings-modal-content {
 
     position: relative;
+
     z-index: 99999;
 
     width: 450px;
-    max-width: calc(100vw - 30px);
+
+    max-width:
+        calc(100vw - 30px);
+
     max-height: 85vh;
+
     overflow-y: auto;
 
     background: #1e293b;
@@ -2109,6 +2141,7 @@
     box-shadow:
         0 25px 80px
         rgba(0, 0, 0, 0.55);
+
 }
 
 
@@ -2119,8 +2152,12 @@
 .nova-profile-area {
 
     position: relative;
+
     width: 100%;
-    padding: 0 12px 10px;
+
+    padding:
+        0 12px 10px;
+
 }
 
 .nova-profile-btn {
@@ -2128,7 +2165,9 @@
     width: 100%;
 
     display: flex;
+
     align-items: center;
+
     gap: 10px;
 
     padding: 9px;
@@ -2143,12 +2182,14 @@
         rgba(255, 255, 255, 0.035);
 
     color: #fff;
+
     cursor: pointer;
 
     transition:
         background .2s ease,
         border-color .2s ease,
         transform .2s ease;
+
 }
 
 .nova-profile-btn:hover {
@@ -2158,6 +2199,7 @@
 
     border-color:
         rgba(0, 229, 255, 0.25);
+
 }
 
 .nova-profile-btn:active {
@@ -2170,10 +2212,13 @@
     flex-shrink: 0;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     font-weight: 800;
+
     color: #fff;
 
     background:
@@ -2182,41 +2227,59 @@
             #00e5ff,
             #008cff
         );
+
 }
 
 .nova-profile-avatar {
 
     width: 42px;
+
     height: 42px;
+
     border-radius: 12px;
+
     font-size: 14px;
+
 }
 
 .nova-profile-info {
 
     min-width: 0;
+
     flex: 1;
 
     display: flex;
+
     flex-direction: column;
+
     align-items: flex-start;
+
     gap: 2px;
+
 }
 
 .nova-profile-info strong {
 
     max-width: 150px;
+
     overflow: hidden;
+
     white-space: nowrap;
+
     text-overflow: ellipsis;
+
     font-size: 14px;
+
 }
 
 .nova-profile-plan {
 
     font-size: 10px;
+
     font-weight: 800;
+
     letter-spacing: .7px;
+
 }
 
 .nova-profile-plan.free {
@@ -2234,14 +2297,20 @@
 .nova-profile-arrow {
 
     font-size: 11px;
+
     color: #81909b;
 
     transition:
         transform .2s ease;
+
 }
 
-.nova-profile-btn.open .nova-profile-arrow {
-    transform: rotate(180deg);
+.nova-profile-btn.open
+.nova-profile-arrow {
+
+    transform:
+        rotate(180deg);
+
 }
 
 
@@ -2254,12 +2323,14 @@
     position: absolute;
 
     left: 12px;
+
     right: 12px;
 
     bottom:
         calc(100% + 10px);
 
     padding: 12px;
+
     border-radius: 18px;
 
     background:
@@ -2277,7 +2348,9 @@
         blur(18px);
 
     opacity: 0;
+
     visibility: hidden;
+
     pointer-events: none;
 
     transform:
@@ -2289,70 +2362,95 @@
         visibility .2s ease;
 
     z-index: 10000;
+
 }
 
 .nova-profile-menu.active {
 
     opacity: 1;
+
     visibility: visible;
+
     pointer-events: auto;
 
     transform:
         translateY(0);
+
 }
 
 .nova-profile-head {
 
     display: flex;
+
     align-items: center;
+
     gap: 11px;
 
     padding:
         8px 5px 13px;
+
 }
 
 .nova-menu-avatar {
 
     width: 46px;
+
     height: 46px;
+
     border-radius: 14px;
+
     font-size: 14px;
+
 }
 
 .nova-profile-head strong {
 
     display: block;
+
     color: #fff;
+
     font-size: 14px;
+
 }
 
 .nova-profile-head span {
 
     display: block;
+
     margin-top: 3px;
 
     max-width: 190px;
+
     overflow: hidden;
+
     white-space: nowrap;
+
     text-overflow: ellipsis;
 
     color: #8798a5;
+
     font-size: 11px;
+
 }
 
 
 /* =========================================================
-   PLAN CARD
+   PROFILE PLAN
 ========================================================= */
 
+.nova-profile-menu
 .nova-plan-card {
 
     display: flex;
+
     align-items: center;
+
     gap: 10px;
 
     padding: 11px;
+
     margin-bottom: 10px;
+
     border-radius: 13px;
 
     background:
@@ -2365,64 +2463,87 @@
     border:
         1px solid
         rgba(0, 229, 255, .12);
+
 }
 
+.nova-profile-menu
 .nova-plan-icon {
 
     width: 34px;
+
     height: 34px;
+
     border-radius: 10px;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     background:
         rgba(0, 229, 255, .1);
 
     color: #00e5ff;
+
 }
 
 .nova-plan-text {
 
     display: flex;
+
     flex-direction: column;
+
     gap: 2px;
+
 }
 
 .nova-plan-text span {
 
     color: #81929f;
+
     font-size: 10px;
+
 }
 
 .nova-plan-text strong {
 
     color: #fff;
+
     font-size: 12px;
+
     letter-spacing: .6px;
+
 }
 
 
 /* =========================================================
-   MENU SECTION
+   MENU
 ========================================================= */
 
 .nova-menu-section {
-    padding: 6px 3px 10px;
+
+    padding:
+        6px 3px 10px;
+
 }
 
 .nova-menu-section-title {
 
     display: flex;
+
     align-items: center;
+
     gap: 7px;
 
     margin-bottom: 9px;
 
     color: #a9bac4;
+
     font-size: 11px;
+
     font-weight: 700;
+
 }
 
 .nova-menu-section-title i {
@@ -2442,15 +2563,19 @@
         repeat(2, minmax(0, 1fr));
 
     gap: 7px;
+
 }
 
 .nova-theme-option {
 
     display: flex;
+
     align-items: center;
+
     gap: 7px;
 
     padding: 8px;
+
     border-radius: 10px;
 
     border:
@@ -2461,28 +2586,37 @@
         rgba(255, 255, 255, .025);
 
     color: #c4d0d7;
+
     font-size: 10px;
+
     cursor: pointer;
+
 }
 
 .nova-theme-option:hover {
 
     background:
         rgba(255, 255, 255, .06);
+
 }
 
 .nova-theme-option.active {
 
     border-color:
         rgba(0, 229, 255, .45);
+
 }
 
 .theme-preview {
 
     width: 20px;
+
     height: 20px;
+
     border-radius: 6px;
+
     display: block;
+
 }
 
 .theme-nova {
@@ -2493,6 +2627,7 @@
             #00e5ff,
             #008cff
         );
+
 }
 
 .theme-purple {
@@ -2503,6 +2638,7 @@
             #a855f7,
             #6366f1
         );
+
 }
 
 .theme-emerald {
@@ -2513,6 +2649,7 @@
             #10b981,
             #06b6d4
         );
+
 }
 
 .theme-amoled {
@@ -2522,6 +2659,7 @@
     border:
         1px solid
         #333;
+
 }
 
 
@@ -2534,22 +2672,28 @@
     width: 100%;
 
     display: flex;
+
     align-items: center;
+
     gap: 10px;
 
     padding:
         10px 9px;
 
     border: 0;
+
     border-radius: 11px;
 
     background: transparent;
 
     color: #c9d4da;
+
     cursor: pointer;
 
     text-align: inherit;
+
     font-size: 12px;
+
 }
 
 .nova-profile-menu-item:hover {
@@ -2558,19 +2702,25 @@
         rgba(255, 255, 255, .055);
 
     color: #fff;
+
 }
 
 .nova-profile-menu-item i:first-child {
 
     width: 17px;
+
     color: #8fa1ad;
+
 }
 
 .nova-profile-menu-item i:last-child {
 
     margin-inline-start: auto;
+
     font-size: 9px;
+
     color: #667783;
+
 }
 
 .nova-logout-item {
@@ -2584,10 +2734,12 @@
 .nova-profile-divider {
 
     height: 1px;
+
     margin: 5px 4px;
 
     background:
         rgba(255, 255, 255, .07);
+
 }
 
 
@@ -2621,7 +2773,7 @@ html[dir="ltr"] .nova-language-modal {
 
 
 /* =========================================================
-   OWNER PLAN PREVIEW
+   OWNER PREVIEW
 ========================================================= */
 
 .nova-owner-preview-item {
@@ -2631,15 +2783,19 @@ html[dir="ltr"] .nova-language-modal {
 .nova-owner-badge {
 
     display: inline-flex;
+
     align-items: center;
+
     justify-content: center;
 
     margin-inline-start: auto;
+
     padding: 3px 7px;
 
     border-radius: 999px;
 
     font-size: 10px;
+
     font-weight: 800;
 
     background:
@@ -2650,16 +2806,21 @@ html[dir="ltr"] .nova-language-modal {
     border:
         1px solid
         rgba(139, 92, 246, 0.25);
+
 }
 
 #novaOwnerPreviewModal {
 
     position: fixed;
+
     inset: 0;
+
     z-index: 99999;
 
     display: none;
+
     align-items: center;
+
     justify-content: center;
 
     padding: 20px;
@@ -2669,6 +2830,7 @@ html[dir="ltr"] .nova-language-modal {
 
     backdrop-filter:
         blur(12px);
+
 }
 
 #novaOwnerPreviewModal.show {
@@ -2677,12 +2839,16 @@ html[dir="ltr"] .nova-language-modal {
 
 .nova-owner-preview-card {
 
-    width: min(520px, 100%);
-    max-height: min(760px, 92vh);
+    width:
+        min(520px, 100%);
+
+    max-height:
+        min(760px, 92vh);
 
     overflow-y: auto;
 
     border-radius: 24px;
+
     padding: 22px;
 
     background:
@@ -2693,52 +2859,71 @@ html[dir="ltr"] .nova-language-modal {
         rgba(255, 255, 255, 0.1);
 
     box-shadow:
-        0 30px 100px rgba(0, 0, 0, 0.5),
-        0 0 50px rgba(99, 102, 241, 0.12);
+        0 30px 100px
+        rgba(0, 0, 0, 0.5),
+        0 0 50px
+        rgba(99, 102, 241, 0.12);
+
 }
 
 .nova-owner-preview-header {
 
     display: flex;
+
     align-items: center;
+
     justify-content: space-between;
 
     gap: 12px;
+
     margin-bottom: 18px;
+
 }
 
 .nova-owner-preview-title {
 
     display: flex;
+
     align-items: center;
+
     gap: 10px;
+
 }
 
 .nova-owner-preview-title i {
 
     color: #f59e0b;
+
     font-size: 21px;
+
 }
 
 .nova-owner-preview-title h3 {
 
     margin: 0;
+
     font-size: 18px;
+
 }
 
 .nova-owner-preview-subtitle {
 
     margin: 5px 0 0;
+
     opacity: 0.65;
+
     font-size: 12px;
+
 }
 
 .nova-owner-preview-close {
 
     width: 38px;
+
     height: 38px;
 
     border: 0;
+
     border-radius: 50%;
 
     cursor: pointer;
@@ -2747,13 +2932,17 @@ html[dir="ltr"] .nova-language-modal {
         rgba(255, 255, 255, 0.07);
 
     color: inherit;
+
     font-size: 16px;
+
 }
 
 .nova-owner-preview-current {
 
     padding: 14px;
+
     margin-bottom: 16px;
+
     border-radius: 18px;
 
     background:
@@ -2762,19 +2951,25 @@ html[dir="ltr"] .nova-language-modal {
     border:
         1px solid
         rgba(99, 102, 241, 0.18);
+
 }
 
 .nova-owner-preview-current-label {
 
     font-size: 11px;
+
     opacity: 0.65;
+
     margin-bottom: 5px;
+
 }
 
 .nova-owner-preview-current-plan {
 
     font-size: 20px;
+
     font-weight: 900;
+
 }
 
 .nova-owner-preview-current-owner {
@@ -2784,7 +2979,9 @@ html[dir="ltr"] .nova-language-modal {
     color: #f59e0b;
 
     font-size: 11px;
+
     font-weight: 800;
+
 }
 
 .nova-owner-plan-grid {
@@ -2795,6 +2992,7 @@ html[dir="ltr"] .nova-language-modal {
         repeat(3, 1fr);
 
     gap: 10px;
+
 }
 
 .nova-owner-plan-btn {
@@ -2802,6 +3000,7 @@ html[dir="ltr"] .nova-language-modal {
     position: relative;
 
     padding: 15px 10px;
+
     border-radius: 18px;
 
     border:
@@ -2812,10 +3011,13 @@ html[dir="ltr"] .nova-language-modal {
         rgba(255,255,255,0.035);
 
     color: inherit;
+
     cursor: pointer;
+
     text-align: center;
 
     transition: 0.2s ease;
+
 }
 
 .nova-owner-plan-btn:hover {
@@ -2825,6 +3027,7 @@ html[dir="ltr"] .nova-language-modal {
 
     border-color:
         rgba(139, 92, 246, 0.45);
+
 }
 
 .nova-owner-plan-btn.active {
@@ -2838,27 +3041,37 @@ html[dir="ltr"] .nova-language-modal {
     box-shadow:
         0 0 0 1px
         rgba(139, 92, 246, 0.15);
+
 }
 
 .nova-owner-plan-name {
 
     font-size: 15px;
+
     font-weight: 900;
+
 }
 
 .nova-owner-plan-price {
 
     margin-top: 4px;
+
     font-size: 11px;
+
     opacity: 0.65;
+
 }
 
 .nova-owner-plan-desc {
 
     margin-top: 6px;
+
     font-size: 10px;
+
     opacity: 0.55;
+
     line-height: 1.4;
+
 }
 
 .nova-owner-preview-stats {
@@ -2869,12 +3082,15 @@ html[dir="ltr"] .nova-language-modal {
         repeat(2, 1fr);
 
     gap: 10px;
+
     margin-top: 16px;
+
 }
 
 .nova-owner-stat {
 
     padding: 13px;
+
     border-radius: 16px;
 
     background:
@@ -2883,12 +3099,15 @@ html[dir="ltr"] .nova-language-modal {
     border:
         1px solid
         rgba(255,255,255,0.07);
+
 }
 
 .nova-owner-stat-label {
 
     font-size: 10px;
+
     opacity: 0.6;
+
 }
 
 .nova-owner-stat-value {
@@ -2896,7 +3115,9 @@ html[dir="ltr"] .nova-language-modal {
     margin-top: 3px;
 
     font-size: 14px;
+
     font-weight: 800;
+
 }
 
 .nova-owner-feature-list {
@@ -2904,22 +3125,29 @@ html[dir="ltr"] .nova-language-modal {
     margin-top: 16px;
 
     display: grid;
+
     gap: 8px;
+
 }
 
 .nova-owner-feature {
 
     display: flex;
+
     align-items: center;
+
     gap: 9px;
 
     font-size: 12px;
+
 }
 
 .nova-owner-feature i {
 
     width: 18px;
+
     text-align: center;
+
 }
 
 .nova-owner-feature.enabled i {
@@ -2935,9 +3163,11 @@ html[dir="ltr"] .nova-language-modal {
     width: 100%;
 
     margin-top: 16px;
+
     padding: 12px;
 
     border: 0;
+
     border-radius: 14px;
 
     cursor: pointer;
@@ -2946,7 +3176,9 @@ html[dir="ltr"] .nova-language-modal {
         rgba(255,255,255,0.07);
 
     color: inherit;
+
     font-weight: 800;
+
 }
 
 .nova-owner-preview-note {
@@ -2956,8 +3188,11 @@ html[dir="ltr"] .nova-language-modal {
     text-align: center;
 
     font-size: 10px;
+
     line-height: 1.6;
+
     opacity: 0.55;
+
 }
 
 body.nova-plan-preview-free {
@@ -2982,7 +3217,9 @@ body.nova-plan-preview-ultra {
     .nova-profile-menu {
 
         left: 10px;
+
         right: 10px;
+
     }
 
 }
@@ -2992,7 +3229,9 @@ body.nova-plan-preview-ultra {
     .nova-language-modal-content {
 
         padding: 18px;
+
         border-radius: 18px;
+
     }
 
     .nova-language-header h3 {
@@ -3005,6 +3244,7 @@ body.nova-plan-preview-ultra {
 
         max-width:
             calc(100vw - 20px);
+
     }
 
     .nova-owner-plan-grid {
@@ -3021,7 +3261,7 @@ body.nova-plan-preview-ultra {
 
 
 <!-- =========================================================
-     NOVA SOCIAL MEDIA
+     NOVA SOCIAL MODAL
 ========================================================= -->
 
 <div
@@ -3074,6 +3314,7 @@ body.nova-plan-preview-ultra {
                 href="https://www.facebook.com/share/19U8X5i6tZ/"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="Facebook"
             >
 
                 <span class="nova-social-icon">
@@ -3106,9 +3347,10 @@ body.nova-plan-preview-ultra {
 
             <a
                 class="nova-social-link tiktok"
-                href="https://www.tiktok.com/@youssefcodes5"
+                href="https://www.tiktok.com/@youssefcodes5?_r=1&_t=ZS-99t9p7VvG1B"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="TikTok"
             >
 
                 <span class="nova-social-icon">
@@ -3124,7 +3366,7 @@ body.nova-plan-preview-ultra {
                     </strong>
 
                     <small>
-                        تابعنا على تيك توك
+                        @youssefcodes5
                     </small>
 
                 </span>
@@ -3137,26 +3379,57 @@ body.nova-plan-preview-ultra {
             </a>
 
 
-            <!-- INSTAGRAM - COMING SOON -->
+            <!-- INSTAGRAM -->
+
+            <a
+                class="nova-social-link instagram"
+                href="https://www.instagram.com/nova645369?stkn=ZmI3NWs4NjhmYmF5"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+            >
+
+                <span class="nova-social-icon">
+
+                    <i class="fa-brands fa-instagram"></i>
+
+                </span>
+
+                <span class="nova-social-info">
+
+                    <strong>
+                        Instagram
+                    </strong>
+
+                    <small>
+                        @nova645369
+                    </small>
+
+                </span>
+
+                <i
+                    class="fa-solid fa-arrow-up-right-from-square"
+                    aria-hidden="true"
+                ></i>
+
+            </a>
+
+        </div>
 
 
-<a
-    class="nova-social-link instagram"
-    href="https://www.instagram.com/nova645369?stkn=ZmI3NWs4NjhmYmF5"
-    target="_blank"
-    rel="noopener noreferrer"
-    aria-label="Instagram"
->
-    <i class="fa-brands fa-instagram"></i>
+        <div class="nova-social-footer">
 
-    <span>
-        <strong>Instagram</strong>
-        <small>@nova645369</small>
-    </span>
+            <span class="nova-social-dot"></span>
 
-    <i class="fa-solid fa-arrow-up-right-from-square"></i>
-</a>
+            <span>
+                تابع Nova AI وكن جزءًا من مجتمعنا
+            </span>
 
+        </div>
+
+    </div>
+
+</div>
 
 
 <!-- =========================================================
@@ -3168,11 +3441,13 @@ body.nova-plan-preview-ultra {
 .nova-social-modal {
 
     position: fixed;
+
     inset: 0;
 
     display: none;
 
     align-items: center;
+
     justify-content: center;
 
     padding: 20px;
@@ -3184,6 +3459,7 @@ body.nova-plan-preview-ultra {
         blur(10px);
 
     z-index: 999999;
+
 }
 
 .nova-social-modal.active {
@@ -3193,6 +3469,7 @@ body.nova-plan-preview-ultra {
 .nova-social-card {
 
     width: 100%;
+
     max-width: 460px;
 
     padding: 22px;
@@ -3212,6 +3489,7 @@ body.nova-plan-preview-ultra {
 
     animation:
         novaSocialIn .22s ease;
+
 }
 
 @keyframes novaSocialIn {
@@ -3223,6 +3501,7 @@ body.nova-plan-preview-ultra {
         transform:
             translateY(12px)
             scale(.97);
+
     }
 
     to {
@@ -3232,6 +3511,7 @@ body.nova-plan-preview-ultra {
         transform:
             translateY(0)
             scale(1);
+
     }
 
 }
@@ -3239,11 +3519,15 @@ body.nova-plan-preview-ultra {
 .nova-social-header {
 
     display: flex;
+
     align-items: flex-start;
+
     justify-content: space-between;
 
     gap: 15px;
+
     margin-bottom: 20px;
+
 }
 
 .nova-social-header h3 {
@@ -3253,6 +3537,7 @@ body.nova-plan-preview-ultra {
     color: #fff;
 
     font-size: 20px;
+
 }
 
 .nova-social-header p {
@@ -3262,16 +3547,19 @@ body.nova-plan-preview-ultra {
     color: #8ea0ad;
 
     font-size: 12px;
+
 }
 
 .nova-social-close {
 
     width: 38px;
+
     height: 38px;
 
     flex-shrink: 0;
 
     border: 0;
+
     border-radius: 12px;
 
     background:
@@ -3280,21 +3568,27 @@ body.nova-plan-preview-ultra {
     color: #fff;
 
     cursor: pointer;
+
 }
 
 .nova-social-links {
 
     display: grid;
+
     gap: 10px;
+
 }
 
 .nova-social-link {
 
     display: flex;
+
     align-items: center;
+
     gap: 12px;
 
     width: 100%;
+
     min-height: 64px;
 
     padding: 10px 12px;
@@ -3318,6 +3612,7 @@ body.nova-plan-preview-ultra {
         transform .2s ease,
         background .2s ease,
         border-color .2s ease;
+
 }
 
 .nova-social-link:hover {
@@ -3327,60 +3622,74 @@ body.nova-plan-preview-ultra {
 
     background:
         rgba(255,255,255,.065);
+
 }
 
 .nova-social-icon {
 
     width: 42px;
+
     height: 42px;
 
     flex-shrink: 0;
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     border-radius: 13px;
 
     font-size: 19px;
+
 }
 
-.nova-social-link.facebook .nova-social-icon {
+.nova-social-link.facebook
+.nova-social-icon {
 
     background:
         rgba(24,119,242,.15);
 
     color:
         #1877f2;
+
 }
 
-.nova-social-link.tiktok .nova-social-icon {
+.nova-social-link.tiktok
+.nova-social-icon {
 
     background:
         rgba(255,255,255,.08);
 
     color:
         #fff;
+
 }
 
-.nova-social-link.instagram .nova-social-icon {
+.nova-social-link.instagram
+.nova-social-icon {
 
     background:
         rgba(225,48,108,.12);
 
     color:
         #e1306c;
+
 }
 
 .nova-social-info {
 
     flex: 1;
+
     min-width: 0;
 
     display: flex;
+
     flex-direction: column;
 
     gap: 4px;
+
 }
 
 .nova-social-info strong {
@@ -3392,56 +3701,24 @@ body.nova-plan-preview-ultra {
     color: #81929f;
 
     font-size: 11px;
+
 }
 
-.nova-social-link > .fa-arrow-up-right-from-square {
+.nova-social-link >
+.fa-arrow-up-right-from-square {
 
     color: #71818d;
 
     font-size: 11px;
-}
 
-.nova-social-link.disabled {
-
-    opacity: .65;
-
-    cursor: default;
-}
-
-.nova-social-link.disabled:hover {
-
-    transform: none;
-
-    background:
-        rgba(255,255,255,.035);
-}
-
-.nova-social-coming-soon {
-
-    padding:
-        5px 9px;
-
-    border-radius:
-        999px;
-
-    background:
-        rgba(225,48,108,.1);
-
-    border:
-        1px solid
-        rgba(225,48,108,.2);
-
-    color:
-        #e86b9b;
-
-    font-size: 10px;
-    font-weight: 700;
 }
 
 .nova-social-footer {
 
     display: flex;
+
     align-items: center;
+
     justify-content: center;
 
     gap: 7px;
@@ -3451,11 +3728,13 @@ body.nova-plan-preview-ultra {
     color: #6f818d;
 
     font-size: 10px;
+
 }
 
 .nova-social-dot {
 
     width: 6px;
+
     height: 6px;
 
     border-radius: 50%;
@@ -3466,6 +3745,7 @@ body.nova-plan-preview-ultra {
     box-shadow:
         0 0 10px
         rgba(0,229,255,.7);
+
 }
 
 @media (max-width: 600px) {
@@ -3475,6 +3755,7 @@ body.nova-plan-preview-ultra {
         padding: 18px;
 
         border-radius: 20px;
+
     }
 
     .nova-social-header h3 {
@@ -3544,7 +3825,9 @@ body.nova-plan-preview-ultra {
         function (event) {
 
             event.preventDefault();
+
             event.stopPropagation();
+
             event.stopImmediatePropagation();
 
             socialModal.classList.add(
@@ -3605,7 +3888,7 @@ body.nova-plan-preview-ultra {
 
 
 <!-- =========================================================
-     NOVA SMART CHAT TITLE
+     SMART CHAT TITLE
 ========================================================= -->
 
 <script>
@@ -3614,114 +3897,129 @@ body.nova-plan-preview-ultra {
 
     "use strict";
 
-    window.generateSmartChatTitle = function (text) {
+    window.generateSmartChatTitle =
+        function (text) {
 
-        if (!text) {
-            return "محادثة جديدة";
-        }
+            if (!text) {
 
-        let title = String(text)
+                return "محادثة جديدة";
 
-            .replace(
-                /https?:\/\/\S+/gi,
-                ""
-            )
-
-            .replace(
-                /www\.\S+/gi,
-                ""
-            )
-
-            .replace(
-                /```[\s\S]*?```/g,
-                ""
-            )
-
-            .replace(
-                /[#*_~`]/g,
-                ""
-            )
-
-            .replace(
-                /\s+/g,
-                " "
-            )
-
-            .trim();
+            }
 
 
-        if (!title) {
-            return "محادثة جديدة";
-        }
+            let title =
+                String(text)
+
+                    .replace(
+                        /https?:\/\/\S+/gi,
+                        ""
+                    )
+
+                    .replace(
+                        /www\.\S+/gi,
+                        ""
+                    )
+
+                    .replace(
+                        /```[\s\S]*?```/g,
+                        ""
+                    )
+
+                    .replace(
+                        /[#*_~`]/g,
+                        ""
+                    )
+
+                    .replace(
+                        /\s+/g,
+                        " "
+                    )
+
+                    .trim();
 
 
-        title = title
+            if (!title) {
 
-            .replace(
-                /^[،,.!?؟:;؛\-–—\s]+/,
-                ""
-            )
+                return "محادثة جديدة";
 
-            .replace(
-                /[،,.!?؟:;؛\-–—\s]+$/,
-                ""
-            )
+            }
 
-            .trim();
-
-
-        if (!title) {
-            return "محادثة جديدة";
-        }
-
-
-        const words =
-            title.split(" ");
-
-
-        if (
-            words.length > 7
-        ) {
-
-            title =
-                words
-                    .slice(0, 7)
-                    .join(" ") +
-                "...";
-        }
-
-
-        if (
-            title.length > 42
-        ) {
 
             title =
                 title
-                    .substring(0, 42)
-                    .trim() +
-                "...";
-        }
+
+                    .replace(
+                        /^[،,.!?؟:;؛\-–—\s]+/,
+                        ""
+                    )
+
+                    .replace(
+                        /[،,.!?؟:;؛\-–—\s]+$/,
+                        ""
+                    )
+
+                    .trim();
 
 
-        return (
-            title ||
-            "محادثة جديدة"
-        );
+            if (!title) {
 
-    };
+                return "محادثة جديدة";
+
+            }
+
+
+            const words =
+                title.split(" ");
+
+
+            if (
+                words.length > 7
+            ) {
+
+                title =
+                    words
+                        .slice(0, 7)
+                        .join(" ") +
+                    "...";
+
+            }
+
+
+            if (
+                title.length > 42
+            ) {
+
+                title =
+                    title
+                        .substring(0, 42)
+                        .trim() +
+                    "...";
+
+            }
+
+
+            return (
+                title ||
+                "محادثة جديدة"
+            );
+
+        };
 
 })();
 
 </script>
-<!-- ==========================================
-     💎 NOVA AI - SUBSCRIPTIONS MODAL
-========================================== -->
+
+
+<!-- =========================================================
+     SUBSCRIPTIONS MODAL
+========================================================= -->
 
 <div
     id="novaSubscriptionsModal"
     class="nova-subscriptions-modal"
     aria-hidden="true"
 >
+
     <div
         class="nova-subscriptions-card"
         role="dialog"
@@ -3729,10 +4027,10 @@ body.nova-plan-preview-ultra {
         aria-labelledby="novaSubscriptionsTitle"
     >
 
-        <!-- Header -->
         <div class="nova-subscriptions-header">
 
             <div>
+
                 <span class="nova-subscriptions-kicker">
                     NOVA AI
                 </span>
@@ -3744,7 +4042,9 @@ body.nova-plan-preview-ultra {
                 <p>
                     اختار الباقة المناسبة لطريقة استخدامك لـ Nova AI.
                 </p>
+
             </div>
+
 
             <button
                 type="button"
@@ -3752,20 +4052,23 @@ body.nova-plan-preview-ultra {
                 class="nova-subscriptions-close"
                 aria-label="إغلاق"
             >
+
                 <i class="fa-solid fa-xmark"></i>
+
             </button>
 
         </div>
 
 
-        <!-- Plans -->
         <div class="nova-plans-grid">
 
             <!-- FREE -->
+
             <article
                 class="nova-plan-card"
                 data-plan="free"
             >
+
                 <div class="nova-plan-icon">
                     <i class="fa-solid fa-gift"></i>
                 </div>
@@ -3774,17 +4077,22 @@ body.nova-plan-preview-ultra {
                     مجاني
                 </span>
 
-                <h3>Free</h3>
+                <h3>
+                    Free
+                </h3>
 
                 <p class="nova-plan-description">
                     البداية المثالية لتجربة Nova AI.
                 </p>
 
                 <div class="nova-plan-price">
-                    <strong>مجاني</strong>
+                    <strong>
+                        مجاني
+                    </strong>
                 </div>
 
                 <ul class="nova-plan-features">
+
                     <li>
                         <i class="fa-solid fa-check"></i>
                         محادثات AI الأساسية
@@ -3804,6 +4112,7 @@ body.nova-plan-preview-ultra {
                         <i class="fa-solid fa-check"></i>
                         مناسب للاستخدام الخفيف
                     </li>
+
                 </ul>
 
                 <button
@@ -3813,14 +4122,17 @@ body.nova-plan-preview-ultra {
                 >
                     الباقة الحالية
                 </button>
+
             </article>
 
 
             <!-- PRO -->
+
             <article
                 class="nova-plan-card featured"
                 data-plan="pro"
             >
+
                 <div class="nova-plan-popular">
                     الأكثر شعبية
                 </div>
@@ -3833,17 +4145,22 @@ body.nova-plan-preview-ultra {
                     للمستخدمين النشطين
                 </span>
 
-                <h3>Pro</h3>
+                <h3>
+                    Pro
+                </h3>
 
                 <p class="nova-plan-description">
                     إمكانيات أكبر للاستخدام اليومي.
                 </p>
 
                 <div class="nova-plan-price">
-                    <strong>Pro</strong>
+                    <strong>
+                        Pro
+                    </strong>
                 </div>
 
                 <ul class="nova-plan-features">
+
                     <li>
                         <i class="fa-solid fa-check"></i>
                         حدود استخدام أعلى
@@ -3863,6 +4180,7 @@ body.nova-plan-preview-ultra {
                         <i class="fa-solid fa-check"></i>
                         ميزات AI متقدمة
                     </li>
+
                 </ul>
 
                 <button
@@ -3872,14 +4190,17 @@ body.nova-plan-preview-ultra {
                 >
                     اشترك في Pro
                 </button>
+
             </article>
 
 
             <!-- ULTRA -->
+
             <article
                 class="nova-plan-card"
                 data-plan="ultra"
             >
+
                 <div class="nova-plan-icon">
                     <i class="fa-solid fa-rocket"></i>
                 </div>
@@ -3888,17 +4209,22 @@ body.nova-plan-preview-ultra {
                     للمستخدمين المكثفين
                 </span>
 
-                <h3>Ultra</h3>
+                <h3>
+                    Ultra
+                </h3>
 
                 <p class="nova-plan-description">
                     تجربة Nova AI بأعلى مستوى.
                 </p>
 
                 <div class="nova-plan-price">
-                    <strong>Ultra</strong>
+                    <strong>
+                        Ultra
+                    </strong>
                 </div>
 
                 <ul class="nova-plan-features">
+
                     <li>
                         <i class="fa-solid fa-check"></i>
                         حدود استخدام كبيرة
@@ -3918,6 +4244,7 @@ body.nova-plan-preview-ultra {
                         <i class="fa-solid fa-check"></i>
                         الوصول للميزات المتقدمة
                     </li>
+
                 </ul>
 
                 <button
@@ -3927,14 +4254,17 @@ body.nova-plan-preview-ultra {
                 >
                     اشترك في Ultra
                 </button>
+
             </article>
 
 
             <!-- GO -->
+
             <article
                 class="nova-plan-card"
                 data-plan="go"
             >
+
                 <div class="nova-plan-icon">
                     <i class="fa-solid fa-gem"></i>
                 </div>
@@ -3943,17 +4273,22 @@ body.nova-plan-preview-ultra {
                     سريع ومرن
                 </span>
 
-                <h3>Go</h3>
+                <h3>
+                    Go
+                </h3>
 
                 <p class="nova-plan-description">
                     باقة بسيطة لمن يريد أكثر من الاستخدام الأساسي.
                 </p>
 
                 <div class="nova-plan-price">
-                    <strong>Go</strong>
+                    <strong>
+                        Go
+                    </strong>
                 </div>
 
                 <ul class="nova-plan-features">
+
                     <li>
                         <i class="fa-solid fa-check"></i>
                         حدود أعلى من Free
@@ -3973,6 +4308,7 @@ body.nova-plan-preview-ultra {
                         <i class="fa-solid fa-check"></i>
                         مناسب للاستخدام اليومي
                     </li>
+
                 </ul>
 
                 <button
@@ -3982,69 +4318,614 @@ body.nova-plan-preview-ultra {
                 >
                     اشترك في Go
                 </button>
+
             </article>
 
         </div>
 
 
-        <!-- Footer -->
         <div class="nova-subscriptions-footer">
+
             <i class="fa-solid fa-shield-halved"></i>
 
             <span>
                 إدارة الباقة والاشتراك ستكون مرتبطة بحساب Nova AI الخاص بك.
             </span>
+
         </div>
 
     </div>
+
 </div>
+
+
+<!-- =========================================================
+     SUBSCRIPTIONS CSS
+========================================================= -->
+
+<style>
+
+.nova-subscriptions-modal {
+
+    position: fixed;
+
+    inset: 0;
+
+    display: none;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    box-sizing: border-box;
+
+    background:
+        rgba(0, 0, 0, 0.72);
+
+    backdrop-filter:
+        blur(10px);
+
+    -webkit-backdrop-filter:
+        blur(10px);
+
+    z-index: 999999;
+
+}
+
+.nova-subscriptions-modal.active {
+    display: flex;
+}
+
+.nova-subscriptions-card {
+
+    width:
+        min(1100px, 100%);
+
+    max-height: 90vh;
+
+    overflow-y: auto;
+
+    padding: 24px;
+
+    box-sizing: border-box;
+
+    border-radius: 24px;
+
+    background:
+        #0b141d;
+
+    border:
+        1px solid
+        rgba(0, 229, 255, 0.14);
+
+    box-shadow:
+        0 30px 100px
+        rgba(0, 0, 0, 0.55);
+
+}
+
+.nova-subscriptions-header {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    gap: 20px;
+
+    margin-bottom: 24px;
+
+}
+
+.nova-subscriptions-kicker {
+
+    display: inline-block;
+
+    margin-bottom: 7px;
+
+    color:
+        #00e5ff;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+
+}
+
+.nova-subscriptions-header h2 {
+
+    margin: 0 0 7px;
+
+    color: #fff;
+
+    font-size: 25px;
+
+}
+
+.nova-subscriptions-header p {
+
+    margin: 0;
+
+    color: #8ea0ad;
+
+    font-size: 13px;
+
+}
+
+.nova-subscriptions-close {
+
+    width: 42px;
+
+    height: 42px;
+
+    flex-shrink: 0;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: 0;
+
+    border-radius: 13px;
+
+    background:
+        rgba(255, 255, 255, 0.06);
+
+    color: #fff;
+
+    cursor: pointer;
+
+    transition:
+        background .2s ease,
+        transform .2s ease;
+
+}
+
+.nova-subscriptions-close:hover {
+
+    background:
+        rgba(255, 255, 255, 0.1);
+
+    transform:
+        scale(1.04);
+
+}
+
+
+.nova-plans-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, minmax(0, 1fr));
+
+    gap: 14px;
+
+}
+
+.nova-subscriptions-card
+.nova-plan-card {
+
+    position: relative;
+
+    display: flex;
+
+    flex-direction: column;
+
+    padding: 20px;
+
+    border-radius: 20px;
+
+    background:
+        rgba(255, 255, 255, 0.035);
+
+    border:
+        1px solid
+        rgba(255, 255, 255, 0.08);
+
+    color: #fff;
+
+    box-sizing: border-box;
+
+}
+
+.nova-subscriptions-card
+.nova-plan-card.featured {
+
+    border-color:
+        rgba(0, 229, 255, 0.35);
+
+    box-shadow:
+        0 0 30px
+        rgba(0, 229, 255, 0.08);
+
+}
+
+.nova-subscriptions-card
+.nova-plan-icon {
+
+    width: 42px;
+
+    height: 42px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    margin-bottom: 12px;
+
+    border-radius: 13px;
+
+    background:
+        rgba(0, 229, 255, 0.1);
+
+    color:
+        #00e5ff;
+
+}
+
+.nova-plan-badge {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    width: fit-content;
+
+    padding: 4px 8px;
+
+    margin-bottom: 9px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(255, 255, 255, 0.06);
+
+    color:
+        #9eafb9;
+
+    font-size: 10px;
+
+    font-weight: 700;
+
+}
+
+.nova-plan-card h3 {
+
+    margin: 0;
+
+    font-size: 22px;
+
+}
+
+.nova-plan-description {
+
+    min-height: 42px;
+
+    margin: 8px 0 15px;
+
+    color:
+        #8798a5;
+
+    font-size: 12px;
+
+    line-height: 1.6;
+
+}
+
+.nova-plan-price {
+
+    margin-bottom: 16px;
+
+}
+
+.nova-plan-price strong {
+
+    color: #fff;
+
+    font-size: 19px;
+
+}
+
+.nova-plan-features {
+
+    display: grid;
+
+    gap: 9px;
+
+    margin: 0 0 20px;
+
+    padding: 0;
+
+    list-style: none;
+
+}
+
+.nova-plan-features li {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    gap: 8px;
+
+    color:
+        #b8c5cc;
+
+    font-size: 11px;
+
+    line-height: 1.5;
+
+}
+
+.nova-plan-features li i {
+
+    flex-shrink: 0;
+
+    margin-top: 2px;
+
+    color:
+        #00d9ff;
+
+}
+
+.nova-plan-button {
+
+    width: 100%;
+
+    margin-top: auto;
+
+    padding: 11px 14px;
+
+    border: 0;
+
+    border-radius: 12px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #00e5ff,
+            #008cff
+        );
+
+    color:
+        #031016;
+
+    font-size: 12px;
+
+    font-weight: 800;
+
+    cursor: pointer;
+
+    transition:
+        transform .2s ease,
+        opacity .2s ease;
+
+}
+
+.nova-plan-button:hover {
+
+    transform:
+        translateY(-1px);
+
+}
+
+.nova-plan-button.current {
+
+    background:
+        rgba(255, 255, 255, 0.07);
+
+    color:
+        #94a5b0;
+
+    cursor: default;
+
+}
+
+.nova-plan-button.current:hover {
+    transform: none;
+}
+
+.nova-plan-popular {
+
+    position: absolute;
+
+    top: 12px;
+
+    left: 12px;
+
+    padding: 5px 8px;
+
+    border-radius: 999px;
+
+    background:
+        rgba(0, 229, 255, 0.12);
+
+    color:
+        #00e5ff;
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+}
+
+.nova-subscriptions-footer {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    margin-top: 18px;
+
+    color:
+        #687984;
+
+    font-size: 10px;
+
+    text-align: center;
+
+}
+
+.nova-subscriptions-footer i {
+
+    color:
+        #00cfff;
+
+}
+
+
+@media (max-width: 900px) {
+
+    .nova-plans-grid {
+
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+    }
+
+}
+
+
+@media (max-width: 600px) {
+
+    .nova-subscriptions-modal {
+
+        padding: 10px;
+
+    }
+
+    .nova-subscriptions-card {
+
+        max-height: 94vh;
+
+        padding: 18px;
+
+        border-radius: 20px;
+
+    }
+
+    .nova-subscriptions-header h2 {
+
+        font-size: 21px;
+
+    }
+
+    .nova-plans-grid {
+
+        grid-template-columns: 1fr;
+
+    }
+
+    .nova-subscriptions-header p {
+
+        font-size: 11px;
+
+    }
+
+}
+
+</style>
+
+
+<!-- =========================================================
+     SUBSCRIPTIONS SCRIPT
+========================================================= -->
+
 <script>
+
 (function () {
 
     "use strict";
 
+
     function setupSubscriptions() {
 
         const modal =
-            document.getElementById("novaSubscriptionsModal");
+            document.getElementById(
+                "novaSubscriptionsModal"
+            );
 
-        const openBtn =
-            document.getElementById("novaProfileSubscriptions");
+        const profileButton =
+            document.getElementById(
+                "novaProfileSubscriptions"
+            );
 
-        const closeBtn =
-            document.getElementById("closeSubscriptionsModal");
+        const settingsButton =
+            document.querySelector(
+                '[data-setting="subscriptions"]'
+            );
 
-        if (!modal || !openBtn || !closeBtn) {
+        const closeButton =
+            document.getElementById(
+                "closeSubscriptionsModal"
+            );
+
+
+        if (
+            !modal ||
+            !closeButton
+        ) {
 
             console.error(
                 "Nova Subscriptions: عناصر الاشتراكات مش موجودة."
             );
 
             return;
+
         }
+
 
         if (
-            openBtn.dataset.subscriptionsReady === "true"
+            modal.dataset.subscriptionsReady ===
+            "true"
         ) {
+
             return;
+
         }
 
-        openBtn.dataset.subscriptionsReady = "true";
+
+        modal.dataset.subscriptionsReady =
+            "true";
 
 
         function openSubscriptions(event) {
 
             if (event) {
+
                 event.preventDefault();
+
                 event.stopPropagation();
+
+                event.stopImmediatePropagation();
+
             }
 
-            modal.classList.add("active");
+
+            modal.classList.add(
+                "active"
+            );
+
 
             modal.setAttribute(
                 "aria-hidden",
                 "false"
             );
+
 
             document.body.classList.add(
                 "subscriptions-open"
@@ -4056,16 +4937,24 @@ body.nova-plan-preview-ultra {
         function closeSubscriptions(event) {
 
             if (event) {
+
                 event.preventDefault();
+
                 event.stopPropagation();
+
             }
 
-            modal.classList.remove("active");
+
+            modal.classList.remove(
+                "active"
+            );
+
 
             modal.setAttribute(
                 "aria-hidden",
                 "true"
             );
+
 
             document.body.classList.remove(
                 "subscriptions-open"
@@ -4074,14 +4963,21 @@ body.nova-plan-preview-ultra {
         }
 
 
-        openBtn.addEventListener(
+        profileButton?.addEventListener(
             "click",
             openSubscriptions,
             true
         );
 
 
-        closeBtn.addEventListener(
+        settingsButton?.addEventListener(
+            "click",
+            openSubscriptions,
+            true
+        );
+
+
+        closeButton.addEventListener(
             "click",
             closeSubscriptions,
             true
@@ -4121,6 +5017,45 @@ body.nova-plan-preview-ultra {
         );
 
 
+        const planButtons =
+            modal.querySelectorAll(
+                "[data-plan-action]"
+            );
+
+
+        planButtons.forEach(
+            function (button) {
+
+                button.addEventListener(
+                    "click",
+                    function () {
+
+                        const plan =
+                            button.dataset.planAction;
+
+
+                        if (
+                            !plan ||
+                            plan === "free"
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        console.log(
+                            "Nova plan selected:",
+                            plan
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
         console.log(
             "Nova Subscriptions: جاهزة ✅"
         );
@@ -4144,6 +5079,9 @@ body.nova-plan-preview-ultra {
     }
 
 })();
+
 </script>
+
+
 </body>
 </html>
