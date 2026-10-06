@@ -61,7 +61,143 @@ let novaQuota = {
 };
 
 let novaQuotaTimer = null;
+let novaQuotaTimer = null;
 
+
+// ==========================================
+// NOVA CHAT QUOTA UI
+// ==========================================
+
+function updateNovaQuota(quota) {
+
+    novaQuota = {
+        allowed:
+            quota?.allowed !== false,
+
+        used:
+            Number(quota?.used ?? 0),
+
+        limit:
+            quota?.limit ?? null,
+
+        remaining:
+            quota?.remaining ?? null,
+
+        resetAt:
+            quota?.reset_at || null,
+
+        plan:
+            quota?.plan || null
+    };
+
+    renderNovaQuotaUI();
+
+    startNovaQuotaTimer();
+}
+
+
+// ==========================================
+// CREATE / UPDATE QUOTA BANNER
+// ==========================================
+
+function renderNovaQuotaUI() {
+
+    let banner =
+        document.getElementById(
+            "novaQuotaBanner"
+        );
+
+    if (!banner) {
+
+        banner =
+            document.createElement("div");
+
+        banner.id =
+            "novaQuotaBanner";
+
+        banner.className =
+            "nova-quota-banner";
+
+        const inputArea =
+            document.querySelector(
+                ".chat-input-container"
+            ) ||
+            document.querySelector(
+                ".input-area"
+            ) ||
+            document.querySelector(
+                ".chat-input-wrapper"
+            );
+
+        if (inputArea) {
+
+            inputArea.parentNode.insertBefore(
+                banner,
+                inputArea
+            );
+        }
+    }
+
+    if (
+        novaQuota.allowed !== false ||
+        novaQuota.plan === "ULTRA"
+    ) {
+
+        banner.style.display =
+            "none";
+
+        setNovaSendEnabled(true);
+
+        return;
+    }
+
+    banner.style.display =
+        "flex";
+
+    banner.innerHTML = `
+
+        <div class="nova-quota-icon">
+            ⏳
+        </div>
+
+        <div class="nova-quota-content">
+
+            <strong>
+                وصلت للحد المسموح في هذه المحادثة
+            </strong>
+
+            <span id="novaQuotaCountdown">
+                يمكنك المتابعة مرة أخرى قريبًا
+            </span>
+
+        </div>
+
+    `;
+
+    setNovaSendEnabled(false);
+
+    updateNovaQuotaCountdown();
+}
+
+
+// ==========================================
+// ENABLE / DISABLE SEND
+// ==========================================
+
+function setNovaSendEnabled(enabled) {
+
+    if (!sendChatBtn) {
+        return;
+    }
+
+    sendChatBtn.disabled =
+        !enabled;
+
+    sendChatBtn.classList.toggle(
+        "quota-disabled",
+        !enabled
+    );
+}
 // ==========================================
 // 2. DOM REFERENCES
 // ==========================================
