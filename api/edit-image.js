@@ -1,13 +1,9 @@
 // ==========================================
-// NOVA AI - IMAGE GENERATION API
-// api/generate-image.js
+// NOVA AI - HUGGING FACE IMAGE EDIT DEBUG
+// api/edit-image.js
 // ==========================================
 
 export default async function handler(req, res) {
-
-    // ==========================================
-    // METHOD
-    // ==========================================
 
     if (req.method !== "POST") {
         return res.status(405).json({
@@ -17,209 +13,181 @@ export default async function handler(req, res) {
     }
 
     try {
+        const { prompt, image } = req.body || {};
 
-        // ==========================================
-        // REQUEST DATA
-        // ==========================================
-
-        const {
-            prompt,
-            width,
-            height,
-            aspectRatio,
-            quality
-        } = req.body || {};
-
-        // ==========================================
-        // VALIDATE PROMPT
-        // ==========================================
-
-        if (
-            !prompt ||
-            typeof prompt !== "string" ||
-            !prompt.trim()
-        ) {
+        if (!prompt || typeof prompt !== "string") {
             return res.status(400).json({
                 success: false,
-                error: "وصف الصورة فارغ"
+                error: "وصف التعديل فارغ"
+            });
+        }
+
+        if (!image || typeof image !== "string") {
+            return res.status(400).json({
+                success: false,
+                error: "لم يتم إرسال الصورة"
             });
         }
 
         // ==========================================
-        // FAL KEY
+        // Hugging Face Token
         // ==========================================
 
-        const apiKey = process.env.FAL_KEY;
+        const hfToken = process.env.HF_TOKEN;
 
-        if (!apiKey) {
-            console.error(
-                "Nova AI: FAL_KEY is missing"
-            );
-
+        if (!hfToken) {
             return res.status(500).json({
                 success: false,
-                error: "خدمة توليد الصور غير مهيأة حاليًا"
+                error: "HF_TOKEN غير موجود في Vercel"
             });
         }
 
         // ==========================================
-        // IMAGE SIZE
+        // قراءة الصورة
         // ==========================================
 
-        let imageSize = "landscape_4_3";
+        const match = image.match(
+            /^data:(image\/[^;]+);base64,(.+)$/s
+        );
 
-        if (
-            aspectRatio === "1:1"
-        ) {
-            imageSize = "square_hd";
-
-        } else if (
-            aspectRatio === "16:9"
-        ) {
-            imageSize = "landscape_16_9";
-
-        } else if (
-            aspectRatio === "9:16"
-        ) {
-            imageSize = "portrait_16_9";
-
-        } else if (
-            aspectRatio === "4:3"
-        ) {
-            imageSize = "landscape_4_3";
-
-        } else if (
-            aspectRatio === "3:4"
-        ) {
-            imageSize = "portrait_4_3";
+        if (!match) {
+            return res.status(400).json({
+                success: false,
+                error: "صيغة الصورة غير صحيحة"
+            });
         }
 
+        const mimeType = match[1];
+        const base64Image = match[2];
+
         // ==========================================
-        // FAL.AI REQUEST
+        // تحويل Base64 إلى Buffer
         // ==========================================
 
-        const response = await fetch(
-            "https://fal.run/fal-ai/flux/dev",
-            {
-                method: "POST",
-
-                headers: {
-                    "Authorization": `Key ${apiKey}`,
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify({
-
-                    prompt: prompt.trim(),
-
-                    image_size: imageSize,
-
-                    num_images: 1,
-
-                    enable_safety_checker: true
-
-                })
-            }
+        const imageBuffer = Buffer.from(
+            base64Image,
+            "base64"
         );
 
         // ==========================================
-        // RESPONSE
+        // Hugging Face
         // ==========================================
 
-        let data = null;
+        const model = "Qwen/Qwen-Image-Edit";
 
-        try {
-            data = await response.json();
-        } catch (error) {
+        const endpoint =
+            `https://router.huggingface.co/hf-inference/models/${model}`;
 
-            console.error(
-                "Nova AI: Invalid fal.ai JSON response"
-            );
+        const response = await fetch(endpoint, {
+            method: "POST",
 
-            return res.status(502).json({
-                success: false,
-                error: "استجابة غير صالحة من خدمة الصور"
-            });
-        }
+            headers: {
+                "Authorization": `Bearer ${hfToken}`,
+                "Content-Type": mimeType,
+                "Accept": "image/*"
+            },
+
+            body: imageBuffer
+        });
+
+        const responseType =
+            response.headers.get("content-type") || "";
 
         // ==========================================
-        // FAL ERROR
+        // لو حصل خطأ
         // ==========================================
 
         if (!response.ok) {
 
+            let details = "";
+
+            try {
+                details = await response.text();
+            } catch {
+                details = "تعذر قراءة استجابة Hugging Face";
+            }
+
             console.error(
-                "fal.ai STATUS:",
+                "HF STATUS:",
                 response.status
             );
 
             console.error(
-                "fal.ai RESPONSE:",
-                data
+                "HF RESPONSE:",
+                details
             );
 
-            return res.status(502).json({
+            return res.status(200).json({
                 success: false,
-                error: "حدث خطأ أثناء توليد الصورة"
+
+                error: "حدث خطأ من Hugging Face",
+
+                debug: {
+                    status: response.status,
+                    contentType: responseType,
+                    details: details
+                }
             });
         }
 
         // ==========================================
-        // EXTRACT IMAGE
+        // التأكد من أن الناتج صورة
         // ==========================================
 
-        const imageUrl =
-            data?.images?.[0]?.url ||
-            data?.image?.url ||
-            null;
+        if (!responseType.startsWith("image/")) {
 
-        if (!imageUrl) {
+            let details = "";
 
-            console.error(
-                "Nova AI: No image returned",
-                data
-            );
-
-            return res.status(502).json({
-                success: false,
-                error: "لم يتم استلام الصورة من خدمة التوليد"
-            });
-        }
-
-        // ==========================================
-        // SUCCESS
-        // ==========================================
-
-        return res.status(200).json({
-
-            success: true,
-
-            image: imageUrl,
-
-            imageUrl: imageUrl,
-
-            url: imageUrl,
-
-            meta: {
-                model: "fal-ai/flux/dev",
-                aspectRatio:
-                    aspectRatio || "4:3",
-                quality:
-                    quality || "standard"
+            try {
+                details = await response.text();
+            } catch {
+                details = "استجابة غير متوقعة";
             }
 
+            return res.status(200).json({
+                success: false,
+                error: "Hugging Face لم يرجع صورة",
+                debug: {
+                    contentType: responseType,
+                    details: details
+                }
+            });
+        }
+
+        // ==========================================
+        // الصورة الناتجة
+        // ==========================================
+
+        const resultBuffer =
+            Buffer.from(await response.arrayBuffer());
+
+        const resultBase64 =
+            resultBuffer.toString("base64");
+
+        return res.status(200).json({
+            success: true,
+
+            image:
+                `data:${responseType};base64,${resultBase64}`
         });
 
     } catch (error) {
 
         console.error(
-            "Nova AI - Image Generation Error:",
+            "NOVA IMAGE ERROR:",
             error
         );
 
         return res.status(500).json({
             success: false,
-            error: "حدث خطأ أثناء توليد الصورة"
+            error: "حدث خطأ داخل Nova AI",
+            debug: {
+                message:
+                    error?.message || String(error),
+
+                stack:
+                    error?.stack || null
+            }
         });
     }
 }
