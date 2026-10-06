@@ -3958,3 +3958,313 @@ body.nova-plan-preview-ultra {
     }
 
 }
+
+/* =========================================================
+   NOVA AI — PREMIUM VISUAL REDESIGN v2
+   ========================================================= */
+:root {
+  --nova-bg: #070812;
+  --nova-panel: rgba(14, 16, 29, .78);
+  --nova-panel-strong: rgba(17, 20, 36, .92);
+  --nova-border: rgba(255,255,255,.085);
+  --nova-muted: #8b91a7;
+  --nova-text: #f7f8ff;
+  --nova-purple: #8b5cf6;
+  --nova-cyan: #22d3ee;
+  --nova-pink: #ec4899;
+}
+
+html, body { background: var(--nova-bg) !important; }
+body {
+  background:
+    radial-gradient(900px 600px at 70% -10%, rgba(124,58,237,.16), transparent 60%),
+    radial-gradient(700px 500px at 15% 105%, rgba(34,211,238,.09), transparent 58%),
+    var(--nova-bg) !important;
+}
+
+.app-container {
+  position: relative;
+  background: transparent !important;
+  isolation: isolate;
+}
+.app-container::before,
+.app-container::after {
+  content: "";
+  position: absolute;
+  pointer-events: none;
+  border-radius: 999px;
+  filter: blur(90px);
+  opacity: .2;
+  z-index: -1;
+}
+.app-container::before { width: 260px; height: 260px; background: #7c3aed; top: 8%; right: 25%; }
+.app-container::after { width: 220px; height: 220px; background: #06b6d4; bottom: 4%; left: 20%; }
+
+.main-content {
+  background: transparent !important;
+}
+
+.sidebar {
+  width: 270px !important;
+  background: rgba(8,10,19,.72) !important;
+  backdrop-filter: blur(22px) saturate(140%);
+  -webkit-backdrop-filter: blur(22px) saturate(140%);
+  border-left: 1px solid var(--nova-border) !important;
+  box-shadow: 0 0 60px rgba(0,0,0,.25), inset -1px 0 rgba(255,255,255,.025);
+}
+.sidebar-header {
+  padding: 20px 18px 14px !important;
+}
+.logo-text {
+  font-size: 22px !important;
+  letter-spacing: -.5px;
+  text-shadow: 0 0 24px rgba(139,92,246,.28);
+}
+.logo-text span {
+  background: linear-gradient(100deg, #a78bfa, #22d3ee);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+.toggle-btn, .sidebar-icon-btn {
+  border: 1px solid transparent !important;
+  color: #9da4bc !important;
+  border-radius: 12px !important;
+}
+.toggle-btn:hover, .sidebar-icon-btn:hover {
+  background: rgba(139,92,246,.1) !important;
+  border-color: rgba(139,92,246,.2) !important;
+  color: #fff !important;
+}
+
+.new-chat-btn {
+  min-height: 48px !important;
+  margin: 10px 15px 18px !important;
+  border: 1px solid rgba(255,255,255,.09) !important;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, rgba(124,58,237,.95), rgba(79,70,229,.86)) !important;
+  box-shadow: 0 12px 30px rgba(124,58,237,.18), inset 0 1px rgba(255,255,255,.16);
+  transition: transform .2s ease, box-shadow .2s ease !important;
+}
+.new-chat-btn:hover {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1) !important;
+  transform: translateY(-1px);
+  box-shadow: 0 16px 36px rgba(124,58,237,.28), inset 0 1px rgba(255,255,255,.18);
+}
+
+.history-section { padding: 0 10px; }
+.history-title { color: #697088 !important; font-size: 11px !important; letter-spacing: .5px; text-transform: uppercase; }
+.history-list { scrollbar-width: thin; }
+.history-list > * {
+  border-radius: 11px !important;
+  transition: background .18s ease, transform .18s ease;
+}
+.history-list > *:hover {
+  background: rgba(255,255,255,.055) !important;
+  transform: translateX(-2px);
+}
+
+.main-content::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(rgba(255,255,255,.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.018) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: linear-gradient(to bottom, black, transparent 85%);
+}
+
+.content-section { padding: 0 !important; }
+.section-header {
+  min-height: 72px !important;
+  padding: 18px 28px !important;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--nova-border) !important;
+  background: rgba(7,8,18,.46) !important;
+  backdrop-filter: blur(16px);
+}
+.section-header h2 {
+  font-size: 15px !important;
+  font-weight: 700 !important;
+  color: #e9eaff !important;
+  letter-spacing: -.2px;
+}
+.section-header h2::before {
+  content: "";
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  margin-left: 9px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 12px rgba(34,197,94,.7);
+}
+
+.chat-box {
+  position: relative;
+  background: transparent !important;
+  padding: 42px clamp(18px, 5vw, 72px) 180px !important;
+}
+.chat-box::before {
+  content: "";
+  position: absolute;
+  width: 520px;
+  height: 320px;
+  top: 9%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse, rgba(124,58,237,.10), transparent 68%);
+  pointer-events: none;
+}
+
+.nova-welcome {
+  max-width: 820px !important;
+  margin: auto !important;
+  padding: 26px 20px 30px !important;
+  position: relative;
+  z-index: 1;
+}
+.nova-welcome-icon {
+  width: 76px !important;
+  height: 76px !important;
+  margin-bottom: 22px !important;
+  border-radius: 24px !important;
+  background: linear-gradient(145deg, rgba(139,92,246,.22), rgba(34,211,238,.12)) !important;
+  border: 1px solid rgba(167,139,250,.28) !important;
+  box-shadow: 0 0 0 8px rgba(139,92,246,.035), 0 20px 60px rgba(124,58,237,.18), inset 0 1px rgba(255,255,255,.14);
+  color: #c4b5fd !important;
+  font-size: 28px !important;
+}
+.nova-welcome h1 {
+  font-size: clamp(30px, 4vw, 48px) !important;
+  line-height: 1.15 !important;
+  letter-spacing: -1.5px !important;
+  color: #fff !important;
+  text-shadow: 0 10px 40px rgba(0,0,0,.35);
+}
+.nova-welcome h1 span {
+  background: linear-gradient(100deg, #c4b5fd 5%, #8b5cf6 45%, #22d3ee 95%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+.nova-welcome p {
+  max-width: 620px;
+  margin: 15px auto 30px !important;
+  color: #8f96ad !important;
+  font-size: 15px !important;
+  line-height: 1.9 !important;
+}
+
+.quick-prompts {
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px !important;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.quick-prompt {
+  min-height: 72px !important;
+  padding: 15px 17px !important;
+  justify-content: flex-start !important;
+  gap: 13px !important;
+  text-align: right !important;
+  border: 1px solid rgba(255,255,255,.075) !important;
+  border-radius: 16px !important;
+  background: linear-gradient(145deg, rgba(255,255,255,.055), rgba(255,255,255,.018)) !important;
+  box-shadow: inset 0 1px rgba(255,255,255,.04);
+  backdrop-filter: blur(12px);
+  transition: transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease !important;
+}
+.quick-prompt i {
+  width: 38px !important;
+  height: 38px !important;
+  display: grid !important;
+  place-items: center !important;
+  flex: 0 0 38px;
+  border-radius: 11px !important;
+  background: rgba(139,92,246,.12) !important;
+  color: #a78bfa !important;
+}
+.quick-prompt span { color: #d8dbea !important; font-size: 13px !important; }
+.quick-prompt:hover {
+  transform: translateY(-3px) !important;
+  border-color: rgba(139,92,246,.35) !important;
+  background: linear-gradient(145deg, rgba(139,92,246,.11), rgba(34,211,238,.045)) !important;
+  box-shadow: 0 14px 34px rgba(0,0,0,.22), 0 0 28px rgba(124,58,237,.08) !important;
+}
+
+.input-area {
+  position: absolute !important;
+  z-index: 20;
+  bottom: 22px !important;
+  left: clamp(16px, 5vw, 72px) !important;
+  right: clamp(16px, 5vw, 72px) !important;
+  width: auto !important;
+  max-width: 920px;
+  margin: 0 auto !important;
+  padding: 9px !important;
+  border: 1px solid rgba(255,255,255,.11) !important;
+  border-radius: 22px !important;
+  background: rgba(12,14,26,.84) !important;
+  box-shadow: 0 20px 70px rgba(0,0,0,.38), 0 0 45px rgba(124,58,237,.07), inset 0 1px rgba(255,255,255,.055) !important;
+  backdrop-filter: blur(24px) saturate(140%) !important;
+}
+.input-area:focus-within {
+  border-color: rgba(139,92,246,.38) !important;
+  box-shadow: 0 20px 70px rgba(0,0,0,.42), 0 0 45px rgba(124,58,237,.12), inset 0 1px rgba(255,255,255,.07) !important;
+}
+.input-area textarea {
+  min-height: 44px !important;
+  max-height: 150px;
+  padding: 12px 9px !important;
+  color: #f5f5ff !important;
+  background: transparent !important;
+  font-size: 14px !important;
+}
+.input-area textarea::placeholder { color: #686f86 !important; }
+.input-area button, .attach-btn {
+  width: 40px !important;
+  height: 40px !important;
+  border-radius: 12px !important;
+  color: #8f96ad !important;
+  background: transparent !important;
+  transition: .2s ease !important;
+}
+.input-area button:hover, .attach-btn:hover {
+  color: #fff !important;
+  background: rgba(255,255,255,.07) !important;
+}
+#sendChatBtn {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1) !important;
+  color: #fff !important;
+  box-shadow: 0 8px 22px rgba(124,58,237,.25);
+}
+#sendChatBtn:hover { transform: translateY(-2px) scale(1.02); background: linear-gradient(135deg,#9f67ff,#6d70ff) !important; }
+
+.message {
+  border-radius: 18px !important;
+}
+
+.nova-profile-area {
+  margin: 10px !important;
+  padding: 6px !important;
+  border: 1px solid rgba(255,255,255,.055);
+  border-radius: 16px;
+  background: rgba(255,255,255,.025);
+}
+.nova-profile-btn { border-radius: 12px !important; }
+
+.sidebar-footer-actions { padding: 10px 15px 15px !important; }
+
+@media (max-width: 700px) {
+  .sidebar { width: 255px !important; }
+  .section-header { min-height: 62px !important; padding: 14px 18px !important; }
+  .chat-box { padding: 26px 15px 150px !important; }
+  .nova-welcome { padding-top: 20px !important; }
+  .nova-welcome-icon { width: 64px !important; height: 64px !important; border-radius: 20px !important; }
+  .quick-prompts { grid-template-columns: 1fr; gap: 9px !important; }
+  .quick-prompt { min-height: 62px !important; }
+  .input-area { bottom: 12px !important; left: 10px !important; right: 10px !important; border-radius: 18px !important; }
+}
