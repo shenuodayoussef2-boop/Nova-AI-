@@ -4850,34 +4850,47 @@ body.nova-plan-preview-ultra {
                     return;
                 }
 
-                // Free = الباقة الحالية
+                // FREE
                 if (plan === "free") {
                     return;
                 }
 
-                // حالياً الاشتراك غير مربوط بالدفع
                 console.log(
                     "Nova AI selected plan:",
                     plan
                 );
 
+                /*
+                 * هنا هنربط الدفع الحقيقي لاحقًا.
+                 * حاليًا نعرض الباقة التي اختارها المستخدم.
+                 */
+
+                const planName =
+                    plan.toUpperCase();
+
+                button.disabled = true;
+
                 const originalText =
                     button.textContent.trim();
 
-                button.disabled = true;
-                button.textContent = "متاح قريبًا";
+                button.textContent =
+                    "تم اختيار " + planName;
 
                 const card =
                     button.closest(".nova-plan-card");
 
                 if (card) {
-                    card.classList.add("plan-selected");
+                    card.classList.add(
+                        "plan-selected"
+                    );
                 }
 
                 setTimeout(function () {
 
                     button.disabled = false;
-                    button.textContent = originalText;
+
+                    button.textContent =
+                        originalText;
 
                     if (card) {
                         card.classList.remove(
