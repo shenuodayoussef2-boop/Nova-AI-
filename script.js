@@ -61,7 +61,6 @@ let novaQuota = {
 };
 
 let novaQuotaTimer = null;
-let novaQuotaTimer = null;
 
 
 // ==========================================
