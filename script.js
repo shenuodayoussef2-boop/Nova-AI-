@@ -3762,25 +3762,19 @@ Make it visually appealing, detailed, coherent and polished.
 
 
         const response =
-            await fetch(
-                "/api/generate-image",
-                {
+    await fetch("/api/generate-image", {
+        method: "POST",
 
-                    method:
-                        "POST",
+        headers: {
+            "Content-Type":
+                "application/json",
 
-                    headers: {
-                        "Content-Type":
-                            "application/json"
-                    },
+            ...(await window.novaGetAuthHeaders())
+        },
 
-                    body:
-                        JSON.stringify({
-                            prompt
-                        })
-
-                }
-            );
+        body:
+            JSON.stringify(body)
+    });
 
 
         const data =
