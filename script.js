@@ -1900,7 +1900,7 @@ async function sendMessage(
         message: text,
     history: conversationHistory,
     chatId: currentChatId
-})
+}),
 
                             signal:
                                 currentAbortController.signal
