@@ -3761,19 +3761,21 @@ Make it visually appealing, detailed, coherent and polished.
 `;
 
 
-        const response =
+const authHeaders =
+    typeof window.novaGetAuthHeaders === "function"
+        ? await window.novaGetAuthHeaders()
+        : {};
+
+const response =
     await fetch("/api/generate-image", {
         method: "POST",
 
         headers: {
-            "Content-Type":
-                "application/json",
-
-            ...(await window.novaGetAuthHeaders())
+            "Content-Type": "application/json",
+            ...authHeaders
         },
 
-        body:
-            JSON.stringify(body)
+        body: JSON.stringify(body)
     });
 
 
