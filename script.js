@@ -178,7 +178,6 @@ function renderNovaQuotaUI() {
     updateNovaQuotaCountdown();
 }
 
-
 // ==========================================
 // ENABLE / DISABLE SEND
 // ==========================================
@@ -197,6 +196,187 @@ function setNovaSendEnabled(enabled) {
         !enabled
     );
 }
+
+
+// ==========================================
+// NOVA QUOTA TIMER
+// ==========================================
+
+function startNovaQuotaTimer() {
+
+    if (novaQuotaTimer) {
+
+        clearInterval(
+            novaQuotaTimer
+        );
+
+    }
+
+    if (
+        novaQuota.allowed !== false ||
+        !novaQuota.resetAt
+    ) {
+
+        return;
+    }
+
+    updateNovaQuotaCountdown();
+
+    novaQuotaTimer =
+        setInterval(
+            updateNovaQuotaCountdown,
+            1000
+        );
+}
+
+
+// ==========================================
+// NOVA QUOTA COUNTDOWN
+// ==========================================
+
+function updateNovaQuotaCountdown() {
+
+    const countdown =
+        document.getElementById(
+            "novaQuotaCountdown"
+        );
+
+    if (!countdown) {
+        return;
+    }
+
+    if (!novaQuota.resetAt) {
+
+        countdown.textContent =
+            "يمكنك المتابعة عند التجديد";
+
+        return;
+    }
+
+    const resetTime =
+        new Date(
+            novaQuota.resetAt
+        ).getTime();
+
+    const now =
+        Date.now();
+
+    const difference =
+        resetTime - now;
+
+
+    // ======================================
+    // RESET REACHED
+    // ======================================
+
+    if (difference <= 0) {
+
+        if (novaQuotaTimer) {
+
+            clearInterval(
+                novaQuotaTimer
+            );
+
+            novaQuotaTimer =
+                null;
+        }
+
+        novaQuota.allowed =
+            true;
+
+        novaQuota.used =
+            0;
+
+        novaQuota.remaining =
+            novaQuota.limit;
+
+        renderNovaQuotaUI();
+
+        return;
+    }
+
+
+    // ======================================
+    // CALCULATE TIME
+    // ======================================
+
+    const totalSeconds =
+        Math.floor(
+            difference / 1000
+        );
+
+    const hours =
+        Math.floor(
+            totalSeconds / 3600
+        );
+
+    const minutes =
+        Math.floor(
+            (
+                totalSeconds % 3600
+            ) / 60
+        );
+
+    const seconds =
+        totalSeconds % 60;
+
+
+    // ======================================
+    // RESET CLOCK
+    // ======================================
+
+    const resetDate =
+        new Date(
+            novaQuota.resetAt
+        );
+
+    const timeText =
+        resetDate.toLocaleTimeString(
+            "ar-EG",
+            {
+                hour: "numeric",
+                minute: "2-digit",
+                hour12: true
+            }
+        );
+
+
+    // ======================================
+    // REMAINING TEXT
+    // ======================================
+
+    let remainingText = "";
+
+    if (hours > 0) {
+
+        remainingText +=
+            `${hours} ساعة `;
+
+    }
+
+    if (
+        minutes > 0 ||
+        hours > 0
+    ) {
+
+        remainingText +=
+            `${minutes} دقيقة `;
+
+    }
+
+    remainingText +=
+        `${seconds} ثانية`;
+
+
+    countdown.innerHTML =
+        `متاح مرة أخرى الساعة <strong>${timeText}</strong>
+        <br>
+        <small>
+            باقي ${remainingText}
+        </small>`;
+}
+
+
 // ==========================================
 // 2. DOM REFERENCES
 // ==========================================
@@ -235,8 +415,6 @@ const attachDropdown =
     document.getElementById(
         "attachDropdown"
     );
-
-
 // ==========================================
 // 3. DOM READY
 // ==========================================
