@@ -2087,24 +2087,16 @@ async function sendMessage(
                     );
 
 
-                if (
-                    !response.ok
-                ) {
-
-                    throw new Error(
-                        `Nova API Error: ${response.status} ${response.statusText}`
-                    );
-
-                }
+         
 
 
-data =
-    await response.json();
+
 
 
 // ==========================================
 // NOVA CHAT QUOTA
 // ==========================================
+
 
 if (
     response.status === 429 &&
@@ -2133,6 +2125,19 @@ if (
     });
 
     return;
+}
+
+
+// ==========================================
+// NOVA API ERROR
+// ==========================================
+
+if (!response.ok) {
+
+    throw new Error(
+        `Nova API Error: ${response.status} ${response.statusText}`
+    );
+
 }
 
 
