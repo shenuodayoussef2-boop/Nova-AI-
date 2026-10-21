@@ -5061,5 +5061,18 @@ body.nova-plan-preview-ultra {
 
 </section>
 
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js")
+        .then((registration) => {
+          console.log("Nova AI Service Worker registered:", registration.scope);
+        })
+        .catch((error) => {
+          console.error("Nova AI Service Worker registration failed:", error);
+        });
+    });
+  }
+</script>
 </body>
 </html>
