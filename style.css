@@ -1,16 +1,27 @@
 /* =========================================================
-   RESET & BASE STYLES
+   1. RESET & BASE STYLES
 ========================================================= */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+:root {
+    --bg-dark: #0b0f19;
+    --bg-sidebar: #111827;
+    --bg-card: #1e293b;
+    --accent-blue: #38bdf8;
+    --accent-indigo: #818cf8;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border-color: rgba(255, 255, 255, 0.08);
 }
 
 body {
-    background-color: #0b0f19;
-    color: #e2e8f0;
+    background-color: var(--bg-dark);
+    color: var(--text-main);
     height: 100vh;
     width: 100vw;
     overflow: hidden;
@@ -26,15 +37,84 @@ body {
 }
 
 /* =========================================================
-   SIDEBAR
+   2. LOADING SCREEN (إخفاء تلقائي بعد التحميل)
+========================================================= */
+#novaLoadingScreen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: var(--bg-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeOutLoader 0.5s ease 2.5s forwards; /* يختفي تلقائياً بعد 2.5 ثانية */
+    pointer-events: none;
+}
+
+@keyframes fadeOutLoader {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+.nova-loader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+}
+
+.nova-loading-logo {
+    width: 120px;
+    height: 120px;
+    border-radius: 24px;
+    object-fit: cover;
+    box-shadow: 0 0 30px rgba(56, 189, 248, 0.3);
+}
+
+.nova-loading-brand {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.nova-brand-nova { color: var(--text-main); }
+.nova-brand-ai { color: var(--accent-blue); }
+
+.nova-progress-container {
+    width: 200px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.nova-progress-bar {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-indigo));
+    animation: loadingAnim 2.5s ease-in-out;
+}
+
+@keyframes loadingAnim {
+    from { width: 0%; }
+    to { width: 100%; }
+}
+
+/* =========================================================
+   3. SIDEBAR (القائمة الجانبية)
 ========================================================= */
 .sidebar {
     width: 260px;
-    background-color: #111827;
+    background-color: var(--bg-sidebar);
     display: flex;
     flex-direction: column;
     padding: 16px;
-    border-left: 1px solid rgba(255, 255, 255, 0.08);
+    border-left: 1px solid var(--border-color);
     transition: all 0.3s ease;
     z-index: 100;
     flex-shrink: 0;
@@ -50,17 +130,17 @@ body {
 .logo-text {
     font-size: 20px;
     font-weight: 700;
-    color: #f8fafc;
+    color: var(--text-main);
 }
 
 .logo-text span {
-    color: #38bdf8;
+    color: var(--accent-blue);
 }
 
 .toggle-btn {
     background: transparent;
     border: none;
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 18px;
     cursor: pointer;
     padding: 6px;
@@ -75,7 +155,7 @@ body {
 .new-chat-btn {
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #f8fafc;
+    color: var(--text-main);
     padding: 10px 16px;
     border-radius: 20px;
     display: flex;
@@ -102,7 +182,6 @@ body {
     font-size: 12px;
     color: #64748b;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
     margin-bottom: 10px;
 }
 
@@ -113,12 +192,12 @@ body {
     gap: 6px;
 }
 
-/* Profile Area */
+/* Profile Section inside Sidebar */
 .nova-profile-area {
     position: relative;
     margin-top: auto;
     padding-top: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    border-top: 1px solid var(--border-color);
 }
 
 .nova-profile-btn {
@@ -131,7 +210,7 @@ body {
     padding: 8px;
     border-radius: 12px;
     cursor: pointer;
-    color: #f8fafc;
+    color: var(--text-main);
     text-align: right;
 }
 
@@ -169,13 +248,8 @@ body {
 
 .nova-profile-plan {
     font-size: 10px;
-    color: #38bdf8;
+    color: var(--accent-blue);
     font-weight: bold;
-}
-
-.nova-profile-arrow {
-    color: #64748b;
-    font-size: 12px;
 }
 
 .nova-profile-menu {
@@ -184,12 +258,12 @@ body {
     bottom: 100%;
     right: 0;
     left: 0;
-    background-color: #1e293b;
+    background-color: var(--bg-card);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 16px;
     padding: 12px;
     margin-bottom: 8px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
     z-index: 200;
 }
 
@@ -198,7 +272,7 @@ body {
 }
 
 /* =========================================================
-   MAIN CONTENT AREA
+   4. MAIN CONTENT AREA (منطقة المحادثة الرئيسية)
 ========================================================= */
 .main-content {
     flex: 1;
@@ -235,12 +309,13 @@ body {
 
 .section-header h2 {
     font-size: 16px;
-    color: #94a3b8;
+    color: var(--text-muted);
     text-align: center;
     font-weight: 500;
+    margin-bottom: 10px;
 }
 
-/* Chat Box / Welcome Section */
+/* Chat Box & Welcome Header */
 .chat-box {
     flex: 1;
     overflow-y: auto;
@@ -259,31 +334,31 @@ body {
 
 .nova-welcome-icon {
     font-size: 32px;
-    color: #38bdf8;
+    color: var(--accent-blue);
     margin-bottom: 12px;
 }
 
 .nova-welcome h1 {
     font-size: 32px;
     font-weight: 600;
-    color: #f8fafc;
+    color: var(--text-main);
     margin-bottom: 12px;
 }
 
 .nova-welcome h1 span {
-    background: linear-gradient(135deg, #38bdf8, #818cf8);
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-indigo));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
 .nova-welcome p {
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 15px;
     line-height: 1.6;
     margin-bottom: 28px;
 }
 
-/* Quick Prompts Grid */
+/* Quick Prompts List */
 .quick-prompts {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -313,16 +388,16 @@ body {
 }
 
 .quick-prompt i {
-    color: #38bdf8;
+    color: var(--accent-blue);
     font-size: 16px;
     flex-shrink: 0;
 }
 
 /* =========================================================
-   INPUT AREA
+   5. INPUT BOX (صندوق الإدخال)
 ========================================================= */
 .input-area {
-    background-color: #1e293b;
+    background-color: var(--bg-card);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 28px;
     padding: 8px 16px;
@@ -337,7 +412,7 @@ body {
 .attach-btn, #micBtn, #sendChatBtn {
     background: transparent;
     border: none;
-    color: #94a3b8;
+    color: var(--text-muted);
     font-size: 18px;
     cursor: pointer;
     width: 36px;
@@ -351,7 +426,7 @@ body {
 }
 
 .attach-btn:hover, #micBtn:hover, #sendChatBtn:hover {
-    color: #38bdf8;
+    color: var(--accent-blue);
     background: rgba(255, 255, 255, 0.08);
 }
 
@@ -360,7 +435,7 @@ body {
     background: transparent;
     border: none;
     outline: none;
-    color: #f8fafc;
+    color: var(--text-main);
     font-size: 15px;
     resize: none;
     max-height: 120px;
@@ -377,13 +452,13 @@ body {
     gap: 6px;
 }
 
-/* Attach Dropdown Menu */
+/* Dropdown Menu for Attachment Options */
 .attach-dropdown {
     display: none;
     position: absolute;
     bottom: 100%;
     right: 0;
-    background: #1e293b;
+    background: var(--bg-card);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     padding: 8px;
@@ -414,9 +489,9 @@ body {
 }
 
 /* =========================================================
-   MODALS & OVERLAYS
+   6. MODALS & RESPONSIVE DESIGN
 ========================================================= */
-.settings-modal-overlay, .nova-language-modal, #voiceOverlay, #novaLoadingScreen {
+.settings-modal-overlay, .nova-language-modal, #voiceOverlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -430,12 +505,6 @@ body {
     z-index: 1000;
 }
 
-#novaLoadingScreen {
-    display: flex; /* يُعرض تلقائياً عند الشحن */
-    background: #0b0f19;
-}
-
-/* Responsive UI */
 @media (max-width: 768px) {
     .sidebar {
         position: absolute;
