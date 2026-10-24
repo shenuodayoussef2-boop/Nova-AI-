@@ -4866,3 +4866,140 @@ body {
     opacity: 0.45;
     cursor: not-allowed;
 }
+
+/* =========================================
+   NOVA AI — GEMINI-INSPIRED CHAT REDESIGN
+   ========================================= */
+
+.section-header {
+    display: none !important;
+}
+
+.chat-box {
+    width: 100%;
+    max-width: 1000px;
+    margin-inline: auto;
+    padding: 36px 28px 180px !important;
+    scroll-behavior: smooth;
+}
+
+.nova-welcome {
+    width: 100%;
+    max-width: 820px;
+    min-height: 55vh;
+    margin: 0 auto;
+    padding: 65px 20px 30px !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    animation: novaWelcomeAppear .55s ease both;
+}
+
+.nova-welcome h1 {
+    font-size: clamp(28px, 4vw, 42px) !important;
+    font-weight: 700;
+    letter-spacing: -1px;
+    line-height: 1.35;
+    margin: 20px 0 12px !important;
+}
+
+.nova-welcome p {
+    max-width: 600px;
+    font-size: 15px !important;
+    line-height: 1.9;
+    opacity: .8;
+}
+
+.nova-welcome-icon {
+    width: 68px;
+    height: 68px;
+    display: grid;
+    place-items: center;
+    border-radius: 23px;
+    background: rgba(34, 211, 238, .09);
+    border: 1px solid rgba(34, 211, 238, .2);
+    box-shadow: 0 0 45px rgba(34, 211, 238, .08);
+}
+
+.quick-prompts {
+    width: 100%;
+    max-width: 700px;
+    margin-top: 30px !important;
+    gap: 12px !important;
+}
+
+.quick-prompt {
+    border-radius: 18px !important;
+    min-height: 78px;
+    text-align: start;
+    transition: transform .2s ease, border-color .2s ease;
+}
+
+.quick-prompt:hover {
+    transform: translateY(-3px);
+    border-color: rgba(34, 211, 238, .5) !important;
+}
+
+.input-area {
+    position: fixed !important;
+    z-index: 100;
+    left: 50% !important;
+    right: auto !important;
+    bottom: 24px !important;
+    transform: translateX(-50%);
+    width: min(850px, calc(100% - 340px)) !important;
+    min-height: 76px;
+    border-radius: 28px !important;
+    padding: 12px 18px !important;
+    background: #151922 !important;
+    border: 1px solid rgba(148, 163, 184, .2) !important;
+    box-shadow: 0 12px 45px rgba(0, 0, 0, .25) !important;
+    backdrop-filter: blur(18px);
+}
+
+.input-area:focus-within {
+    border-color: rgba(34, 211, 238, .45) !important;
+}
+
+#chatInput {
+    background: transparent !important;
+    color: #f8fafc !important;
+    font-size: 15px !important;
+}
+
+#sendChatBtn {
+    background: #22d3ee !important;
+    color: #07131b !important;
+    border-radius: 50% !important;
+    box-shadow: none !important;
+}
+
+@keyframes novaWelcomeAppear {
+    from {
+        opacity: 0;
+        transform: translateY(14px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@media (max-width: 700px) {
+    .chat-box {
+        padding: 22px 14px 145px !important;
+    }
+
+    .nova-welcome {
+        min-height: 45vh;
+        padding: 35px 8px 20px !important;
+    }
+
+    .input-area {
+        width: calc(100% - 24px) !important;
+        bottom: 12px !important;
+        border-radius: 23px !important;
+    }
+}
