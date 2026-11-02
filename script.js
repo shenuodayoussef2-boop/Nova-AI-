@@ -4642,7 +4642,64 @@ document.addEventListener(
 
     }
 );
+// ==========================================
+// NOVA PROFILE MENU
+// ==========================================
 
+(() => {
+    const profileBtn = document.getElementById("novaProfileBtn");
+    const profileMenu = document.getElementById("novaProfileMenu");
+
+    if (!profileBtn || !profileMenu) {
+        console.error("Nova Profile: elements not found");
+        return;
+    }
+
+    function openProfileMenu() {
+        profileMenu.classList.add("active");
+        profileBtn.classList.add("open");
+        profileBtn.setAttribute("aria-expanded", "true");
+    }
+
+    function closeProfileMenu() {
+        profileMenu.classList.remove("active");
+        profileBtn.classList.remove("open");
+        profileBtn.setAttribute("aria-expanded", "false");
+    }
+
+    profileBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+
+        const isOpen = profileMenu.classList.contains("active");
+
+        if (isOpen) {
+            closeProfileMenu();
+        } else {
+            openProfileMenu();
+        }
+    });
+
+    profileMenu.addEventListener("click", (event) => {
+        event.stopPropagation();
+    });
+
+    document.addEventListener("click", (event) => {
+        if (
+            !profileMenu.contains(event.target) &&
+            !profileBtn.contains(event.target)
+        ) {
+            closeProfileMenu();
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+            closeProfileMenu();
+        }
+    });
+
+    console.log("Nova Profile Menu initialized successfully");
+})();
 // ==========================================
 // نهاية Nova AI
 // ==========================================
