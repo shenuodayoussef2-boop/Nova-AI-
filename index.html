@@ -489,5 +489,84 @@
     </div>
 </div>
 
+<script>
+(() => {
+    "use strict";
+
+    const loadingScreen = document.getElementById("novaLoadingScreen");
+    const progressBar = document.getElementById("novaProgressBar");
+    const progressText = document.getElementById("novaProgressText");
+
+    if (!loadingScreen || !progressBar || !progressText) {
+        console.error("Nova Loading Screen elements not found.");
+        return;
+    }
+
+    let progress = 1;
+    let finished = false;
+
+    function updateProgress(value) {
+        progress = Math.min(100, Math.max(progress, value));
+
+        progressBar.style.width = progress + "%";
+        progressText.textContent = Math.floor(progress) + "%";
+    }
+
+    // تحريك شريط التحميل تدريجياً
+    const loadingInterval = setInterval(() => {
+        if (finished) return;
+
+        if (progress < 85) {
+            updateProgress(progress + Math.random() * 7);
+        } else if (progress < 95) {
+            updateProgress(progress + 0.5);
+        }
+    }, 250);
+
+    // إنهاء شاشة التحميل
+    function finishLoading() {
+        if (finished) return;
+        finished = true;
+
+        clearInterval(loadingInterval);
+        updateProgress(100);
+
+        setTimeout(() => {
+            loadingScreen.classList.add("nova-loading-hidden");
+        }, 400);
+    }
+
+    // عند اكتمال تحميل الصفحة
+    if (document.readyState === "complete") {
+        finishLoading();
+    } else {
+        window.addEventListener("load", finishLoading, { once: true });
+    }
+
+    // حماية من بقاء الشاشة معلقة
+    setTimeout(finishLoading, 12000);
+
+})();
+</script>
+
+<style>
+#novaLoadingScreen {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.6s ease, visibility 0.6s ease;
+    z-index: 999999;
+}
+
+#novaLoadingScreen.nova-loading-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.nova-progress-bar {
+    transition: width 0.25s ease;
+}
+</style>
+
 </body>
 </html>
