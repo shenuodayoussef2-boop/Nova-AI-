@@ -1,3 +1,4 @@
+
 const supabaseClient = window.novaSupabase;
 
 const authForm = document.getElementById("authForm");
@@ -12,7 +13,15 @@ const formTitle = document.getElementById("formTitle");
 const formSubtitle = document.getElementById("formSubtitle");
 const messageBox = document.getElementById("message");
 
+const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
+const forgotPasswordField = document.getElementById("forgotPasswordField");
+
 let isSignup = false;
+
+
+/* =========================
+   رسائل النظام
+========================= */
 
 function showMessage(text, type = "error") {
     messageBox.textContent = text;
@@ -23,6 +32,7 @@ function clearMessage() {
     messageBox.textContent = "";
     messageBox.className = "message";
 }
+
 
 /* =========================
    التبديل بين الدخول والتسجيل
@@ -51,6 +61,10 @@ switchBtn.addEventListener("click", function (event) {
 
         passwordInput.autocomplete = "new-password";
 
+        if (forgotPasswordField) {
+            forgotPasswordField.style.display = "none";
+        }
+
     } else {
 
         formTitle.textContent = "أهلاً بيك في Nova AI 👋";
@@ -65,8 +79,83 @@ switchBtn.addEventListener("click", function (event) {
         nameInput.required = false;
 
         passwordInput.autocomplete = "current-password";
+
+        if (forgotPasswordField) {
+            forgotPasswordField.style.display = "block";
+        }
     }
 });
+
+
+/* =========================
+   استعادة كلمة المرور
+========================= */
+
+if (forgotPasswordBtn) {
+
+    forgotPasswordBtn.addEventListener("click", async function (event) {
+
+        event.preventDefault();
+
+        clearMessage();
+
+        const email = emailInput.value.trim();
+
+        if (!email) {
+            showMessage("اكتب بريدك الإلكتروني الأول.");
+            emailInput.focus();
+            return;
+        }
+
+        if (!supabaseClient) {
+            showMessage("Supabase مش متصل.");
+            return;
+        }
+
+        forgotPasswordBtn.disabled = true;
+
+        forgotPasswordBtn.textContent = "جاري إرسال الرابط...";
+
+        try {
+
+            const { error } =
+                await supabaseClient.auth.resetPasswordForEmail(
+                    email,
+                    {
+                        redirectTo:
+                            window.location.origin +
+                            "/reset-password.html"
+                    }
+                );
+
+            if (error) {
+                throw error;
+            }
+
+            showMessage(
+                "لو البريد مسجل، هتوصلك رسالة لإعادة تعيين كلمة المرور. راجع صندوق الوارد والرسائل غير المرغوب فيها.",
+                "success"
+            );
+
+        } catch (error) {
+
+            console.error("NOVA PASSWORD RESET ERROR:", error);
+
+            showMessage(
+                "حصلت مشكلة أثناء إرسال رابط استعادة كلمة المرور."
+            );
+
+        } finally {
+
+            forgotPasswordBtn.disabled = false;
+
+            forgotPasswordBtn.textContent = "هل نسيت كلمة المرور؟";
+
+        }
+
+    });
+
+}
 
 
 /* =========================
@@ -131,9 +220,6 @@ authForm.addEventListener("submit", async function (event) {
                 throw error;
             }
 
-            /*
-             * لو تأكيد الإيميل شغال
-             */
             if (!data.session) {
 
                 showMessage(
@@ -143,11 +229,6 @@ authForm.addEventListener("submit", async function (event) {
 
                 return;
             }
-
-            /*
-             * لو التأكيد مقفول
-             * هيكون فيه Session وندخل الشات مباشرة
-             */
 
             showMessage(
                 "تم إنشاء الحساب 🎉",
