@@ -47,55 +47,6 @@ let currentAbortController = null;
 // الصورة المرفوعة التي سيتم استخدامها في تعديل الصورة
 let pendingVisionImage = null;
 
-
-// ==========================================
-// NOVA AI - MAIN SCRIPT
-// ==========================================
-
-// ==========================================
-// 0. DEMO MODE
-// ==========================================
-
-// true = عرض تجريبي بدون Gemini
-// false = استخدام API الحقيقي
-const DEMO_MODE = false;
-
-
-// ==========================================
-// 1. نظام المحادثات
-// ==========================================
-
-let chatsArray = [];
-
-try {
-    const savedChats = localStorage.getItem("novaAllChats");
-
-    chatsArray = savedChats
-        ? JSON.parse(savedChats)
-        : [];
-
-    if (!Array.isArray(chatsArray)) {
-        chatsArray = [];
-    }
-
-} catch (error) {
-
-    console.error(
-        "Nova AI - خطأ في بيانات المحادثات:",
-        error
-    );
-
-    chatsArray = [];
-
-    localStorage.removeItem("novaAllChats");
-}
-let currentChatId = null;
-
-let currentAbortController = null;
-
-// الصورة المرفوعة التي سيتم استخدامها في تعديل الصورة
-let pendingVisionImage = null;
-
 const historyList =
     document.getElementById("historyList");
 
