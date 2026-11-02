@@ -4701,5 +4701,46 @@ document.addEventListener(
     console.log("Nova Profile Menu initialized successfully");
 })();
 // ==========================================
+// NOVA AI - SIGN OUT
+// ==========================================
+
+(() => {
+    const logoutBtn = document.getElementById("novaLogoutBtn");
+
+    if (!logoutBtn) {
+        console.error("Nova Logout: button not found");
+        return;
+    }
+
+    logoutBtn.addEventListener("click", async () => {
+        const supabase = window.novaSupabase;
+
+        if (!supabase) {
+            alert("تعذر الاتصال بنظام تسجيل الدخول.");
+            return;
+        }
+
+        logoutBtn.disabled = true;
+
+        try {
+            const { error } = await supabase.auth.signOut({
+                scope: "local"
+            });
+
+            if (error) {
+                throw error;
+            }
+
+            window.novaUser = null;
+            window.location.replace("login.html");
+
+        } catch (error) {
+            console.error("Nova Logout Error:", error);
+            alert("حدث خطأ أثناء تسجيل الخروج. حاول مرة أخرى.");
+            logoutBtn.disabled = false;
+        }
+    });
+})();
+// ==========================================
 // نهاية Nova AI
 // ==========================================
