@@ -277,3 +277,62 @@ loginForm.addEventListener(
 
     }
 );
+
+const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
+
+if (forgotPasswordBtn) {
+    forgotPasswordBtn.addEventListener("click", async function (event) {
+        event.preventDefault();
+
+        const emailInput = document.getElementById("email");
+        const messageBox = document.getElementById("message");
+        const supabase = window.novaSupabase;
+
+        const email = emailInput.value.trim();
+
+        function showMessage(text, type = "error") {
+            messageBox.textContent = text;
+            messageBox.className = `message show ${type}`;
+        }
+
+        if (!email) {
+            showMessage("اكتب بريدك الإلكتروني الأول.");
+            emailInput.focus();
+            return;
+        }
+
+        if (!supabase) {
+            showMessage("حصلت مشكلة في الاتصال بالخادم.");
+            return;
+        }
+
+        forgotPasswordBtn.style.pointerEvents = "none";
+        forgotPasswordBtn.textContent = "جاري إرسال الرابط...";
+
+        try {
+            const { error } =
+                await supabase.auth.resetPasswordForEmail(email, {
+                    redirectTo:
+                        window.location.origin + "/reset-password.html"
+                });
+
+            if (error) throw error;
+
+            showMessage(
+                "لو البريد مسجل، هتوصلك رسالة لاستعادة كلمة المرور. راجع صندوق الوارد والـ Spam.",
+                "success"
+            );
+
+        } catch (error) {
+            console.error("Password Reset Error:", error);
+
+            showMessage(
+                "تعذر إرسال رابط الاستعادة. حاول مرة تانية."
+            );
+
+        } finally {
+            forgotPasswordBtn.style.pointerEvents = "auto";
+            forgotPasswordBtn.textContent = "هل نسيت كلمة المرور؟";
+        }
+    });
+}
