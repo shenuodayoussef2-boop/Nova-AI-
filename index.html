@@ -5,14 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <!-- =========================
-         Google Site Verification
-    ========================== -->
+    <!-- Google Site Verification -->
     <meta name="google-site-verification" content="U4lbMdErCwu2gXKKds2fLr9R78B5ULqtpR39sEVElEc">
 
-    <!-- =========================
-         SEO
-    ========================== -->
+    <!-- SEO -->
     <title>Nova AI - استوديو الذكاء الاصطناعي</title>
     <meta name="description" content="Nova AI هو استوديو ذكاء اصطناعي يساعدك في البرمجة، الكتابة، التعلم، الإبداع، تحليل الصور والمحادثة الذكية.">
     <meta name="keywords" content="Nova AI, ذكاء اصطناعي, AI, مساعد ذكي, برمجة, كتابة, تعلم, إبداع">
@@ -21,16 +17,12 @@
     <meta name="googlebot" content="index, follow">
     <link rel="canonical" href="https://nova-ai-one-cyan.vercel.app/">
 
-    <!-- =========================
-         Theme
-    ========================== -->
+    <!-- Theme -->
     <meta name="theme-color" content="#0f172a">
     <link rel="manifest" href="/manifest.webmanifest">
     <meta name="color-scheme" content="dark">
 
-    <!-- =========================
-         Open Graph
-    ========================== -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="Nova AI - استوديو الذكاء الاصطناعي">
     <meta property="og:description" content="مساعدك الذكي للبرمجة، الكتابة، التعلم والإبداع.">
@@ -41,38 +33,28 @@
     <meta property="og:image:alt" content="Nova AI">
     <meta property="og:image:type" content="image/jpeg">
 
-    <!-- =========================
-         Twitter / X
-    ========================== -->
+    <!-- Twitter / X -->
     <meta name="twitter:card" content="summary">
     <meta name="twitter:title" content="Nova AI - استوديو الذكاء الاصطناعي">
     <meta name="twitter:description" content="مساعدك الذكي للبرمجة، الكتابة، التعلم والإبداع.">
     <meta name="twitter:image" content="https://i.postimg.cc/JzFwyMDB/Whats-App-Image-2026-10-05-at-9-05-23-PM.jpg">
     <meta name="twitter:image:alt" content="Nova AI">
 
-    <!-- =========================
-         Favicon
-    ========================== -->
+    <!-- Favicon -->
     <link rel="icon" type="image/jpeg" sizes="32x32" href="https://i.postimg.cc/JzFwyMDB/Whats-App-Image-2026-10-05-at-9-05-23-PM.jpg">
     <link rel="icon" type="image/jpeg" sizes="192x192" href="https://i.postimg.cc/JzFwyMDB/Whats-App-Image-2026-10-05-at-9-05-23-PM.jpg">
     <link rel="shortcut icon" type="image/jpeg" href="https://i.postimg.cc/JzFwyMDB/Whats-App-Image-2026-10-05-at-9-05-23-PM.jpg">
     <link rel="apple-touch-icon" href="https://i.postimg.cc/JzFwyMDB/Whats-App-Image-2026-10-05-at-9-05-23-PM.jpg">
 
-    <!-- =========================
-         Styles & Fonts
-    ========================== -->
+    <!-- Styles & Fonts -->
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- =========================
-         Supabase
-    ========================== -->
+    <!-- Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
 
-    <!-- =========================
-         Structured Data
-    ========================== -->
+    <!-- Structured Data -->
     <script type="application/ld+json">
     {
         "@context": "https://schema.org",
@@ -97,23 +79,29 @@
 <div id="novaLoadingScreen">
     <div class="nova-loader">
         <div class="nova-loader-glow"></div>
+
         <div class="nova-loader-logo-wrap">
             <img src="https://i.postimg.cc/JzFwyMDB/Whats-App-Image-2026-10-05-at-9-05-23-PM.jpg" alt="Nova AI" class="nova-loading-logo">
         </div>
+
         <div class="nova-loading-brand">
             <span class="nova-brand-nova">Nova</span>
             <span class="nova-brand-ai">AI</span>
         </div>
+
         <div class="nova-loading-subtitle">استوديو الذكاء الاصطناعي</div>
+
         <div class="nova-progress-wrapper">
             <div class="nova-progress-top">
                 <span>جاري تشغيل Nova</span>
                 <span id="novaProgressText" class="nova-progress-text">1%</span>
             </div>
+
             <div class="nova-progress-container">
                 <div id="novaProgressBar" class="nova-progress-bar"></div>
             </div>
         </div>
+
         <div class="nova-loading-status">
             <span class="nova-status-dot"></span>
             <span>تهيئة النظام...</span>
@@ -126,14 +114,14 @@
 ========================================================= -->
 <div class="app-container">
 
-    <!-- =====================================================
-         SIDEBAR
-    ====================================================== -->
+    <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
+
         <div class="sidebar-header">
             <button id="sidebarToggleBtn" class="toggle-btn" title="طي / فتح القائمة" type="button" aria-label="طي أو فتح القائمة">
                 <i class="fa-solid fa-bars"></i>
             </button>
+
             <h2 class="logo-text">Nova <span>AI</span></h2>
         </div>
 
@@ -149,18 +137,23 @@
 
         <!-- PROFILE -->
         <div class="nova-profile-area">
+
             <button id="novaProfileBtn" class="nova-profile-btn" type="button" aria-expanded="false" aria-haspopup="true">
                 <div id="novaProfileAvatar" class="nova-profile-avatar">YS</div>
+
                 <div class="nova-profile-info">
                     <strong id="novaProfileName">يوسف شنوده</strong>
                     <span id="novaProfilePlan" class="nova-profile-plan free">FREE</span>
                 </div>
+
                 <i class="fa-solid fa-chevron-up nova-profile-arrow"></i>
             </button>
 
             <div id="novaProfileMenu" class="nova-profile-menu">
+
                 <div class="nova-profile-head">
                     <div id="novaMenuAvatar" class="nova-menu-avatar">YS</div>
+
                     <div>
                         <strong id="novaMenuName">يوسف شنوده</strong>
                         <span id="novaMenuEmail">—</span>
@@ -168,7 +161,10 @@
                 </div>
 
                 <div class="nova-plan-card">
-                    <div class="nova-plan-icon"><i class="fa-solid fa-sparkles"></i></div>
+                    <div class="nova-plan-icon">
+                        <i class="fa-solid fa-sparkles"></i>
+                    </div>
+
                     <div class="nova-plan-text">
                         <span>Current plan</span>
                         <strong id="novaMenuPlan">FREE</strong>
@@ -180,19 +176,23 @@
                         <i class="fa-solid fa-palette"></i>
                         <span>Themes</span>
                     </div>
+
                     <div class="nova-theme-grid">
                         <button class="nova-theme-option active" data-theme="nova" type="button">
                             <span class="theme-preview theme-nova"></span>
                             <span>Nova</span>
                         </button>
+
                         <button class="nova-theme-option" data-theme="purple" type="button">
                             <span class="theme-preview theme-purple"></span>
                             <span>Purple</span>
                         </button>
+
                         <button class="nova-theme-option" data-theme="emerald" type="button">
                             <span class="theme-preview theme-emerald"></span>
                             <span>Emerald</span>
                         </button>
+
                         <button class="nova-theme-option" data-theme="amoled" type="button">
                             <span class="theme-preview theme-amoled"></span>
                             <span>AMOLED</span>
@@ -230,13 +230,29 @@
                     <i class="fa-solid fa-right-from-bracket"></i>
                     <span>Sign out</span>
                 </button>
+
             </div>
         </div>
 
+        <!-- SIDEBAR FOOTER -->
         <div class="sidebar-footer-actions" style="margin-top: auto; padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+
             <button class="sidebar-icon-btn" id="settingsBtn" title="الإعدادات" type="button" aria-label="الإعدادات">
                 <i class="fa-solid fa-gear"></i>
             </button>
+
+            <!-- INSTALL NOVA AI BUTTON -->
+            <button
+                class="nova-install-btn"
+                id="installNovaBtn"
+                type="button"
+                title="Install Nova AI"
+                aria-label="Install Nova AI"
+            >
+                <i class="fa-solid fa-download" aria-hidden="true"></i>
+                <span>Install Nova AI</span>
+            </button>
+
         </div>
     </aside>
 
@@ -244,78 +260,99 @@
          MAIN CONTENT
     ========================================================= -->
     <main class="main-content">
+
         <button id="mobileMenuBtn" class="mobile-menu-btn" type="button" title="فتح القائمة" aria-label="فتح القائمة">
             <i class="fa-solid fa-bars"></i>
         </button>
 
         <section id="chat-section" class="content-section active">
+
             <div class="section-header">
                 <h2>Nova AI</h2>
             </div>
 
             <div class="chat-box" id="chatBox">
+
                 <div class="nova-welcome" id="novaWelcome">
+
                     <div class="nova-welcome-icon">
                         <i class="fa-solid fa-sparkles"></i>
                     </div>
+
                     <h1>أهلاً بيك في <span>Nova AI</span> 👋</h1>
+
                     <p>
                         مساعدك الذكي للبرمجة، الكتابة، التعلم والإبداع.
-                        <br> ابدأ محادثتك واكتشف إمكانيات Nova.
+                        <br>
+                        ابدأ محادثتك واكتشف إمكانيات Nova.
                     </p>
 
                     <div class="quick-prompts">
+
                         <button type="button" class="quick-prompt" data-prompt="اكتب لي فكرة مشروع ويب مبتكر باستخدام HTML وCSS وJavaScript">
                             <i class="fa-solid fa-code"></i>
                             <span>اقترح لي مشروع برمجي</span>
                         </button>
+
                         <button type="button" class="quick-prompt" data-prompt="اشرح لي الذكاء الاصطناعي بطريقة سهلة وبسيطة">
                             <i class="fa-solid fa-brain"></i>
                             <span>اشرح لي الذكاء الاصطناعي</span>
                         </button>
+
                         <button type="button" class="quick-prompt" data-prompt="ساعدني في كتابة خطة لتعلم البرمجة من البداية">
                             <i class="fa-solid fa-graduation-cap"></i>
                             <span>ساعدني أتعلم البرمجة</span>
                         </button>
+
                         <button type="button" class="quick-prompt" data-prompt="اكتب لي قصة قصيرة وممتعة">
                             <i class="fa-solid fa-book-open"></i>
                             <span>اكتب لي قصة قصيرة</span>
                         </button>
+
                     </div>
                 </div>
             </div>
 
+            <!-- INPUT AREA -->
             <div class="input-area">
+
                 <input type="file" id="fileInput" style="display: none;" multiple>
 
                 <div class="attach-wrapper" style="position: relative; display: inline-block;">
+
                     <button id="attachBtn" class="attach-btn" type="button" title="خيارات إضافية" aria-label="خيارات إضافية">
                         <i class="fa-solid fa-plus"></i>
                     </button>
 
                     <div id="attachDropdown" class="attach-dropdown">
+
                         <div class="dropdown-item" id="optUpload" role="button" tabindex="0">
                             <i class="fa-solid fa-paperclip"></i>
                             <span>رفع ملف</span>
                         </div>
+
                         <div class="dropdown-item" id="optImage" role="button" tabindex="0">
                             <i class="fa-solid fa-wand-magic-sparkles"></i>
                             <span>توليد صورة</span>
                         </div>
+
                         <div class="dropdown-item" id="optVideo" role="button" tabindex="0">
                             <i class="fa-solid fa-video"></i>
                             <span>توليد فيديو</span>
                         </div>
+
                         <div class="dropdown-item" id="optMusic" role="button" tabindex="0">
                             <i class="fa-solid fa-music"></i>
                             <span>توليد صوت</span>
                         </div>
+
                     </div>
                 </div>
 
                 <textarea id="chatInput" rows="1" placeholder="اكتب رسالتك هنا..." autocomplete="off" spellcheck="true"></textarea>
 
                 <div class="input-actions-right">
+
                     <button id="micBtn" type="button" title="تحويل الصوت لنص" aria-label="تحويل الصوت لنص">
                         <i class="fa-solid fa-microphone"></i>
                     </button>
@@ -332,6 +369,7 @@
                     <button id="sendChatBtn" type="button" title="إرسال" aria-label="إرسال الرسالة">
                         <i class="fa-solid fa-paper-plane"></i>
                     </button>
+
                 </div>
             </div>
         </section>
@@ -342,22 +380,29 @@
      VOICE OVERLAY
 ========================================================= -->
 <div id="voiceOverlay" class="voice-overlay">
+
     <button id="closeVoiceBtn" class="close-voice-btn" title="إغلاق المحادثة الصوتية" type="button" aria-label="إغلاق المحادثة الصوتية">
         <i class="fa-solid fa-xmark"></i>
     </button>
+
     <div class="voice-header">
         <span>Nova الصوت</span>
     </div>
+
     <div class="orb-container">
         <div id="voiceOrb" class="voice-orb"></div>
     </div>
+
     <div class="voice-controls">
+
         <button id="toggleMuteBtn" class="voice-ctrl-btn" title="كتم الصوت" type="button" aria-label="كتم الصوت">
             <i class="fa-solid fa-microphone"></i>
         </button>
+
         <button id="endVoiceCallBtn" class="voice-ctrl-btn close-call" title="إنهاء المحادثة" type="button" aria-label="إنهاء المحادثة">
             <i class="fa-solid fa-xmark"></i>
         </button>
+
     </div>
 </div>
 
@@ -365,69 +410,87 @@
      SETTINGS MODAL
 ========================================================= -->
 <div id="settingsModal" class="settings-modal-overlay">
+
     <div class="settings-modal-content">
+
         <div class="settings-header">
             <h3>الإعدادات</h3>
+
             <button id="closeSettingsBtn" class="close-settings-btn" type="button" aria-label="إغلاق الإعدادات">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
+
         <div class="settings-body">
+
             <div class="setting-item" data-setting="activity">
                 <i class="fa-solid fa-clock-rotate-left"></i>
                 <span>Activity</span>
             </div>
+
             <div class="setting-item" data-setting="personal-intelligence">
                 <i class="fa-solid fa-brain"></i>
                 <span>Personal Intelligence</span>
             </div>
+
             <div class="setting-item" data-setting="import-memory">
                 <i class="fa-solid fa-file-import"></i>
                 <span>Import memory to Nova</span>
             </div>
+
             <div class="setting-item" data-setting="avatar">
                 <i class="fa-regular fa-face-smile"></i>
                 <span>Avatar</span>
             </div>
+
             <div class="setting-item" data-setting="usage">
                 <i class="fa-solid fa-chart-pie"></i>
                 <span>Usage limits</span>
             </div>
+
             <div class="setting-item" data-setting="gems">
                 <i class="fa-solid fa-gem"></i>
                 <span>Gems</span>
             </div>
+
             <div class="setting-item" data-setting="public-links">
                 <i class="fa-solid fa-link"></i>
                 <span>Your public links</span>
             </div>
+
             <div class="setting-item" data-setting="theme">
                 <i class="fa-solid fa-sun"></i>
                 <span>Theme</span>
                 <i class="fa-solid fa-chevron-left arrow"></i>
             </div>
+
             <div class="setting-item" data-setting="language">
                 <i class="fa-solid fa-language"></i>
                 <span>Language</span>
                 <i class="fa-solid fa-chevron-left arrow"></i>
             </div>
+
             <div class="setting-item" data-setting="subscriptions">
                 <i class="fa-solid fa-box-archive"></i>
                 <span>View subscriptions</span>
             </div>
+
             <div class="setting-item" data-setting="notebook">
                 <i class="fa-solid fa-book"></i>
                 <span>Nova Notebook</span>
             </div>
+
             <div class="setting-item" data-setting="watermark">
                 <i class="fa-solid fa-photo-film"></i>
                 <span>Media watermark</span>
                 <i class="fa-solid fa-chevron-left arrow"></i>
             </div>
+
             <div class="setting-item" data-setting="feedback">
                 <i class="fa-solid fa-comment-dots"></i>
                 <span>Send feedback</span>
             </div>
+
             <div class="setting-item" data-setting="help">
                 <i class="fa-solid fa-circle-question"></i>
                 <span>Help</span>
@@ -436,16 +499,21 @@
 
             <!-- SMART MEMORY -->
             <div class="settings-section memory-section">
+
                 <div class="settings-section-title">
                     <i class="fa-solid fa-brain"></i>
                     <span>ذاكرة Nova</span>
                 </div>
+
                 <p class="settings-description">المعلومات التي طلبت من Nova أن تتذكرها عنك.</p>
+
                 <div id="memoryList" class="memory-list"></div>
+
                 <button id="clearMemoryBtn" class="danger-btn" type="button">
                     <i class="fa-solid fa-trash"></i>
                     <span>مسح كل الذكريات</span>
                 </button>
+
             </div>
         </div>
     </div>
@@ -455,18 +523,24 @@
      LANGUAGE MODAL
 ========================================================= -->
 <div id="languageModal" class="nova-language-modal">
+
     <div class="nova-language-modal-content">
+
         <div class="nova-language-header">
             <div>
                 <h3>🌐 لغة Nova</h3>
                 <p>اختار اللغة اللي تحب Nova والتطبيق يستخدموها</p>
             </div>
+
             <button id="closeLanguageModal" type="button" aria-label="إغلاق">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
+
         <div class="nova-language-select-wrapper">
+
             <label for="novaLanguageSelect">لغة التطبيق</label>
+
             <select id="novaLanguageSelect">
                 <option value="auto">🌍 Auto — اكتشاف تلقائي</option>
                 <option value="ar-eg">🇪🇬 العربية المصرية</option>
@@ -485,10 +559,14 @@
                 <option value="tr">🇹🇷 Türkçe</option>
                 <option value="el">🇬🇷 Ελληνικά</option>
             </select>
+
         </div>
     </div>
 </div>
 
+<!-- =========================================================
+     LOADING SCRIPT
+========================================================= -->
 <script>
 (() => {
     "use strict";
@@ -526,6 +604,7 @@
     // إنهاء شاشة التحميل
     function finishLoading() {
         if (finished) return;
+
         finished = true;
 
         clearInterval(loadingInterval);
@@ -549,6 +628,9 @@
 })();
 </script>
 
+<!-- =========================================================
+     NOVA AI INSTALL BUTTON STYLE
+========================================================= -->
 <style>
 #novaLoadingScreen {
     opacity: 1;
@@ -566,20 +648,163 @@
 .nova-progress-bar {
     transition: width 0.25s ease;
 }
+
+/* Nova AI install button */
+.nova-install-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 42px;
+    padding: 10px 12px;
+    border: 1px solid rgba(34, 211, 238, 0.35);
+    border-radius: 12px;
+    background: rgba(34, 211, 238, 0.10);
+    color: #67e8f9;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.nova-install-btn:hover {
+    background: rgba(34, 211, 238, 0.20);
+    border-color: #22d3ee;
+    transform: translateY(-1px);
+}
+
+.nova-install-btn:focus-visible {
+    outline: 2px solid #22d3ee;
+    outline-offset: 3px;
+}
+
+.nova-install-btn[hidden] {
+    display: none !important;
+}
 </style>
+
+<!-- MAIN APP SCRIPT -->
 <script src="script.js"></script>
+
+<!-- =========================================================
+     NOVA AI INSTALL LOGIC
+========================================================= -->
+<script>
+(() => {
+    "use strict";
+
+    const installButton = document.getElementById("installNovaBtn");
+
+    if (!installButton) return;
+
+    let deferredInstallPrompt = null;
+
+    const isAppInstalled = () =>
+        window.matchMedia("(display-mode: standalone)").matches ||
+        window.navigator.standalone === true;
+
+    // إخفاء الزر إذا كان Nova AI مثبتًا بالفعل كتطبيق.
+    if (isAppInstalled()) {
+        installButton.hidden = true;
+    }
+
+    // استقبال نافذة التثبيت الأصلية في المتصفحات الداعمة.
+    window.addEventListener("beforeinstallprompt", (event) => {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+    });
+
+    // عند الضغط على زر التثبيت.
+    installButton.addEventListener("click", async () => {
+
+        if (isAppInstalled()) {
+            installButton.hidden = true;
+            return;
+        }
+
+        // التثبيت من خلال نافذة المتصفح الأصلية.
+        if (deferredInstallPrompt) {
+            const promptEvent = deferredInstallPrompt;
+            deferredInstallPrompt = null;
+
+            promptEvent.prompt();
+
+            try {
+                const choice = await promptEvent.userChoice;
+
+                if (choice && choice.outcome === "accepted") {
+                    installButton.hidden = true;
+                }
+
+            } catch (error) {
+                console.error("Nova AI installation prompt failed:", error);
+            }
+
+            return;
+        }
+
+        // اكتشاف أجهزة iPhone و iPad.
+        const isIOS =
+            /iphone|ipad|ipod/i.test(window.navigator.userAgent) ||
+            (
+                window.navigator.platform === "MacIntel" &&
+                window.navigator.maxTouchPoints > 1
+            );
+
+        if (isIOS) {
+
+            window.alert(
+                "لتثبيت Nova AI على جهازك:\n\n" +
+                "1. افتح Nova AI من Safari.\n" +
+                "2. اضغط على زر المشاركة Share.\n" +
+                "3. اختر Add to Home Screen.\n" +
+                "4. اضغط Add."
+            );
+
+        } else {
+
+            window.alert(
+                "لتثبيت Nova AI كتطبيق:\n\n" +
+                "افتح قائمة المتصفح، ثم اختر Install Nova AI أو Install app إذا كان الخيار متاحًا.\n\n" +
+                "لو لم يظهر خيار التثبيت، تأكد من فتح الموقع عبر HTTPS وأن manifest وملف service worker يعملان بشكل صحيح."
+            );
+
+        }
+    });
+
+    // إخفاء الزر بعد اكتمال التثبيت.
+    window.addEventListener("appinstalled", () => {
+        installButton.hidden = true;
+        deferredInstallPrompt = null;
+    });
+
+})();
+</script>
+
+<!-- =========================================================
+     SERVICE WORKER REGISTRATION
+========================================================= -->
 <script>
 if ("serviceWorker" in navigator) {
+
     window.addEventListener("load", () => {
+
         navigator.serviceWorker.register("/sw.js")
+
             .then((registration) => {
                 console.log("Nova AI PWA registered:", registration.scope);
             })
+
             .catch((error) => {
                 console.error("Nova AI PWA registration failed:", error);
             });
+
     });
 }
 </script>
+
 </body>
 </html>
