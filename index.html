@@ -241,8 +241,8 @@
                 <i class="fa-solid fa-gear"></i>
             </button>
 
-        </div>
-    </aside>
+        </div> <!-- End sidebar-footer-actions -->
+    </aside> <!-- End sidebar -->
 
     <!-- =========================================================
          MAIN CONTENT
@@ -508,6 +508,61 @@
 </div>
 
 <!-- =========================================================
+     NOVA AI — PUBLIC SOCIAL LINKS MODAL
+========================================================= -->
+<div class="nova-public-links-modal" id="novaPublicLinksModal" hidden aria-hidden="true">
+    <div class="nova-public-links-backdrop" data-public-links-close></div>
+
+    <section class="nova-public-links-dialog" role="dialog" aria-modal="true"
+             aria-labelledby="novaPublicLinksTitle" aria-describedby="novaPublicLinksDescription">
+        <button class="nova-public-links-close" id="closeNovaPublicLinks" type="button" aria-label="Close">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="nova-public-links-heading-icon">
+            <i class="fa-solid fa-link"></i>
+        </div>
+        <span class="nova-public-links-kicker">CONNECT WITH NOVA</span>
+        <h2 id="novaPublicLinksTitle">Your public links</h2>
+        <p id="novaPublicLinksDescription">تابع Nova AI على منصات التواصل الاجتماعي الرسمية.</p>
+
+        <div class="nova-public-links-list">
+            <a class="nova-public-link-card facebook" href="https://www.facebook.com/share/19U8X5i6tZ/"
+               target="_blank" rel="noopener noreferrer" aria-label="Open Nova AI on Facebook">
+                <span class="nova-public-link-icon"><i class="fa-brands fa-facebook-f"></i></span>
+                <span class="nova-public-link-copy">
+                    <strong>Facebook</strong>
+                    <small>تابعنا على فيسبوك</small>
+                </span>
+                <i class="fa-solid fa-arrow-up-right-from-square nova-public-link-arrow"></i>
+            </a>
+
+            <a class="nova-public-link-card tiktok" href="https://www.tiktok.com/@youssefcodes5?_r=1&amp;_t=ZS-99t9p7VvG1B"
+               target="_blank" rel="noopener noreferrer" aria-label="Open Nova AI on TikTok">
+                <span class="nova-public-link-icon"><i class="fa-brands fa-tiktok"></i></span>
+                <span class="nova-public-link-copy">
+                    <strong>TikTok</strong>
+                    <small>@youssefcodes5</small>
+                </span>
+                <i class="fa-solid fa-arrow-up-right-from-square nova-public-link-arrow"></i>
+            </a>
+
+            <a class="nova-public-link-card instagram" href="https://www.instagram.com/nova645369?psln=ZmI3NWs4NjhmYmF5"
+               target="_blank" rel="noopener noreferrer" aria-label="Open Nova AI on Instagram">
+                <span class="nova-public-link-icon"><i class="fa-brands fa-instagram"></i></span>
+                <span class="nova-public-link-copy">
+                    <strong>Instagram</strong>
+                    <small>@nova645369</small>
+                </span>
+                <i class="fa-solid fa-arrow-up-right-from-square nova-public-link-arrow"></i>
+            </a>
+        </div>
+
+        <button class="nova-public-links-done" id="novaPublicLinksDone" type="button">تم</button>
+    </section>
+</div>
+
+<!-- =========================================================
      LANGUAGE MODAL
 ========================================================= -->
 <div id="languageModal" class="nova-language-modal">
@@ -638,8 +693,275 @@
 }
 </style>
 
+<style>
+/* =========================================================
+   NOVA AI — PUBLIC LINKS MODAL
+   Scoped styles: does not modify existing chat/settings styles.
+========================================================= */
+.nova-public-links-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1000100;
+    display: grid;
+    place-items: center;
+    padding: 20px;
+}
+
+.nova-public-links-modal[hidden] {
+    display: none !important;
+}
+
+.nova-public-links-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(2, 6, 23, 0.78);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    animation: novaPublicLinksFade 0.18s ease both;
+}
+
+.nova-public-links-dialog {
+    position: relative;
+    width: min(100%, 430px);
+    max-height: min(90dvh, 680px);
+    overflow-y: auto;
+    padding: 30px 24px 22px;
+    border: 1px solid rgba(34, 211, 238, 0.20);
+    border-radius: 22px;
+    background: linear-gradient(155deg, #17243b 0%, #0b1220 75%);
+    color: #f8fafc;
+    text-align: center;
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55), 0 0 35px rgba(34, 211, 238, 0.08);
+    animation: novaPublicLinksPop 0.22s ease both;
+}
+
+.nova-public-links-close {
+    position: absolute;
+    top: 12px;
+    inset-inline-start: 12px;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(148, 163, 184, 0.14);
+    border-radius: 11px;
+    background: rgba(148, 163, 184, 0.09);
+    color: #cbd5e1;
+    cursor: pointer;
+}
+
+.nova-public-links-heading-icon {
+    display: grid;
+    place-items: center;
+    width: 58px;
+    height: 58px;
+    margin: 3px auto 13px;
+    border: 1px solid rgba(34, 211, 238, 0.28);
+    border-radius: 18px;
+    background: rgba(34, 211, 238, 0.10);
+    color: #67e8f9;
+    font-size: 22px;
+}
+
+.nova-public-links-kicker {
+    color: #67e8f9;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.8px;
+}
+
+.nova-public-links-dialog h2 {
+    margin: 7px 0 8px;
+    color: #f8fafc;
+    font-size: 22px;
+}
+
+.nova-public-links-dialog > p {
+    margin: 0 0 20px;
+    color: #9eacc0;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.nova-public-links-list {
+    display: grid;
+    gap: 10px;
+    text-align: start;
+}
+
+.nova-public-link-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 68px;
+    padding: 11px 13px;
+    border: 1px solid rgba(148, 163, 184, 0.15);
+    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.035);
+    color: #e2e8f0;
+    text-decoration: none;
+    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.nova-public-link-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(34, 211, 238, 0.34);
+    background: rgba(34, 211, 238, 0.065);
+}
+
+.nova-public-link-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 43px;
+    width: 43px;
+    height: 43px;
+    border-radius: 13px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #67e8f9;
+    font-size: 19px;
+}
+
+.nova-public-link-card.facebook .nova-public-link-icon { color: #60a5fa; }
+.nova-public-link-card.tiktok .nova-public-link-icon { color: #f8fafc; }
+.nova-public-link-card.instagram .nova-public-link-icon { color: #f0abfc; }
+
+.nova-public-link-copy {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nova-public-link-copy strong {
+    color: #f8fafc;
+    font-size: 14px;
+}
+
+.nova-public-link-copy small {
+    overflow: hidden;
+    color: #91a0b5;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.nova-public-link-arrow {
+    flex: 0 0 auto;
+    color: #718198;
+    font-size: 12px;
+}
+
+.nova-public-links-done {
+    width: 100%;
+    min-height: 43px;
+    margin-top: 17px;
+    border: 1px solid rgba(34, 211, 238, 0.24);
+    border-radius: 12px;
+    background: rgba(34, 211, 238, 0.10);
+    color: #a5f3fc;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.nova-public-links-close:focus-visible,
+.nova-public-links-done:focus-visible,
+.nova-public-link-card:focus-visible {
+    outline: 2px solid #22d3ee;
+    outline-offset: 3px;
+}
+
+body.light-theme .nova-public-links-dialog {
+    border-color: #dbeafe;
+    background: linear-gradient(155deg, #ffffff, #f1f5f9);
+    color: #0f172a;
+}
+
+body.light-theme .nova-public-links-dialog h2,
+body.light-theme .nova-public-link-copy strong { color: #0f172a; }
+body.light-theme .nova-public-links-dialog > p,
+body.light-theme .nova-public-link-copy small { color: #64748b; }
+body.light-theme .nova-public-link-card { border-color: #e2e8f0; background: #fff; color: #0f172a; }
+body.light-theme .nova-public-link-card:hover { background: #f8fafc; }
+
+@keyframes novaPublicLinksFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes novaPublicLinksPop {
+    from { opacity: 0; transform: translateY(10px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 480px) {
+    .nova-public-links-modal { padding: 13px; }
+    .nova-public-links-dialog { padding: 27px 17px 18px; border-radius: 19px; }
+}
+</style>
+
 <!-- MAIN APP SCRIPT -->
 <script src="script.js"></script>
+
+<script>
+(() => {
+    "use strict";
+
+    const modal = document.getElementById("novaPublicLinksModal");
+    const settingsModal = document.getElementById("settingsModal");
+    const closeButton = document.getElementById("closeNovaPublicLinks");
+    const doneButton = document.getElementById("novaPublicLinksDone");
+    const settingsItem = document.querySelector('[data-setting="public-links"]');
+
+    if (!modal || !settingsItem) return;
+
+    let previousFocus = null;
+
+    function openPublicLinks() {
+        previousFocus = document.getElementById("settingsBtn") || settingsItem;
+
+        // Close the settings window before opening the social-links dialog.
+        settingsModal?.classList.remove("active", "show");
+        document.body.classList.remove("settings-open");
+
+        modal.hidden = false;
+        modal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+        closeButton?.focus();
+    }
+
+    function closePublicLinks() {
+        modal.hidden = true;
+        modal.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+        previousFocus?.focus();
+    }
+
+    // Capture phase prevents the generic settings placeholder from handling this item.
+    document.addEventListener("click", (event) => {
+        const item = event.target.closest?.('[data-setting="public-links"]');
+        if (!item) return;
+
+        event.preventDefault();
+        event.stopPropagation();
+        event.stopImmediatePropagation();
+        openPublicLinks();
+    }, true);
+
+    closeButton?.addEventListener("click", closePublicLinks);
+    doneButton?.addEventListener("click", closePublicLinks);
+
+    modal.addEventListener("click", (event) => {
+        if (event.target.matches("[data-public-links-close]")) {
+            closePublicLinks();
+        }
+    });
+
+    document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && !modal.hidden) {
+            closePublicLinks();
+        }
+    });
+})();
+</script>
 
 </body>
 </html>
