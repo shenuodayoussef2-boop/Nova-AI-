@@ -13,15 +13,19 @@ const BRAND = {
         "YOVIA AI is your smart AI companion for coding, writing, learning and creativity."
 };
 
-// Replace brand names in visible text
+// Replace old brand names
 function replaceBrandText(value) {
+    if (typeof value !== "string") return value;
+
     return value
         .replace(/\bNova\s+AI\b/gi, BRAND.name)
         .replace(/\bNova\b/gi, BRAND.shortName);
 }
 
 // Update document title
-document.title = replaceBrandText(document.title);
+function updateDocumentTitle() {
+    document.title = replaceBrandText(document.title);
+}
 
 // Update visible text nodes
 function updateTextNodes(root = document.body) {
@@ -40,8 +44,11 @@ function updateTextNodes(root = document.body) {
 
         if (!parent) continue;
 
+        // Avoid changing user content and code
         if (parent.closest(
-            "script, style, textarea, input, code, pre"
+            "script, style, textarea, input, code, pre, " +
+            "[contenteditable='true'], .chat-messages, " +
+            ".message, .user-message, .assistant-message"
         )) continue;
 
         nodes.push(node);
@@ -68,18 +75,18 @@ function updateAttributes() {
         "meta[property='og:image:alt']",
         "meta[name='twitter:title']",
         "meta[name='twitter:description']",
-        "meta[name='twitter:image:alt']",
-        "title"
+        "meta[name='twitter:image:alt']"
     ];
 
     document.querySelectorAll(selectors.join(",")).forEach(el => {
-        if (el.hasAttribute("content")) {
-            el.setAttribute(
-                "content",
-                replaceBrandText(el.getAttribute("content"))
-            );
-        } else {
-            el.textContent = replaceBrandText(el.textContent);
+        const content = el.getAttribute("content");
+
+        if (content) {
+            const updated = replaceBrandText(content);
+
+            if (updated !== content) {
+                el.setAttribute("content", updated);
+            }
         }
     });
 
@@ -88,23 +95,26 @@ function updateAttributes() {
     ).forEach(el => {
         ["alt", "title", "aria-label", "placeholder"]
             .forEach(attr => {
-                if (el.hasAttribute(attr)) {
-                    el.setAttribute(
-                        attr,
-                        replaceBrandText(el.getAttribute(attr))
-                    );
+                if (!el.hasAttribute(attr)) return;
+
+                const current = el.getAttribute(attr);
+                const updated = replaceBrandText(current);
+
+                if (updated !== current) {
+                    el.setAttribute(attr, updated);
                 }
             });
     });
 }
 
-// Update structured data without changing URLs
+// Update structured data ONCE
 function updateStructuredData() {
     document.querySelectorAll(
         'script[type="application/ld+json"]'
     ).forEach(script => {
         try {
-            const data = JSON.parse(script.textContent);
+            const original = script.textContent;
+            const data = JSON.parse(original);
 
             function updateObject(obj) {
                 if (Array.isArray(obj)) {
@@ -120,41 +130,77 @@ function updateStructuredData() {
                         !["url", "image"].includes(key)
                     ) {
                         obj[key] = replaceBrandText(obj[key]);
-                    } else if (typeof obj[key] === "object") {
+                    } else if (
+                        obj[key] &&
+                        typeof obj[key] === "object"
+                    ) {
                         updateObject(obj[key]);
                     }
                 });
             }
 
             updateObject(data);
-            script.textContent = JSON.stringify(data, null, 2);
+
+            const updated = JSON.stringify(data, null, 2);
+
+            if (updated !== original) {
+                script.textContent = updated;
+            }
 
         } catch (error) {
-            console.warn("YOVIA branding: JSON-LD update failed", error);
+            console.warn(
+                "YOVIA branding: JSON-LD update failed",
+                error
+            );
         }
     });
 }
 
-// Run branding system
-function applyBranding() {
-    document.title = replaceBrandText(document.title);
-    updateTextNodes();
+// Main branding function
+function applyBranding(root = document.body) {
+    updateDocumentTitle();
+    updateTextNodes(root);
     updateAttributes();
-    updateStructuredData();
 }
 
+// Initial execution
 applyBranding();
+updateStructuredData();
 
-// Support dynamically created elements
-const brandingObserver = new MutationObserver(() => {
-    applyBranding();
+// Observe dynamically added elements
+const brandingObserver = new MutationObserver(mutations => {
+    mutations.forEach(mutation => {
+        mutation.addedNodes.forEach(node => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                applyBranding(node);
+            } else if (node.nodeType === Node.TEXT_NODE) {
+                const parent = node.parentElement;
+
+                if (
+                    parent &&
+                    !parent.closest(
+                        "script, style, textarea, input, code, pre, " +
+                        "[contenteditable='true'], .chat-messages, " +
+                        ".message, .user-message, .assistant-message"
+                    )
+                ) {
+                    const updated = replaceBrandText(node.nodeValue);
+
+                    if (updated !== node.nodeValue) {
+                        node.nodeValue = updated;
+                    }
+                }
+            }
+        });
+    });
 });
 
-brandingObserver.observe(document.documentElement, {
-    childList: true,
-    subtree: true,
-    characterData: true
-});
+if (document.body) {
+    brandingObserver.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+}
 
 console.log("YOVIA AI Branding System initialized 🚀");
-      
+   
