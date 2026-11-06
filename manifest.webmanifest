@@ -24,12 +24,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "https://i.postimg.cc/1z4xZHLd/file-00000000088481f49e95910bcfdca5e0.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "maskable"
     }
   ]
 }
