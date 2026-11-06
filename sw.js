@@ -1,10 +1,11 @@
 
-const CACHE_NAME = "nova-ai-pwa-v2";
+const CACHE_NAME = "yovia-ai-pwa-v3";
 
 const APP_SHELL = [
   "/manifest.webmanifest"
 ];
 
+// Install
 self.addEventListener("install", (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
@@ -17,12 +18,18 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
 });
 
+// Activate
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then(async (keys) => {
       await Promise.all(
         keys
-          .filter((key) => key.startsWith("nova-ai-pwa-") && key !== CACHE_NAME)
+          .filter(
+            (key) =>
+              (key.startsWith("nova-ai-pwa-") ||
+               key.startsWith("yovia-ai-pwa-")) &&
+              key !== CACHE_NAME
+          )
           .map((key) => caches.delete(key))
       );
 
@@ -31,6 +38,7 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// Fetch
 self.addEventListener("fetch", (event) => {
   const request = event.request;
   const url = new URL(request.url);
@@ -38,7 +46,7 @@ self.addEventListener("fetch", (event) => {
   if (request.method !== "GET") return;
   if (url.origin !== self.location.origin) return;
 
-  // Never cache API or authentication requests.
+  // Never cache API or authentication requests
   if (
     url.pathname.startsWith("/api/") ||
     url.pathname.includes("auth") ||
@@ -47,15 +55,17 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Network-first for page navigation.
+  // Network-first for page navigation
   if (request.mode === "navigate") {
     event.respondWith(
       fetch(request).catch(() =>
         new Response(
-          "أنت غير متصل بالإنترنت. اتصل بالشبكة لاستخدام Nova AI.",
+          "أنت غير متصل بالإنترنت. اتصل بالشبكة لاستخدام YOVIA AI.",
           {
             status: 503,
-            headers: { "Content-Type": "text/plain; charset=utf-8" }
+            headers: {
+              "Content-Type": "text/plain; charset=utf-8"
+            }
           }
         )
       )
@@ -64,12 +74,26 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Cache-first only for the manifest.
+  // Network-first for manifest
   if (url.pathname === "/manifest.webmanifest") {
     event.respondWith(
-      caches.match(request).then((cached) => {
-        return cached || fetch(request);
-      })
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            const copy = response.clone();
+
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, copy);
+            });
+          }
+
+          return response;
+        })
+        .catch(async () => {
+          const cached = await caches.match(request);
+
+          return cached || Response.error();
+        })
     );
   }
 });
