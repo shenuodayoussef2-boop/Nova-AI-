@@ -1227,9 +1227,11 @@ try {
     console.error("Chatbot Error:", error);
 
     const loadingElem = document.getElementById(loadingId);
-    if (loadingElem) {
-        loadingElem.remove();
-    }
+if (loadingElem) {
+    loadingElem.remove();
+} else { // لازم تقفل الـ if الاول بـ }
+    console.log("No loading element found");
+}
 
     // مهم جدا: تظهر رسالة للعميل ان حصل مشكلة
     const chatBox = document.getElementById("chat-box");
