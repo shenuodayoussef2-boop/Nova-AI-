@@ -4741,6 +4741,51 @@ document.addEventListener(
         }
     });
 })();
+
+
+// ==========================================
+// ربط زر الإرسال والتحكم في حالته
+// ==========================================
+
+function updateSendButtonState(isSending = false) {
+    if (!sendChatBtn) return;
+
+    const icon = sendChatBtn.querySelector("i");
+
+    if (icon) {
+        icon.className = isSending
+            ? "fa-solid fa-stop"
+            : "fa-solid fa-paper-plane";
+    }
+
+    sendChatBtn.title = isSending ? "إلغاء الرد" : "إرسال";
+    sendChatBtn.setAttribute(
+        "aria-label",
+        isSending ? "إلغاء الرد" : "إرسال الرسالة"
+    );
+}
+
+// الضغط على زر الإرسال أو إلغاء الرد
+sendChatBtn?.addEventListener("click", () => {
+    if (currentAbortController) {
+        currentAbortController.abort();
+        return;
+    }
+
+    sendMessage();
+});
+
+// الضغط على Enter للإرسال و Shift + Enter لسطر جديد
+chatInput?.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+
+        if (!currentAbortController) {
+            sendMessage();
+        }
+    }
+});
+
 // ==========================================
 // نهاية Nova AI
 // ==========================================
