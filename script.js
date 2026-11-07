@@ -1123,7 +1123,6 @@ const response = await fetch(
         },
         signal: currentAbortController.signal,
         body: JSON.stringify({
-            chatId: currentChatId,
             message: text,
             history: conversationHistory.slice(0, -1)
         })
