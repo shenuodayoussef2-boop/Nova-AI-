@@ -1219,33 +1219,24 @@ break;
 
         }
 
-    } catch (error) {
+try {
+    // الكود بتاعك اللي بيجيب رد الـ AI هنا
+    // const response = await fetch(...)
 
-        const loadingElem =
-            document.getElementById(
-                loadingId
-            );
+} catch (error) {
+    console.error("Chatbot Error:", error);
 
-        if (loadingElem) {
+    const loadingElem = document.getElementById(loadingId);
+    if (loadingElem) {
+        loadingElem.remove();
+    }
 
-            loadingElem.remove();
-
-        }
-
-
-        if (
-            error.name ===
-            "AbortError"
-        ) {
-
-            chatBox.insertAdjacentHTML(
-                "beforeend",
-                `
-                <div class="message bot-message nova-message muted-message">
-                    تم إلغاء الرد بواسطة المستخدم.
-                </div>
-                `
-            );
+    // مهم جدا: تظهر رسالة للعميل ان حصل مشكلة
+    const chatBox = document.getElementById("chat-box");
+    if (chatBox) {
+        chatBox.innerHTML += `<div class="bot-message">حصل مشكلة بسيطة، جرب تاني 🙏</div>`;
+    }
+}
 
         } else {
 
