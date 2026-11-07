@@ -1112,7 +1112,7 @@ for (
 
     try {
 
- const conversationHistory = getConversationHistory();
+const conversationHistory = getConversationHistory();
 
 const response = await fetch(
     "/api/chat",
@@ -1122,47 +1122,40 @@ const response = await fetch(
             "Content-Type": "application/json"
         },
         signal: currentAbortController.signal,
-       body: JSON.stringify({
-    chatId: currentChatId,
-    message: text,
-    history: conversationHistory.slice(0, -1)
-})
-
-        data = await response.json();
-
-        if (
-            data.error &&
-            data.error.message &&
-            data.error.message.includes(
-                "high demand"
-            ) &&
-            attempt < 3
-        ) {
-
-            await delay(1500);
-
-            continue;
-        }
-
-        success = response.ok;
-
-        break;
-
-    } catch (netErr) {
-
-        if (
-            netErr.name === "AbortError"
-        ) {
-
-            throw netErr;
-        }
-
-        if (attempt === 3) {
-            throw netErr;
-        }
-
-        await delay(1500);
+        body: JSON.stringify({
+            chatId: currentChatId,
+            message: text,
+            history: conversationHistory.slice(0, -1)
+        })
     }
+);
+
+data = await response.json();
+
+if (
+    data.error &&
+    data.error.message &&
+    data.error.message.includes("high demand") &&
+    attempt < 3
+) {
+    await delay(1500);
+    continue;
+}
+
+success = response.ok;
+break;
+
+} catch (netErr) {
+
+    if (netErr.name === "AbortError") {
+        throw netErr;
+    }
+
+    if (attempt === 3) {
+        throw netErr;
+    }
+
+    await delay(1500);
 }
 
 
