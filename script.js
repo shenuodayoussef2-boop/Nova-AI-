@@ -1122,12 +1122,11 @@ const response = await fetch(
             "Content-Type": "application/json"
         },
         signal: currentAbortController.signal,
-        body: JSON.stringify({
-            message: text,
-            history: conversationHistory.slice(0, -1)
-        })
-    }
-);
+       body: JSON.stringify({
+    chatId: currentChatId,
+    message: text,
+    history: conversationHistory.slice(0, -1)
+})
 
         data = await response.json();
 
