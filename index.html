@@ -197,6 +197,16 @@
                             <span class="theme-preview theme-amoled"></span>
                             <span>AMOLED</span>
                         </button>
+
+                        <button class="nova-theme-option nova-display-mode-option" data-nova-mode="night" type="button" aria-pressed="false">
+                            <span class="theme-preview theme-night"></span>
+                            <span>Night Mode</span>
+                        </button>
+
+                        <button class="nova-theme-option nova-display-mode-option" data-nova-mode="dark" type="button" aria-pressed="false">
+                            <span class="theme-preview theme-dark"></span>
+                            <span>Dark Mode</span>
+                        </button>
                     </div>
                 </div>
 
@@ -241,12 +251,10 @@
                 <i class="fa-solid fa-gear"></i>
             </button>
 
-        </div> <!-- End sidebar-footer-actions -->
-    </aside> <!-- End sidebar -->
+        </div>
+    </aside>
 
-    <!-- =========================================================
-         MAIN CONTENT
-    ========================================================= -->
+    <!-- MAIN CONTENT -->
     <main class="main-content">
 
         <button id="mobileMenuBtn" class="mobile-menu-btn" type="button" title="فتح القائمة" aria-label="فتح القائمة">
@@ -268,8 +276,7 @@
                     </div>
 
                     <h1>أهلاً بيك في <span>Nova AI</span> 👋</h1>
-
-                    <p>
+                                        <p>
                         مساعدك الذكي للبرمجة، الكتابة، التعلم والإبداع.
                         <br>
                         ابدأ محادثتك واكتشف إمكانيات Nova.
@@ -364,9 +371,7 @@
     </main>
 </div>
 
-<!-- =========================================================
-     VOICE OVERLAY
-========================================================= -->
+<!-- VOICE OVERLAY -->
 <div id="voiceOverlay" class="voice-overlay">
 
     <button id="closeVoiceBtn" class="close-voice-btn" title="إغلاق المحادثة الصوتية" type="button" aria-label="إغلاق المحادثة الصوتية">
@@ -394,9 +399,7 @@
     </div>
 </div>
 
-<!-- =========================================================
-     SETTINGS MODAL
-========================================================= -->
+<!-- SETTINGS MODAL -->
 <div id="settingsModal" class="settings-modal-overlay">
 
     <div class="settings-modal-content">
@@ -507,9 +510,7 @@
     </div>
 </div>
 
-<!-- =========================================================
-     NOVA AI — PUBLIC SOCIAL LINKS MODAL
-========================================================= -->
+<!-- PUBLIC SOCIAL LINKS MODAL -->
 <div class="nova-public-links-modal" id="novaPublicLinksModal" hidden aria-hidden="true">
     <div class="nova-public-links-backdrop" data-public-links-close></div>
 
@@ -562,9 +563,7 @@
     </section>
 </div>
 
-<!-- =========================================================
-     LANGUAGE MODAL
-========================================================= -->
+<!-- LANGUAGE MODAL -->
 <div id="languageModal" class="nova-language-modal">
 
     <div class="nova-language-modal-content">
@@ -607,9 +606,7 @@
     </div>
 </div>
 
-<!-- =========================================================
-     LOADING SCRIPT
-========================================================= -->
+<!-- LOADING SCRIPT -->
 <script>
 (() => {
     "use strict";
@@ -671,9 +668,7 @@
 })();
 </script>
 
-<!-- =========================================================
-     NOVA AI INSTALL BUTTON STYLE
-========================================================= -->
+<!-- INSTALL BUTTON STYLE -->
 <style>
 #novaLoadingScreen {
     opacity: 1;
@@ -694,10 +689,7 @@
 </style>
 
 <style>
-/* =========================================================
-   NOVA AI — PUBLIC LINKS MODAL
-   Scoped styles: does not modify existing chat/settings styles.
-========================================================= */
+/* NOVA AI — PUBLIC LINKS MODAL */
 .nova-public-links-modal {
     position: fixed;
     inset: 0;
@@ -960,6 +952,191 @@ body.light-theme .nova-public-link-card:hover { background: #f8fafc; }
             closePublicLinks();
         }
     });
+})();
+</script>
+<!-- =========================================================
+     NOVA AI — NIGHT MODE & DARK MODE
+     مدمج داخل نفس ملف HTML بدون تعديل ملفات CSS/JS الخارجية
+========================================================= -->
+<style>
+/* معاينات الوضعين داخل قائمة الثيمات */
+.theme-night {
+    background: linear-gradient(135deg, #101b35, #263b62) !important;
+}
+
+.theme-dark {
+    background: linear-gradient(135deg, #000000, #242424) !important;
+}
+
+/* Night Mode: كحلي داكن */
+body.nova-night-mode,
+body.nova-night-mode .app-container,
+body.nova-night-mode .main-content {
+    background-color: #0b1220 !important;
+    color: #e7edf8 !important;
+}
+
+body.nova-night-mode .sidebar,
+body.nova-night-mode .chat-box,
+body.nova-night-mode .input-area,
+body.nova-night-mode .settings-modal-content,
+body.nova-night-mode .nova-profile-menu,
+body.nova-night-mode .nova-language-modal-content,
+body.nova-night-mode .nova-subscriptions-card {
+    background: #111d32 !important;
+    color: #e7edf8 !important;
+    border-color: rgba(148, 163, 184, .18) !important;
+}
+
+body.nova-night-mode .message,
+body.nova-night-mode .user-message,
+body.nova-night-mode .ai-message,
+body.nova-night-mode .setting-item,
+body.nova-night-mode .nova-profile-menu-item,
+body.nova-night-mode .quick-prompt {
+    background-color: #172640 !important;
+    color: #e7edf8 !important;
+    border-color: rgba(148, 163, 184, .16) !important;
+}
+
+body.nova-night-mode input,
+body.nova-night-mode textarea,
+body.nova-night-mode select {
+    background: #0c1729 !important;
+    color: #f1f5f9 !important;
+    border-color: #30415e !important;
+}
+
+body.nova-night-mode input::placeholder,
+body.nova-night-mode textarea::placeholder {
+    color: #91a0b8 !important;
+}
+
+/* Dark Mode: أسود ورمادي */
+body.nova-dark-mode,
+body.nova-dark-mode .app-container,
+body.nova-dark-mode .main-content {
+    background-color: #080808 !important;
+    color: #f1f1f1 !important;
+}
+
+body.nova-dark-mode .sidebar,
+body.nova-dark-mode .chat-box,
+body.nova-dark-mode .input-area,
+body.nova-dark-mode .settings-modal-content,
+body.nova-dark-mode .nova-profile-menu,
+body.nova-dark-mode .nova-language-modal-content,
+body.nova-dark-mode .nova-subscriptions-card {
+    background: #111111 !important;
+    color: #f1f1f1 !important;
+    border-color: rgba(255, 255, 255, .12) !important;
+}
+
+body.nova-dark-mode .message,
+body.nova-dark-mode .user-message,
+body.nova-dark-mode .ai-message,
+body.nova-dark-mode .setting-item,
+body.nova-dark-mode .nova-profile-menu-item,
+body.nova-dark-mode .quick-prompt {
+    background-color: #1b1b1b !important;
+    color: #f1f1f1 !important;
+    border-color: rgba(255, 255, 255, .10) !important;
+}
+
+body.nova-dark-mode input,
+body.nova-dark-mode textarea,
+body.nova-dark-mode select {
+    background: #090909 !important;
+    color: #f5f5f5 !important;
+    border-color: #383838 !important;
+}
+
+body.nova-dark-mode input::placeholder,
+body.nova-dark-mode textarea::placeholder {
+    color: #929292 !important;
+}
+
+/* تمييز الوضع المختار */
+.nova-display-mode-option.active {
+    outline: 2px solid #22d3ee;
+    outline-offset: 2px;
+}
+
+body.nova-night-mode .nova-public-links-dialog,
+body.nova-dark-mode .nova-public-links-dialog {
+    background: #151515 !important;
+    color: #f1f5f9 !important;
+}
+</style>
+
+<script>
+(() => {
+    "use strict";
+
+    const STORAGE_KEY = "nova-display-mode";
+    const body = document.body;
+    const buttons = document.querySelectorAll("[data-nova-mode]");
+    const themeColor = document.querySelector('meta[name="theme-color"]');
+
+    function applyDisplayMode(mode) {
+        body.classList.remove("nova-night-mode", "nova-dark-mode");
+
+        if (mode === "night") {
+            body.classList.add("nova-night-mode");
+        }
+
+        if (mode === "dark") {
+            body.classList.add("nova-dark-mode");
+        }
+
+        buttons.forEach((button) => {
+            const selected = button.dataset.novaMode === mode;
+
+            button.classList.toggle("active", selected);
+            button.setAttribute("aria-pressed", String(selected));
+        });
+
+        if (themeColor) {
+            themeColor.setAttribute(
+                "content",
+                mode === "night"
+                    ? "#0b1220"
+                    : mode === "dark"
+                        ? "#080808"
+                        : "#0f172a"
+            );
+        }
+
+        try {
+            if (mode) {
+                localStorage.setItem(STORAGE_KEY, mode);
+            } else {
+                localStorage.removeItem(STORAGE_KEY);
+            }
+        } catch (error) {
+            console.warn("Nova: تعذر حفظ وضع العرض.", error);
+        }
+    }
+
+    buttons.forEach((button) => {
+        button.addEventListener("click", () => {
+            applyDisplayMode(button.dataset.novaMode);
+        });
+    });
+
+    let savedMode = null;
+
+    try {
+        savedMode = localStorage.getItem(STORAGE_KEY);
+    } catch (error) {
+        console.warn("Nova: تعذر قراءة وضع العرض المحفوظ.", error);
+    }
+
+    applyDisplayMode(
+        savedMode === "night" || savedMode === "dark"
+            ? savedMode
+            : null
+    );
 })();
 </script>
 
