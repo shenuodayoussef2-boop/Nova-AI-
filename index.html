@@ -1299,8 +1299,46 @@ body.nova-dark-mode .nova-public-links-dialog {
     console.info("YOVIA Profile Controls initialized");
 })();
 </script>
-</body>
-</html>
+<script>
+document.addEventListener("DOMContentLoaded", () => {
 
+    const logoutBtn = document.getElementById("novaLogoutBtn");
+
+    if (!logoutBtn) {
+        console.error("YOVIA: Logout button not found.");
+        return;
+    }
+
+    logoutBtn.addEventListener("click", async (event) => {
+        event.preventDefault();
+
+        const confirmed = confirm("هل أنت متأكد أنك تريد تسجيل الخروج؟");
+
+        if (!confirmed) return;
+
+        logoutBtn.disabled = true;
+
+        try {
+            const client = window.novaSupabase;
+
+            if (!client) {
+                throw new Error("Supabase client غير متصل.");
+            }
+
+            const { error } = await client.auth.signOut();
+
+            if (error) throw error;
+
+            window.location.replace("/login.html");
+
+        } catch (error) {
+            console.error("YOVIA Logout Error:", error);
+            alert("تعذر تسجيل الخروج. حاول مرة أخرى.");
+            logoutBtn.disabled = false;
+        }
+    });
+
+});
+</script>
 </body>
 </html>
