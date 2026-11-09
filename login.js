@@ -1,77 +1,44 @@
 
 "use strict";
 
-const supabaseClient = window.novaSupabase;
+/* =========================
+   إعداد Supabase
+========================= */
+
+const loginSupabaseClient = window.novaSupabase;
+
+/* =========================
+   عناصر الصفحة
+========================= */
 
 const loginForm = document.getElementById("loginForm");
 const loginBtn = document.getElementById("loginBtn");
 const message = document.getElementById("message");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
-const forgotPasswordBtn = document.getElementById("forgotPasswordBtn");
 
 /* =========================
    رسائل النظام
 ========================= */
 
-function showMessage(text, type) {
+function showMessage(text, type = "error") {
+    if (!message) return;
+
     message.textContent = text;
     message.className = "message show " + type;
 }
 
 /* =========================
-   استعادة كلمة المرور
+   التحقق من الاتصال
 ========================= */
 
-if (forgotPasswordBtn) {
-    forgotPasswordBtn.addEventListener("click", async function (event) {
-        event.preventDefault();
+function checkSupabase() {
+    if (!loginSupabaseClient) {
+        showMessage("Supabase مش متصل.", "error");
+        return false;
+    }
 
-        const email = emailInput.value.trim();
-
-        if (!email) {
-            showMessage("اكتب بريدك الإلكتروني الأول.", "error");
-            emailInput.focus();
-            return;
-        }
-
-        if (!supabaseClient) {
-            showMessage("Supabase مش متصل.", "error");
-            return;
-        }
-
-        forgotPasswordBtn.style.pointerEvents = "none";
-        forgotPasswordBtn.textContent = "جاري إرسال الرابط...";
-
-        try {
-            const { error } = await supabaseClient.auth.resetPasswordForEmail(
-                email,
-                {
-                    redirectTo:
-                        window.location.origin + "/reset-password.html"
-                }
-            );
-
-            if (error) throw error;
-
-            showMessage(
-                "لو البريد مسجل، هتوصلك رسالة لإعادة تعيين كلمة المرور. راجع صندوق الوارد والرسائل غير المرغوب فيها.",
-                "success"
-            );
-
-        } catch (error) {
-            console.error("Nova Password Reset Error:", error);
-
-            showMessage(
-                "حصلت مشكلة أثناء إرسال رابط استعادة كلمة المرور.",
-                "error"
-            );
-
-        } finally {
-            forgotPasswordBtn.style.pointerEvents = "auto";
-            forgotPasswordBtn.textContent = "هل نسيت كلمة المرور؟";
-        }
-    });
+    return true;
 }
 
 /* =========================
@@ -82,8 +49,8 @@ if (loginForm) {
     loginForm.addEventListener("submit", async function (event) {
         event.preventDefault();
 
-        const email = emailInput.value.trim();
-        const password = passwordInput.value;
+        const email = emailInput?.value.trim();
+        const password = passwordInput?.value;
 
         if (!email || !password) {
             showMessage(
@@ -93,37 +60,38 @@ if (loginForm) {
             return;
         }
 
-        if (!supabaseClient) {
-            showMessage("Supabase مش متصل.", "error");
-            return;
-        }
+        if (!checkSupabase()) return;
 
-        loginBtn.disabled = true;
-        loginBtn.textContent = "جاري تسجيل الدخول...";
+        if (loginBtn) {
+            loginBtn.disabled = true;
+            loginBtn.textContent = "جاري تسجيل الدخول...";
+        }
 
         try {
             const { data, error } =
-                await supabaseClient.auth.signInWithPassword({
-                    email: email,
-                    password: password
+                await loginSupabaseClient.auth.signInWithPassword({
+                    email,
+                    password
                 });
 
             if (error) throw error;
 
             showMessage("تم تسجيل الدخول بنجاح ✅", "success");
 
-            /* قراءة صلاحية المستخدم من جدول profiles */
+            /* قراءة صلاحية المستخدم */
 
             const {
                 data: profile,
                 error: profileError
-            } = await supabaseClient
+            } = await loginSupabaseClient
                 .from("profiles")
                 .select("role")
                 .eq("id", data.user.id)
                 .single();
 
-            if (profileError) throw profileError;
+            if (profileError) {
+                throw profileError;
+            }
 
             if (profile?.role === "partner") {
                 showMessage(
@@ -166,8 +134,14 @@ if (loginForm) {
                 );
             }
 
-            loginBtn.disabled = false;
-            loginBtn.textContent = "تسجيل الدخول";
+            if (loginBtn) {
+                loginBtn.disabled = false;
+                loginBtn.textContent = "تسجيل الدخول";
+            }
         }
     });
 }
+
+/* =========================
+   نهاية ملف تسجيل الدخول
+========================= */
