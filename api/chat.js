@@ -379,50 +379,50 @@ function isDeveloperQuestion(message) {
 
         // Arabic
         /مين.*مطورك/i,
-        /مين.*مطور.*nova/i,
+        /مين.*مطور.*Yovia/i,
         /مين.*عملك/i,
-        /مين.*عامل.*nova/i,
-        /مين.*صاحب.*nova/i,
+        /مين.*عامل.*Yovia/i,
+        /مين.*صاحب.*Yovia/i,
         /مين.*صاحب.*المشروع/i,
         /مين.*برمجك/i,
-        /مين.*برمج.*nova/i,
-        /مين.*اللي.*عمل.*nova/i,
-        /مين.*اللي.*عامل.*nova/i,
+        /مين.*برمج.*Yovia/i,
+        /مين.*اللي.*عمل.*Yovia/i,
+        /مين.*اللي.*عامل.*Yovia/i,
         /مين.*اللي.*برمجك/i,
         /مين.*المطور/i,
         /مين.*مطوّر/i,
 
         // English
-        /who.*developed.*nova/i,
-        /who.*made.*nova/i,
-        /who.*created.*nova/i,
-        /who.*built.*nova/i,
-        /who.*programmed.*nova/i,
+        /who.*developed.*Yovia/i,
+        /who.*made.*Yovia/i,
+        /who.*created.*Yovia/i,
+        /who.*built.*Yovia/i,
+        /who.*programmed.*Yovia/i,
         /who.*is.*your.*developer/i,
         /who.*is.*the.*developer/i,
 
         // French
-        /qui.*a.*développé.*nova/i,
-        /qui.*a.*créé.*nova/i,
-        /qui.*a.*fait.*nova/i,
+        /qui.*a.*développé.*Yovia/i,
+        /qui.*a.*créé.*Yovia/i,
+        /qui.*a.*fait.*Yovia/i,
         /qui.*est.*ton.*développeur/i,
 
         // Spanish
-        /quién.*desarrolló.*nova/i,
-        /quién.*creó.*nova/i,
-        /quién.*hizo.*nova/i,
+        /quién.*desarrolló.*Yovia/i,
+        /quién.*creó.*Yovia/i,
+        /quién.*hizo.*Yovia/i,
 
         // Portuguese
-        /quem.*desenvolveu.*nova/i,
-        /quem.*criou.*nova/i,
+        /quem.*desenvolveu.*Yovia/i,
+        /quem.*criou.*Yovia/i,
 
         // German
-        /wer.*hat.*nova.*entwickelt/i,
-        /wer.*hat.*nova.*erstellt/i,
+        /wer.*hat.*Yovia.*entwickelt/i,
+        /wer.*hat.*Yovia.*erstellt/i,
 
         // Turkish
-        /nova.*kim.*geliştirdi/i,
-        /nova.*kim.*yaptı/i
+        /Yovia.*kim.*geliştirdi/i,
+        /Yovia.*kim.*yaptı/i
     ];
 
 
@@ -449,23 +449,23 @@ const systemInstruction = {
 أنت مساعد ذكاء اصطناعي متعدد اللغات.
 
 ━━━━━━━━━━━━━━━━━━━━
-هوية Nova AI
+هوية Yovia AI
 ━━━━━━━━━━━━━━━━━━━━
 
-اسم مطوّر Nova AI هو "يوسف".
+اسم مطوّر Yovia AI هو "يوسف".
 
-يوسف هو المطوّر الأساسي لـ Nova AI.
+يوسف هو المطوّر الأساسي لـ Yovia AI.
 
 ممنوع تغيير اسم المطوّر.
 
 ممنوع اختراع مطوّر آخر.
 
-ممنوع نسبة تطوير Nova AI إلى OpenAI أو Google أو Gemini.
+ممنوع نسبة تطوير Yovia AI إلى OpenAI أو Google أو Gemini.
 
-Gemini مجرد نموذج ذكاء اصطناعي تستخدمه Nova AI لتوليد الردود،
-وليس هو مطوّر Nova AI.
+Gemini مجرد نموذج ذكاء اصطناعي تستخدمه Yovia AI لتوليد الردود،
+وليس هو مطوّر Yovia AI.
 
-لو المستخدم سأل عن مطوّر Nova AI،
+لو المستخدم سأل عن مطوّر Yovia AI،
 المعلومة الثابتة هي:
 
 "المطوّر هو يوسف."
@@ -677,7 +677,7 @@ export default async function handler(
 
 
         console.log(
-            "NOVA REQUEST BODY:",
+            "Yovia REQUEST BODY:",
             JSON.stringify(body)
         );
 
