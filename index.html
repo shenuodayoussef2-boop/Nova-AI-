@@ -1182,6 +1182,7 @@ body.nova-dark-mode .nova-public-links-dialog {
 })();
 </script>
 
+<script>
 (() => {
     "use strict";
 
@@ -1210,7 +1211,10 @@ body.nova-dark-mode .nova-public-links-dialog {
 
     function openLanguage() {
         closeProfileMenu();
-        languageModal?.classList.add("active");
+
+        if (!languageModal) return;
+
+        languageModal.classList.add("active");
     }
 
     function closeLanguage() {
@@ -1222,11 +1226,18 @@ body.nova-dark-mode .nova-public-links-dialog {
     $("settingsBtn")?.addEventListener("click", openSettings);
     $("closeSettingsBtn")?.addEventListener("click", closeSettings);
 
+    settingsModal?.addEventListener("click", (event) => {
+        if (event.target === settingsModal) closeSettings();
+    });
+
     // Language
     $("novaProfileLanguage")?.addEventListener("click", openLanguage);
     $("closeLanguageModal")?.addEventListener("click", closeLanguage);
 
-    // حفظ اختيار اللغة
+    languageModal?.addEventListener("click", (event) => {
+        if (event.target === languageModal) closeLanguage();
+    });
+
     $("novaLanguageSelect")?.addEventListener("change", (event) => {
         const language = event.target.value;
 
@@ -1239,15 +1250,23 @@ body.nova-dark-mode .nova-public-links-dialog {
         document.documentElement.lang =
             language === "auto" ? "ar" : language;
 
-        showToast("تم حفظ اختيار اللغة");
+        if (typeof window.showToast === "function") {
+            window.showToast("تم حفظ اختيار اللغة");
+        } else {
+            console.info("تم حفظ اختيار اللغة:", language);
+        }
     });
 
-    // استعادة اللغة المحفوظة
-    const savedLanguage = localStorage.getItem("nova-language");
-    const languageSelect = $("novaLanguageSelect");
+    // Restore saved language
+    try {
+        const savedLanguage = localStorage.getItem("nova-language");
+        const languageSelect = $("novaLanguageSelect");
 
-    if (savedLanguage && languageSelect) {
-        languageSelect.value = savedLanguage;
+        if (savedLanguage && languageSelect) {
+            languageSelect.value = savedLanguage;
+        }
+    } catch (error) {
+        console.warn("Language restore error:", error);
     }
 
     // Sign out
@@ -1255,25 +1274,33 @@ body.nova-dark-mode .nova-public-links-dialog {
         const client = window.novaSupabase;
 
         if (!client) {
-            showToast("تعذر الاتصال بخدمة تسجيل الدخول");
+            alert("تعذر الاتصال بخدمة تسجيل الدخول");
             return;
         }
 
-        const confirmed = confirm("هل تريد تسجيل الخروج بالفعل؟");
-        if (!confirmed) return;
+        if (!confirm("هل تريد تسجيل الخروج بالفعل؟")) return;
 
-        const { error } = await client.auth.signOut();
+        try {
+            const { error } = await client.auth.signOut();
 
-        if (error) {
+            if (error) {
+                console.error("Sign out error:", error);
+                alert("تعذر تسجيل الخروج");
+                return;
+            }
+
+            window.location.reload();
+        } catch (error) {
             console.error("Sign out error:", error);
-            showToast("تعذر تسجيل الخروج");
-            return;
+            alert("حدث خطأ أثناء تسجيل الخروج");
         }
-
-        window.location.reload();
     });
 
     console.info("YOVIA Profile Controls initialized");
 })();
+</script>
+</body>
+</html>
+
 </body>
 </html>
