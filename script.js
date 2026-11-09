@@ -688,3 +688,6 @@ function setupCodeCopyButtons(div) {}
 function updateSendButtonState(isSending) {
     if (sendChatBtn) sendChatBtn.disabled = isSending;
 }
+// إتاحة وظائف المحادثة للملفات الخارجية
+window.startNewChat = startNewChat;
+window.sendMessage = sendMessage;
