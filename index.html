@@ -1147,7 +1147,6 @@ body.nova-dark-mode .nova-public-links-dialog {
 <script src="/script.js"></script>
 
 <!-- إصلاحات الواجهة -->
-<script src="/yovia-api-fixer.js" defer></script>
 <script src="/yovia-button-fixer.js" defer></script>
 <script>
 (() => {
@@ -1182,5 +1181,99 @@ body.nova-dark-mode .nova-public-links-dialog {
     });
 })();
 </script>
+
+(() => {
+    "use strict";
+
+    const $ = (id) => document.getElementById(id);
+
+    const profileMenu = $("novaProfileMenu");
+    const profileButton = $("novaProfileBtn");
+    const settingsModal = $("settingsModal");
+    const languageModal = $("languageModal");
+
+    function closeProfileMenu() {
+        profileMenu?.classList.remove("active");
+        profileButton?.setAttribute("aria-expanded", "false");
+    }
+
+    function openSettings() {
+        closeProfileMenu();
+        settingsModal?.classList.add("active");
+        document.body.classList.add("settings-open");
+    }
+
+    function closeSettings() {
+        settingsModal?.classList.remove("active", "show");
+        document.body.classList.remove("settings-open");
+    }
+
+    function openLanguage() {
+        closeProfileMenu();
+        languageModal?.classList.add("active");
+    }
+
+    function closeLanguage() {
+        languageModal?.classList.remove("active", "show");
+    }
+
+    // Settings
+    $("novaProfileSettings")?.addEventListener("click", openSettings);
+    $("settingsBtn")?.addEventListener("click", openSettings);
+    $("closeSettingsBtn")?.addEventListener("click", closeSettings);
+
+    // Language
+    $("novaProfileLanguage")?.addEventListener("click", openLanguage);
+    $("closeLanguageModal")?.addEventListener("click", closeLanguage);
+
+    // حفظ اختيار اللغة
+    $("novaLanguageSelect")?.addEventListener("change", (event) => {
+        const language = event.target.value;
+
+        try {
+            localStorage.setItem("nova-language", language);
+        } catch (error) {
+            console.error("Language storage error:", error);
+        }
+
+        document.documentElement.lang =
+            language === "auto" ? "ar" : language;
+
+        showToast("تم حفظ اختيار اللغة");
+    });
+
+    // استعادة اللغة المحفوظة
+    const savedLanguage = localStorage.getItem("nova-language");
+    const languageSelect = $("novaLanguageSelect");
+
+    if (savedLanguage && languageSelect) {
+        languageSelect.value = savedLanguage;
+    }
+
+    // Sign out
+    $("novaLogoutBtn")?.addEventListener("click", async () => {
+        const client = window.novaSupabase;
+
+        if (!client) {
+            showToast("تعذر الاتصال بخدمة تسجيل الدخول");
+            return;
+        }
+
+        const confirmed = confirm("هل تريد تسجيل الخروج بالفعل؟");
+        if (!confirmed) return;
+
+        const { error } = await client.auth.signOut();
+
+        if (error) {
+            console.error("Sign out error:", error);
+            showToast("تعذر تسجيل الخروج");
+            return;
+        }
+
+        window.location.reload();
+    });
+
+    console.info("YOVIA Profile Controls initialized");
+})();
 </body>
 </html>
