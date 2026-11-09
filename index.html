@@ -1139,8 +1139,16 @@ body.nova-dark-mode .nova-public-links-dialog {
     );
 })();
 </script>
-<script src="yovia-api-fixer.js" defer></script>
-<script src="script.js"></script>
-<script src="yovia-button-fixer.js" defer></script>
+<!-- تحميل Supabase موجود بالفعل في HEAD -->
+
+<!-- إصلاح اتصال YOVIA AI -->
+<script src="/yovia-auto-fix.js"></script>
+
+<!-- الملف الرئيسي -->
+<script src="/script.js"></script>
+
+<!-- إصلاحات الواجهة -->
+<script src="/yovia-api-fixer.js" defer></script>
+<script src="/yovia-button-fixer.js" defer></script>
 </body>
 </html>
