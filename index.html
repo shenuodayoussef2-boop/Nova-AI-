@@ -890,8 +890,7 @@ body.light-theme .nova-public-link-card:hover { background: #f8fafc; }
 }
 </style>
 
-<!-- MAIN APP SCRIPT -->
-<script src="script.js"></script>
+
 
 <script>
 (() => {
@@ -1150,5 +1149,38 @@ body.nova-dark-mode .nova-public-links-dialog {
 <!-- إصلاحات الواجهة -->
 <script src="/yovia-api-fixer.js" defer></script>
 <script src="/yovia-button-fixer.js" defer></script>
+<script>
+(() => {
+    const button = document.getElementById("novaProfileBtn");
+    const menu = document.getElementById("novaProfileMenu");
+
+    if (!button || !menu) {
+        console.error("YOVIA: Profile elements not found");
+        return;
+    }
+
+    if (button.dataset.profileFixLoaded === "true") return;
+    button.dataset.profileFixLoaded = "true";
+
+    button.addEventListener("click", (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        const isOpen = button.getAttribute("aria-expanded") === "true";
+
+        button.setAttribute("aria-expanded", String(!isOpen));
+        menu.classList.toggle("active", !isOpen);
+
+        console.log("YOVIA Profile:", !isOpen ? "Opened" : "Closed");
+    });
+
+    document.addEventListener("click", (event) => {
+        if (!button.contains(event.target) && !menu.contains(event.target)) {
+            button.setAttribute("aria-expanded", "false");
+            menu.classList.remove("active");
+        }
+    });
+})();
+</script>
 </body>
 </html>
