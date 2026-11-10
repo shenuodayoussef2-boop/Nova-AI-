@@ -139,12 +139,12 @@ function startNewChat() {
                     <i class="fa-solid fa-sparkles"></i>
                 </div>
 
-                <h1>أهلاً بيك في <span>Nova AI</span> 👋</h1>
+                <h1>أهلاً بيك في <span>Yovia AI</span> 👋</h1>
 
                 <p>
                     مساعدك الذكي للبرمجة، الكتابة، التعلم والإبداع.
                     <br>
-                    ابدأ محادثتك واكتشف إمكانيات Nova.
+                    ابدأ محادثتك واكتشف إمكانيات Yovia.
                 </p>
 
                 <div class="quick-prompts">
@@ -579,7 +579,7 @@ async function sendMessage(customText = null, options = {}) {
             "beforeend",
             `<div class="message bot-message nova-message" id="${loadingId}">
                 <div class="nova-loading">
-                    <span>Nova يفكر</span>
+                    <span>Yovia يفكر</span>
                     <span class="loading-dots"><i></i><i></i><i></i></span>
                 </div>
             </div>`
@@ -622,7 +622,7 @@ async function sendMessage(customText = null, options = {}) {
         "beforeend",
         `<div class="message bot-message nova-message" id="${loadingId}">
             <div class="nova-loading">
-                <span>Nova يفكر</span>
+                <span>Yovia يفكر</span>
                 <span class="loading-dots"><i></i><i></i><i></i></span>
             </div>
         </div>`
@@ -1055,7 +1055,7 @@ async function generateImage(text) {
                 <div class="image-loading-info">
                     <div class="image-loading-title">
                         <i class="fas fa-wand-magic-sparkles"></i>
-                        Nova AI يصنع صورتك
+                        Yovia AI يصنع صورتك
                     </div>
 
                     <div class="image-loading-subtitle">
@@ -1113,7 +1113,7 @@ ${translatedText}
         if (response.ok && data && data.success && data.image) {
 
             appendMediaMessage(
-                "إليك الصورة التخيلية المطلوبة من Nova AI: ✨",
+                "إليك الصورة التخيلية المطلوبة من Yovia AI: ✨",
                 data.image,
                 text,
                 "image"
@@ -1179,7 +1179,7 @@ async function editImageWithPrompt(text, imageSrc) {
                 <div class="image-loading-info">
                     <div class="image-loading-title">
                         <i class="fas fa-wand-magic-sparkles"></i>
-                        Nova AI يعدّل الصورة
+                        Yovia AI يعدّل الصورة
                     </div>
 
                     <div class="image-loading-subtitle">
@@ -1381,7 +1381,7 @@ function appendMediaMessage(title, src, altText, type) {
                     border-radius:6px;
                     backdrop-filter:blur(4px);
                 ">
-                    ${icon} Nova AI
+                    ${icon} Yovia AI
                 </div>
 
             </div>
