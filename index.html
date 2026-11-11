@@ -1,1345 +1,1772 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<script src="branding.js" defer></script>
-    <!-- Google Site Verification -->
-    <meta name="google-site-verification" content="U4lbMdErCwu2gXKKds2fLr9R78B5ULqtpR39sEVElEc">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<meta name="theme-color" content="#0d0e12" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="mobile-web-app-capable" content="yes" />
+<title>Logvidia — مساعدك الذكي</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%235d7186'/%3E%3Cpath d='M11 8.5v11.2a3.3 3.3 0 0 0 3.3 3.3H21' stroke='%23fff' stroke-width='2.8' stroke-linecap='round' fill='none'/%3E%3Ccircle cx='21.5' cy='10' r='2.4' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#0d0e12; --bg-elev:#121319;
+  --surface:#171922; --surface-2:#1e2029; --surface-3:#282a35;
+  --border:rgba(255,255,255,.06); --border-strong:rgba(255,255,255,.11);
+  --text:#e8e9ee; --text-dim:#9fa3b0; --text-mute:#6a6e7d;
+  --brand-a:#5d7186; --brand-b:#738399;
+  --accent-grad:linear-gradient(135deg,var(--brand-a),var(--brand-b));
+  --accent-soft:rgba(93,113,134,.14);
+  --ok:#4d9e7a; --warn:#c9a14a; --danger:#c96060;
+  --r-sm:10px; --r-md:14px; --r-lg:20px; --r-xl:28px;
+  --shadow-lg:0 24px 70px -24px rgba(0,0,0,.9);
+  --shadow-sm:0 6px 24px -10px rgba(0,0,0,.7);
+  --font-scale:1;
+  --sat:env(safe-area-inset-top,0px); --sab:env(safe-area-inset-bottom,0px);
+}
+[data-theme="light"]{
+  --bg:#f5f6f9; --bg-elev:#fff; --surface:#fff;
+  --surface-2:#eef0f4; --surface-3:#e0e3ea;
+  --border:rgba(16,20,32,.08); --border-strong:rgba(16,20,32,.15);
+  --text:#16181f; --text-dim:#565b6a; --text-mute:#8b8f9c;
+  --brand-a:#4a5f78; --brand-b:#5d7186; --accent-soft:rgba(74,95,120,.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:'IBM Plex Sans Arabic',system-ui,-apple-system,sans-serif;
+  background:var(--bg); color:var(--text);
+  font-size:calc(15px * var(--font-scale));
+  line-height:1.65; -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent; overflow:hidden;
+  transition:background .3s,color .3s;
+}
+body::before{
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:0;
+  background:
+    radial-gradient(680px 420px at 12% -5%, rgba(93,113,134,.14), transparent 70%),
+    radial-gradient(760px 520px at 90% 105%, rgba(115,131,153,.10), transparent 70%);
+}
+::selection{background:var(--brand-a);color:#fff}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:99px;border:3px solid transparent;background-clip:content-box}
+button,input,textarea,select{font:inherit;color:inherit}
+button{background:none;border:none;cursor:pointer}
+a{color:var(--brand-a);text-decoration:none}
+.app{position:relative;z-index:1;display:flex;height:100dvh;overflow:hidden}
 
-    <!-- SEO -->
-    <title>Nova AI - استوديو الذكاء الاصطناعي</title>
-    <meta name="description" content="Nova AI هو استوديو ذكاء اصطناعي يساعدك في البرمجة، الكتابة، التعلم، الإبداع، تحليل الصور والمحادثة الذكية.">
-    <meta name="keywords" content="Nova AI, ذكاء اصطناعي, AI, مساعد ذكي, برمجة, كتابة, تعلم, إبداع">
-    <meta name="author" content="Nova AI">
-    <meta name="robots" content="index, follow">
-    <meta name="googlebot" content="index, follow">
-    <link rel="canonical" href="https://yovia-ai-one-cyan.vercel.app/">
+/* Sidebar */
+.sidebar{
+  width:288px;flex:0 0 288px;display:flex;flex-direction:column;
+  background:var(--bg-elev);border-inline-end:1px solid var(--border);
+  transition:width .28s cubic-bezier(.4,0,.2,1),flex-basis .28s cubic-bezier(.4,0,.2,1),opacity .2s;
+  overflow:hidden; padding-top:var(--sat);
+}
+.sidebar.collapsed{width:0;flex-basis:0;opacity:0;pointer-events:none}
+.side-top{display:flex;align-items:center;justify-content:space-between;padding:16px 14px 10px;gap:8px}
+.brand{display:flex;align-items:center;gap:10px;padding:4px 6px;border-radius:var(--r-md);color:var(--text)}
+.brand-mark{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:var(--accent-grad);box-shadow:0 6px 18px -6px var(--brand-a);flex:0 0 auto}
+.brand-mark svg{width:20px;height:20px}
+.brand-name{font-size:19px;font-weight:700;letter-spacing:-.4px}
+.icon-btn{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;color:var(--text-dim);transition:background .16s,color .16s,transform .16s;flex:0 0 auto}
+.icon-btn:hover{background:var(--surface-2);color:var(--text)}
+.icon-btn:active{transform:scale(.94)}
+.icon-btn svg{width:19px;height:19px}
+.new-chat{display:flex;align-items:center;gap:10px;margin:6px 14px 12px;padding:13px 16px;border-radius:var(--r-md);background:var(--accent-grad);color:#fff;font-weight:600;font-size:14.5px;box-shadow:0 8px 24px -10px var(--brand-a);transition:transform .16s;position:relative;overflow:hidden}
+.new-chat:hover{transform:translateY(-1px)}
+.new-chat:active{transform:scale(.99)}
+.new-chat svg{width:18px;height:18px}
+.new-chat kbd{margin-inline-start:auto;font-family:'JetBrains Mono',monospace;font-size:11px;padding:2px 6px;border-radius:6px;background:rgba(255,255,255,.18)}
+.search-wrap{position:relative;margin:0 14px 12px}
+.search-wrap svg{position:absolute;inset-inline-start:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--text-mute);pointer-events:none}
+.search-wrap input{width:100%;padding:10px 36px 10px 12px;border-radius:var(--r-sm);background:var(--surface-2);border:1px solid transparent;font-size:13.5px;outline:none;transition:border-color .18s,background .18s}
+.search-wrap input:focus{border-color:var(--brand-a);background:var(--surface)}
+.history{flex:1;overflow-y:auto;overflow-x:hidden;padding:0 10px 12px}
+.hist-group-title{font-size:11px;font-weight:600;letter-spacing:.6px;color:var(--text-mute);padding:14px 10px 6px}
+.hist-item{display:flex;align-items:center;gap:9px;padding:10px;border-radius:var(--r-sm);cursor:pointer;color:var(--text-dim);font-size:13.5px;transition:background .15s,color .15s;position:relative;margin-bottom:2px}
+.hist-item:hover{background:var(--surface-2);color:var(--text)}
+.hist-item.active{background:var(--accent-soft);color:var(--text);font-weight:500}
+.hist-item.active::before{content:'';position:absolute;inset-inline-start:0;top:50%;transform:translateY(-50%);width:3px;height:60%;border-radius:99px;background:var(--brand-a)}
+.hist-item svg{width:15px;height:15px;flex:0 0 auto;opacity:.7}
+.hist-title{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hist-del{width:28px;height:28px;border-radius:6px;display:grid;place-items:center;opacity:0;color:var(--text-mute);transition:opacity .15s,background .15s,color .15s;flex:0 0 auto}
+.hist-item:hover .hist-del{opacity:1}
+.hist-del:hover{background:rgba(201,96,96,.15);color:var(--danger)}
+.hist-del svg{width:14px;height:14px}
+.hist-empty{padding:24px 12px;text-align:center;font-size:13px;color:var(--text-mute)}
+.side-bottom{padding:10px 10px calc(12px + var(--sab));border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+.side-item{display:flex;align-items:center;gap:10px;padding:12px;border-radius:var(--r-sm);color:var(--text-dim);font-size:13.5px;transition:background .15s,color .15s;width:100%;text-align:start}
+.side-item:hover{background:var(--surface-2);color:var(--text)}
+.side-item svg{width:18px;height:18px}
+.user{display:flex;align-items:center;gap:10px;padding:10px;border-radius:var(--r-md);background:var(--surface-2);margin-top:4px}
+.avatar-sm{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:var(--accent-grad);color:#fff;font-weight:700;font-size:13px;flex:0 0 auto}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:13.5px;font-weight:600}
+.user-plan{font-size:11px;color:var(--brand-a);font-weight:600;display:flex;align-items:center;gap:4px}
+.user-plan::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--brand-a)}
+.user-plan.demo{color:var(--warn)}
+.user-plan.demo::before{background:var(--warn)}
 
-    <!-- Theme -->
-    <meta name="theme-color" content="#0f172a">
-    <link rel="manifest" href="/manifest.webmanifest">
-    <meta name="color-scheme" content="dark">
+/* Main */
+.main{flex:1;min-width:0;display:flex;flex-direction:column;position:relative}
+.topbar{display:flex;align-items:center;gap:10px;padding:calc(12px + var(--sat)) 18px 12px;border-bottom:1px solid var(--border);background:color-mix(in srgb,var(--bg-elev) 75%,transparent);backdrop-filter:blur(18px) saturate(1.4);-webkit-backdrop-filter:blur(18px) saturate(1.4);z-index:20;flex:0 0 auto}
+.topbar-title{display:flex;flex-direction:column;min-width:0;flex:1}
+.topbar-title h1{font-size:14.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.topbar-title span{font-size:11.5px;color:var(--text-mute)}
+.model-btn{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface-2);font-size:13px;font-weight:500;color:var(--text-dim);transition:border-color .18s,color .18s;white-space:nowrap}
+.model-btn:hover{border-color:var(--border-strong);color:var(--text)}
+.model-btn .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(77,158,122,.20)}
+.model-btn .dot.demo{background:var(--warn);box-shadow:0 0 0 3px rgba(201,161,74,.20)}
+.model-btn svg{width:14px;height:14px;opacity:.6}
+.dropdown{position:absolute;top:calc(100% + 8px);inset-inline-end:0;min-width:280px;background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--r-md);box-shadow:var(--shadow-lg);padding:6px;z-index:80;opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:opacity .16s,transform .16s;max-height:70vh;overflow-y:auto}
+.dropdown.show{opacity:1;transform:none;pointer-events:auto}
+.dd-item{display:flex;align-items:flex-start;gap:10px;padding:10px;border-radius:var(--r-sm);width:100%;text-align:start;transition:background .14s}
+.dd-item:hover{background:var(--surface-2)}
+.dd-item .dd-ico{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--accent-soft);color:var(--brand-a);flex:0 0 auto}
+.dd-item .dd-ico svg{width:16px;height:16px}
+.dd-item .dd-txt{flex:1;min-width:0}
+.dd-item .dd-name{font-size:13px;font-weight:600;color:var(--text)}
+.dd-item .dd-desc{font-size:11px;color:var(--text-mute);line-height:1.4}
+.dd-item .dd-check{color:var(--brand-a);opacity:0}
+.dd-item.selected .dd-check{opacity:1}
+.dd-section-label{font-size:11px;font-weight:600;color:var(--text-mute);padding:10px 12px 4px;letter-spacing:.5px}
 
-    <!-- Open Graph -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Nova AI - استوديو الذكاء الاصطناعي">
-    <meta property="og:description" content="مساعدك الذكي للبرمجة، الكتابة، التعلم والإبداع.">
-    <meta property="og:url" content="https://nova-ai-one-cyan.vercel.app/">
-    <meta property="og:site_name" content="Nova AI">
-    <meta property="og:locale" content="ar_AR">
-    <meta property="og:image" content="https://i.postimg.cc/1z4xZHLd/file-00000000088481f49e95910bcfdca5e0.png">
-    <meta property="og:image:alt" content="Nova AI">
-    <meta property="og:image:type" content="image/jpeg">
+/* Chat */
+.chat-scroll{flex:1;overflow-y:auto;overflow-x:hidden;scroll-behavior:smooth;position:relative}
+.chat-inner{max-width:860px;margin:0 auto;padding:28px 24px 40px;display:flex;flex-direction:column;gap:26px}
+.welcome{min-height:55vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:8px;animation:fadeUp .5s ease both}
+.welcome-logo{width:66px;height:66px;border-radius:22px;display:grid;place-items:center;background:var(--accent-grad);box-shadow:0 20px 50px -18px var(--brand-a);margin-bottom:10px;animation:float 5s ease-in-out infinite}
+.welcome-logo svg{width:36px;height:36px}
+.welcome h2{font-size:clamp(24px,4vw,32px);font-weight:700;letter-spacing:-.8px;color:var(--text)}
+.welcome p{font-size:14.5px;color:var(--text-dim);max-width:460px}
+.mode-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;font-size:11.5px;font-weight:600;margin-top:6px;background:var(--accent-soft);color:var(--brand-a);border:1px solid rgba(93,113,134,.25)}
+.mode-pill.demo{background:rgba(201,161,74,.14);color:var(--warn);border-color:rgba(201,161,74,.30)}
+.mode-pill svg{width:12px;height:12px}
+.suggestions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:26px;width:100%;max-width:660px}
+.sugg{display:flex;align-items:flex-start;gap:11px;padding:14px 15px;border-radius:var(--r-md);border:1px solid var(--border);background:var(--surface);text-align:start;transition:border-color .2s,transform .2s,background .2s;min-height:64px}
+.sugg:hover{border-color:var(--brand-a);transform:translateY(-2px);background:var(--surface-2)}
+.sugg .s-ico{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:var(--accent-soft);color:var(--brand-a);flex:0 0 auto}
+.sugg .s-ico svg{width:16px;height:16px}
+.sugg .s-title{font-size:13.5px;font-weight:600;color:var(--text);display:block}
+.sugg .s-sub{font-size:11.5px;color:var(--text-mute);line-height:1.45;display:block}
+.msg{display:flex;gap:13px;animation:fadeUp .32s cubic-bezier(.22,1,.36,1) both}
+.msg-avatar{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;flex:0 0 auto;font-size:13px;font-weight:700;margin-top:2px}
+.msg-assistant .msg-avatar{background:var(--accent-grad);box-shadow:0 8px 20px -10px var(--brand-a)}
+.msg-assistant .msg-avatar svg{width:18px;height:18px}
+.msg-user .msg-avatar{background:var(--surface-3);color:var(--text-dim)}
+.msg-body{flex:1;min-width:0}
+.msg-head{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.msg-name{font-size:13px;font-weight:600;color:var(--text)}
+.msg-time{font-size:11px;color:var(--text-mute)}
+.msg-content{font-size:14.5px;color:var(--text);word-wrap:break-word;overflow-wrap:anywhere;line-height:1.75}
+.msg-user .msg-content{background:var(--surface-2);border:1px solid var(--border);padding:11px 15px;border-radius:var(--r-md);border-start-start-radius:4px;white-space:pre-wrap;display:inline-block;max-width:100%}
+.msg-content p{margin:0 0 .8em}
+.msg-content p:last-child{margin-bottom:0}
+.msg-content h2,.msg-content h3,.msg-content h4{margin:1em 0 .5em;font-weight:700;line-height:1.4}
+.msg-content h2{font-size:19px}
+.msg-content h3{font-size:16.5px}
+.msg-content h4{font-size:15px}
+.msg-content ul,.msg-content ol{margin:.5em 0 .9em;padding-inline-start:22px}
+.msg-content li{margin-bottom:.3em}
+.msg-content blockquote{border-inline-start:3px solid var(--brand-a);padding:2px 14px;margin:.7em 0;color:var(--text-dim);background:var(--accent-soft);border-radius:0 var(--r-sm) var(--r-sm) 0}
+.msg-content code.ic{font-family:'JetBrains Mono',monospace;font-size:.87em;background:var(--surface-3);padding:2px 6px;border-radius:6px;color:var(--brand-b);direction:ltr;display:inline-block}
+.code-block{margin:.9em 0;border-radius:var(--r-md);border:1px solid var(--border);overflow:hidden;background:#0a0b0f}
+[data-theme="light"] .code-block{background:#14161f}
+.code-head{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--border)}
+.code-lang{font-family:'JetBrains Mono',monospace;font-size:11px;color:#8b8fa4}
+.copy-code{font-size:11.5px;font-weight:500;color:#8b8fa4;padding:4px 10px;border-radius:6px;transition:background .15s,color .15s}
+.copy-code:hover{background:rgba(255,255,255,.09);color:#fff}
+.code-block pre{margin:0;padding:14px 16px;overflow-x:auto;direction:ltr;text-align:left}
+.code-block code{font-family:'JetBrains Mono',monospace;font-size:12.8px;line-height:1.7;color:#d8dade;white-space:pre}
+.msg-files{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.file-pill{display:flex;align-items:center;gap:9px;padding:8px 12px;border-radius:var(--r-sm);background:var(--surface-2);border:1px solid var(--border);font-size:12.5px;max-width:260px}
+.file-ico{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;background:var(--accent-soft);color:var(--brand-a);flex:0 0 auto}
+.file-ico svg{width:14px;height:14px}
+.file-meta{min-width:0}
+.file-name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-size{font-size:11px;color:var(--text-mute)}
+.msg-actions{display:flex;gap:2px;margin-top:8px;opacity:0;transition:opacity .18s}
+.msg:hover .msg-actions{opacity:1}
+.msg-act{width:32px;height:32px;border-radius:7px;display:grid;place-items:center;color:var(--text-mute);transition:background .15s,color .15s}
+.msg-act:hover{background:var(--surface-2);color:var(--text)}
+.msg-act svg{width:15px;height:15px}
+.msg-act.liked{color:var(--ok)}
+.msg-act.disliked{color:var(--danger)}
+.typing-dots{display:inline-flex;gap:5px;align-items:center;padding:12px 4px}
+.typing-dots span{width:7px;height:7px;border-radius:50%;background:var(--brand-a);animation:bounce 1.3s infinite ease-in-out}
+.typing-dots span:nth-child(2){animation-delay:.16s;opacity:.75}
+.typing-dots span:nth-child(3){animation-delay:.32s;opacity:.5}
+.msg-error{margin-top:8px;padding:10px 14px;border-radius:var(--r-sm);background:rgba(201,96,96,.10);border:1px solid rgba(201,96,96,.30);color:#e8a5a5;font-size:13px;line-height:1.5}
+[data-theme="light"] .msg-error{color:#a13e3e}
 
-    <!-- Twitter / X -->
-    <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Nova AI - استوديو الذكاء الاصطناعي">
-    <meta name="twitter:description" content="مساعدك الذكي للبرمجة، الكتابة، التعلم والإبداع.">
-    <meta name="twitter:image" content="https://i.postimg.cc/1z4xZHLd/file-00000000088481f49e95910bcfdca5e0.png">
-    <meta name="twitter:image:alt" content="Nova AI">
+/* Composer */
+.composer-wrap{flex:0 0 auto;padding:0 24px calc(18px + var(--sab));background:linear-gradient(to top,var(--bg) 55%,transparent);position:relative;z-index:15}
+.composer{max-width:860px;margin:0 auto;background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--r-xl);padding:10px 12px;box-shadow:var(--shadow-sm);transition:border-color .2s,box-shadow .2s}
+.composer:focus-within{border-color:var(--brand-a);box-shadow:0 0 0 3px var(--accent-soft),var(--shadow-sm)}
+.attachments{display:flex;flex-wrap:wrap;gap:8px;padding:2px 2px 10px}
+.attachments:empty{display:none}
+.att-chip{display:flex;align-items:center;gap:8px;padding:6px 8px 6px 10px;border-radius:var(--r-sm);background:var(--surface-2);border:1px solid var(--border);font-size:12.5px;max-width:240px;animation:popIn .22s cubic-bezier(.22,1,.36,1) both}
+.att-chip .file-ico{width:26px;height:26px}
+.att-chip .att-name{max-width:130px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.att-chip .att-size{font-size:10.5px;color:var(--text-mute)}
+.att-remove{width:24px;height:24px;border-radius:6px;display:grid;place-items:center;color:var(--text-mute);transition:background .15s,color .15s;flex:0 0 auto}
+.att-remove:hover{background:rgba(201,96,96,.16);color:var(--danger)}
+.att-remove svg{width:12px;height:12px}
+.input-row{display:flex;align-items:flex-end;gap:8px}
+.composer textarea{flex:1;min-height:26px;max-height:200px;padding:8px 6px;background:transparent;border:none;outline:none;resize:none;font-size:15px;line-height:1.6;color:var(--text)}
+.composer textarea::placeholder{color:var(--text-mute)}
+.tool-btn{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;color:var(--text-dim);transition:background .16s,color .16s,transform .16s;flex:0 0 auto}
+.tool-btn:hover{background:var(--surface-2);color:var(--text)}
+.tool-btn:active{transform:scale(.92)}
+.tool-btn svg{width:19px;height:19px}
+.tool-btn.recording{color:var(--danger);animation:pulse 1.2s infinite}
+.send-btn{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--accent-grad);color:#fff;box-shadow:0 8px 22px -10px var(--brand-a);transition:transform .16s,opacity .18s;flex:0 0 auto}
+.send-btn:hover{transform:translateY(-1px) scale(1.03)}
+.send-btn:active{transform:scale(.95)}
+.send-btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.send-btn svg{width:18px;height:18px}
+.send-btn.stop{background:var(--danger);box-shadow:0 8px 22px -10px var(--danger)}
+.composer-hint{text-align:center;font-size:11px;color:var(--text-mute);padding:9px 0 0}
+.composer-hint kbd{font-family:'JetBrains Mono',monospace;font-size:10px;padding:1px 5px;border-radius:4px;background:var(--surface-2);border:1px solid var(--border)}
+.drop-overlay{position:absolute;inset:12px;border:2px dashed var(--brand-a);border-radius:var(--r-xl);background:var(--accent-soft);backdrop-filter:blur(4px);display:grid;place-items:center;z-index:50;opacity:0;pointer-events:none;transition:opacity .2s}
+.drop-overlay.show{opacity:1}
+.drop-overlay .drop-inner{text-align:center;color:var(--brand-a);font-weight:600}
+.drop-overlay svg{width:44px;height:44px;margin-bottom:8px}
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/jpeg" sizes="32x32" href="https://i.postimg.cc/1z4xZHLd/file-00000000088481f49e95910bcfdca5e0.png">
-    <link rel="icon" type="image/jpeg" sizes="192x192" href="https://i.postimg.cc/1z4xZHLd/file-00000000088481f49e95910bcfdca5e0.png">
-    <link rel="shortcut icon" type="image/jpeg" href="https://i.postimg.cc/1z4xZHLd/file-00000000088481f49e95910bcfdca5e0.png">
-    <link rel="apple-touch-icon" href="https://i.postimg.cc/1z4xZHLd/file-00000000088481f49e95910bcfdca5e0.png">
+/* Settings */
+.modal-backdrop{position:fixed;inset:0;z-index:200;background:rgba(4,5,10,.70);backdrop-filter:blur(8px);display:grid;place-items:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .24s}
+.modal-backdrop.show{opacity:1;pointer-events:auto}
+.modal{width:min(760px,100%);max-height:min(660px,88dvh);background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--r-lg);box-shadow:var(--shadow-lg);display:flex;flex-direction:column;overflow:hidden;transform:translateY(14px) scale(.98);transition:transform .26s cubic-bezier(.22,1,.36,1)}
+.modal-backdrop.show .modal{transform:none}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;border-bottom:1px solid var(--border);flex:0 0 auto}
+.modal-head h3{font-size:16px;font-weight:700}
+.modal-body{display:flex;flex:1;min-height:0}
+.settings-tabs{width:190px;flex:0 0 190px;border-inline-end:1px solid var(--border);padding:12px 10px;display:flex;flex-direction:column;gap:3px;overflow-y:auto}
+.st-tab{display:flex;align-items:center;gap:9px;padding:10px 11px;border-radius:var(--r-sm);font-size:13.5px;color:var(--text-dim);text-align:start;transition:background .15s,color .15s;width:100%}
+.st-tab:hover{background:var(--surface-2);color:var(--text)}
+.st-tab.active{background:var(--accent-soft);color:var(--brand-a);font-weight:600}
+.st-tab svg{width:16px;height:16px}
+.st-tab .badge{margin-inline-start:auto;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;background:var(--ok);color:#fff}
+.st-tab .badge.demo{background:var(--warn)}
+.settings-panels{flex:1;overflow-y:auto;padding:20px 22px 26px}
+.panel{display:none;animation:fadeIn .22s ease both}
+.panel.active{display:block}
+.field{margin-bottom:22px}
+.field:last-child{margin-bottom:0}
+.field-label{font-size:13.5px;font-weight:600;margin-bottom:4px;display:block}
+.field-desc{font-size:12px;color:var(--text-mute);margin-bottom:10px;line-height:1.5}
+.select,.input-text{width:100%;padding:11px 12px;border-radius:var(--r-sm);background:var(--surface-2);border:1px solid var(--border-strong);font-size:13.5px;outline:none;transition:border-color .18s}
+.select{appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238b8fa4' stroke-width='2.5' stroke-linecap='round'><polyline points='6 9 12 15 18 9'/></svg>");background-repeat:no-repeat;background-position:left 12px center;padding-left:34px;cursor:pointer}
+.input-text{font-family:'JetBrains Mono',monospace;font-size:12.5px;direction:ltr}
+.select:focus,.input-text:focus{border-color:var(--brand-a)}
+.note-box{padding:11px 14px;border-radius:var(--r-sm);background:rgba(201,161,74,.10);border:1px solid rgba(201,161,74,.25);color:#d4b870;font-size:12px;line-height:1.5;margin-bottom:12px}
+[data-theme="light"] .note-box{color:#8a6a1f}
+.note-box.info{background:rgba(93,113,134,.10);border-color:rgba(93,113,134,.25);color:var(--brand-b)}
+[data-theme="light"] .note-box.info{color:#3d506b}
+.switch-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:14px 0;border-bottom:1px solid var(--border)}
+.switch-row:last-child{border-bottom:none}
+.switch-txt .switch-title{font-size:13.5px;font-weight:500}
+.switch-txt .switch-desc{font-size:11.5px;color:var(--text-mute)}
+.switch{width:46px;height:27px;border-radius:99px;background:var(--surface-3);position:relative;transition:background .22s;flex:0 0 auto;cursor:pointer}
+.switch::after{content:'';position:absolute;top:3px;inset-inline-start:3px;width:21px;height:21px;border-radius:50%;background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.3);transition:transform .22s cubic-bezier(.22,1,.36,1)}
+.switch.on{background:var(--brand-a)}
+.switch.on::after{transform:translateX(-19px)}
+.theme-grid{display:flex;gap:10px}
+.theme-card{flex:1;border:2px solid var(--border);border-radius:var(--r-md);padding:10px;transition:border-color .18s,transform .18s;text-align:center;cursor:pointer}
+.theme-card:hover{transform:translateY(-2px)}
+.theme-card.active{border-color:var(--brand-a)}
+.theme-preview{height:52px;border-radius:9px;margin-bottom:8px;border:1px solid var(--border);overflow:hidden;position:relative}
+.theme-preview.dark{background:#0d0e12}
+.theme-preview.light{background:#f2f3f7}
+.theme-preview.system{background:linear-gradient(100deg,#0d0e12 50%,#f2f3f7 50%)}
+.theme-preview::before{content:'';position:absolute;inset-block:8px;inset-inline-start:7px;width:26%;border-radius:4px;background:rgba(93,113,134,.55)}
+.theme-preview::after{content:'';position:absolute;inset-block:8px;inset-inline-end:7px;width:48%;border-radius:4px;background:rgba(140,145,160,.28)}
+.theme-card span{font-size:12.5px;font-weight:500}
+.swatches{display:flex;gap:10px;flex-wrap:wrap}
+.swatch{width:40px;height:40px;border-radius:12px;position:relative;transition:transform .18s;border:2px solid transparent;cursor:pointer}
+.swatch:hover{transform:scale(1.08)}
+.swatch.active{border-color:var(--text)}
+.swatch.active::after{content:'✓';position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:15px;font-weight:700;text-shadow:0 1px 3px rgba(0,0,0,.4)}
+.range-row{display:flex;align-items:center;gap:14px}
+input[type="range"]{flex:1;-webkit-appearance:none;appearance:none;height:5px;border-radius:99px;background:var(--surface-3);outline:none;cursor:pointer}
+input[type="range"]::-webkit-slider-thumb{-webkit-appearance:none;width:19px;height:19px;border-radius:50%;background:var(--brand-a);border:3px solid var(--surface);box-shadow:0 2px 8px rgba(0,0,0,.35)}
+input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;background:var(--brand-a);border:3px solid var(--surface);cursor:pointer}
+.range-val{min-width:52px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:5px 9px;border-radius:7px;background:var(--surface-2);color:var(--text-dim)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:var(--r-sm);font-size:13.5px;font-weight:600;border:1px solid var(--border-strong);background:var(--surface-2);color:var(--text);transition:background .16s,border-color .16s,transform .16s;min-height:40px;cursor:pointer}
+.btn:hover{background:var(--surface-3)}
+.btn:active{transform:scale(.98)}
+.btn svg{width:15px;height:15px}
+.btn.danger{color:var(--danger);border-color:rgba(201,96,96,.35)}
+.btn.danger:hover{background:rgba(201,96,96,.10)}
+.btn.primary{background:var(--accent-grad);color:#fff;border-color:transparent}
+.modal-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:14px 18px;border-top:1px solid var(--border);flex:0 0 auto}
 
-    <!-- Styles & Fonts -->
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+/* Toast */
+.toast-wrap{position:fixed;bottom:calc(24px + var(--sab));inset-inline-start:50%;transform:translateX(50%);z-index:500;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{display:flex;align-items:center;gap:9px;padding:11px 16px;border-radius:99px;background:var(--surface-3);border:1px solid var(--border-strong);color:var(--text);font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);animation:toastIn .28s cubic-bezier(.22,1,.36,1) both;max-width:90vw}
+.toast svg{width:16px;height:16px;color:var(--ok);flex:0 0 auto}
+.toast.err svg{color:var(--danger)}
+.toast.out{animation:toastOut .24s ease forwards}
+.overlay{position:fixed;inset:0;z-index:55;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);opacity:0;pointer-events:none;transition:opacity .24s}
+.overlay.show{opacity:1;pointer-events:auto}
 
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase.js"></script>
-     <script src="yovia-duplicate-guard.js"></script>
-    <!-- Structured Data -->
-    <script type="application/ld+json">
-    {
-        "@context": "https://schema.org",
-        "@type": "WebApplication",
-        "name": "Nova AI",
-        "url": "https://nova-ai-one-cyan.vercel.app/",
-        "description": "Nova AI هو استوديو ذكاء اصطناعي يساعد في البرمجة والكتابة والتعلم والإبداع والمحادثة الذكية.",
-        "applicationCategory": "Artificial Intelligence",
-        "operatingSystem": "Web",
-        "inLanguage": "ar",
-        "browserRequirements": "Requires JavaScript",
-        "image": "https://i.postimg.cc/JzFwyMDB/Whats-App-Image-2026-10-05-at-9-05-23-PM.jpg"
-    }
-    </script>
+@keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes popIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:none}}
+@keyframes bounce{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-6px)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+@keyframes toastIn{from{opacity:0;transform:translateY(14px) scale(.94)}to{opacity:1;transform:none}}
+@keyframes toastOut{to{opacity:0;transform:translateY(10px) scale(.96)}}
+
+@media (max-width:900px){
+  .sidebar{position:fixed;inset-block:0;inset-inline-start:0;z-index:60;transform:translateX(100%);transition:transform .3s cubic-bezier(.22,1,.36,1);box-shadow:var(--shadow-lg);width:290px;flex-basis:290px}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar.collapsed{width:290px;flex-basis:290px;opacity:1;pointer-events:auto}
+  .chat-inner{padding:20px 16px 32px}
+  .composer-wrap{padding:0 14px calc(14px + var(--sab))}
+  .suggestions{grid-template-columns:1fr}
+  .modal{max-height:92dvh;border-radius:var(--r-lg) var(--r-lg) 0 0;align-self:end}
+  .modal-backdrop{padding:0;align-items:end}
+  .modal-body{flex-direction:column}
+  .settings-tabs{width:100%;flex:0 0 auto;flex-direction:row;overflow-x:auto;border-inline-end:none;border-bottom:1px solid var(--border);padding:10px;scrollbar-width:none}
+  .settings-tabs::-webkit-scrollbar{display:none}
+  .st-tab{white-space:nowrap;width:auto}
+  .topbar{padding:calc(10px + var(--sat)) 12px 10px}
+  .model-btn span.model-name{display:none}
+  .msg-actions{opacity:1}
+}
+@media (max-width:520px){
+  .new-chat kbd{display:none}
+  .msg-avatar{width:30px;height:30px}
+  .composer-hint{display:none}
+}
+</style>
 </head>
-
 <body>
 
-<!-- =========================================================
-     NOVA AI LOADING SCREEN
-========================================================= -->
-<div id="novaLoadingScreen">
-    <div class="nova-loader">
-        <div class="nova-loader-glow"></div>
-
-        <div class="nova-loader-logo-wrap">
-            <img src="https://i.postimg.cc/1z4xZHLd/file-00000000088481f49e95910bcfdca5e0.png" alt="Nova AI" class="nova-loading-logo">
-        </div>
-
-        <div class="nova-loading-brand">
-            <span class="nova-brand-nova">Nova</span>
-            <span class="nova-brand-ai">AI</span>
-        </div>
-
-        <div class="nova-loading-subtitle">استوديو الذكاء الاصطناعي</div>
-
-        <div class="nova-progress-wrapper">
-            <div class="nova-progress-top">
-                <span>جاري تشغيل Nova</span>
-                <span id="novaProgressText" class="nova-progress-text">1%</span>
-            </div>
-
-            <div class="nova-progress-container">
-                <div id="novaProgressBar" class="nova-progress-bar"></div>
-            </div>
-        </div>
-
-        <div class="nova-loading-status">
-            <span class="nova-status-dot"></span>
-            <span>تهيئة النظام...</span>
-        </div>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="side-top">
+      <a class="brand" href="#" onclick="return false;">
+        <span class="brand-mark">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path d="M11 8.5v11.2a3.3 3.3 0 0 0 3.3 3.3H21" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/>
+            <circle cx="21.5" cy="10" r="2.4" fill="#fff"/>
+          </svg>
+        </span>
+        <span class="brand-name">logvidia</span>
+      </a>
+      <button class="icon-btn" id="collapseBtn" aria-label="طي">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/></svg>
+      </button>
     </div>
-</div>
-
-<!-- =========================================================
-     APP CONTAINER
-========================================================= -->
-<div class="app-container">
-
-    <!-- SIDEBAR -->
-    <aside class="sidebar" id="sidebar">
-
-        <div class="sidebar-header">
-            <button id="sidebarToggleBtn" class="toggle-btn" title="طي / فتح القائمة" type="button" aria-label="طي أو فتح القائمة">
-                <i class="fa-solid fa-bars"></i>
-            </button>
-
-            <h2 class="logo-text">Nova <span>AI</span></h2>
-        </div>
-
-        <button id="newChatBtn" class="new-chat-btn" type="button">
-            <i class="fa-solid fa-plus"></i>
-            <span class="btn-text">محادثة جديدة</span>
-        </button>
-
-        <div class="history-section">
-            <h3 class="history-title">Recents</h3>
-            <ul class="history-list" id="historyList"></ul>
-        </div>
-
-        <!-- PROFILE -->
-        <div class="nova-profile-area">
-
-            <button id="novaProfileBtn" class="nova-profile-btn" type="button" aria-expanded="false" aria-haspopup="true">
-                <div id="novaProfileAvatar" class="nova-profile-avatar">YS</div>
-
-                <div class="nova-profile-info">
-                    <strong id="novaProfileName">يوسف شنوده</strong>
-                    <span id="novaProfilePlan" class="nova-profile-plan free">FREE</span>
-                </div>
-
-                <i class="fa-solid fa-chevron-up nova-profile-arrow"></i>
-            </button>
-
-            <div id="novaProfileMenu" class="nova-profile-menu">
-
-                <div class="nova-profile-head">
-                    <div id="novaMenuAvatar" class="nova-menu-avatar">YS</div>
-
-                    <div>
-                        <strong id="novaMenuName">يوسف شنوده</strong>
-                        <span id="novaMenuEmail">—</span>
-                    </div>
-                </div>
-
-                <div class="nova-plan-card">
-                    <div class="nova-plan-icon">
-                        <i class="fa-solid fa-sparkles"></i>
-                    </div>
-
-                    <div class="nova-plan-text">
-                        <span>Current plan</span>
-                        <strong id="novaMenuPlan">FREE</strong>
-                    </div>
-                </div>
-
-                <div class="nova-menu-section">
-                    <div class="nova-menu-section-title">
-                        <i class="fa-solid fa-palette"></i>
-                        <span>Themes</span>
-                    </div>
-
-                    <div class="nova-theme-grid">
-                        <button class="nova-theme-option active" data-theme="nova" type="button">
-                            <span class="theme-preview theme-nova"></span>
-                            <span>Nova</span>
-                        </button>
-
-                        <button class="nova-theme-option" data-theme="purple" type="button">
-                            <span class="theme-preview theme-purple"></span>
-                            <span>Purple</span>
-                        </button>
-
-                        <button class="nova-theme-option" data-theme="emerald" type="button">
-                            <span class="theme-preview theme-emerald"></span>
-                            <span>Emerald</span>
-                        </button>
-
-                        <button class="nova-theme-option" data-theme="amoled" type="button">
-                            <span class="theme-preview theme-amoled"></span>
-                            <span>AMOLED</span>
-                        </button>
-
-                        <button class="nova-theme-option nova-display-mode-option" data-nova-mode="night" type="button" aria-pressed="false">
-                            <span class="theme-preview theme-night"></span>
-                            <span>Night Mode</span>
-                        </button>
-
-                        <button class="nova-theme-option nova-display-mode-option" data-nova-mode="dark" type="button" aria-pressed="false">
-                            <span class="theme-preview theme-dark"></span>
-                            <span>Dark Mode</span>
-                        </button>
-                    </div>
-                </div>
-
-                <button id="novaProfileLanguage" class="nova-profile-menu-item" type="button">
-                    <i class="fa-solid fa-language"></i>
-                    <span>Language</span>
-                    <i class="fa-solid fa-chevron-left"></i>
-                </button>
-
-                <button id="novaProfileUsage" class="nova-profile-menu-item" type="button">
-                    <i class="fa-solid fa-chart-pie"></i>
-                    <span>Usage</span>
-                    <i class="fa-solid fa-chevron-left"></i>
-                </button>
-
-                <button id="novaProfileSubscriptions" class="nova-profile-menu-item" type="button">
-                    <i class="fa-solid fa-crown"></i>
-                    <span>الباقات والاشتراك</span>
-                    <i class="fa-solid fa-chevron-left"></i>
-                </button>
-
-                <button id="novaProfileSettings" class="nova-profile-menu-item" type="button">
-                    <i class="fa-solid fa-gear"></i>
-                    <span>Settings</span>
-                    <i class="fa-solid fa-chevron-left"></i>
-                </button>
-
-                <div class="nova-profile-divider"></div>
-
-                <button id="novaLogoutBtn" class="nova-profile-menu-item nova-logout-item" type="button">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span>Sign out</span>
-                </button>
-
-            </div>
-        </div>
-
-        <!-- SIDEBAR FOOTER -->
-        <div class="sidebar-footer-actions" style="margin-top: auto; padding: 15px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
-
-            <button class="sidebar-icon-btn" id="settingsBtn" title="الإعدادات" type="button" aria-label="الإعدادات">
-                <i class="fa-solid fa-gear"></i>
-            </button>
-
-        </div>
-    </aside>
-
-    <!-- MAIN CONTENT -->
-    <main class="main-content">
-
-        <button id="mobileMenuBtn" class="mobile-menu-btn" type="button" title="فتح القائمة" aria-label="فتح القائمة">
-            <i class="fa-solid fa-bars"></i>
-        </button>
-
-        <section id="chat-section" class="content-section active">
-
-            <div class="section-header">
-                <h2>Nova AI</h2>
-            </div>
-
-            <div class="chat-box" id="chatBox">
-
-                <div class="nova-welcome" id="novaWelcome">
-
-                    <div class="nova-welcome-icon">
-                        <i class="fa-solid fa-sparkles"></i>
-                    </div>
-
-                    <h1>أهلاً بيك في <span>Nova AI</span> 👋</h1>
-                                        <p>
-                        مساعدك الذكي للبرمجة، الكتابة، التعلم والإبداع.
-                        <br>
-                        ابدأ محادثتك واكتشف إمكانيات Nova.
-                    </p>
-
-                    <div class="quick-prompts">
-
-                        <button type="button" class="quick-prompt" data-prompt="اكتب لي فكرة مشروع ويب مبتكر باستخدام HTML وCSS وJavaScript">
-                            <i class="fa-solid fa-code"></i>
-                            <span>اقترح لي مشروع برمجي</span>
-                        </button>
-
-                        <button type="button" class="quick-prompt" data-prompt="اشرح لي الذكاء الاصطناعي بطريقة سهلة وبسيطة">
-                            <i class="fa-solid fa-brain"></i>
-                            <span>اشرح لي الذكاء الاصطناعي</span>
-                        </button>
-
-                        <button type="button" class="quick-prompt" data-prompt="ساعدني في كتابة خطة لتعلم البرمجة من البداية">
-                            <i class="fa-solid fa-graduation-cap"></i>
-                            <span>ساعدني أتعلم البرمجة</span>
-                        </button>
-
-                        <button type="button" class="quick-prompt" data-prompt="اكتب لي قصة قصيرة وممتعة">
-                            <i class="fa-solid fa-book-open"></i>
-                            <span>اكتب لي قصة قصيرة</span>
-                        </button>
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- INPUT AREA -->
-            <div class="input-area">
-
-                <input type="file" id="fileInput" style="display: none;" multiple>
-
-                <div class="attach-wrapper" style="position: relative; display: inline-block;">
-
-                    <button id="attachBtn" class="attach-btn" type="button" title="خيارات إضافية" aria-label="خيارات إضافية">
-                        <i class="fa-solid fa-plus"></i>
-                    </button>
-
-                    <div id="attachDropdown" class="attach-dropdown">
-
-                        <div class="dropdown-item" id="optUpload" role="button" tabindex="0">
-                            <i class="fa-solid fa-paperclip"></i>
-                            <span>رفع ملف</span>
-                        </div>
-
-                        <div class="dropdown-item" id="optImage" role="button" tabindex="0">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i>
-                            <span>توليد صورة</span>
-                        </div>
-
-                        <div class="dropdown-item" id="optVideo" role="button" tabindex="0">
-                            <i class="fa-solid fa-video"></i>
-                            <span>توليد فيديو</span>
-                        </div>
-
-                        <div class="dropdown-item" id="optMusic" role="button" tabindex="0">
-                            <i class="fa-solid fa-music"></i>
-                            <span>توليد صوت</span>
-                        </div>
-
-                    </div>
-                </div>
-
-                <textarea id="chatInput" rows="1" placeholder="اكتب رسالتك هنا..." autocomplete="off" spellcheck="true"></textarea>
-
-                <div class="input-actions-right">
-
-                    <button id="micBtn" type="button" title="تحويل الصوت لنص" aria-label="تحويل الصوت لنص">
-                        <i class="fa-solid fa-microphone"></i>
-                    </button>
-
-                    <button id="liveVoiceBtn" class="mic-btn live-btn" type="button" title="محادثة صوتية مباشرة" aria-label="محادثة صوتية مباشرة">
-                        <div class="wave-icon">
-                            <span class="bar"></span>
-                            <span class="bar"></span>
-                            <span class="bar"></span>
-                            <span class="bar"></span>
-                        </div>
-                    </button>
-
-                    <button id="sendChatBtn" type="button" title="إرسال" aria-label="إرسال الرسالة">
-                        <i class="fa-solid fa-paper-plane"></i>
-                    </button>
-
-                </div>
-            </div>
-        </section>
-    </main>
-</div>
-
-<!-- VOICE OVERLAY -->
-<div id="voiceOverlay" class="voice-overlay">
-
-    <button id="closeVoiceBtn" class="close-voice-btn" title="إغلاق المحادثة الصوتية" type="button" aria-label="إغلاق المحادثة الصوتية">
-        <i class="fa-solid fa-xmark"></i>
+    <button class="new-chat" id="newChatBtn">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      <span>محادثة جديدة</span><kbd>⌘K</kbd>
     </button>
-
-    <div class="voice-header">
-        <span>Nova الصوت</span>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="text" id="searchInput" placeholder="بحث في المحادثات…" />
     </div>
-
-    <div class="orb-container">
-        <div id="voiceOrb" class="voice-orb"></div>
+    <div class="history" id="history"></div>
+    <div class="side-bottom">
+      <button class="side-item" id="settingsBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.35.44.62.83.74H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>الإعدادات</span>
+      </button>
+      <div class="user">
+        <div class="avatar-sm">م</div>
+        <div class="user-info">
+          <div class="user-name">مستخدم Logvidia</div>
+          <div class="user-plan" id="userMode">وضع تجريبي</div>
+        </div>
+      </div>
     </div>
+  </aside>
 
-    <div class="voice-controls">
+  <div class="overlay" id="overlay"></div>
 
-        <button id="toggleMuteBtn" class="voice-ctrl-btn" title="كتم الصوت" type="button" aria-label="كتم الصوت">
-            <i class="fa-solid fa-microphone"></i>
+  <main class="main">
+    <header class="topbar">
+      <button class="icon-btn" id="menuBtn" aria-label="القائمة">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+      <div class="topbar-title">
+        <h1 id="chatTitle">محادثة جديدة</h1>
+        <span id="chatSubtitle">جاهز للمساعدة</span>
+      </div>
+      <div style="position:relative">
+        <button class="model-btn" id="modelBtn">
+          <span class="dot" id="statusDot"></span>
+          <span class="model-name" id="modelLabel">وضع تجريبي</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
+        <div class="dropdown" id="modelDropdown"></div>
+      </div>
+      <button class="icon-btn" id="themeBtn" title="تبديل المظهر">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+    </header>
 
-        <button id="endVoiceCallBtn" class="voice-ctrl-btn close-call" title="إنهاء المحادثة" type="button" aria-label="إنهاء المحادثة">
-            <i class="fa-solid fa-xmark"></i>
-        </button>
-
+    <div class="chat-scroll" id="chatScroll">
+      <div class="chat-inner" id="chatInner"></div>
     </div>
+
+    <div class="composer-wrap">
+      <div class="composer" id="composer">
+        <div class="attachments" id="attachments"></div>
+        <div class="input-row">
+          <button class="tool-btn" id="attachBtn" title="إرفاق ملف">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          </button>
+          <textarea id="input" rows="1" placeholder="أرسل رسالة إلى Logvidia…"></textarea>
+          <button class="tool-btn" id="micBtn" title="إدخال صوتي">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+          </button>
+          <button class="send-btn" id="sendBtn" disabled title="إرسال">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="composer-hint">
+        اضغط <kbd>Enter</kbd> للإرسال · <kbd>Shift</kbd> + <kbd>Enter</kbd> لسطر جديد
+      </div>
+    </div>
+
+    <div class="drop-overlay" id="dropOverlay">
+      <div class="drop-inner">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        <div>أفلت الملفات هنا للإرفاق</div>
+      </div>
+    </div>
+    <input type="file" id="fileInput" multiple hidden />
+  </main>
 </div>
 
-<!-- SETTINGS MODAL -->
-<div id="settingsModal" class="settings-modal-overlay">
-
-    <div class="settings-modal-content">
-
-        <div class="settings-header">
-            <h3>الإعدادات</h3>
-
-            <button id="closeSettingsBtn" class="close-settings-btn" type="button" aria-label="إغلاق الإعدادات">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <div class="settings-body">
-
-            <div class="setting-item" data-setting="activity">
-                <i class="fa-solid fa-clock-rotate-left"></i>
-                <span>Activity</span>
-            </div>
-
-            <div class="setting-item" data-setting="personal-intelligence">
-                <i class="fa-solid fa-brain"></i>
-                <span>Personal Intelligence</span>
-            </div>
-
-            <div class="setting-item" data-setting="import-memory">
-                <i class="fa-solid fa-file-import"></i>
-                <span>Import memory to Nova</span>
-            </div>
-
-            <div class="setting-item" data-setting="avatar">
-                <i class="fa-regular fa-face-smile"></i>
-                <span>Avatar</span>
-            </div>
-
-            <div class="setting-item" data-setting="usage">
-                <i class="fa-solid fa-chart-pie"></i>
-                <span>Usage limits</span>
-            </div>
-
-            <div class="setting-item" data-setting="gems">
-                <i class="fa-solid fa-gem"></i>
-                <span>Gems</span>
-            </div>
-
-            <div class="setting-item" data-setting="public-links">
-                <i class="fa-solid fa-link"></i>
-                <span>Your public links</span>
-            </div>
-
-            <div class="setting-item" data-setting="theme">
-                <i class="fa-solid fa-sun"></i>
-                <span>Theme</span>
-                <i class="fa-solid fa-chevron-left arrow"></i>
-            </div>
-
-            <div class="setting-item" data-setting="language">
-                <i class="fa-solid fa-language"></i>
-                <span>Language</span>
-                <i class="fa-solid fa-chevron-left arrow"></i>
-            </div>
-
-            <div class="setting-item" data-setting="subscriptions">
-                <i class="fa-solid fa-box-archive"></i>
-                <span>View subscriptions</span>
-            </div>
-
-            <div class="setting-item" data-setting="notebook">
-                <i class="fa-solid fa-book"></i>
-                <span>Nova Notebook</span>
-            </div>
-
-            <div class="setting-item" data-setting="watermark">
-                <i class="fa-solid fa-photo-film"></i>
-                <span>Media watermark</span>
-                <i class="fa-solid fa-chevron-left arrow"></i>
-            </div>
-
-            <div class="setting-item" data-setting="feedback">
-                <i class="fa-solid fa-comment-dots"></i>
-                <span>Send feedback</span>
-            </div>
-
-            <div class="setting-item" data-setting="help">
-                <i class="fa-solid fa-circle-question"></i>
-                <span>Help</span>
-                <i class="fa-solid fa-chevron-left arrow"></i>
-            </div>
-
-            <!-- SMART MEMORY -->
-            <div class="settings-section memory-section">
-
-                <div class="settings-section-title">
-                    <i class="fa-solid fa-brain"></i>
-                    <span>ذاكرة Nova</span>
-                </div>
-
-                <p class="settings-description">المعلومات التي طلبت من Nova أن تتذكرها عنك.</p>
-
-                <div id="memoryList" class="memory-list"></div>
-
-                <button id="clearMemoryBtn" class="danger-btn" type="button">
-                    <i class="fa-solid fa-trash"></i>
-                    <span>مسح كل الذكريات</span>
-                </button>
-
-            </div>
-        </div>
+<!-- Settings Modal -->
+<div class="modal-backdrop" id="settingsModal">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-head">
+      <h3>الإعدادات</h3>
+      <button class="icon-btn" id="closeSettings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
     </div>
-</div>
-
-<!-- PUBLIC SOCIAL LINKS MODAL -->
-<div class="nova-public-links-modal" id="novaPublicLinksModal" hidden aria-hidden="true">
-    <div class="nova-public-links-backdrop" data-public-links-close></div>
-
-    <section class="nova-public-links-dialog" role="dialog" aria-modal="true"
-             aria-labelledby="novaPublicLinksTitle" aria-describedby="novaPublicLinksDescription">
-        <button class="nova-public-links-close" id="closeNovaPublicLinks" type="button" aria-label="Close">
-            <i class="fa-solid fa-xmark"></i>
+    <div class="modal-body">
+      <nav class="settings-tabs" id="settingsTabs">
+        <button class="st-tab active" data-tab="mode">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span>الوضع</span>
+          <span class="badge demo" id="modeBadge">تجريبي</span>
         </button>
+        <button class="st-tab" data-tab="api">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 0 10h-3"/><path d="M9 17H6a5 5 0 0 1 0-10h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+          <span>API</span>
+          <span class="badge" id="apiBadge" style="display:none">✓</span>
+        </button>
+        <button class="st-tab" data-tab="model">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M9 2v2M15 2v2M9 20v2M15 20v2M2 9h2M2 15h2M20 9h2M20 15h2"/></svg>
+          <span>النموذج</span>
+        </button>
+        <button class="st-tab" data-tab="general">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.35.44.62.83.74H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>عام</span>
+        </button>
+        <button class="st-tab" data-tab="appearance">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="1.5"/><circle cx="17.5" cy="10.5" r="1.5"/><circle cx="8.5" cy="7.5" r="1.5"/><circle cx="6.5" cy="12.5" r="1.5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z"/></svg>
+          <span>المظهر</span>
+        </button>
+        <button class="st-tab" data-tab="data">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+          <span>البيانات</span>
+        </button>
+      </nav>
 
-        <div class="nova-public-links-heading-icon">
-            <i class="fa-solid fa-link"></i>
-        </div>
-        <span class="nova-public-links-kicker">CONNECT WITH NOVA</span>
-        <h2 id="novaPublicLinksTitle">Your public links</h2>
-        <p id="novaPublicLinksDescription">تابع Nova AI على منصات التواصل الاجتماعي الرسمية.</p>
-
-        <div class="nova-public-links-list">
-            <a class="nova-public-link-card facebook" href="https://www.facebook.com/share/19U8X5i6tZ/"
-               target="_blank" rel="noopener noreferrer" aria-label="Open Nova AI on Facebook">
-                <span class="nova-public-link-icon"><i class="fa-brands fa-facebook-f"></i></span>
-                <span class="nova-public-link-copy">
-                    <strong>Facebook</strong>
-                    <small>تابعنا على فيسبوك</small>
-                </span>
-                <i class="fa-solid fa-arrow-up-right-from-square nova-public-link-arrow"></i>
-            </a>
-
-            <a class="nova-public-link-card tiktok" href="https://www.tiktok.com/@youssefcodes5?_r=1&amp;_t=ZS-99t9p7VvG1B"
-               target="_blank" rel="noopener noreferrer" aria-label="Open Nova AI on TikTok">
-                <span class="nova-public-link-icon"><i class="fa-brands fa-tiktok"></i></span>
-                <span class="nova-public-link-copy">
-                    <strong>TikTok</strong>
-                    <small>@youssefcodes5</small>
-                </span>
-                <i class="fa-solid fa-arrow-up-right-from-square nova-public-link-arrow"></i>
-            </a>
-
-            <a class="nova-public-link-card instagram" href="https://www.instagram.com/nova645369?psln=ZmI3NWs4NjhmYmF5"
-               target="_blank" rel="noopener noreferrer" aria-label="Open Nova AI on Instagram">
-                <span class="nova-public-link-icon"><i class="fa-brands fa-instagram"></i></span>
-                <span class="nova-public-link-copy">
-                    <strong>Instagram</strong>
-                    <small>@nova645369</small>
-                </span>
-                <i class="fa-solid fa-arrow-up-right-from-square nova-public-link-arrow"></i>
-            </a>
-        </div>
-
-        <button class="nova-public-links-done" id="novaPublicLinksDone" type="button">تم</button>
-    </section>
-</div>
-
-<!-- LANGUAGE MODAL -->
-<div id="languageModal" class="nova-language-modal">
-
-    <div class="nova-language-modal-content">
-
-        <div class="nova-language-header">
-            <div>
-                <h3>🌐 لغة Nova</h3>
-                <p>اختار اللغة اللي تحب Nova والتطبيق يستخدموها</p>
-            </div>
-
-            <button id="closeLanguageModal" type="button" aria-label="إغلاق">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <div class="nova-language-select-wrapper">
-
-            <label for="novaLanguageSelect">لغة التطبيق</label>
-
-            <select id="novaLanguageSelect">
-                <option value="auto">🌍 Auto — اكتشاف تلقائي</option>
-                <option value="ar-eg">🇪🇬 العربية المصرية</option>
-                <option value="ar-ma">🇲🇦 الدارجة المغربية</option>
-                <option value="ar">🟢 العربية</option>
-                <option value="en">🇬🇧 English</option>
-                <option value="fr">🇫🇷 Français</option>
-                <option value="es">🇪🇸 Español</option>
-                <option value="de">🇩🇪 Deutsch</option>
-                <option value="it">🇮🇹 Italiano</option>
-                <option value="pt">🇵🇹 Português</option>
-                <option value="nl">🇳🇱 Nederlands</option>
-                <option value="pl">🇵🇱 Polski</option>
-                <option value="ru">🇷🇺 Русский</option>
-                <option value="uk">🇺🇦 Українська</option>
-                <option value="tr">🇹🇷 Türkçe</option>
-                <option value="el">🇬🇷 Ελληνικά</option>
+      <div class="settings-panels">
+        <!-- Mode -->
+        <div class="panel active" data-panel="mode">
+          <div class="note-box info">
+            💡 <strong>الوضع التجريبي</strong> يعمل بدون مفتاح ويعطيك ردوداً جاهزة للتجربة. <strong>وضع API</strong> يتصل بموديلات حقيقية (Llama, Qwen, GPT).
+          </div>
+          <div class="field">
+            <label class="field-label">اختر الوضع</label>
+            <p class="field-desc">تقدر تبدّل بينهم في أي وقت.</p>
+            <select class="select" id="appMode">
+              <option value="demo">🎭 وضع تجريبي (بدون مفتاح)</option>
+              <option value="api">🔌 وضع API حقيقي (يحتاج مفتاح)</option>
             </select>
-
+          </div>
+          <div class="switch-row">
+            <div class="switch-txt">
+              <div class="switch-title">الاحتفاظ بالردود التجريبية في السجل</div>
+              <div class="switch-desc">عند التبديل لـ API تحتفظ بالمحادثات القديمة</div>
+            </div>
+            <div class="switch on" data-switch="keepDemoChats"></div>
+          </div>
         </div>
+
+        <!-- API -->
+        <div class="panel" data-panel="api">
+          <div class="note-box">
+            🔒 <strong>خصوصيتك:</strong> المفتاح يُخزَّن في متصفحك فقط (localStorage) ولا يُرسل لأي سيرفر غير المزود الذي تختاره.
+          </div>
+          <div class="field">
+            <label class="field-label">مزود الخدمة</label>
+            <select class="select" id="apiProvider">
+              <option value="openrouter">OpenRouter (مجاني — Llama, Qwen, Gemma)</option>
+              <option value="groq">Groq (سريع جداً — طبقة مجانية)</option>
+              <option value="together">Together AI (رصيد مجاني)</option>
+              <option value="ollama">Ollama محلي</option>
+              <option value="custom">مخصص (OpenAI-compatible)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label class="field-label">مفتاح API</label>
+            <p class="field-desc" id="apiKeyHint">احصل على مفتاح مجاني من openrouter.ai/keys</p>
+            <input type="password" class="input-text" id="apiKey" placeholder="sk-or-v1-..." autocomplete="off" spellcheck="false" />
+          </div>
+          <div class="field">
+            <label class="field-label">Endpoint</label>
+            <input type="text" class="input-text" id="apiBaseUrl" spellcheck="false" />
+          </div>
+          <div class="field">
+            <label class="field-label">اسم الموديل</label>
+            <p class="field-desc">مثال: <code style="font-family:'JetBrains Mono',monospace;font-size:11px">meta-llama/llama-3.3-70b-instruct:free</code></p>
+            <input type="text" class="input-text" id="apiModel" spellcheck="false" />
+            <button class="btn" id="loadModelsBtn" style="margin-top:10px">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+              جلب الموديلات
+            </button>
+          </div>
+          <div class="field">
+            <label class="field-label">System Prompt</label>
+            <p class="field-desc">تعليمات توجّه شخصية المساعد.</p>
+            <textarea class="input-text" id="systemPrompt" rows="3" style="font-family:'IBM Plex Sans Arabic',sans-serif;direction:rtl;font-size:13px;resize:vertical;min-height:70px"></textarea>
+          </div>
+          <button class="btn primary" id="testConnectionBtn" style="width:100%">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            اختبار الاتصال
+          </button>
+        </div>
+
+        <!-- Model -->
+        <div class="panel" data-panel="model">
+          <div class="field">
+            <label class="field-label">درجة الإبداع</label>
+            <div class="range-row">
+              <input type="range" id="temperature" min="0" max="2" step="0.1" value="0.7" />
+              <span class="range-val" id="tempVal">0.7</span>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">الحد الأقصى للرد</label>
+            <div class="range-row">
+              <input type="range" id="maxTokens" min="256" max="8192" step="256" value="2048" />
+              <span class="range-val" id="tokensVal">2048</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- General -->
+        <div class="panel" data-panel="general">
+          <div class="switch-row">
+            <div class="switch-txt"><div class="switch-title">الإرسال بزر Enter</div><div class="switch-desc">عند الإيقاف استخدم Ctrl+Enter</div></div>
+            <div class="switch on" data-switch="enterToSend"></div>
+          </div>
+          <div class="switch-row">
+            <div class="switch-txt"><div class="switch-title">الإشعارات الصوتية</div><div class="switch-desc">نغمة عند اكتمال الرد</div></div>
+            <div class="switch" data-switch="sound"></div>
+          </div>
+          <div class="switch-row">
+            <div class="switch-txt"><div class="switch-title">حفظ المحادثات</div><div class="switch-desc">في هذا المتصفح فقط</div></div>
+            <div class="switch on" data-switch="autosave"></div>
+          </div>
+        </div>
+
+        <!-- Appearance -->
+        <div class="panel" data-panel="appearance">
+          <div class="field">
+            <label class="field-label">سمة الواجهة</label>
+            <div class="theme-grid">
+              <button class="theme-card" data-theme-val="dark"><div class="theme-preview dark"></div><span>داكن</span></button>
+              <button class="theme-card" data-theme-val="light"><div class="theme-preview light"></div><span>فاتح</span></button>
+              <button class="theme-card" data-theme-val="system"><div class="theme-preview system"></div><span>النظام</span></button>
+            </div>
+          </div>
+          <div class="field">
+            <label class="field-label">لون التمييز</label>
+            <div class="swatches" id="swatches"></div>
+          </div>
+          <div class="field">
+            <label class="field-label">حجم الخط</label>
+            <div class="range-row">
+              <input type="range" id="fontScale" min="0.85" max="1.25" step="0.05" value="1" />
+              <span class="range-val" id="fontScaleVal">100%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data -->
+        <div class="panel" data-panel="data">
+          <div class="field">
+            <label class="field-label">تصدير المحادثات</label>
+            <button class="btn" id="exportBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              تصدير JSON
+            </button>
+          </div>
+          <div class="field">
+            <label class="field-label">منطقة الخطر</label>
+            <button class="btn danger" id="clearAllBtn">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+              حذف الكل
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
+    <div class="modal-foot">
+      <button class="btn" id="settingsCloseBtn">إغلاق</button>
+      <button class="btn primary" id="settingsSaveBtn">حفظ</button>
+    </div>
+  </div>
 </div>
 
-<!-- LOADING SCRIPT -->
+<div class="toast-wrap" id="toastWrap"></div>
+
 <script>
-(() => {
-    "use strict";
+(function(){
+'use strict';
 
-    const loadingScreen = document.getElementById("novaLoadingScreen");
-    const progressBar = document.getElementById("novaProgressBar");
-    const progressText = document.getElementById("novaProgressText");
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).slice(-3);
+const esc=(s)=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 
-    if (!loadingScreen || !progressBar || !progressText) {
-        console.error("Nova Loading Screen elements not found.");
-        return;
+const ICON={
+  file:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+  image:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`,
+  code:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
+  bot:`<svg viewBox="0 0 32 32" fill="none"><path d="M11 8.5v11.2a3.3 3.3 0 0 0 3.3 3.3H21" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/><circle cx="21.5" cy="10" r="2.4" fill="#fff"/></svg>`,
+  copy:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`,
+  check:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  trash:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
+  thumbUp:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3z"/><path d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/></svg>`,
+  thumbDown:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3z"/><path d="M17 2h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"/></svg>`,
+  refresh:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`,
+  msg:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>`,
+  x:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>`,
+  stop:`<svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>`,
+  spark:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>`,
+  pen:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>`,
+  chart:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+  bulb:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>`,
+  theatre:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s2-4 10-4 10 4 10 4-2 4-10 4S2 12 2 12z"/><circle cx="8" cy="12" r="1"/><circle cx="16" cy="12" r="1"/></svg>`,
+  plug:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-5M9 7V2M15 7V2M6 7h12v3a6 6 0 0 1-12 0V7z"/></svg>`
+};
+
+const PROVIDERS={
+  openrouter:{baseUrl:'https://openrouter.ai/api/v1',defaultModel:'meta-llama/llama-3.3-70b-instruct:free',hint:'احصل على مفتاح مجاني من openrouter.ai/keys',
+    models:[
+      {id:'meta-llama/llama-3.3-70b-instruct:free',name:'Llama 3.3 70B — مجاني'},
+      {id:'qwen/qwen-2.5-72b-instruct:free',name:'Qwen 2.5 72B — مجاني'},
+      {id:'google/gemma-2-9b-it:free',name:'Gemma 2 9B — مجاني'},
+      {id:'mistralai/mistral-7b-instruct:free',name:'Mistral 7B — مجاني'},
+      {id:'deepseek/deepseek-chat',name:'DeepSeek Chat — رخيص'},
+      {id:'anthropic/claude-3.5-sonnet',name:'Claude 3.5 Sonnet — مميز'},
+      {id:'openai/gpt-4o-mini',name:'GPT-4o mini — رخيص'}
+    ]},
+  groq:{baseUrl:'https://api.groq.com/openai/v1',defaultModel:'llama-3.3-70b-versatile',hint:'console.groq.com/keys',
+    models:[
+      {id:'llama-3.3-70b-versatile',name:'Llama 3.3 70B'},
+      {id:'llama-3.1-8b-instant',name:'Llama 3.1 8B'},
+      {id:'mixtral-8x7b-32768',name:'Mixtral 8x7B'},
+      {id:'gemma2-9b-it',name:'Gemma 2 9B'}
+    ]},
+  together:{baseUrl:'https://api.together.xyz/v1',defaultModel:'meta-llama/Llama-3.3-70B-Instruct-Turbo',hint:'api.together.xyz',
+    models:[
+      {id:'meta-llama/Llama-3.3-70B-Instruct-Turbo',name:'Llama 3.3 70B Turbo'},
+      {id:'Qwen/Qwen2.5-72B-Instruct-Turbo',name:'Qwen 2.5 72B Turbo'},
+      {id:'mistralai/Mixtral-8x7B-Instruct-v0.1',name:'Mixtral 8x7B'}
+    ]},
+  ollama:{baseUrl:'http://localhost:11434/v1',defaultModel:'llama3.2',hint:'شغّل Ollama محلياً',
+    models:[
+      {id:'llama3.2',name:'Llama 3.2'},
+      {id:'qwen2.5',name:'Qwen 2.5'},
+      {id:'mistral',name:'Mistral'}
+    ]},
+  custom:{baseUrl:'',defaultModel:'',hint:'أدخل Endpoint خاصاً بك (OpenAI-compatible)',models:[]}
+};
+
+const ACCENTS={
+  slate:{a:'#5d7186',b:'#738399'},
+  violet:{a:'#7c5cff',b:'#a855f7'},
+  teal:{a:'#4a9080',b:'#5da590'},
+  rose:{a:'#a85a72',b:'#c47a92'},
+  amber:{a:'#b07d3d',b:'#c99858'},
+  indigo:{a:'#5c6db0',b:'#7486c4'}
+};
+
+const STORE_KEY='logvidia.v3';
+let state={
+  chats:[],currentId:null,
+  settings:{
+    theme:'dark',accent:'slate',fontScale:1,
+    enterToSend:true,sound:false,autosave:true,keepDemoChats:true,
+    temperature:0.7,maxTokens:2048,
+    appMode:'demo',
+    api:{
+      provider:'openrouter',key:'',
+      baseUrl:'https://openrouter.ai/api/v1',
+      model:'meta-llama/llama-3.3-70b-instruct:free',
+      systemPrompt:'أنت Logvidia، مساعد ذكي ودود ومحترف. تجيب بالعربية الفصحى المبسّطة، وتستخدم Markdown في التنسيق.'
     }
+  }
+};
+let pendingFiles=[];
+let isGenerating=false;
+let abortController=null;
 
-    let progress = 1;
-    let finished = false;
-
-    function updateProgress(value) {
-        progress = Math.min(100, Math.max(progress, value));
-
-        progressBar.style.width = progress + "%";
-        progressText.textContent = Math.floor(progress) + "%";
+/* ---------- Storage ---------- */
+function save(){ try{localStorage.setItem(STORE_KEY,JSON.stringify(state));}catch(e){} }
+function load(){
+  try{
+    const raw=localStorage.getItem(STORE_KEY);
+    if(raw){
+      const p=JSON.parse(raw);
+      state.chats=p.chats||[];
+      state.currentId=p.currentId||null;
+      Object.assign(state.settings,p.settings||{});
+      if(p.settings&&p.settings.api)Object.assign(state.settings.api,p.settings.api);
     }
+  }catch(e){}
+}
 
-    // تحريك شريط التحميل تدريجياً
-    const loadingInterval = setInterval(() => {
-        if (finished) return;
-
-        if (progress < 85) {
-            updateProgress(progress + Math.random() * 7);
-        } else if (progress < 95) {
-            updateProgress(progress + 0.5);
-        }
-    }, 250);
-
-    // إنهاء شاشة التحميل
-    function finishLoading() {
-        if (finished) return;
-
-        finished = true;
-
-        clearInterval(loadingInterval);
-        updateProgress(100);
-
-        setTimeout(() => {
-            loadingScreen.classList.add("nova-loading-hidden");
-        }, 400);
+/* ---------- Markdown ---------- */
+function inlineFmt(s){
+  s=esc(s);
+  s=s.replace(/`([^`]+)`/g,'<code class="ic">$1</code>');
+  s=s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  s=s.replace(/(^|[^*])\*([^*\n]+)\*/g,'$1<em>$2</em>');
+  s=s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
+  return s;
+}
+function renderMarkdown(src){
+  const lines=String(src).split('\n');
+  let out='',i=0;
+  while(i<lines.length){
+    const line=lines[i];
+    if(/^```/.test(line)){
+      const lang=line.slice(3).trim();
+      const buf=[];i++;
+      while(i<lines.length&&!/^```/.test(lines[i])){buf.push(lines[i]);i++;}
+      i++;
+      out+=`<div class="code-block"><div class="code-head"><span class="code-lang">${esc(lang)||'code'}</span><button class="copy-code" type="button">نسخ</button></div><pre><code>${esc(buf.join('\n'))}</code></pre></div>`;
+      continue;
     }
-
-    // عند اكتمال تحميل الصفحة
-    if (document.readyState === "complete") {
-        finishLoading();
-    } else {
-        window.addEventListener("load", finishLoading, { once: true });
+    if(/^\s*[-*+]\s+/.test(line)){
+      const items=[];
+      while(i<lines.length&&/^\s*[-*+]\s+/.test(lines[i])){
+        items.push('<li>'+inlineFmt(lines[i].replace(/^\s*[-*+]\s+/,''))+'</li>');i++;
+      }
+      out+='<ul>'+items.join('')+'</ul>';continue;
     }
+    if(/^\s*\d+[.)]\s+/.test(line)){
+      const items=[];
+      while(i<lines.length&&/^\s*\d+[.)]\s+/.test(lines[i])){
+        items.push('<li>'+inlineFmt(lines[i].replace(/^\s*\d+[.)]\s+/,''))+'</li>');i++;
+      }
+      out+='<ol>'+items.join('')+'</ol>';continue;
+    }
+    if(/^#{1,3}\s/.test(line)){
+      const lvl=line.match(/^#+/)[0].length;
+      const tag='h'+Math.min(lvl+2,5);
+      out+=`<${tag}>${inlineFmt(line.replace(/^#+\s+/,''))}</${tag}>`;i++;continue;
+    }
+    if(/^>\s?/.test(line)){
+      const buf=[];
+      while(i<lines.length&&/^>\s?/.test(lines[i])){
+        buf.push(inlineFmt(lines[i].replace(/^>\s?/,'')));i++;
+      }
+      out+='<blockquote>'+buf.join('<br>')+'</blockquote>';continue;
+    }
+    if(line.trim()===''){i++;continue;}
+    const buf=[];
+    while(i<lines.length&&lines[i].trim()!==''&&!/^```/.test(lines[i])&&!/^\s*[-*+]\s+/.test(lines[i])&&!/^\s*\d+[.)]\s+/.test(lines[i])&&!/^#{1,3}\s/.test(lines[i])&&!/^>\s?/.test(lines[i])){
+      buf.push(inlineFmt(lines[i]));i++;
+    }
+    out+='<p>'+buf.join('<br>')+'</p>';
+  }
+  return out;
+}
 
-    // حماية من بقاء الشاشة معلقة
-    setTimeout(finishLoading, 12000);
+/* ---------- Toast ---------- */
+function toast(msg,isErr){
+  const w=$('#toastWrap');
+  const el=document.createElement('div');
+  el.className='toast'+(isErr?' err':'');
+  el.innerHTML=(isErr?ICON.x:ICON.check)+'<span>'+esc(msg)+'</span>';
+  w.appendChild(el);
+  setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),260);},2600);
+}
 
+/* ---------- Theme ---------- */
+function applyTheme(){
+  const s=state.settings;
+  let t=s.theme;
+  if(t==='system')t=window.matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';
+  document.documentElement.setAttribute('data-theme',t);
+  const acc=ACCENTS[s.accent]||ACCENTS.slate;
+  document.documentElement.style.setProperty('--brand-a',acc.a);
+  document.documentElement.style.setProperty('--brand-b',acc.b);
+  document.documentElement.style.setProperty('--accent-grad',`linear-gradient(135deg, ${acc.a}, ${acc.b})`);
+  document.documentElement.style.setProperty('--font-scale',s.fontScale);
+  $$('.theme-card').forEach(c=>c.classList.toggle('active',c.dataset.themeVal===s.theme));
+  $$('.swatch').forEach(sw=>sw.classList.toggle('active',sw.dataset.accent===s.accent));
+  const meta=document.querySelector('meta[name="theme-color"]');
+  if(meta)meta.setAttribute('content',t==='light'?'#f5f6f9':'#0d0e12');
+}
+
+/* ---------- Mode helpers ---------- */
+function isApiMode(){ return state.settings.appMode==='api' && !!state.settings.api.key; }
+function modeLabel(){ return isApiMode()?state.settings.api.model.split('/').pop().replace(':free',''):'وضع تجريبي'; }
+
+/* ---------- History ---------- */
+function timeGroup(chats){
+  const now=new Date();
+  const startToday=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime();
+  const g={today:[],yesterday:[],week:[],older:[]};
+  chats.forEach(c=>{
+    const t=c.updatedAt||c.createdAt||0;
+    if(t>=startToday)g.today.push(c);
+    else if(t>=startToday-86400000)g.yesterday.push(c);
+    else if(t>=startToday-7*86400000)g.week.push(c);
+    else g.older.push(c);
+  });
+  return [['اليوم',g.today],['أمس',g.yesterday],['آخر ٧ أيام',g.week],['أقدم',g.older]];
+}
+function renderHistory(filter){
+  const box=$('#history');
+  const q=(filter||'').trim().toLowerCase();
+  let chats=state.chats.slice().sort((a,b)=>(b.updatedAt||0)-(a.updatedAt||0));
+  if(q)chats=chats.filter(c=>(c.title||'').toLowerCase().includes(q));
+  if(!chats.length){box.innerHTML=`<div class="hist-empty">${q?'لا نتائج':'لا محادثات بعد'}</div>`;return;}
+  let html='';
+  timeGroup(chats).forEach(([lbl,list])=>{
+    if(!list.length)return;
+    html+=`<div class="hist-group-title">${lbl}</div>`;
+    list.forEach(c=>{
+      html+=`<div class="hist-item ${c.id===state.currentId?'active':''}" data-id="${c.id}">${ICON.msg}<span class="hist-title">${esc(c.title||'محادثة')}</span><button class="hist-del" data-del="${c.id}">${ICON.trash}</button></div>`;
+    });
+  });
+  box.innerHTML=html;
+  $$('.hist-item',box).forEach(el=>{
+    el.addEventListener('click',e=>{
+      if(e.target.closest('.hist-del'))return;
+      selectChat(el.dataset.id);
+    });
+  });
+  $$('.hist-del',box).forEach(btn=>{
+    btn.addEventListener('click',e=>{e.stopPropagation();deleteChat(btn.dataset.del);});
+  });
+}
+function deleteChat(id){
+  state.chats=state.chats.filter(c=>c.id!==id);
+  if(state.currentId===id){state.currentId=null;renderChat();}
+  save();renderHistory($('#searchInput').value);toast('تم الحذف');
+}
+
+/* ---------- Chat ---------- */
+function currentChat(){return state.chats.find(c=>c.id===state.currentId)||null;}
+function createChat(){
+  const chat={id:uid(),title:'محادثة جديدة',messages:[],createdAt:Date.now(),updatedAt:Date.now()};
+  state.chats.unshift(chat);state.currentId=chat.id;
+  save();renderHistory($('#searchInput').value);renderChat();
+  return chat;
+}
+function selectChat(id){
+  state.currentId=id;save();renderHistory($('#searchInput').value);renderChat();closeMobileSidebar();
+}
+function fileIcon(name){
+  const ext=(name.split('.').pop()||'').toLowerCase();
+  if(['png','jpg','jpeg','gif','webp','svg','bmp'].includes(ext))return ICON.image;
+  if(['js','ts','jsx','tsx','html','css','json','py','java','cpp','php'].includes(ext))return ICON.code;
+  return ICON.file;
+}
+function fmtSize(b){
+  if(!b&&b!==0)return '';
+  if(b<1024)return b+' B';
+  if(b<1048576)return (b/1024).toFixed(1)+' KB';
+  return (b/1048576).toFixed(1)+' MB';
+}
+function messageNode(msg){
+  const isUser=msg.role==='user';
+  const el=document.createElement('div');
+  el.className='msg '+(isUser?'msg-user':'msg-assistant');
+  el.dataset.id=msg.id;
+  const time=new Date(msg.time||Date.now()).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
+  const avatar=isUser?`<div class="msg-avatar">م</div>`:`<div class="msg-avatar">${ICON.bot}</div>`;
+  let filesHtml='';
+  if(msg.files&&msg.files.length){
+    filesHtml='<div class="msg-files">'+msg.files.map(f=>`<div class="file-pill"><div class="file-ico">${fileIcon(f.name)}</div><div class="file-meta"><div class="file-name">${esc(f.name)}</div><div class="file-size">${fmtSize(f.size)}</div></div></div>`).join('')+'</div>';
+  }
+  const content=isUser?esc(msg.text):renderMarkdown(msg.text||'');
+  const actions=`<div class="msg-actions"><button class="msg-act" data-act="copy" title="نسخ">${ICON.copy}</button>${!isUser?`<button class="msg-act" data-act="regen" title="إعادة">${ICON.refresh}</button><button class="msg-act" data-act="like" title="إعجاب">${ICON.thumbUp}</button><button class="msg-act" data-act="dislike" title="عدم إعجاب">${ICON.thumbDown}</button>`:''}</div>`;
+  el.innerHTML=`${avatar}<div class="msg-body"><div class="msg-head"><span class="msg-name">${isUser?'أنت':'Logvidia'}</span><span class="msg-time">${time}</span></div><div class="msg-content" data-content>${content}</div>${filesHtml}${actions}</div>`;
+  return el;
+}
+function renderChat(){
+  const inner=$('#chatInner');
+  const chat=currentChat();
+  inner.innerHTML='';
+  if(chat){
+    $('#chatTitle').textContent=chat.title||'محادثة';
+    $('#chatSubtitle').textContent=`${chat.messages.length} رسالة · ${modeLabel()}`;
+  }else{
+    $('#chatTitle').textContent='محادثة جديدة';
+    $('#chatSubtitle').textContent=isApiMode()?'جاهز للمساعدة':'وضع تجريبي — جرّب الآن';
+  }
+  updateModeUI();
+  if(!chat||chat.messages.length===0){inner.appendChild(welcomeNode());return;}
+  chat.messages.forEach(m=>inner.appendChild(messageNode(m)));
+  scrollBottom(false);
+}
+function welcomeNode(){
+  const wrap=document.createElement('div');
+  wrap.className='welcome';
+  const hour=new Date().getHours();
+  const greet=hour<12?'صباح الخير':'مساء الخير';
+  const mode=isApiMode();
+  const suggestions=[
+    {ico:ICON.pen,t:'اكتب رسالة بريد احترافية',s:'بريد لطلب اجتماع مع عميل'},
+    {ico:ICON.chart,t:'حلّل ملفاً ولخّصه',s:'ارفع CSV أو PDF وسأستخرج النقاط'},
+    {ico:ICON.code,t:'اكتب كود لمكوّن واجهة',s:'مكوّن React لجدول قابل للفرز'},
+    {ico:ICON.bulb,t:'اشرح لي مفهوماً معقّداً',s:'الذكاء الاصطناعي التوليدي ببساطة'}
+  ];
+  wrap.innerHTML=`
+    <div class="welcome-logo">${ICON.bot}</div>
+    <h2>${greet} 👋</h2>
+    <p>أنا <strong>Logvidia</strong> — ${mode?'متصل بموديل حقيقي. اسألني أي شيء.':'وضع تجريبي جاهز. جرّب الآن بدون مفتاح، أو أضف مفتاحاً لردود حقيقية.'}</p>
+    <div class="mode-pill ${mode?'':'demo'}">${mode?ICON.plug:ICON.theatre}<span>${mode?'API حقيقي: '+state.settings.api.model.split('/').pop().replace(':free',''):'وضع تجريبي'}</span></div>
+    <div class="suggestions">
+      ${suggestions.map(s=>`<button class="sugg" data-prompt="${esc(s.s)}"><span class="s-ico">${s.ico}</span><span><span class="s-title">${esc(s.t)}</span><span class="s-sub">${esc(s.s)}</span></span></button>`).join('')}
+    </div>`;
+  wrap.querySelectorAll('[data-prompt]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      $('#input').value=b.dataset.prompt;
+      autoResize($('#input'));updateSendState();$('#input').focus();
+    });
+  });
+  return wrap;
+}
+function scrollBottom(smooth=true){
+  const el=$('#chatScroll');
+  requestAnimationFrame(()=>{el.scrollTo({top:el.scrollHeight,behavior:smooth?'smooth':'auto'});});
+}
+
+/* ---------- Send state ---------- */
+function updateSendState(){
+  const btn=$('#sendBtn');
+  if(isGenerating){
+    btn.disabled=false;btn.classList.add('stop');btn.innerHTML=ICON.stop;btn.title='إيقاف';return;
+  }
+  btn.classList.remove('stop');
+  btn.innerHTML=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4z"/></svg>`;
+  btn.title='إرسال';
+  const has=$('#input').value.trim().length>0||pendingFiles.length>0;
+  btn.disabled=!has;
+}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,200)+'px';}
+
+/* ---------- Attachments ---------- */
+function renderAttachments(){
+  const box=$('#attachments');
+  box.innerHTML=pendingFiles.map((f,i)=>`<div class="att-chip"><div class="file-ico">${fileIcon(f.name)}</div><div><div class="att-name">${esc(f.name)}</div><div class="att-size">${fmtSize(f.size)}</div></div><button class="att-remove" data-idx="${i}">${ICON.x}</button></div>`).join('');
+  box.querySelectorAll('.att-remove').forEach(b=>{
+    b.addEventListener('click',()=>{pendingFiles.splice(Number(b.dataset.idx),1);renderAttachments();updateSendState();});
+  });
+}
+function addFiles(list){
+  Array.from(list).forEach(f=>{
+    if(pendingFiles.length>=10)return;
+    if(pendingFiles.some(x=>x.name===f.name&&x.size===f.size))return;
+    pendingFiles.push(f);
+  });
+  renderAttachments();updateSendState();
+}
+
+/* ============================================================
+   Demo Mode — الردود التجريبية من النسخة الأولى
+   ============================================================ */
+function generateDemoReply(text,files,chat){
+  const t=(text||'').toLowerCase();
+
+  if(files.length){
+    const names=files.map(f=>'`'+f.name+'`').join('، ');
+    return `تم استلام ${files.length} ملف: ${names} ✅
+
+**نظرة سريعة على الملفات:**
+
+| العنصر | الحالة |
+| --- | --- |
+| الرفع | تم بنجاح |
+| الاستخراج | جاهز للمعالجة |
+| التحليل | مبدئي |
+
+يمكنني الآن:
+1. تلخيص محتوى الملف في نقاط مختصرة
+2. استخراج البيانات وتحويلها إلى جدول
+3. الإجابة عن أسئلة محددة حول المحتوى
+
+ما الذي تفضّل أن نبدأ به؟
+
+> 💡 هذه ردود تجريبية. لتحليل حقيقي، أضف مفتاح API من الإعدادات.`;
+  }
+
+  if(/كود|code|react|javascript|python|html|css|برمج/.test(t)){
+    return `بالتأكيد — إليك مثالاً عملياً لمكوّن **React** بسيط وقابل لإعادة الاستخدام:
+
+\`\`\`jsx
+import { useMemo, useState } from 'react';
+
+export default function DataTable({ rows }) {
+  const [query, setQuery] = useState('');
+  const [asc, setAsc] = useState(true);
+
+  const data = useMemo(() => {
+    return rows
+      .filter(r => r.name.toLowerCase().includes(query.toLowerCase()))
+      .sort((a, b) => (asc ? 1 : -1) * a.name.localeCompare(b.name));
+  }, [rows, query, asc]);
+
+  return (
+    <div className="table">
+      <input
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        placeholder="بحث…"
+      />
+      <button onClick={() => setAsc(v => !v)}>
+        الترتيب {asc ? '↑' : '↓'}
+      </button>
+      <ul>
+        {data.map(r => <li key={r.id}>{r.name}</li>)}
+      </ul>
+    </div>
+  );
+}
+\`\`\`
+
+**أهم النقاط:**
+- استخدمت \`useMemo\` لتجنّب إعادة الحساب غير الضرورية
+- الترتيب والفلترة يتمان في مكان واحد
+- المكوّن عديم الحالة تماماً وقابل للاختبار بسهولة
+
+هل تريد إضافة ترقيم صفحات أو تصدير CSV؟`;
+  }
+
+  if(/لخّص|تلخيص|ملخص|summar/.test(t)){
+    return `إليك تلخيصاً منظّماً:
+
+## الفكرة الأساسية
+النص يتناول **ثلاث محاور رئيسية** مترابطة، يمكن اختصارها في جملة واحدة:
+> الهدف هو تحويل البيانات المعقّدة إلى قرارات قابلة للتنفيذ.
+
+## النقاط الرئيسية
+1. **المحور الأول** — تحديد المشكلة بدقة قبل القفز إلى الحل.
+2. **المحور الثاني** — جمع الأدلة وتقييم البدائل بموضوعية.
+3. **المحور الثالث** — التنفيذ التدريجي مع قياس الأثر.
+
+## الخلاصة
+النهج المقترح يعتمد على التكرار السريع والتحقق المستمر، وهو ما يقلّل المخاطر ويرفع جودة النتيجة النهائية.
+
+هل تريد نسخة أقصر (٣ أسطر) أو أطول (مع أمثلة)؟`;
+  }
+
+  if(/مرحبا|أهلا|السلام|hello|hi\b|هاي/.test(t)){
+    return `أهلاً بك! 👋
+
+أنا **Logvidia**، ويمكنني مساعدتك في:
+
+- ✍️ الكتابة والتحرير والصياغة الاحترافية
+- 💻 البرمجة ومراجعة الأكواد
+- 📊 تحليل الملفات والبيانات
+- 🧠 الشرح والتلخيص والتفكير المنظّم
+
+**جرّب أن ترفق ملفاً** (PDF، صورة، CSV، كود) وسأتعامل معه مباشرة.
+
+بماذا نبدأ؟`;
+  }
+
+  if(/بريد|ايميل|email|رسالة/.test(t)){
+    return `إليك مسودة بريد احترافية:
+
+**الموضوع:** طلب اجتماع — مناقشة سبل التعاون
+
+---
+
+السلام عليكم [اسم المستلم]،
+
+أكتب إليك بخصوص الفرصة التي تحدّثنا عنها مؤخراً. أعتقد أن هناك مجالاً واسعاً للتعاون بين فريقينا، وأودّ مناقشة التفاصيل معك مباشرة.
+
+**هل يناسبك اجتماع قصير (٣٠ دقيقة) في أحد الأيام التالية؟**
+- الثلاثاء ١٠:٠٠ صباحاً
+- الأربعاء ٢:٠٠ مساءً
+- الخميس ١١:٠٠ صباحاً
+
+سأرسل دعوة تقويم بمجرد تأكيد الموعد المناسب لك.
+
+مع التقدير،
+[اسمك]
+[مسمّاك الوظيفي]
+
+---
+
+هل تريد نبرة أكثر رسمية أو أكثر ودّية؟`;
+  }
+
+  if(/ذكاء|ai|اصطناعي|توليدي/.test(t)){
+    return `## ما هو الذكاء الاصطناعي التوليدي؟
+
+هو فرع من الذكاء الاصطناعي يركّز على **إنشاء محتوى جديد** بدلاً من مجرد التصنيف أو التوقّع.
+
+### كيف يعمل؟
+1. يُدرَّب النموذج على كمية ضخمة من البيانات
+2. يتعلّم الأنماط الإحصائية والعلاقات بينها
+3. عند الطلب، يولّد مخرجات جديدة بناءً على هذه الأنماط
+
+### أمثلة عملية
+- **النصوص** — مثل المحادثة التي نخوضها الآن
+- **الصور** — توليد صور من وصف نصي
+- **الصوت** — تحويل النص إلى كلام طبيعي
+- **الكود** — كتابة وإكمال البرامج
+
+> الفكرة الجوهرية: النموذج لا "يبحث" عن إجابة جاهزة، بل **يبنيها** لحظة بلحظة.
+
+هل تريد التعمق في آلية عمل المحوّلات (Transformers)؟`;
+  }
+
+  if(/سعر|تسعير|price|تكلفة/.test(t)){
+    return `إليك مقارنة بين المزودين:
+
+| المزود | السعر | الموديلات |
+| --- | --- | --- |
+| **OpenRouter** | مجاني (موديلات :free) | Llama, Qwen, Gemma |
+| **Groq** | طبقة مجانية سخية | Llama, Mixtral |
+| **Together AI** | رصيد مجاني عند التسجيل | Llama, Qwen |
+| **Ollama** | مجاني تماماً (محلي) | أي موديل مفتوح |
+
+**التوصية:** ابدأ بـ OpenRouter — مجاني ويغطي 90% من الاستخدام الشخصي.`;
+  }
+
+  return `فهمت طلبك حول: **"${text.slice(0,90)}${text.length>90?'…':''}"**
+
+إليك كيف يمكنني مساعدتك:
+
+1. **تحليل الطلب** — تقسيمه إلى أجزاء أصغر قابلة للتنفيذ
+2. **اقتراح الحل** — خيارات متعددة مع مزايا وعيوب كل منها
+3. **التنفيذ** — خطوات عملية واضحة يمكنك البدء بها فوراً
+
+**سؤال سريع لتحسين الإجابة:**
+- هل تريد النتيجة مختصرة أم مفصّلة؟
+- هل هناك قيود معيّنة (وقت، ميزانية، أدوات) يجب مراعاتها؟
+
+> 💡 هذا وضع تجريبي. لأجوبة حقيقية على أي سؤال، أضف مفتاح API من الإعدادات.`;
+}
+
+/* ============================================================
+   API — النداء الحقيقي
+   ============================================================ */
+async function readFileAsText(file){
+  if(file.size>500*1024)return `[ملف كبير: ${file.name} — ${fmtSize(file.size)}]`;
+  const isText=/\.(txt|md|csv|json|js|ts|jsx|tsx|html|css|py|java|cpp|php|xml|yml|yaml|log|sql)$/i.test(file.name);
+  if(!isText)return `[ملف مرفق: ${file.name} — ${fmtSize(file.size)}]`;
+  return new Promise(resolve=>{
+    const r=new FileReader();
+    r.onload=()=>resolve(`--- محتوى ${file.name} ---\n${String(r.result).slice(0,8000)}\n--- نهاية الملف ---`);
+    r.onerror=()=>resolve(`[خطأ في قراءة ${file.name}]`);
+    r.readAsText(file);
+  });
+}
+async function buildMessages(userText,files){
+  const chat=currentChat();
+  const sys=state.settings.api.systemPrompt||'أنت مساعد ذكي.';
+  const msgs=[{role:'system',content:sys}];
+  const history=(chat.messages||[]).slice(-12);
+  history.forEach(m=>msgs.push({role:m.role,content:m.text||''}));
+  let userContent=userText||'';
+  if(files&&files.length){
+    const parts=[];
+    for(const f of files)parts.push(await readFileAsText(f));
+    userContent=(userContent?userContent+'\n\n':'')+parts.join('\n\n');
+  }
+  msgs.push({role:'user',content:userContent});
+  return msgs;
+}
+
+async function streamChat(messages,handlers){
+  const api=state.settings.api;
+  const url=api.baseUrl.replace(/\/$/,'')+'/chat/completions';
+  const headers={'Content-Type':'application/json','Authorization':`Bearer ${api.key}`};
+  if(api.provider==='openrouter'){
+    headers['HTTP-Referer']=location.origin||'https://logvidia.app';
+    headers['X-Title']='Logvidia';
+  }
+  const body={
+    model:api.model,messages,stream:true,
+    temperature:Number(state.settings.temperature),
+    max_tokens:Number(state.settings.maxTokens)
+  };
+  let res;
+  try{
+    res=await fetch(url,{method:'POST',headers,body:JSON.stringify(body),signal:abortController.signal});
+  }catch(e){
+    if(e.name==='AbortError'){handlers.onDone();return;}
+    throw new Error('تعذّر الاتصال — تحقق من الشبكة');
+  }
+  if(!res.ok){
+    let msg=`HTTP ${res.status}`;
+    try{const err=await res.json();msg=err.error?.message||err.message||msg;}catch(e){try{msg=await res.text();}catch(_){}}
+    throw new Error(msg.slice(0,200));
+  }
+  if(!res.body||!res.body.getReader){
+    const data=await res.json();
+    const content=data.choices?.[0]?.message?.content||'';
+    handlers.onToken(content);handlers.onDone();return;
+  }
+  const reader=res.body.getReader();
+  const decoder=new TextDecoder();
+  let buffer='';
+  try{
+    while(true){
+      const {done,value}=await reader.read();
+      if(done)break;
+      buffer+=decoder.decode(value,{stream:true});
+      const lines=buffer.split('\n');
+      buffer=lines.pop();
+      for(const line of lines){
+        const trimmed=line.trim();
+        if(!trimmed)continue;
+        if(trimmed==='data: [DONE]'){handlers.onDone();return;}
+        if(!trimmed.startsWith('data: '))continue;
+        const jsonStr=trimmed.slice(6);
+        try{
+          const json=JSON.parse(jsonStr);
+          const delta=json.choices?.[0]?.delta?.content||json.choices?.[0]?.message?.content||'';
+          if(delta)handlers.onToken(delta);
+        }catch(e){}
+      }
+    }
+    handlers.onDone();
+  }catch(e){
+    if(e.name==='AbortError'){handlers.onDone();return;}
+    handlers.onError(e.message||'انقطع الاتصال');
+  }
+}
+
+/* ============================================================
+   Send Message — يوجّه حسب الوضع
+   ============================================================ */
+async function sendMessage(){
+  if(isGenerating){stopGeneration();return;}
+  const input=$('#input');
+  const text=input.value.trim();
+  const files=pendingFiles.slice();
+  if(!text&&!files.length)return;
+
+  if(state.settings.appMode==='api'&&!state.settings.api.key){
+    toast('أضف مفتاح API أو بدّل للوضع التجريبي',true);
+    openSettings();return;
+  }
+
+  let chat=currentChat();
+  if(!chat)chat=createChat();
+
+  const userMsg={id:uid(),role:'user',text,files:files.map(f=>({name:f.name,size:f.size})),time:Date.now()};
+  chat.messages.push(userMsg);
+  chat.updatedAt=Date.now();
+  if(chat.messages.length===1)chat.title=text?text.slice(0,42):(files[0]?files[0].name:'محادثة');
+
+  input.value='';autoResize(input);pendingFiles=[];renderAttachments();
+  save();renderHistory($('#searchInput').value);
+
+  const inner=$('#chatInner');
+  if(inner.querySelector('.welcome'))inner.innerHTML='';
+  inner.appendChild(messageNode(userMsg));
+  scrollBottom();
+
+  isGenerating=true;updateSendState();
+
+  const botMsgId=uid();
+  const botEl=document.createElement('div');
+  botEl.className='msg msg-assistant';
+  botEl.dataset.id=botMsgId;
+  botEl.innerHTML=`<div class="msg-avatar">${ICON.bot}</div><div class="msg-body"><div class="msg-head"><span class="msg-name">Logvidia</span><span class="msg-time">الآن</span></div><div class="msg-content" data-content><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`;
+  inner.appendChild(botEl);
+  scrollBottom();
+
+  const contentEl=botEl.querySelector('[data-content]');
+  let fullText='';
+  let renderPending=false;
+  let lastRender=0;
+  function scheduleRender(){
+    if(renderPending)return;
+    renderPending=true;
+    const now=performance.now();
+    const wait=Math.max(0,60-(now-lastRender));
+    setTimeout(()=>{
+      lastRender=performance.now();
+      renderPending=false;
+      contentEl.innerHTML=renderMarkdown(fullText)+'<span style="display:inline-block;width:7px;height:16px;background:var(--brand-a);vertical-align:middle;margin-inline-start:2px;animation:pulse 1s infinite;border-radius:2px"></span>';
+      scrollBottom(false);
+    },wait);
+  }
+
+  function finishSuccess(finalText){
+    chat.messages.push({id:botMsgId,role:'assistant',text:finalText,time:Date.now()});
+    chat.updatedAt=Date.now();
+    isGenerating=false;abortController=null;
+    updateSendState();save();
+    renderHistory($('#searchInput').value);
+    contentEl.innerHTML=renderMarkdown(finalText);
+    if(!botEl.querySelector('.msg-actions')){
+      const body=botEl.querySelector('.msg-body');
+      body.insertAdjacentHTML('beforeend',`<div class="msg-actions"><button class="msg-act" data-act="copy" title="نسخ">${ICON.copy}</button><button class="msg-act" data-act="regen" title="إعادة">${ICON.refresh}</button><button class="msg-act" data-act="like" title="إعجاب">${ICON.thumbUp}</button><button class="msg-act" data-act="dislike" title="عدم إعجاب">${ICON.thumbDown}</button></div>`);
+    }
+    if(state.settings.sound)beep();
+  }
+  function finishError(err){
+    isGenerating=false;abortController=null;updateSendState();
+    toast('فشل: '+String(err).slice(0,80),true);
+  }
+
+  /* ==== الوضع التجريبي ==== */
+  if(state.settings.appMode==='demo'||!state.settings.api.key){
+    const delay=800+Math.random()*900;
+    await new Promise(r=>setTimeout(r,delay));
+    const reply=generateDemoReply(text,files,chat);
+    /* كتابة متدرجة */
+    const chars=[...reply];
+    let idx=0;
+    const step=Math.max(1,Math.floor(chars.length/80));
+    while(idx<chars.length){
+      if(!isGenerating)break;
+      fullText+=chars.slice(idx,idx+step).join('');
+      idx+=step;
+      scheduleRender();
+      await new Promise(r=>setTimeout(r,18));
+    }
+    if(isGenerating){fullText=reply;finishSuccess(reply);}
+    return;
+  }
+
+  /* ==== وضع API ==== */
+  try{
+    const messages=await buildMessages(text,files);
+    abortController=new AbortController();
+    await streamChat(messages,{
+      onToken:delta=>{fullText+=delta;scheduleRender();},
+      onDone:()=>{finishSuccess(fullText);},
+      onError:err=>{
+        contentEl.innerHTML=renderMarkdown(fullText||'')+(fullText?'':`<div class="msg-error">⚠️ ${esc(err)}</div>`);
+        if(fullText)finishSuccess(fullText);else finishError(err);
+      }
+    });
+  }catch(err){
+    contentEl.innerHTML=`<div class="msg-error">⚠️ ${esc(err.message||'خطأ')}</div>`;
+    finishError(err.message||'خطأ');
+  }
+}
+function stopGeneration(){
+  isGenerating=false;
+  if(abortController){try{abortController.abort();}catch(e){}}
+  updateSendState();
+}
+
+/* ---------- Beep ---------- */
+function beep(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    const osc=ctx.createOscillator();
+    const g=ctx.createGain();
+    osc.connect(g);g.connect(ctx.destination);
+    osc.frequency.value=720;
+    g.gain.setValueAtTime(0.0001,ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.06,ctx.currentTime+0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+0.18);
+    osc.start();osc.stop(ctx.currentTime+0.2);
+  }catch(e){}
+}
+
+/* ---------- Mode UI ---------- */
+function updateModeUI(){
+  const api=isApiMode();
+  const dot=$('#statusDot');
+  dot.classList.toggle('demo',!api);
+  $('#modelLabel').textContent=modeLabel();
+  const userMode=$('#userMode');
+  userMode.textContent=api?'متصل (API)':'وضع تجريبي';
+  userMode.classList.toggle('demo',!api);
+  const badge=$('#modeBadge');
+  badge.textContent=api?'API':'تجريبي';
+  badge.classList.toggle('demo',!api);
+  $('#apiBadge').style.display=state.settings.api.key?'inline-block':'none';
+}
+
+/* ---------- Model dropdown ---------- */
+function renderModelDropdown(){
+  const dd=$('#modelDropdown');
+  const api=isApiMode();
+  let html='';
+  html+=`<div class="dd-section-label">الوضع الحالي</div>`;
+  html+=`<button class="dd-item ${state.settings.appMode==='demo'?'selected':''}" data-mode="demo">
+    <span class="dd-ico">${ICON.theatre}</span>
+    <span class="dd-txt"><span class="dd-name">وضع تجريبي</span><span class="dd-desc">بدون مفتاح — ردود جاهزة</span></span>
+    <span class="dd-check">${ICON.check}</span>
+  </button>`;
+  html+=`<button class="dd-item ${state.settings.appMode==='api'?'selected':''}" data-mode="api">
+    <span class="dd-ico">${ICON.plug}</span>
+    <span class="dd-txt"><span class="dd-name">وضع API حقيقي</span><span class="dd-desc">${state.settings.api.key?'جاهز — '+state.settings.api.model.split('/').pop().replace(':free',''):'يتطلب مفتاح'}</span></span>
+    <span class="dd-check">${ICON.check}</span>
+  </button>`;
+
+  const models=PROVIDERS[state.settings.api.provider]?.models||[];
+  if(models.length){
+    html+=`<div class="dd-section-label">موديلات ${state.settings.api.provider}</div>`;
+    models.forEach(m=>{
+      html+=`<button class="dd-item ${m.id===state.settings.api.model?'selected':''}" data-model="${m.id}">
+        <span class="dd-ico">${ICON.spark}</span>
+        <span class="dd-txt"><span class="dd-name">${esc(m.name)}</span><span class="dd-desc" style="font-family:'JetBrains Mono',monospace;font-size:10px">${esc(m.id)}</span></span>
+        <span class="dd-check">${ICON.check}</span>
+      </button>`;
+    });
+  }
+  dd.innerHTML=html;
+
+  dd.querySelectorAll('[data-mode]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      state.settings.appMode=b.dataset.mode;
+      if(b.dataset.mode==='api'&&!state.settings.api.key){toast('أضف مفتاح API أولاً',true);openSettings();}
+      save();updateModeUI();renderModelDropdown();renderChat();
+      dd.classList.remove('show');
+      toast(b.dataset.mode==='api'?'وضع API مفعّل':'وضع تجريبي');
+    });
+  });
+  dd.querySelectorAll('[data-model]').forEach(b=>{
+    b.addEventListener('click',()=>{
+      state.settings.api.model=b.dataset.model;
+      state.settings.appMode='api';
+      $('#apiModel').value=b.dataset.model;
+      save();updateModeUI();renderModelDropdown();renderChat();
+      dd.classList.remove('show');
+      toast('الموديل: '+b.dataset.model.split('/').pop());
+    });
+  });
+}
+
+/* ---------- Sidebar ---------- */
+function openMobileSidebar(){
+  if(window.innerWidth<=900){$('#sidebar').classList.add('open');$('#overlay').classList.add('show');}
+  else $('#sidebar').classList.toggle('collapsed');
+}
+function closeMobileSidebar(){
+  $('#sidebar').classList.remove('open');
+  $('#overlay').classList.remove('show');
+}
+
+/* ---------- Settings ---------- */
+function openSettings(){syncSettingsUI();$('#settingsModal').classList.add('show');}
+function closeSettings(){$('#settingsModal').classList.remove('show');}
+function syncSettingsUI(){
+  const s=state.settings;const a=s.api;
+  $('#appMode').value=s.appMode;
+  $('#apiProvider').value=a.provider;
+  $('#apiKey').value=a.key;
+  $('#apiBaseUrl').value=a.baseUrl;
+  $('#apiModel').value=a.model;
+  $('#systemPrompt').value=a.systemPrompt||'';
+  $('#apiKeyHint').textContent=PROVIDERS[a.provider]?.hint||'';
+  $('#temperature').value=s.temperature;
+  $('#tempVal').textContent=Number(s.temperature).toFixed(1);
+  $('#maxTokens').value=s.maxTokens;
+  $('#tokensVal').textContent=s.maxTokens;
+  $('#fontScale').value=s.fontScale;
+  $('#fontScaleVal').textContent=Math.round(s.fontScale*100)+'%';
+  $$('.switch').forEach(sw=>sw.classList.toggle('on',!!s[sw.dataset.switch]));
+  updateModeUI();
+}
+
+/* ---------- Init ---------- */
+function init(){
+  load();
+  const sw=$('#swatches');
+  sw.innerHTML=Object.entries(ACCENTS).map(([k,v])=>`<button class="swatch" data-accent="${k}" style="background:linear-gradient(135deg, ${v.a}, ${v.b})" title="${k}"></button>`).join('');
+  sw.querySelectorAll('.swatch').forEach(b=>{
+    b.addEventListener('click',()=>{state.settings.accent=b.dataset.accent;applyTheme();save();});
+  });
+  applyTheme();
+  if(state.currentId&&!state.chats.some(c=>c.id===state.currentId))state.currentId=null;
+  renderHistory('');renderChat();renderModelDropdown();
+
+  /* Sidebar */
+  $('#menuBtn').addEventListener('click',openMobileSidebar);
+  $('#collapseBtn').addEventListener('click',()=>{if(window.innerWidth<=900)closeMobileSidebar();else $('#sidebar').classList.add('collapsed');});
+  $('#overlay').addEventListener('click',closeMobileSidebar);
+  $('#newChatBtn').addEventListener('click',()=>{createChat();closeMobileSidebar();$('#input').focus();});
+  $('#searchInput').addEventListener('input',e=>renderHistory(e.target.value));
+
+  /* Input */
+  const input=$('#input');
+  input.addEventListener('input',()=>{autoResize(input);updateSendState();});
+  input.addEventListener('keydown',e=>{
+    if(e.key==='Enter'){
+      const shouldSend=state.settings.enterToSend?!e.shiftKey:(e.ctrlKey||e.metaKey);
+      if(shouldSend){e.preventDefault();sendMessage();}
+    }
+  });
+  $('#sendBtn').addEventListener('click',()=>{
+    if(isGenerating)stopGeneration();else sendMessage();
+  });
+
+  $('#attachBtn').addEventListener('click',()=>$('#fileInput').click());
+  $('#fileInput').addEventListener('change',e=>{addFiles(e.target.files);e.target.value='';});
+
+  $('#micBtn').addEventListener('click',function(){
+    this.classList.toggle('recording');
+    if(this.classList.contains('recording')){
+      toast('الاستماع… (محاكاة)');
+      setTimeout(()=>{
+        this.classList.remove('recording');
+        input.value='اكتب لي رسالة بريد احترافية لطلب اجتماع';
+        autoResize(input);updateSendState();input.focus();
+      },1500);
+    }
+  });
+
+  /* Drag & Drop */
+  const dropOverlay=$('#dropOverlay');
+  let dragCounter=0;
+  ['dragenter','dragover'].forEach(evt=>{
+    document.addEventListener(evt,e=>{
+      if(!e.dataTransfer||!Array.from(e.dataTransfer.types||[]).includes('Files'))return;
+      e.preventDefault();dragCounter++;dropOverlay.classList.add('show');
+    });
+  });
+  ['dragleave','drop'].forEach(evt=>{
+    document.addEventListener(evt,e=>{
+      e.preventDefault();
+      dragCounter=Math.max(0,dragCounter-1);
+      if(dragCounter===0)dropOverlay.classList.remove('show');
+      if(evt==='drop'&&e.dataTransfer&&e.dataTransfer.files.length)addFiles(e.dataTransfer.files);
+    });
+  });
+
+  /* Message actions */
+  $('#chatInner').addEventListener('click',e=>{
+    const copyCode=e.target.closest('.copy-code');
+    if(copyCode){
+      const code=copyCode.closest('.code-block').querySelector('code').textContent;
+      navigator.clipboard.writeText(code).then(()=>{
+        copyCode.textContent='تم ✓';
+        setTimeout(()=>copyCode.textContent='نسخ',1500);
+      });
+      return;
+    }
+    const act=e.target.closest('.msg-act');
+    if(!act)return;
+    const msgEl=act.closest('.msg');
+    const chat=currentChat();
+    const msg=chat&&chat.messages.find(m=>m.id===msgEl.dataset.id);
+    if(!msg)return;
+    if(act.dataset.act==='copy')navigator.clipboard.writeText(msg.text).then(()=>toast('تم النسخ'));
+    if(act.dataset.act==='like'){
+      act.classList.toggle('liked');
+      act.parentElement.querySelector('[data-act="dislike"]')?.classList.remove('disliked');
+    }
+    if(act.dataset.act==='dislike'){
+      act.classList.toggle('disliked');
+      act.parentElement.querySelector('[data-act="like"]')?.classList.remove('liked');
+    }
+    if(act.dataset.act==='regen'&&!isGenerating){
+      const idx=chat.messages.findIndex(m=>m.id===msg.id);
+      if(idx<0)return;
+      const prev=[...chat.messages].slice(0,idx).reverse().find(m=>m.role==='user');
+      chat.messages.splice(idx,1);save();renderChat();
+      if(prev){
+        $('#input').value=prev.text||'';
+        autoResize($('#input'));updateSendState();
+        setTimeout(sendMessage,120);
+      }
+    }
+  });
+
+  /* Model dropdown */
+  $('#modelBtn').addEventListener('click',e=>{e.stopPropagation();$('#modelDropdown').classList.toggle('show');});
+  document.addEventListener('click',()=>$('#modelDropdown').classList.remove('show'));
+
+  /* Theme toggle */
+  $('#themeBtn').addEventListener('click',()=>{
+    state.settings.theme=state.settings.theme==='dark'?'light':'dark';
+    applyTheme();syncSettingsUI();save();
+  });
+
+  /* Settings */
+  $('#settingsBtn').addEventListener('click',openSettings);
+  $('#closeSettings').addEventListener('click',closeSettings);
+  $('#settingsCloseBtn').addEventListener('click',closeSettings);
+  $('#settingsModal').addEventListener('click',e=>{if(e.target===$('#settingsModal'))closeSettings();});
+  $('#settingsSaveBtn').addEventListener('click',()=>{save();closeSettings();updateModeUI();renderModelDropdown();renderChat();toast('تم الحفظ');});
+
+  /* Tabs */
+  $$('.st-tab').forEach(tab=>{
+    tab.addEventListener('click',()=>{
+      $$('.st-tab').forEach(t=>t.classList.remove('active'));
+      $$('.panel').forEach(p=>p.classList.remove('active'));
+      tab.classList.add('active');
+      $(`.panel[data-panel="${tab.dataset.tab}"]`).classList.add('active');
+    });
+  });
+
+  /* Mode select */
+  $('#appMode').addEventListener('change',e=>{
+    state.settings.appMode=e.target.value;
+    save();updateModeUI();renderChat();
+    toast(e.target.value==='api'?'وضع API — تأكد من المفتاح':'وضع تجريبي');
+  });
+
+  /* API provider */
+  $('#apiProvider').addEventListener('change',e=>{
+    const p=e.target.value;const cfg=PROVIDERS[p];
+    state.settings.api.provider=p;
+    state.settings.api.baseUrl=cfg.baseUrl;
+    state.settings.api.model=cfg.defaultModel;
+    $('#apiBaseUrl').value=cfg.baseUrl;
+    $('#apiModel').value=cfg.defaultModel;
+    $('#apiKeyHint').textContent=cfg.hint;
+    save();updateModeUI();renderModelDropdown();
+  });
+
+  $('#apiKey').addEventListener('change',e=>{
+    state.settings.api.key=e.target.value.trim();
+    save();updateModeUI();
+    toast(state.settings.api.key?'تم حفظ المفتاح':'تم مسح المفتاح');
+  });
+  $('#apiBaseUrl').addEventListener('change',e=>{state.settings.api.baseUrl=e.target.value.trim();save();});
+  $('#apiModel').addEventListener('change',e=>{state.settings.api.model=e.target.value.trim();save();updateModeUI();});
+  $('#systemPrompt').addEventListener('change',e=>{state.settings.api.systemPrompt=e.target.value;save();});
+
+  $('#loadModelsBtn').addEventListener('click',async()=>{
+    const api=state.settings.api;
+    if(!api.key&&api.provider!=='ollama'){toast('أضف مفتاحاً أولاً',true);return;}
+    toast('جاري الجلب…');
+    try{
+      const res=await fetch(api.baseUrl.replace(/\/$/,'')+'/models',{headers:{'Authorization':`Bearer ${api.key}`}});
+      if(!res.ok)throw new Error('HTTP '+res.status);
+      const data=await res.json();
+      const list=(data.data||[]).map(m=>({id:m.id,name:m.name||m.id})).slice(0,50);
+      if(!list.length){toast('لا موديلات',true);return;}
+      PROVIDERS.custom.models=list;
+      renderModelDropdown();
+      toast(`تم جلب ${list.length} موديل — افتح القائمة العلوية`);
+    }catch(e){toast('فشل: '+e.message,true);}
+  });
+
+  $('#testConnectionBtn').addEventListener('click',async()=>{
+    const api=state.settings.api;
+    if(!api.key){toast('أضف مفتاحاً',true);return;}
+    const btn=$('#testConnectionBtn');
+    btn.disabled=true;const orig=btn.innerHTML;btn.innerHTML='...جاري الاختبار';
+    try{
+      const res=await fetch(api.baseUrl.replace(/\/$/,'')+'/chat/completions',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','Authorization':`Bearer ${api.key}`},
+        body:JSON.stringify({model:api.model,messages:[{role:'user',content:'قل "تم"' }],max_tokens:10})
+      });
+      if(!res.ok){const txt=await res.text();throw new Error('HTTP '+res.status+': '+txt.slice(0,100));}
+      const data=await res.json();
+      const reply=data.choices?.[0]?.message?.content||'';
+      toast('✓ نجح: '+(reply.slice(0,40)||'OK'));
+    }catch(e){toast('فشل: '+e.message.slice(0,90),true);}
+    finally{btn.disabled=false;btn.innerHTML=orig;}
+  });
+
+  /* Switches */
+  $$('.switch').forEach(sw=>{
+    sw.addEventListener('click',()=>{
+      const k=sw.dataset.switch;
+      state.settings[k]=!state.settings[k];
+      sw.classList.toggle('on',state.settings[k]);save();
+    });
+  });
+  $$('.theme-card').forEach(card=>{
+    card.addEventListener('click',()=>{state.settings.theme=card.dataset.themeVal;applyTheme();save();});
+  });
+
+  $('#fontScale').addEventListener('input',e=>{
+    state.settings.fontScale=parseFloat(e.target.value);
+    $('#fontScaleVal').textContent=Math.round(state.settings.fontScale*100)+'%';
+    applyTheme();save();
+  });
+  $('#temperature').addEventListener('input',e=>{
+    state.settings.temperature=parseFloat(e.target.value);
+    $('#tempVal').textContent=Number(state.settings.temperature).toFixed(1);save();
+  });
+  $('#maxTokens').addEventListener('input',e=>{
+    state.settings.maxTokens=parseInt(e.target.value,10);
+    $('#tokensVal').textContent=state.settings.maxTokens;save();
+  });
+
+  $('#exportBtn').addEventListener('click',()=>{
+    const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=`logvidia-${new Date().toISOString().slice(0,10)}.json`;a.click();
+    URL.revokeObjectURL(url);toast('تم التصدير');
+  });
+  $('#clearAllBtn').addEventListener('click',()=>{
+    if(!confirm('حذف كل المحادثات؟'))return;
+    state.chats=[];state.currentId=null;save();renderHistory('');renderChat();toast('تم الحذف');
+  });
+
+  /* Shortcuts */
+  document.addEventListener('keydown',e=>{
+    if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();createChat();$('#input').focus();}
+    if(e.key==='Escape'){closeSettings();$('#modelDropdown').classList.remove('show');closeMobileSidebar();}
+  });
+
+  window.matchMedia('(prefers-color-scheme: light)').addEventListener('change',()=>{
+    if(state.settings.theme==='system')applyTheme();
+  });
+  window.addEventListener('resize',()=>{if(window.innerWidth>900)closeMobileSidebar();});
+
+  setTimeout(()=>$('#input').focus(),300);
+  updateSendState();
+
+  /* PWA manifest */
+  try{
+    const manifest={
+      name:'Logvidia — مساعد ذكي',short_name:'Logvidia',
+      description:'شات بوت حديث بوضع تجريبي وAPI حقيقي',
+      start_url:location.pathname,scope:location.pathname,
+      display:'standalone',orientation:'portrait',
+      background_color:'#0d0e12',theme_color:'#0d0e12',
+      lang:'ar',dir:'rtl',
+      icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%235d7186'/%3E%3Cpath d='M170 130v190a50 50 0 0 0 50 50h130' stroke='%23fff' stroke-width='42' stroke-linecap='round' fill='none'/%3E%3Ccircle cx='345' cy='155' r='38' fill='%23fff'/%3E%3C/svg%3E",sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}]
+    };
+    const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+    const link=document.createElement('link');link.rel='manifest';link.href=URL.createObjectURL(blob);
+    document.head.appendChild(link);
+  }catch(e){}
+}
+
+document.addEventListener('DOMContentLoaded',init);
 })();
-</script>
-
-<!-- INSTALL BUTTON STYLE -->
-<style>
-#novaLoadingScreen {
-    opacity: 1;
-    visibility: visible;
-    transition: opacity 0.6s ease, visibility 0.6s ease;
-    z-index: 999999;
-}
-
-#novaLoadingScreen.nova-loading-hidden {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-}
-
-.nova-progress-bar {
-    transition: width 0.25s ease;
-}
-</style>
-
-<style>
-/* NOVA AI — PUBLIC LINKS MODAL */
-.nova-public-links-modal {
-    position: fixed;
-    inset: 0;
-    z-index: 1000100;
-    display: grid;
-    place-items: center;
-    padding: 20px;
-}
-
-.nova-public-links-modal[hidden] {
-    display: none !important;
-}
-
-.nova-public-links-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(2, 6, 23, 0.78);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
-    animation: novaPublicLinksFade 0.18s ease both;
-}
-
-.nova-public-links-dialog {
-    position: relative;
-    width: min(100%, 430px);
-    max-height: min(90dvh, 680px);
-    overflow-y: auto;
-    padding: 30px 24px 22px;
-    border: 1px solid rgba(34, 211, 238, 0.20);
-    border-radius: 22px;
-    background: linear-gradient(155deg, #17243b 0%, #0b1220 75%);
-    color: #f8fafc;
-    text-align: center;
-    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55), 0 0 35px rgba(34, 211, 238, 0.08);
-    animation: novaPublicLinksPop 0.22s ease both;
-}
-
-.nova-public-links-close {
-    position: absolute;
-    top: 12px;
-    inset-inline-start: 12px;
-    display: grid;
-    place-items: center;
-    width: 36px;
-    height: 36px;
-    border: 1px solid rgba(148, 163, 184, 0.14);
-    border-radius: 11px;
-    background: rgba(148, 163, 184, 0.09);
-    color: #cbd5e1;
-    cursor: pointer;
-}
-
-.nova-public-links-heading-icon {
-    display: grid;
-    place-items: center;
-    width: 58px;
-    height: 58px;
-    margin: 3px auto 13px;
-    border: 1px solid rgba(34, 211, 238, 0.28);
-    border-radius: 18px;
-    background: rgba(34, 211, 238, 0.10);
-    color: #67e8f9;
-    font-size: 22px;
-}
-
-.nova-public-links-kicker {
-    color: #67e8f9;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 1.8px;
-}
-
-.nova-public-links-dialog h2 {
-    margin: 7px 0 8px;
-    color: #f8fafc;
-    font-size: 22px;
-}
-
-.nova-public-links-dialog > p {
-    margin: 0 0 20px;
-    color: #9eacc0;
-    font-size: 13px;
-    line-height: 1.8;
-}
-
-.nova-public-links-list {
-    display: grid;
-    gap: 10px;
-    text-align: start;
-}
-
-.nova-public-link-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    min-height: 68px;
-    padding: 11px 13px;
-    border: 1px solid rgba(148, 163, 184, 0.15);
-    border-radius: 15px;
-    background: rgba(255, 255, 255, 0.035);
-    color: #e2e8f0;
-    text-decoration: none;
-    transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
-}
-
-.nova-public-link-card:hover {
-    transform: translateY(-2px);
-    border-color: rgba(34, 211, 238, 0.34);
-    background: rgba(34, 211, 238, 0.065);
-}
-
-.nova-public-link-icon {
-    display: grid;
-    place-items: center;
-    flex: 0 0 43px;
-    width: 43px;
-    height: 43px;
-    border-radius: 13px;
-    background: rgba(255, 255, 255, 0.08);
-    color: #67e8f9;
-    font-size: 19px;
-}
-
-.nova-public-link-card.facebook .nova-public-link-icon { color: #60a5fa; }
-.nova-public-link-card.tiktok .nova-public-link-icon { color: #f8fafc; }
-.nova-public-link-card.instagram .nova-public-link-icon { color: #f0abfc; }
-
-.nova-public-link-copy {
-    display: flex;
-    flex: 1;
-    min-width: 0;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.nova-public-link-copy strong {
-    color: #f8fafc;
-    font-size: 14px;
-}
-
-.nova-public-link-copy small {
-    overflow: hidden;
-    color: #91a0b5;
-    font-size: 11px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
-
-.nova-public-link-arrow {
-    flex: 0 0 auto;
-    color: #718198;
-    font-size: 12px;
-}
-
-.nova-public-links-done {
-    width: 100%;
-    min-height: 43px;
-    margin-top: 17px;
-    border: 1px solid rgba(34, 211, 238, 0.24);
-    border-radius: 12px;
-    background: rgba(34, 211, 238, 0.10);
-    color: #a5f3fc;
-    font: inherit;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-.nova-public-links-close:focus-visible,
-.nova-public-links-done:focus-visible,
-.nova-public-link-card:focus-visible {
-    outline: 2px solid #22d3ee;
-    outline-offset: 3px;
-}
-
-body.light-theme .nova-public-links-dialog {
-    border-color: #dbeafe;
-    background: linear-gradient(155deg, #ffffff, #f1f5f9);
-    color: #0f172a;
-}
-
-body.light-theme .nova-public-links-dialog h2,
-body.light-theme .nova-public-link-copy strong { color: #0f172a; }
-body.light-theme .nova-public-links-dialog > p,
-body.light-theme .nova-public-link-copy small { color: #64748b; }
-body.light-theme .nova-public-link-card { border-color: #e2e8f0; background: #fff; color: #0f172a; }
-body.light-theme .nova-public-link-card:hover { background: #f8fafc; }
-
-@keyframes novaPublicLinksFade { from { opacity: 0; } to { opacity: 1; } }
-@keyframes novaPublicLinksPop {
-    from { opacity: 0; transform: translateY(10px) scale(0.97); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-@media (max-width: 480px) {
-    .nova-public-links-modal { padding: 13px; }
-    .nova-public-links-dialog { padding: 27px 17px 18px; border-radius: 19px; }
-}
-</style>
-
-
-
-<script>
-(() => {
-    "use strict";
-
-    const modal = document.getElementById("novaPublicLinksModal");
-    const settingsModal = document.getElementById("settingsModal");
-    const closeButton = document.getElementById("closeNovaPublicLinks");
-    const doneButton = document.getElementById("novaPublicLinksDone");
-    const settingsItem = document.querySelector('[data-setting="public-links"]');
-
-    if (!modal || !settingsItem) return;
-
-    let previousFocus = null;
-
-    function openPublicLinks() {
-        previousFocus = document.getElementById("settingsBtn") || settingsItem;
-
-        // Close the settings window before opening the social-links dialog.
-        settingsModal?.classList.remove("active", "show");
-        document.body.classList.remove("settings-open");
-
-        modal.hidden = false;
-        modal.setAttribute("aria-hidden", "false");
-        document.body.style.overflow = "hidden";
-        closeButton?.focus();
-    }
-
-    function closePublicLinks() {
-        modal.hidden = true;
-        modal.setAttribute("aria-hidden", "true");
-        document.body.style.overflow = "";
-        previousFocus?.focus();
-    }
-
-    // Capture phase prevents the generic settings placeholder from handling this item.
-    document.addEventListener("click", (event) => {
-        const item = event.target.closest?.('[data-setting="public-links"]');
-        if (!item) return;
-
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation();
-        openPublicLinks();
-    }, true);
-
-    closeButton?.addEventListener("click", closePublicLinks);
-    doneButton?.addEventListener("click", closePublicLinks);
-
-    modal.addEventListener("click", (event) => {
-        if (event.target.matches("[data-public-links-close]")) {
-            closePublicLinks();
-        }
-    });
-
-    document.addEventListener("keydown", (event) => {
-        if (event.key === "Escape" && !modal.hidden) {
-            closePublicLinks();
-        }
-    });
-})();
-</script>
-<!-- =========================================================
-     NOVA AI — NIGHT MODE & DARK MODE
-     مدمج داخل نفس ملف HTML بدون تعديل ملفات CSS/JS الخارجية
-========================================================= -->
-<style>
-/* معاينات الوضعين داخل قائمة الثيمات */
-.theme-night {
-    background: linear-gradient(135deg, #101b35, #263b62) !important;
-}
-
-.theme-dark {
-    background: linear-gradient(135deg, #000000, #242424) !important;
-}
-
-/* Night Mode: كحلي داكن */
-body.nova-night-mode,
-body.nova-night-mode .app-container,
-body.nova-night-mode .main-content {
-    background-color: #0b1220 !important;
-    color: #e7edf8 !important;
-}
-
-body.nova-night-mode .sidebar,
-body.nova-night-mode .chat-box,
-body.nova-night-mode .input-area,
-body.nova-night-mode .settings-modal-content,
-body.nova-night-mode .nova-profile-menu,
-body.nova-night-mode .nova-language-modal-content,
-body.nova-night-mode .nova-subscriptions-card {
-    background: #111d32 !important;
-    color: #e7edf8 !important;
-    border-color: rgba(148, 163, 184, .18) !important;
-}
-
-body.nova-night-mode .message,
-body.nova-night-mode .user-message,
-body.nova-night-mode .ai-message,
-body.nova-night-mode .setting-item,
-body.nova-night-mode .nova-profile-menu-item,
-body.nova-night-mode .quick-prompt {
-    background-color: #172640 !important;
-    color: #e7edf8 !important;
-    border-color: rgba(148, 163, 184, .16) !important;
-}
-
-body.nova-night-mode input,
-body.nova-night-mode textarea,
-body.nova-night-mode select {
-    background: #0c1729 !important;
-    color: #f1f5f9 !important;
-    border-color: #30415e !important;
-}
-
-body.nova-night-mode input::placeholder,
-body.nova-night-mode textarea::placeholder {
-    color: #91a0b8 !important;
-}
-
-/* Dark Mode: أسود ورمادي */
-body.nova-dark-mode,
-body.nova-dark-mode .app-container,
-body.nova-dark-mode .main-content {
-    background-color: #080808 !important;
-    color: #f1f1f1 !important;
-}
-
-body.nova-dark-mode .sidebar,
-body.nova-dark-mode .chat-box,
-body.nova-dark-mode .input-area,
-body.nova-dark-mode .settings-modal-content,
-body.nova-dark-mode .nova-profile-menu,
-body.nova-dark-mode .nova-language-modal-content,
-body.nova-dark-mode .nova-subscriptions-card {
-    background: #111111 !important;
-    color: #f1f1f1 !important;
-    border-color: rgba(255, 255, 255, .12) !important;
-}
-
-body.nova-dark-mode .message,
-body.nova-dark-mode .user-message,
-body.nova-dark-mode .ai-message,
-body.nova-dark-mode .setting-item,
-body.nova-dark-mode .nova-profile-menu-item,
-body.nova-dark-mode .quick-prompt {
-    background-color: #1b1b1b !important;
-    color: #f1f1f1 !important;
-    border-color: rgba(255, 255, 255, .10) !important;
-}
-
-body.nova-dark-mode input,
-body.nova-dark-mode textarea,
-body.nova-dark-mode select {
-    background: #090909 !important;
-    color: #f5f5f5 !important;
-    border-color: #383838 !important;
-}
-
-body.nova-dark-mode input::placeholder,
-body.nova-dark-mode textarea::placeholder {
-    color: #929292 !important;
-}
-
-/* تمييز الوضع المختار */
-.nova-display-mode-option.active {
-    outline: 2px solid #22d3ee;
-    outline-offset: 2px;
-}
-
-body.nova-night-mode .nova-public-links-dialog,
-body.nova-dark-mode .nova-public-links-dialog {
-    background: #151515 !important;
-    color: #f1f5f9 !important;
-}
-</style>
-
-<script>
-(() => {
-    "use strict";
-
-    const STORAGE_KEY = "nova-display-mode";
-    const body = document.body;
-    const buttons = document.querySelectorAll("[data-nova-mode]");
-    const themeColor = document.querySelector('meta[name="theme-color"]');
-
-    function applyDisplayMode(mode) {
-        body.classList.remove("nova-night-mode", "nova-dark-mode");
-
-        if (mode === "night") {
-            body.classList.add("nova-night-mode");
-        }
-
-        if (mode === "dark") {
-            body.classList.add("nova-dark-mode");
-        }
-
-        buttons.forEach((button) => {
-            const selected = button.dataset.novaMode === mode;
-
-            button.classList.toggle("active", selected);
-            button.setAttribute("aria-pressed", String(selected));
-        });
-
-        if (themeColor) {
-            themeColor.setAttribute(
-                "content",
-                mode === "night"
-                    ? "#0b1220"
-                    : mode === "dark"
-                        ? "#080808"
-                        : "#0f172a"
-            );
-        }
-
-        try {
-            if (mode) {
-                localStorage.setItem(STORAGE_KEY, mode);
-            } else {
-                localStorage.removeItem(STORAGE_KEY);
-            }
-        } catch (error) {
-            console.warn("Nova: تعذر حفظ وضع العرض.", error);
-        }
-    }
-
-    buttons.forEach((button) => {
-        button.addEventListener("click", () => {
-            applyDisplayMode(button.dataset.novaMode);
-        });
-    });
-
-    let savedMode = null;
-
-    try {
-        savedMode = localStorage.getItem(STORAGE_KEY);
-    } catch (error) {
-        console.warn("Nova: تعذر قراءة وضع العرض المحفوظ.", error);
-    }
-
-    applyDisplayMode(
-        savedMode === "night" || savedMode === "dark"
-            ? savedMode
-            : null
-    );
-})();
-</script>
-<!-- تحميل Supabase موجود بالفعل في HEAD -->
-
-<!-- إصلاح اتصال YOVIA AI -->
-<script src="/yovia-auto-fix.js"></script>
-
-<!-- الملف الرئيسي -->
-<script src="yovia-identity.js"></script>
-<script src="/script.js"></script>
-
-<!-- إصلاحات الواجهة -->
-<script src="/yovia-button-fixer.js" defer></script>
-<script>
-(() => {
-    const button = document.getElementById("novaProfileBtn");
-    const menu = document.getElementById("novaProfileMenu");
-
-    if (!button || !menu) {
-        console.error("YOVIA: Profile elements not found");
-        return;
-    }
-
-    if (button.dataset.profileFixLoaded === "true") return;
-    button.dataset.profileFixLoaded = "true";
-
-    button.addEventListener("click", (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-
-        const isOpen = button.getAttribute("aria-expanded") === "true";
-
-        button.setAttribute("aria-expanded", String(!isOpen));
-        menu.classList.toggle("active", !isOpen);
-
-        console.log("YOVIA Profile:", !isOpen ? "Opened" : "Closed");
-    });
-
-    document.addEventListener("click", (event) => {
-        if (!button.contains(event.target) && !menu.contains(event.target)) {
-            button.setAttribute("aria-expanded", "false");
-            menu.classList.remove("active");
-        }
-    });
-})();
-</script>
-
-<script>
-(() => {
-    "use strict";
-
-    const $ = (id) => document.getElementById(id);
-
-    const profileMenu = $("novaProfileMenu");
-    const profileButton = $("novaProfileBtn");
-    const settingsModal = $("settingsModal");
-    const languageModal = $("languageModal");
-
-    function closeProfileMenu() {
-        profileMenu?.classList.remove("active");
-        profileButton?.setAttribute("aria-expanded", "false");
-    }
-
-    function openSettings() {
-        closeProfileMenu();
-        settingsModal?.classList.add("active");
-        document.body.classList.add("settings-open");
-    }
-
-    function closeSettings() {
-        settingsModal?.classList.remove("active", "show");
-        document.body.classList.remove("settings-open");
-    }
-
-    function openLanguage() {
-        closeProfileMenu();
-
-        if (!languageModal) return;
-
-        languageModal.classList.add("active");
-    }
-
-    function closeLanguage() {
-        languageModal?.classList.remove("active", "show");
-    }
-
-    // Settings
-    $("novaProfileSettings")?.addEventListener("click", openSettings);
-    $("settingsBtn")?.addEventListener("click", openSettings);
-    $("closeSettingsBtn")?.addEventListener("click", closeSettings);
-
-    settingsModal?.addEventListener("click", (event) => {
-        if (event.target === settingsModal) closeSettings();
-    });
-
-    // Language
-    $("novaProfileLanguage")?.addEventListener("click", openLanguage);
-    $("closeLanguageModal")?.addEventListener("click", closeLanguage);
-
-    languageModal?.addEventListener("click", (event) => {
-        if (event.target === languageModal) closeLanguage();
-    });
-
-    $("novaLanguageSelect")?.addEventListener("change", (event) => {
-        const language = event.target.value;
-
-        try {
-            localStorage.setItem("nova-language", language);
-        } catch (error) {
-            console.error("Language storage error:", error);
-        }
-
-        document.documentElement.lang =
-            language === "auto" ? "ar" : language;
-
-        if (typeof window.showToast === "function") {
-            window.showToast("تم حفظ اختيار اللغة");
-        } else {
-            console.info("تم حفظ اختيار اللغة:", language);
-        }
-    });
-
-    // Restore saved language
-    try {
-        const savedLanguage = localStorage.getItem("nova-language");
-        const languageSelect = $("novaLanguageSelect");
-
-        if (savedLanguage && languageSelect) {
-            languageSelect.value = savedLanguage;
-        }
-    } catch (error) {
-        console.warn("Language restore error:", error);
-    }
-
-    // Sign out
-    $("novaLogoutBtn")?.addEventListener("click", async () => {
-        const client = window.novaSupabase;
-
-        if (!client) {
-            alert("تعذر الاتصال بخدمة تسجيل الدخول");
-            return;
-        }
-
-        if (!confirm("هل تريد تسجيل الخروج بالفعل؟")) return;
-
-        try {
-            const { error } = await client.auth.signOut();
-
-            if (error) {
-                console.error("Sign out error:", error);
-                alert("تعذر تسجيل الخروج");
-                return;
-            }
-
-            window.location.reload();
-        } catch (error) {
-            console.error("Sign out error:", error);
-            alert("حدث خطأ أثناء تسجيل الخروج");
-        }
-    });
-
-    console.info("YOVIA Profile Controls initialized");
-})();
-</script>
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-
-    const logoutBtn = document.getElementById("novaLogoutBtn");
-
-    if (!logoutBtn) {
-        console.error("YOVIA: Logout button not found.");
-        return;
-    }
-
-    logoutBtn.addEventListener("click", async (event) => {
-        event.preventDefault();
-
-        const confirmed = confirm("هل أنت متأكد أنك تريد تسجيل الخروج؟");
-
-        if (!confirmed) return;
-
-        logoutBtn.disabled = true;
-
-        try {
-            const client = window.novaSupabase;
-
-            if (!client) {
-                throw new Error("Supabase client غير متصل.");
-            }
-
-            const { error } = await client.auth.signOut();
-
-            if (error) throw error;
-
-            window.location.replace("/login.html");
-
-        } catch (error) {
-            console.error("YOVIA Logout Error:", error);
-            alert("تعذر تسجيل الخروج. حاول مرة أخرى.");
-            logoutBtn.disabled = false;
-        }
-    });
-
-});
 </script>
 </body>
 </html>
