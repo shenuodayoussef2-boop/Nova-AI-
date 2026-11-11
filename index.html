@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%235d7186'/%3E%3Cpath d='M11 8.5v11.2a3.3 3.3 0 0 0 3.3 3.3H21' stroke='%23fff' stroke-width='2.8' stroke-linecap='round' fill='none'/%3E%3Ccircle cx='21.5' cy='10' r='2.4' fill='%23fff'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%235d7186'/%3E%3Cpath d='M8.5 8.2L12 13.5L15.5 8.2M12 13.5V20.2' stroke='%23fff' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Ccircle cx='21.5' cy='10' r='2.4' fill='%23fff'/%3E%3C/svg%3E">
 <style>
 :root{
   --bg:#0d0e12; --bg-elev:#121319;
@@ -354,11 +354,17 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
   <aside class="sidebar" id="sidebar">
     <div class="side-top">
       <a class="brand" href="#" onclick="return false;">
-        <span class="brand-mark">
-          <svg viewBox="0 0 32 32" fill="none">
-            <path d="M11 8.5v11.2a3.3 3.3 0 0 0 3.3 3.3H21" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/>
-            <circle cx="21.5" cy="10" r="2.4" fill="#fff"/>
-          </svg>
+  <div class="brand-mark" aria-hidden="true">
+  <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect width="28" height="28" rx="8" fill="#2a2c35"></rect>
+    <g clip-path="url(#clipY)">
+      <path d='M8.5 8.2L12 13.5L15.5 8.2M12 13.5V20.2' fill='none' stroke='white' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/>
+    </g>
+    <g class="dot"><circle cx="19.5" cy="8.2" r="1.8" fill="white"></circle></g>
+    <defs><clipPath id="clipY"><rect width="28" height="28" rx="8" fill="white"></rect></clipPath></defs>
+  </svg>
+</div>
+</span>
         </span>
         <span class="brand-name">Yovia</span>
       </a>
@@ -653,7 +659,7 @@ const ICON={
   file:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`,
   image:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`,
   code:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>`,
-  bot:`<svg viewBox="0 0 32 32" fill="none"><path d="M11 8.5v11.2a3.3 3.3 0 0 0 3.3 3.3H21" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/><circle cx="21.5" cy="10" r="2.4" fill="#fff"/></svg>`,
+  bot:`<svg viewBox="0 0 32 32" fill="none"><path d="M8.5 8.2L12 13.5L15.5 8.2M12 13.5V20.2" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="21.5" cy="10" r="2.4" fill="#fff"/></svg>`,
   copy:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>`,
   check:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
   trash:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>`,
@@ -713,7 +719,7 @@ const ACCENTS={
   indigo:{a:'#5c6db0',b:'#7486c4'}
 };
 
-const STORE_KEY='logvidia.v3';
+const STORE_KEY='Yovia.v3';
 let state={
   chats:[],currentId:null,
   settings:{
@@ -725,7 +731,7 @@ let state={
       provider:'openrouter',key:'',
       baseUrl:'https://openrouter.ai/api/v1',
       model:'meta-llama/llama-3.3-70b-instruct:free',
-      systemPrompt:'أنت Logvidia، مساعد ذكي ودود ومحترف. تجيب بالعربية الفصحى المبسّطة، وتستخدم Markdown في التنسيق.'
+      systemPrompt:'أنت Yovia، مساعد ذكي ودود ومحترف. تجيب بالعربية الفصحى المبسّطة، وتستخدم Markdown في التنسيق.'
     }
   }
 };
@@ -918,7 +924,7 @@ function messageNode(msg){
   }
   const content=isUser?esc(msg.text):renderMarkdown(msg.text||'');
   const actions=`<div class="msg-actions"><button class="msg-act" data-act="copy" title="نسخ">${ICON.copy}</button>${!isUser?`<button class="msg-act" data-act="regen" title="إعادة">${ICON.refresh}</button><button class="msg-act" data-act="like" title="إعجاب">${ICON.thumbUp}</button><button class="msg-act" data-act="dislike" title="عدم إعجاب">${ICON.thumbDown}</button>`:''}</div>`;
-  el.innerHTML=`${avatar}<div class="msg-body"><div class="msg-head"><span class="msg-name">${isUser?'أنت':'Logvidia'}</span><span class="msg-time">${time}</span></div><div class="msg-content" data-content>${content}</div>${filesHtml}${actions}</div>`;
+  el.innerHTML=`${avatar}<div class="msg-body"><div class="msg-head"><span class="msg-name">${isUser?'أنت':'Yovia'}</span><span class="msg-time">${time}</span></div><div class="msg-content" data-content>${content}</div>${filesHtml}${actions}</div>`;
   return el;
 }
 function renderChat(){
@@ -952,7 +958,7 @@ function welcomeNode(){
   wrap.innerHTML=`
     <div class="welcome-logo">${ICON.bot}</div>
     <h2>${greet} 👋</h2>
-    <p>أنا <strong>Logvidia</strong> — ${mode?'متصل بموديل حقيقي. اسألني أي شيء.':'وضع تجريبي جاهز. جرّب الآن بدون مفتاح، أو أضف مفتاحاً لردود حقيقية.'}</p>
+    <p>أنا <strong>Yovia</strong> — ${mode?'متصل بموديل حقيقي. اسألني أي شيء.':'وضع تجريبي جاهز. جرّب الآن بدون مفتاح، أو أضف مفتاحاً لردود حقيقية.'}</p>
     <div class="mode-pill ${mode?'':'demo'}">${mode?ICON.plug:ICON.theatre}<span>${mode?'API حقيقي: '+state.settings.api.model.split('/').pop().replace(':free',''):'وضع تجريبي'}</span></div>
     <div class="suggestions">
       ${suggestions.map(s=>`<button class="sugg" data-prompt="${esc(s.s)}"><span class="s-ico">${s.ico}</span><span><span class="s-title">${esc(s.t)}</span><span class="s-sub">${esc(s.s)}</span></span></button>`).join('')}
@@ -1215,8 +1221,8 @@ async function streamChat(messages,handlers){
   const url=api.baseUrl.replace(/\/$/,'')+'/chat/completions';
   const headers={'Content-Type':'application/json','Authorization':`Bearer ${api.key}`};
   if(api.provider==='openrouter'){
-    headers['HTTP-Referer']=location.origin||'https://logvidia.app';
-    headers['X-Title']='Logvidia';
+    headers['HTTP-Referer']=location.origin||'https://Yovia.app';
+    headers['X-Title']='Yovia';
   }
   const body={
     model:api.model,messages,stream:true,
@@ -1307,7 +1313,7 @@ async function sendMessage(){
   const botEl=document.createElement('div');
   botEl.className='msg msg-assistant';
   botEl.dataset.id=botMsgId;
-  botEl.innerHTML=`<div class="msg-avatar">${ICON.bot}</div><div class="msg-body"><div class="msg-head"><span class="msg-name">Logvidia</span><span class="msg-time">الآن</span></div><div class="msg-content" data-content><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`;
+  botEl.innerHTML=`<div class="msg-avatar">${ICON.bot}</div><div class="msg-body"><div class="msg-head"><span class="msg-name">Yovia</span><span class="msg-time">الآن</span></div><div class="msg-content" data-content><div class="typing-dots"><span></span><span></span><span></span></div></div></div>`;
   inner.appendChild(botEl);
   scrollBottom();
 
@@ -1726,7 +1732,7 @@ function init(){
     const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
-    a.href=url;a.download=`logvidia-${new Date().toISOString().slice(0,10)}.json`;a.click();
+    a.href=url;a.download=`yovia-${new Date().toISOString().slice(0,10)}.json`;a.click();
     URL.revokeObjectURL(url);toast('تم التصدير');
   });
   $('#clearAllBtn').addEventListener('click',()=>{
@@ -1751,13 +1757,13 @@ function init(){
   /* PWA manifest */
   try{
     const manifest={
-      name:'Logvidia — مساعد ذكي',short_name:'Yovia',
+      name:'Yovia — مساعد ذكي',short_name:'Yovia',
       description:'شات بوت حديث بوضع تجريبي وAPI حقيقي',
       start_url:location.pathname,scope:location.pathname,
       display:'standalone',orientation:'portrait',
       background_color:'#0d0e12',theme_color:'#0d0e12',
       lang:'ar',dir:'rtl',
-      icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='110' fill='%235d7186'/%3E%3Cpath d='M170 130v190a50 50 0 0 0 50 50h130' stroke='%23fff' stroke-width='42' stroke-linecap='round' fill='none'/%3E%3Ccircle cx='345' cy='155' r='38' fill='%23fff'/%3E%3C/svg%3E",sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}]
+      icons:[{src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%235d7186'/%3E%3Cpath d='M8.5 8.2L12 13.5L15.5 8.2M12 13.5V20.2' stroke='%23fff' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Ccircle cx='21.5' cy='10' r='2.4' fill='%23fff'/%3E%3C/svg%3E",sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}]
     };
     const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
     const link=document.createElement('link');link.rel='manifest';link.href=URL.createObjectURL(blob);
