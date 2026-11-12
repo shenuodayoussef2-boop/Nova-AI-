@@ -7,6 +7,9 @@
 <meta name="theme-color" content="#080b14">
 <title>YOVIA ADMIN — Control Center</title>
 
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
 
@@ -27,7 +30,10 @@
 }
 
 body {
-    visibility: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    min-height: 100vh;
 }
 
 button {
@@ -35,8 +41,114 @@ button {
     cursor: pointer;
 }
 
-.app {
+/* LOGIN SCREEN */
+
+.auth-screen {
+    min-height: 100vh;
     display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background:
+        radial-gradient(circle at top, #172b4d, transparent 55%),
+        var(--bg);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 410px;
+    padding: 32px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    box-shadow: 0 20px 70px #0007;
+}
+
+.auth-logo {
+    width: 58px;
+    height: 58px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 18px;
+    border-radius: 16px;
+    background: linear-gradient(135deg,#3985ff,#7555ff);
+    font-size: 29px;
+    font-weight: 800;
+}
+
+.auth-card h2 {
+    text-align: center;
+    font-size: 23px;
+    margin-bottom: 8px;
+}
+
+.auth-card > p {
+    color: var(--muted);
+    text-align: center;
+    font-size: 12px;
+    margin-bottom: 27px;
+}
+
+.auth-card label {
+    display: block;
+    font-size: 12px;
+    margin: 15px 0 8px;
+}
+
+.auth-card input {
+    width: 100%;
+    padding: 13px;
+    background: #080e1a;
+    color: white;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    outline: none;
+    font: inherit;
+    direction: ltr;
+    text-align: left;
+}
+
+.auth-card input:focus {
+    border-color: var(--blue);
+}
+
+.auth-submit {
+    width: 100%;
+    padding: 13px;
+    margin-top: 22px;
+    border: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg,#3985ff,#6555ff);
+    color: white;
+    font-weight: bold;
+    transition: .2s;
+}
+
+.auth-submit:hover {
+    filter: brightness(1.12);
+}
+
+.auth-submit:disabled {
+    opacity: .6;
+    cursor: wait;
+}
+
+.auth-error {
+    display: none;
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 9px;
+    background: #3b1720;
+    color: #ff9ba8;
+    font-size: 12px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+/* ADMIN APP */
+
+.app {
+    display: none;
     min-height: 100vh;
 }
 
@@ -131,6 +243,7 @@ button {
     display: flex;
     align-items: center;
     gap: 10px;
+    overflow: hidden;
 }
 
 .avatar {
@@ -142,6 +255,7 @@ button {
     background: #203b69;
     color: #8bb8ff;
     font-weight: bold;
+    flex-shrink: 0;
 }
 
 .admin-profile small {
@@ -180,6 +294,7 @@ button {
     padding: 8px 13px;
     border-radius: 30px;
     font-size: 11px;
+    white-space: nowrap;
 }
 
 .welcome {
@@ -343,10 +458,20 @@ button {
     border-radius: 9px;
 }
 
+.logout-btn {
+    border: 1px solid var(--border);
+    background: var(--panel2);
+    color: #ff9ba8;
+    border-radius: 9px;
+    padding: 8px 12px;
+    font-size: 12px;
+}
+
 @media(max-width:1050px) {
     .stats {
         grid-template-columns: repeat(2,1fr);
     }
+
     .content-grid {
         grid-template-columns: 1fr;
     }
@@ -356,216 +481,328 @@ button {
     .sidebar {
         transform: translateX(100%);
     }
+
     .sidebar.open {
         transform: translateX(0);
     }
+
     .main {
         margin-right: 0;
         width: 100%;
         padding: 18px;
     }
+
     .menu-toggle {
         display: block;
     }
+
     .topbar h1 {
         font-size: 19px;
     }
+
     .stats {
         gap: 10px;
     }
+
     .stat-card {
         padding: 13px;
     }
+
     .stat-card h2 {
         font-size: 22px;
+    }
+
+    .status {
+        font-size: 9px;
+        padding: 7px 9px;
     }
 }
 </style>
 </head>
 
 <body>
+
+<!-- LOGIN SCREEN -->
+
+<div class="auth-screen" id="authScreen">
+
+    <form class="auth-card" id="adminLoginForm">
+
+        <div class="auth-logo">Y</div>
+
+        <h2>YOVIA ADMIN</h2>
+
+        <p>سجّل الدخول للوصول إلى مركز التحكم</p>
+
+        <label for="adminEmail">البريد الإلكتروني</label>
+
+        <input
+            type="email"
+            id="adminEmail"
+            placeholder="admin@example.com"
+            autocomplete="username"
+            required
+        >
+
+        <label for="adminPassword">كلمة المرور</label>
+
+        <input
+            type="password"
+            id="adminPassword"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            required
+        >
+
+        <button class="auth-submit" id="adminLoginBtn" type="submit">
+            تسجيل الدخول
+        </button>
+
+        <div class="auth-error" id="authError" role="alert"></div>
+
+    </form>
+
+</div>
+
+<!-- ADMIN APP -->
+
 <div class="app">
 
-<aside class="sidebar" id="sidebar">
-    <div class="brand">
-        <div class="logo">Y</div>
-        <div>
-            <h2>YOVIA ADMIN</h2>
-            <small>CONTROL CENTER</small>
-        </div>
-    </div>
+    <aside class="sidebar" id="sidebar">
 
-    <p class="section-label">القائمة الرئيسية</p>
-
-    <button class="nav-item active" data-page="dashboard">
-        <span class="nav-icon">◫</span> الرئيسية
-    </button>
-
-    <button class="nav-item" data-page="users">
-        <span class="nav-icon">♙</span> المستخدمون
-    </button>
-
-    <button class="nav-item" data-page="employees">
-        <span class="nav-icon">♧</span> الموظفون
-    </button>
-
-    <button class="nav-item" data-page="upgrades">
-        <span class="nav-icon">♛</span> طلبات الترقية
-    </button>
-
-    <p class="section-label">النظام</p>
-
-    <button class="nav-item" data-page="activity">
-        <span class="nav-icon">◷</span> سجل العمليات
-    </button>
-
-    <button class="nav-item" data-page="settings">
-        <span class="nav-icon">⚙</span> الإعدادات
-    </button>
-
-    <div class="admin-profile">
-        <div class="avatar">YS</div>
-        <div>
-            <strong>YOVIA Owner</strong>
-            <small>مدير النظام</small>
-        </div>
-    </div>
-</aside>
-
-<main class="main">
-
-    <header class="topbar">
-        <div style="display:flex;align-items:center;gap:12px">
-            <button class="menu-toggle" id="menuToggle">☰</button>
+        <div class="brand">
+            <div class="logo">Y</div>
             <div>
-                <h1 id="pageTitle">لوحة التحكم</h1>
-                <p>إدارة ومتابعة منصة YOVIA AI</p>
-            </div>
-        </div>
-        <div class="status">● الواجهة جاهزة</div>
-    </header>
-
-    <section class="page active" id="dashboard">
-
-        <div class="welcome">
-            <h2>أهلاً بك في <span>YOVIA ADMIN</span> 👋</h2>
-            <p>مركز التحكم الرئيسي لإدارة منصة YOVIA AI.</p>
-        </div>
-
-        <div class="stats">
-            <div class="stat-card">
-                <div class="stat-top">
-                    <p>إجمالي المستخدمين</p>
-                    <div class="stat-icon">♙</div>
-                </div>
-                <h2>—</h2>
-                <small>بانتظار ربط Supabase</small>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-top">
-                    <p>الموظفون</p>
-                    <div class="stat-icon">♧</div>
-                </div>
-                <h2>—</h2>
-                <small>بانتظار ربط Supabase</small>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-top">
-                    <p>طلبات الترقية</p>
-                    <div class="stat-icon">♛</div>
-                </div>
-                <h2>—</h2>
-                <small>بانتظار ربط Supabase</small>
-            </div>
-
-            <div class="stat-card">
-                <div class="stat-top">
-                    <p>العمليات المسجلة</p>
-                    <div class="stat-icon">◷</div>
-                </div>
-                <h2>—</h2>
-                <small>بانتظار ربط Supabase</small>
+                <h2>YOVIA ADMIN</h2>
+                <small>CONTROL CENTER</small>
             </div>
         </div>
 
-        <div class="content-grid">
+        <p class="section-label">القائمة الرئيسية</p>
+
+        <button class="nav-item active" data-page="dashboard">
+            <span class="nav-icon">◫</span> الرئيسية
+        </button>
+
+        <button class="nav-item" data-page="users">
+            <span class="nav-icon">♙</span> المستخدمون
+        </button>
+
+        <button class="nav-item" data-page="employees">
+            <span class="nav-icon">♧</span> الموظفون
+        </button>
+
+        <button class="nav-item" data-page="upgrades">
+            <span class="nav-icon">♛</span> طلبات الترقية
+        </button>
+
+        <p class="section-label">النظام</p>
+
+        <button class="nav-item" data-page="activity">
+            <span class="nav-icon">◷</span> سجل العمليات
+        </button>
+
+        <button class="nav-item" data-page="settings">
+            <span class="nav-icon">⚙</span> الإعدادات
+        </button>
+
+        <div class="admin-profile">
+            <div class="avatar">YS</div>
+            <div>
+                <strong>YOVIA Owner</strong>
+                <small>مدير النظام</small>
+            </div>
+        </div>
+
+    </aside>
+
+    <main class="main">
+
+        <header class="topbar">
+
+            <div style="display:flex;align-items:center;gap:12px">
+
+                <button class="menu-toggle" id="menuToggle">☰</button>
+
+                <div>
+                    <h1 id="pageTitle">لوحة التحكم</h1>
+                    <p>إدارة ومتابعة منصة YOVIA AI</p>
+                </div>
+
+            </div>
+
+            <div style="display:flex;align-items:center;gap:10px">
+                <div class="status">● الواجهة جاهزة</div>
+                <button class="logout-btn" id="logoutBtn">تسجيل الخروج</button>
+            </div>
+
+        </header>
+
+        <!-- DASHBOARD -->
+
+        <section class="page active" id="dashboard">
+
+            <div class="welcome">
+                <h2>أهلاً بك في <span>YOVIA ADMIN</span> 👋</h2>
+                <p>مركز التحكم الرئيسي لإدارة منصة YOVIA AI.</p>
+            </div>
+
+            <div class="stats">
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <p>إجمالي المستخدمين</p>
+                        <div class="stat-icon">♙</div>
+                    </div>
+                    <h2>—</h2>
+                    <small>بانتظار ربط Supabase</small>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <p>الموظفون</p>
+                        <div class="stat-icon">♧</div>
+                    </div>
+                    <h2>—</h2>
+                    <small>بانتظار ربط Supabase</small>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <p>طلبات الترقية</p>
+                        <div class="stat-icon">♛</div>
+                    </div>
+                    <h2>—</h2>
+                    <small>بانتظار ربط Supabase</small>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <p>العمليات المسجلة</p>
+                        <div class="stat-icon">◷</div>
+                    </div>
+                    <h2>—</h2>
+                    <small>بانتظار ربط Supabase</small>
+                </div>
+
+            </div>
+
+            <div class="content-grid">
+
+                <div class="panel">
+
+                    <div class="panel-header">
+                        <h3>آخر المستخدمين</h3>
+                        <button data-go="users">عرض الكل ←</button>
+                    </div>
+
+                    <div class="empty">
+                        <div class="empty-icon">♙</div>
+                        لا توجد بيانات معروضة حتى الآن.
+                        <br>
+                        سيتم تحميلها بعد ربط قاعدة البيانات.
+                    </div>
+
+                </div>
+
+                <div class="panel">
+
+                    <div class="panel-header">
+                        <h3>آخر العمليات</h3>
+                        <button data-go="activity">عرض الكل ←</button>
+                    </div>
+
+                    <div class="empty">
+                        <div class="empty-icon">◷</div>
+                        سجل العمليات سيظهر هنا بعد تفعيله.
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- USERS -->
+
+        <section class="page" id="users">
 
             <div class="panel">
                 <div class="panel-header">
-                    <h3>آخر المستخدمين</h3>
-                    <button data-go="users">عرض الكل ←</button>
+                    <h3>إدارة المستخدمين</h3>
                 </div>
                 <div class="empty">
-                    <div class="empty-icon">♙</div>
-                    لا توجد بيانات معروضة حتى الآن.
-                    <br>سيتم تحميلها بعد ربط قاعدة البيانات.
+                    سيتم ربط قائمة المستخدمين بحسابات Supabase.
                 </div>
             </div>
+
+        </section>
+
+        <!-- EMPLOYEES -->
+
+        <section class="page" id="employees">
 
             <div class="panel">
                 <div class="panel-header">
-                    <h3>آخر العمليات</h3>
-                    <button data-go="activity">عرض الكل ←</button>
+                    <h3>إدارة الموظفين</h3>
                 </div>
-
                 <div class="empty">
-                    <div class="empty-icon">◷</div>
-                    سجل العمليات سيظهر هنا بعد تفعيله.
+                    سيتم تجهيز إدارة الموظفين والصلاحيات.
                 </div>
             </div>
 
-        </div>
-    </section>
+        </section>
 
-    <section class="page" id="users">
-        <div class="panel">
-            <div class="panel-header">
-                <h3>إدارة المستخدمين</h3>
+        <!-- UPGRADES -->
+
+        <section class="page" id="upgrades">
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>طلبات الترقية</h3>
+                </div>
+                <div class="empty">
+                    طلبات الترقية ستظهر هنا بعد ربط مصدرها.
+                </div>
             </div>
-            <div class="empty">سيتم ربط قائمة المستخدمين بحسابات Supabase.</div>
-        </div>
-    </section>
 
-    <section class="page" id="employees">
-        <div class="panel">
-            <div class="panel-header">
-                <h3>إدارة الموظفين</h3>
+        </section>
+
+        <!-- ACTIVITY -->
+
+        <section class="page" id="activity">
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>سجل العمليات</h3>
+                </div>
+                <div class="empty">
+                    سيتم عرض العمليات الإدارية المسجلة هنا.
+                </div>
             </div>
-            <div class="empty">سيتم تجهيز إدارة الموظفين والصلاحيات.</div>
-        </div>
-    </section>
 
-    <section class="page" id="upgrades">
-        <div class="panel">
-            <div class="panel-header">
-                <h3>طلبات الترقية</h3>
+        </section>
+
+        <!-- SETTINGS -->
+
+        <section class="page" id="settings">
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>إعدادات النظام</h3>
+                </div>
+                <div class="empty">
+                    إعدادات لوحة الإدارة.
+                </div>
             </div>
-            <div class="empty">طلبات الترقية ستظهر هنا بعد ربط مصدرها.</div>
-        </div>
-    </section>
 
-    <section class="page" id="activity">
-        <div class="panel">
-            <div class="panel-header">
-                <h3>سجل العمليات</h3>
-            </div>
-            <div class="empty">سيتم عرض العمليات الإدارية المسجلة هنا.</div>
-        </div>
-    </section>
+        </section>
 
-    <section class="page" id="settings">
-        <div class="panel">
-            <div class="panel-header">
-                <h3>إعدادات النظام</h3>
-            </div>
-            <div class="empty">إعدادات لوحة الإدارة.</div>
-        </div>
-    </section>
+    </main>
 
-</main>
 </div>
+
+<!-- NAVIGATION -->
 
 <script>
 const navItems = document.querySelectorAll(".nav-item");
@@ -583,6 +820,7 @@ const titles = {
 };
 
 function openPage(page) {
+
     if (!document.getElementById(page)) return;
 
     pages.forEach(item => item.classList.remove("active"));
@@ -615,8 +853,12 @@ document.getElementById("menuToggle").addEventListener("click", () => {
     sidebar.classList.toggle("open");
 });
 </script>
+
+<!-- SUPABASE -->
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js"></script>
-<script src="admin.js"></script>
+<script src="./supabase.js"></script>
+<script src="./admin.js"></script>
+
 </body>
 </html>
