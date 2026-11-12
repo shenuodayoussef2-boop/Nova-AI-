@@ -1,0 +1,625 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080b14">
+<title>YOVIA ADMIN — Control Center</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap');
+
+:root {
+    --bg: #080b14;
+    --panel: #101625;
+    --panel2: #151e30;
+    --border: #202b40;
+    --blue: #3985ff;
+    --text: #f4f7ff;
+    --muted: #8492a9;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Cairo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+}
+
+button {
+    font: inherit;
+    cursor: pointer;
+}
+
+.app {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 255px;
+    background: #0c1220;
+    border-left: 1px solid var(--border);
+    padding: 25px 17px;
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    transition: .3s;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 5px 8px 30px;
+}
+
+.logo {
+    width: 43px;
+    height: 43px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg,#3985ff,#7555ff);
+    border-radius: 13px;
+    font-weight: 800;
+    font-size: 22px;
+}
+
+.brand h2 {
+    font-size: 19px;
+    letter-spacing: 1px;
+}
+
+.brand small {
+    display: block;
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.section-label {
+    color: #61718b;
+    font-size: 11px;
+    margin: 15px 12px 9px;
+}
+
+.nav-item {
+    width: 100%;
+    border: 0;
+    background: transparent;
+    color: #9eabc0;
+    padding: 12px 13px;
+    border-radius: 10px;
+    text-align: right;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 5px;
+    transition: .2s;
+}
+
+.nav-item:hover,
+.nav-item.active {
+    background: #182744;
+    color: #fff;
+}
+
+.nav-item.active {
+    border-right: 3px solid var(--blue);
+}
+
+.nav-icon {
+    width: 22px;
+    text-align: center;
+    font-size: 17px;
+}
+
+.admin-profile {
+    position: absolute;
+    bottom: 20px;
+    right: 17px;
+    left: 17px;
+    padding: 13px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.avatar {
+    width: 38px;
+    height: 38px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: #203b69;
+    color: #8bb8ff;
+    font-weight: bold;
+}
+
+.admin-profile small {
+    color: var(--muted);
+    display: block;
+    font-size: 11px;
+}
+
+.main {
+    margin-right: 255px;
+    width: calc(100% - 255px);
+    padding: 30px;
+}
+
+.topbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    gap: 15px;
+}
+
+.topbar h1 {
+    font-size: 25px;
+}
+
+.topbar p {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.status {
+    background: #102c25;
+    color: #4cdaa6;
+    padding: 8px 13px;
+    border-radius: 30px;
+    font-size: 11px;
+}
+
+.welcome {
+    padding: 27px;
+    border: 1px solid #263e67;
+    border-radius: 18px;
+    background: linear-gradient(110deg,#122747,#101b30 65%,#151a35);
+    margin-bottom: 25px;
+    position: relative;
+    overflow: hidden;
+}
+
+.welcome h2 {
+    font-size: 22px;
+    margin-bottom: 8px;
+}
+
+.welcome p {
+    color: #a9bad5;
+    font-size: 13px;
+}
+
+.welcome span {
+    color: #80b3ff;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.stat-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    padding: 19px;
+}
+
+.stat-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.stat-icon {
+    width: 39px;
+    height: 39px;
+    display: grid;
+    place-items: center;
+    border-radius: 11px;
+    background: #192c4b;
+    font-size: 18px;
+}
+
+.stat-card p {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+.stat-card h2 {
+    font-size: 27px;
+    margin-top: 5px;
+}
+
+.stat-card small {
+    color: #6e9fff;
+    font-size: 11px;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: 18px;
+}
+
+.panel {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 15px;
+    padding: 20px;
+    min-width: 0;
+}
+
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.panel-header h3 {
+    font-size: 15px;
+}
+
+.panel-header button {
+    border: 0;
+    background: transparent;
+    color: #77aaff;
+    font-size: 12px;
+}
+
+.empty {
+    padding: 35px 10px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.empty-icon {
+    font-size: 30px;
+    margin-bottom: 10px;
+}
+
+.activity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--border);
+}
+
+.activity:last-child {
+    border: 0;
+}
+
+.activity-icon {
+    width: 36px;
+    height: 36px;
+    background: #192b48;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+}
+
+.activity p {
+    font-size: 12px;
+}
+
+.activity small {
+    color: var(--muted);
+    font-size: 10px;
+}
+
+.page {
+    display: none;
+}
+
+.page.active {
+    display: block;
+}
+
+.menu-toggle {
+    display: none;
+    background: var(--panel2);
+    border: 1px solid var(--border);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 9px;
+}
+
+@media(max-width:1050px) {
+    .stats {
+        grid-template-columns: repeat(2,1fr);
+    }
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media(max-width:700px) {
+    .sidebar {
+        transform: translateX(100%);
+    }
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    .main {
+        margin-right: 0;
+        width: 100%;
+        padding: 18px;
+    }
+    .menu-toggle {
+        display: block;
+    }
+    .topbar h1 {
+        font-size: 19px;
+    }
+    .stats {
+        gap: 10px;
+    }
+    .stat-card {
+        padding: 13px;
+    }
+    .stat-card h2 {
+        font-size: 22px;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+
+<aside class="sidebar" id="sidebar">
+    <div class="brand">
+        <div class="logo">Y</div>
+        <div>
+            <h2>YOVIA ADMIN</h2>
+            <small>CONTROL CENTER</small>
+        </div>
+    </div>
+
+    <p class="section-label">القائمة الرئيسية</p>
+
+    <button class="nav-item active" data-page="dashboard">
+        <span class="nav-icon">◫</span> الرئيسية
+    </button>
+
+    <button class="nav-item" data-page="users">
+        <span class="nav-icon">♙</span> المستخدمون
+    </button>
+
+    <button class="nav-item" data-page="employees">
+        <span class="nav-icon">♧</span> الموظفون
+    </button>
+
+    <button class="nav-item" data-page="upgrades">
+        <span class="nav-icon">♛</span> طلبات الترقية
+    </button>
+
+    <p class="section-label">النظام</p>
+
+    <button class="nav-item" data-page="activity">
+        <span class="nav-icon">◷</span> سجل العمليات
+    </button>
+
+    <button class="nav-item" data-page="settings">
+        <span class="nav-icon">⚙</span> الإعدادات
+    </button>
+
+    <div class="admin-profile">
+        <div class="avatar">YS</div>
+        <div>
+            <strong>YOVIA Owner</strong>
+            <small>مدير النظام</small>
+        </div>
+    </div>
+</aside>
+
+<main class="main">
+
+    <header class="topbar">
+        <div style="display:flex;align-items:center;gap:12px">
+            <button class="menu-toggle" id="menuToggle">☰</button>
+            <div>
+                <h1 id="pageTitle">لوحة التحكم</h1>
+                <p>إدارة ومتابعة منصة YOVIA AI</p>
+            </div>
+        </div>
+        <div class="status">● الواجهة جاهزة</div>
+    </header>
+
+    <section class="page active" id="dashboard">
+
+        <div class="welcome">
+            <h2>أهلاً بك في <span>YOVIA ADMIN</span> 👋</h2>
+            <p>مركز التحكم الرئيسي لإدارة منصة YOVIA AI.</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-top">
+                    <p>إجمالي المستخدمين</p>
+                    <div class="stat-icon">♙</div>
+                </div>
+                <h2>—</h2>
+                <small>بانتظار ربط Supabase</small>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <p>الموظفون</p>
+                    <div class="stat-icon">♧</div>
+                </div>
+                <h2>—</h2>
+                <small>بانتظار ربط Supabase</small>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <p>طلبات الترقية</p>
+                    <div class="stat-icon">♛</div>
+                </div>
+                <h2>—</h2>
+                <small>بانتظار ربط Supabase</small>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-top">
+                    <p>العمليات المسجلة</p>
+                    <div class="stat-icon">◷</div>
+                </div>
+                <h2>—</h2>
+                <small>بانتظار ربط Supabase</small>
+            </div>
+        </div>
+
+        <div class="content-grid">
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>آخر المستخدمين</h3>
+                    <button data-go="users">عرض الكل ←</button>
+                </div>
+                <div class="empty">
+                    <div class="empty-icon">♙</div>
+                    لا توجد بيانات معروضة حتى الآن.
+                    <br>سيتم تحميلها بعد ربط قاعدة البيانات.
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <h3>آخر العمليات</h3>
+                    <button data-go="activity">عرض الكل ←</button>
+                </div>
+
+                <div class="empty">
+                    <div class="empty-icon">◷</div>
+                    سجل العمليات سيظهر هنا بعد تفعيله.
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <section class="page" id="users">
+        <div class="panel">
+            <div class="panel-header">
+                <h3>إدارة المستخدمين</h3>
+            </div>
+            <div class="empty">سيتم ربط قائمة المستخدمين بحسابات Supabase.</div>
+        </div>
+    </section>
+
+    <section class="page" id="employees">
+        <div class="panel">
+            <div class="panel-header">
+                <h3>إدارة الموظفين</h3>
+            </div>
+            <div class="empty">سيتم تجهيز إدارة الموظفين والصلاحيات.</div>
+        </div>
+    </section>
+
+    <section class="page" id="upgrades">
+        <div class="panel">
+            <div class="panel-header">
+                <h3>طلبات الترقية</h3>
+            </div>
+            <div class="empty">طلبات الترقية ستظهر هنا بعد ربط مصدرها.</div>
+        </div>
+    </section>
+
+    <section class="page" id="activity">
+        <div class="panel">
+            <div class="panel-header">
+                <h3>سجل العمليات</h3>
+            </div>
+            <div class="empty">سيتم عرض العمليات الإدارية المسجلة هنا.</div>
+        </div>
+    </section>
+
+    <section class="page" id="settings">
+        <div class="panel">
+            <div class="panel-header">
+                <h3>إعدادات النظام</h3>
+            </div>
+            <div class="empty">إعدادات لوحة الإدارة.</div>
+        </div>
+    </section>
+
+</main>
+</div>
+
+<script>
+const navItems = document.querySelectorAll(".nav-item");
+const pages = document.querySelectorAll(".page");
+const pageTitle = document.getElementById("pageTitle");
+const sidebar = document.getElementById("sidebar");
+
+const titles = {
+    dashboard: "لوحة التحكم",
+    users: "إدارة المستخدمين",
+    employees: "إدارة الموظفين",
+    upgrades: "طلبات الترقية",
+    activity: "سجل العمليات",
+    settings: "الإعدادات"
+};
+
+function openPage(page) {
+    if (!document.getElementById(page)) return;
+
+    pages.forEach(item => item.classList.remove("active"));
+
+    navItems.forEach(item => item.classList.remove("active"));
+
+    document.getElementById(page).classList.add("active");
+
+    document.querySelectorAll(`[data-page="${page}"]`)
+        .forEach(item => item.classList.add("active"));
+
+    pageTitle.textContent = titles[page] || "YOVIA ADMIN";
+
+    sidebar.classList.remove("open");
+}
+
+navItems.forEach(item => {
+    item.addEventListener("click", () => {
+        openPage(item.dataset.page);
+    });
+});
+
+document.querySelectorAll("[data-go]").forEach(button => {
+    button.addEventListener("click", () => {
+        openPage(button.dataset.go);
+    });
+});
+
+document.getElementById("menuToggle").addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+});
+</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>
