@@ -1,126 +1,147 @@
 
 const adminClient = window.novaSupabase;
-async function protectAdmin() {
-    const status = document.querySelector(".status");
 
-    try {
-        if (!supabase) {
-            throw new Error("Supabase client not found");
-        }
+const authScreen = document.getElementById("authScreen");
+const loginForm = document.getElementById("adminLoginForm");
+const loginBtn = document.getElementById("adminLoginBtn");
+const authError = document.getElementById("authError");
+const adminApp = document.querySelector(".app");
 
-        // 1. التحقق من جلسة المستخدم
-        const {
-            data: { user },
-            error: authError
-        } = await supabase.auth.getUser();
+function showError(message) {
+    authError.textContent = message;
+    authError.style.display = "block";
+}
 
-        if (authError || !user) {
-            window.location.replace("index.html");
-            return;
-        }
+function showLogin() {
+    document.body.classList.remove("admin-authenticated");
+    adminApp.style.display = "none";
+    authScreen.style.display = "flex";
+}
 
-        // 2. التحقق من صلاحيات الإدارة
-        const {
-            data: admin,
-            error: adminError
-        } = await supabase
-            .from("admin_users")
-            .select("role")
-            .eq("user_id", user.id)
-            .maybeSingle();
+function showDashboard(user, role) {
+    authScreen.style.display = "none";
+    adminApp.style.display = "flex";
 
-        if (adminError) {
-            throw adminError;
-        }
+    const profile = document.querySelector(".admin-profile");
 
-        // 3. رفض الدخول عند عدم وجود صلاحية
-        if (!admin || !["owner", "admin", "support"].includes(admin.role)) {
-            document.body.innerHTML = `
-                <div style="
-                    background:#080b14;
-                    color:white;
-                    min-height:100vh;
-                    display:grid;
-                    place-items:center;
-                    text-align:center;
-                    font-family:Arial;
-                    padding:20px;
-                ">
-                    <div>
-                        <h1>Access Denied</h1>
-                        <p>ليس لديك تصريح لدخول لوحة الإدارة.</p>
-                        <a href="index.html" style="color:#3985ff">
-                            العودة إلى YOVIA AI
-                        </a>
-                    </div>
-                </div>
-            `;
-
-            document.body.style.visibility = "visible";
-            return;
-        }
-
-        // 4. عرض بيانات الحساب
-        const profileName =
+    if (profile) {
+        profile.querySelector("strong").textContent =
             user.user_metadata?.name ||
             user.email ||
-            "YOVIA Admin";
+            "YOVIA Owner";
 
-        const profileElement =
-            document.querySelector(".admin-profile strong");
+        profile.querySelector("small").textContent =
+            role === "owner" ? "مالك النظام" :
+            role === "admin" ? "مدير النظام" :
+            "الدعم الفني";
+    }
 
-        const roleElement =
-            document.querySelector(".admin-profile small");
+    const status = document.querySelector(".status");
 
-        if (profileElement) {
-            profileElement.textContent = profileName;
-        }
-
-        if (roleElement) {
-            roleElement.textContent =
-                admin.role === "owner"
-                    ? "مالك المنصة"
-                    : admin.role === "admin"
-                    ? "مدير النظام"
-                    : "دعم فني";
-        }
-
-        if (status) {
-            status.textContent = "● تم التحقق من الصلاحيات";
-        }
-
-        document.body.style.visibility = "visible";
-
-        console.log("YOVIA ADMIN AUTHORIZED");
-
-    } catch (error) {
-        console.error("YOVIA ADMIN ERROR:", error);
-
-        document.body.innerHTML = `
-            <div style="
-                background:#080b14;
-                color:white;
-                min-height:100vh;
-                display:grid;
-                place-items:center;
-                text-align:center;
-                font-family:Arial;
-            ">
-                <div>
-                    <h2>تعذر التحقق من الحساب</h2>
-                    <p>تأكد من اتصال Supabase وإعدادات الصلاحيات.</p>
-                    <button onclick="location.reload()">
-                        إعادة المحاولة
-                    </button>
-                </div>
-            </div>
-        `;
-
-        document.body.style.visibility = "visible";
+    if (status) {
+        status.textContent = "● تم التحقق من الصلاحيات";
     }
 }
 
-// إخفاء الصفحة أثناء التحقق
-document.body.style.visibility = "hidden";
+async function verifyAdmin(user) {
+    const { data, error } = await adminClient
+        .from("admin_users")
+        .select("role")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+    if (error) {
+        console.error("Admin Permission Error:", error);
+        throw new Error("تعذر قراءة صلاحيات الحساب: " + error.message);
+    }
+
+    if (!data || !["owner", "admin", "support"].includes(data.role)) {
+        throw new Error("هذا الحساب ليس لديه صلاحية دخول لوحة الإدارة.");
+    }
+
+    return data.role;
+}
+
+async function protectAdmin() {
+    if (!adminClient) {
+        showLogin();
+        showError("تعذر تحميل مكتبة Supabase. أعد تحميل الصفحة.");
+        return;
+    }
+
+    try {
+        const { data, error } = await adminClient.auth.getSession();
+
+        if (error) throw error;
+
+        const session = data.session;
+
+        if (!session) {
+            showLogin();
+            return;
+        }
+
+        const { data: userData, error: userError } =
+            await adminClient.auth.getUser();
+
+        if (userError) throw userError;
+
+        if (!userData.user) {
+            showLogin();
+            return;
+        }
+
+        const role = await verifyAdmin(userData.user);
+
+        showDashboard(userData.user, role);
+
+    } catch (error) {
+        console.error("YOVIA ADMIN ERROR:", error);
+        showLogin();
+        showError(error.message || "تعذر التحقق من الحساب.");
+    }
+}
+
+loginForm.addEventListener("submit", async function(event) {
+    event.preventDefault();
+
+    authError.style.display = "none";
+
+    const email = document.getElementById("adminEmail").value.trim();
+    const password = document.getElementById("adminPassword").value;
+
+    loginBtn.disabled = true;
+    loginBtn.textContent = "جارٍ تسجيل الدخول...";
+
+    try {
+        const { data, error } = await adminClient.auth
+            .signInWithPassword({
+                email,
+                password
+            });
+
+        if (error) throw error;
+
+        if (!data.user) {
+            throw new Error("لم يتم العثور على بيانات الحساب.");
+        }
+
+        const role = await verifyAdmin(data.user);
+
+        showDashboard(data.user, role);
+
+    } catch (error) {
+        console.error("YOVIA LOGIN ERROR:", error);
+
+        await adminClient.auth.signOut();
+
+        showLogin();
+        showError(error.message || "فشل تسجيل الدخول.");
+
+    } finally {
+        loginBtn.disabled = false;
+        loginBtn.textContent = "تسجيل الدخول";
+    }
+});
 
 protectAdmin();
