@@ -109,8 +109,6 @@ a{color:var(--brand-a);text-decoration:none}
 .user-name{font-size:13.5px;font-weight:600}
 .user-plan{font-size:11px;color:var(--brand-a);font-weight:600;display:flex;align-items:center;gap:4px}
 .user-plan::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--brand-a)}
-.user-plan.demo{color:var(--warn)}
-.user-plan.demo::before{background:var(--warn)}
 
 /* Main */
 .main{flex:1;min-width:0;display:flex;flex-direction:column;position:relative}
@@ -121,7 +119,6 @@ a{color:var(--brand-a);text-decoration:none}
 .model-btn{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface-2);font-size:13px;font-weight:500;color:var(--text-dim);transition:border-color .18s,color .18s;white-space:nowrap}
 .model-btn:hover{border-color:var(--border-strong);color:var(--text)}
 .model-btn .dot{width:7px;height:7px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 3px rgba(77,158,122,.20)}
-.model-btn .dot.demo{background:var(--warn);box-shadow:0 0 0 3px rgba(201,161,74,.20)}
 .model-btn svg{width:14px;height:14px;opacity:.6}
 .dropdown{position:absolute;top:calc(100% + 8px);inset-inline-end:0;min-width:280px;background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--r-md);box-shadow:var(--shadow-lg);padding:6px;z-index:80;opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:opacity .16s,transform .16s;max-height:70vh;overflow-y:auto}
 .dropdown.show{opacity:1;transform:none;pointer-events:auto}
@@ -145,7 +142,6 @@ a{color:var(--brand-a);text-decoration:none}
 .welcome h2{font-size:clamp(24px,4vw,32px);font-weight:700;letter-spacing:-.8px;color:var(--text)}
 .welcome p{font-size:14.5px;color:var(--text-dim);max-width:460px}
 .mode-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;font-size:11.5px;font-weight:600;margin-top:6px;background:var(--accent-soft);color:var(--brand-a);border:1px solid rgba(93,113,134,.25)}
-.mode-pill.demo{background:rgba(201,161,74,.14);color:var(--warn);border-color:rgba(201,161,74,.30)}
 .mode-pill svg{width:12px;height:12px}
 .suggestions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:26px;width:100%;max-width:660px}
 .sugg{display:flex;align-items:flex-start;gap:11px;padding:14px 15px;border-radius:var(--r-md);border:1px solid var(--border);background:var(--surface);text-align:start;transition:border-color .2s,transform .2s,background .2s;min-height:64px}
@@ -252,7 +248,6 @@ a{color:var(--brand-a);text-decoration:none}
 .st-tab.active{background:var(--accent-soft);color:var(--brand-a);font-weight:600}
 .st-tab svg{width:16px;height:16px}
 .st-tab .badge{margin-inline-start:auto;font-size:10px;font-weight:700;padding:1px 6px;border-radius:99px;background:var(--ok);color:#fff}
-.st-tab .badge.demo{background:var(--warn)}
 .settings-panels{flex:1;overflow-y:auto;padding:20px 22px 26px}
 .panel{display:none;animation:fadeIn .22s ease both}
 .panel.active{display:block}
@@ -390,7 +385,7 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
         <div class="avatar-sm">م</div>
         <div class="user-info">
           <div class="user-name">مستخدم Yovia</div>
-          <div class="user-plan" id="userMode">وضع تجريبي</div>
+          <div class="user-plan" id="userMode">Yovia AI</div>
         </div>
       </div>
     </div>
@@ -410,7 +405,7 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
       <div style="position:relative">
         <button class="model-btn" id="modelBtn">
           <span class="dot" id="statusDot"></span>
-          <span class="model-name" id="modelLabel">وضع تجريبي</span>
+          <span class="model-name" id="modelLabel">اختر النموذج</span>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
         </button>
         <div class="dropdown" id="modelDropdown"></div>
@@ -466,12 +461,7 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
     </div>
     <div class="modal-body">
       <nav class="settings-tabs" id="settingsTabs">
-        <button class="st-tab active" data-tab="mode">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-          <span>الوضع</span>
-          <span class="badge demo" id="modeBadge">تجريبي</span>
-        </button>
-        <button class="st-tab" data-tab="api">
+        <button class="st-tab active" data-tab="api">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 7h3a5 5 0 0 1 0 10h-3"/><path d="M9 17H6a5 5 0 0 1 0-10h3"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
           <span>API</span>
           <span class="badge" id="apiBadge" style="display:none">✓</span>
@@ -495,30 +485,8 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
       </nav>
 
       <div class="settings-panels">
-        <!-- Mode -->
-        <div class="panel active" data-panel="mode">
-          <div class="note-box info">
-            💡 <strong>الوضع التجريبي</strong> يعمل بدون مفتاح ويعطيك ردوداً جاهزة للتجربة. <strong>وضع API</strong> يتصل بموديلات حقيقية (Llama, Qwen, GPT).
-          </div>
-          <div class="field">
-            <label class="field-label">اختر الوضع</label>
-            <p class="field-desc">تقدر تبدّل بينهم في أي وقت.</p>
-            <select class="select" id="appMode">
-              <option value="demo">🎭 وضع تجريبي (بدون مفتاح)</option>
-              <option value="api">🔌 وضع API حقيقي (يحتاج مفتاح)</option>
-            </select>
-          </div>
-          <div class="switch-row">
-            <div class="switch-txt">
-              <div class="switch-title">الاحتفاظ بالردود التجريبية في السجل</div>
-              <div class="switch-desc">عند التبديل لـ API تحتفظ بالمحادثات القديمة</div>
-            </div>
-            <div class="switch on" data-switch="keepDemoChats"></div>
-          </div>
-        </div>
-
         <!-- API -->
-        <div class="panel" data-panel="api">
+        <div class="panel active" data-panel="api">
           <div class="note-box">
             🔒 <strong>خصوصيتك:</strong> المفتاح يُخزَّن في متصفحك فقط (localStorage) ولا يُرسل لأي سيرفر غير المزود الذي تختاره.
           </div>
@@ -724,9 +692,8 @@ let state={
   chats:[],currentId:null,
   settings:{
     theme:'dark',accent:'slate',fontScale:1,
-    enterToSend:true,sound:false,autosave:true,keepDemoChats:true,
+    enterToSend:true,sound:false,autosave:true,
     temperature:0.7,maxTokens:2048,
-    appMode:'demo',
     api:{
       provider:'openrouter',key:'',
       baseUrl:'https://openrouter.ai/api/v1',
@@ -840,8 +807,8 @@ function applyTheme(){
 }
 
 /* ---------- Mode helpers ---------- */
-function isApiMode(){ return state.settings.appMode==='api' && !!state.settings.api.key; }
-function modeLabel(){ return isApiMode()?state.settings.api.model.split('/').pop().replace(':free',''):'وضع تجريبي'; }
+function isApiMode(){ return !!state.settings.api.key; }
+function modeLabel(){ return state.settings.api.model.split('/').pop().replace(':free',''); }
 
 /* ---------- History ---------- */
 function timeGroup(chats){
@@ -936,7 +903,7 @@ function renderChat(){
     $('#chatSubtitle').textContent=`${chat.messages.length} رسالة · ${modeLabel()}`;
   }else{
     $('#chatTitle').textContent='محادثة جديدة';
-    $('#chatSubtitle').textContent=isApiMode()?'جاهز للمساعدة':'وضع تجريبي — جرّب الآن';
+    $('#chatSubtitle').textContent=isApiMode()?'جاهز للمساعدة':'أضف مفتاح API لبدء المحادثة';
   }
   updateModeUI();
   if(!chat||chat.messages.length===0){inner.appendChild(welcomeNode());return;}
@@ -948,7 +915,6 @@ function welcomeNode(){
   wrap.className='welcome';
   const hour=new Date().getHours();
   const greet=hour<12?'صباح الخير':'مساء الخير';
-  const mode=isApiMode();
   const suggestions=[
     {ico:ICON.pen,t:'اكتب رسالة بريد احترافية',s:'بريد لطلب اجتماع مع عميل'},
     {ico:ICON.chart,t:'حلّل ملفاً ولخّصه',s:'ارفع CSV أو PDF وسأستخرج النقاط'},
@@ -958,8 +924,8 @@ function welcomeNode(){
   wrap.innerHTML=`
     <div class="welcome-logo">${ICON.bot}</div>
     <h2>${greet} 👋</h2>
-    <p>أنا <strong>Yovia</strong> — ${mode?'متصل بموديل حقيقي. اسألني أي شيء.':'وضع تجريبي جاهز. جرّب الآن بدون مفتاح، أو أضف مفتاحاً لردود حقيقية.'}</p>
-    <div class="mode-pill ${mode?'':'demo'}">${mode?ICON.plug:ICON.theatre}<span>${mode?'API حقيقي: '+state.settings.api.model.split('/').pop().replace(':free',''):'وضع تجريبي'}</span></div>
+    <p>أنا <strong>Yovia</strong> — مساعدك الذكي. اسألني أي شيء وسأساعدك.</p>
+    <div class="mode-pill">${ICON.plug}<span>${state.settings.api.key?'متصل: '+state.settings.api.model.split('/').pop().replace(':free',''):'أضف مفتاح API من الإعدادات للبدء'}</span></div>
     <div class="suggestions">
       ${suggestions.map(s=>`<button class="sugg" data-prompt="${esc(s.s)}"><span class="s-ico">${s.ico}</span><span><span class="s-title">${esc(s.t)}</span><span class="s-sub">${esc(s.s)}</span></span></button>`).join('')}
     </div>`;
@@ -1005,185 +971,6 @@ function addFiles(list){
     pendingFiles.push(f);
   });
   renderAttachments();updateSendState();
-}
-
-/* ============================================================
-   Demo Mode — الردود التجريبية من النسخة الأولى
-   ============================================================ */
-function generateDemoReply(text,files,chat){
-  const t=(text||'').toLowerCase();
-
-  if(files.length){
-    const names=files.map(f=>'`'+f.name+'`').join('، ');
-    return `تم استلام ${files.length} ملف: ${names} ✅
-
-**نظرة سريعة على الملفات:**
-
-| العنصر | الحالة |
-| --- | --- |
-| الرفع | تم بنجاح |
-| الاستخراج | جاهز للمعالجة |
-| التحليل | مبدئي |
-
-يمكنني الآن:
-1. تلخيص محتوى الملف في نقاط مختصرة
-2. استخراج البيانات وتحويلها إلى جدول
-3. الإجابة عن أسئلة محددة حول المحتوى
-
-ما الذي تفضّل أن نبدأ به؟
-
-> 💡 هذه ردود تجريبية. لتحليل حقيقي، أضف مفتاح API من الإعدادات.`;
-  }
-
-  if(/كود|code|react|javascript|python|html|css|برمج/.test(t)){
-    return `بالتأكيد — إليك مثالاً عملياً لمكوّن **React** بسيط وقابل لإعادة الاستخدام:
-
-\`\`\`jsx
-import { useMemo, useState } from 'react';
-
-export default function DataTable({ rows }) {
-  const [query, setQuery] = useState('');
-  const [asc, setAsc] = useState(true);
-
-  const data = useMemo(() => {
-    return rows
-      .filter(r => r.name.toLowerCase().includes(query.toLowerCase()))
-      .sort((a, b) => (asc ? 1 : -1) * a.name.localeCompare(b.name));
-  }, [rows, query, asc]);
-
-  return (
-    <div className="table">
-      <input
-        value={query}
-        onChange={e => setQuery(e.target.value)}
-        placeholder="بحث…"
-      />
-      <button onClick={() => setAsc(v => !v)}>
-        الترتيب {asc ? '↑' : '↓'}
-      </button>
-      <ul>
-        {data.map(r => <li key={r.id}>{r.name}</li>)}
-      </ul>
-    </div>
-  );
-}
-\`\`\`
-
-**أهم النقاط:**
-- استخدمت \`useMemo\` لتجنّب إعادة الحساب غير الضرورية
-- الترتيب والفلترة يتمان في مكان واحد
-- المكوّن عديم الحالة تماماً وقابل للاختبار بسهولة
-
-هل تريد إضافة ترقيم صفحات أو تصدير CSV؟`;
-  }
-
-  if(/لخّص|تلخيص|ملخص|summar/.test(t)){
-    return `إليك تلخيصاً منظّماً:
-
-## الفكرة الأساسية
-النص يتناول **ثلاث محاور رئيسية** مترابطة، يمكن اختصارها في جملة واحدة:
-> الهدف هو تحويل البيانات المعقّدة إلى قرارات قابلة للتنفيذ.
-
-## النقاط الرئيسية
-1. **المحور الأول** — تحديد المشكلة بدقة قبل القفز إلى الحل.
-2. **المحور الثاني** — جمع الأدلة وتقييم البدائل بموضوعية.
-3. **المحور الثالث** — التنفيذ التدريجي مع قياس الأثر.
-
-## الخلاصة
-النهج المقترح يعتمد على التكرار السريع والتحقق المستمر، وهو ما يقلّل المخاطر ويرفع جودة النتيجة النهائية.
-
-هل تريد نسخة أقصر (٣ أسطر) أو أطول (مع أمثلة)؟`;
-  }
-
-  if(/مرحبا|أهلا|السلام|hello|hi\b|هاي/.test(t)){
-    return `أهلاً بك! 👋
-
-أنا **Yovia**، ويمكنني مساعدتك في:
-
-- ✍️ الكتابة والتحرير والصياغة الاحترافية
-- 💻 البرمجة ومراجعة الأكواد
-- 📊 تحليل الملفات والبيانات
-- 🧠 الشرح والتلخيص والتفكير المنظّم
-
-**جرّب أن ترفق ملفاً** (PDF، صورة، CSV، كود) وسأتعامل معه مباشرة.
-
-بماذا نبدأ؟`;
-  }
-
-  if(/بريد|ايميل|email|رسالة/.test(t)){
-    return `إليك مسودة بريد احترافية:
-
-**الموضوع:** طلب اجتماع — مناقشة سبل التعاون
-
----
-
-السلام عليكم [اسم المستلم]،
-
-أكتب إليك بخصوص الفرصة التي تحدّثنا عنها مؤخراً. أعتقد أن هناك مجالاً واسعاً للتعاون بين فريقينا، وأودّ مناقشة التفاصيل معك مباشرة.
-
-**هل يناسبك اجتماع قصير (٣٠ دقيقة) في أحد الأيام التالية؟**
-- الثلاثاء ١٠:٠٠ صباحاً
-- الأربعاء ٢:٠٠ مساءً
-- الخميس ١١:٠٠ صباحاً
-
-سأرسل دعوة تقويم بمجرد تأكيد الموعد المناسب لك.
-
-مع التقدير،
-[اسمك]
-[مسمّاك الوظيفي]
-
----
-
-هل تريد نبرة أكثر رسمية أو أكثر ودّية؟`;
-  }
-
-  if(/ذكاء|ai|اصطناعي|توليدي/.test(t)){
-    return `## ما هو الذكاء الاصطناعي التوليدي؟
-
-هو فرع من الذكاء الاصطناعي يركّز على **إنشاء محتوى جديد** بدلاً من مجرد التصنيف أو التوقّع.
-
-### كيف يعمل؟
-1. يُدرَّب النموذج على كمية ضخمة من البيانات
-2. يتعلّم الأنماط الإحصائية والعلاقات بينها
-3. عند الطلب، يولّد مخرجات جديدة بناءً على هذه الأنماط
-
-### أمثلة عملية
-- **النصوص** — مثل المحادثة التي نخوضها الآن
-- **الصور** — توليد صور من وصف نصي
-- **الصوت** — تحويل النص إلى كلام طبيعي
-- **الكود** — كتابة وإكمال البرامج
-
-> الفكرة الجوهرية: النموذج لا "يبحث" عن إجابة جاهزة، بل **يبنيها** لحظة بلحظة.
-
-هل تريد التعمق في آلية عمل المحوّلات (Transformers)؟`;
-  }
-
-  if(/سعر|تسعير|price|تكلفة/.test(t)){
-    return `إليك مقارنة بين المزودين:
-
-| المزود | السعر | الموديلات |
-| --- | --- | --- |
-| **OpenRouter** | مجاني (موديلات :free) | Llama, Qwen, Gemma |
-| **Groq** | طبقة مجانية سخية | Llama, Mixtral |
-| **Together AI** | رصيد مجاني عند التسجيل | Llama, Qwen |
-| **Ollama** | مجاني تماماً (محلي) | أي موديل مفتوح |
-
-**التوصية:** ابدأ بـ OpenRouter — مجاني ويغطي 90% من الاستخدام الشخصي.`;
-  }
-
-  return `فهمت طلبك حول: **"${text.slice(0,90)}${text.length>90?'…':''}"**
-
-إليك كيف يمكنني مساعدتك:
-
-1. **تحليل الطلب** — تقسيمه إلى أجزاء أصغر قابلة للتنفيذ
-2. **اقتراح الحل** — خيارات متعددة مع مزايا وعيوب كل منها
-3. **التنفيذ** — خطوات عملية واضحة يمكنك البدء بها فوراً
-
-**سؤال سريع لتحسين الإجابة:**
-- هل تريد النتيجة مختصرة أم مفصّلة؟
-- هل هناك قيود معيّنة (وقت، ميزانية، أدوات) يجب مراعاتها؟
-
-> 💡 هذا وضع تجريبي. لأجوبة حقيقية على أي سؤال، أضف مفتاح API من الإعدادات.`;
 }
 
 /* ============================================================
@@ -1286,8 +1073,8 @@ async function sendMessage(){
   const files=pendingFiles.slice();
   if(!text&&!files.length)return;
 
-  if(state.settings.appMode==='api'&&!state.settings.api.key){
-    toast('أضف مفتاح API أو بدّل للوضع التجريبي',true);
+  if(!state.settings.api.key){
+    toast('أضف مفتاح API من الإعدادات أولاً',true);
     openSettings();return;
   }
 
@@ -1352,27 +1139,6 @@ async function sendMessage(){
     toast('فشل: '+String(err).slice(0,80),true);
   }
 
-  /* ==== الوضع التجريبي ==== */
-  if(state.settings.appMode==='demo'||!state.settings.api.key){
-    const delay=800+Math.random()*900;
-    await new Promise(r=>setTimeout(r,delay));
-    const reply=generateDemoReply(text,files,chat);
-    /* كتابة متدرجة */
-    const chars=[...reply];
-    let idx=0;
-    const step=Math.max(1,Math.floor(chars.length/80));
-    while(idx<chars.length){
-      if(!isGenerating)break;
-      fullText+=chars.slice(idx,idx+step).join('');
-      idx+=step;
-      scheduleRender();
-      await new Promise(r=>setTimeout(r,18));
-    }
-    if(isGenerating){fullText=reply;finishSuccess(reply);}
-    return;
-  }
-
-  /* ==== وضع API ==== */
   try{
     const messages=await buildMessages(text,files);
     abortController=new AbortController();
@@ -1412,36 +1178,15 @@ function beep(){
 
 /* ---------- Mode UI ---------- */
 function updateModeUI(){
-  const api=isApiMode();
-  const dot=$('#statusDot');
-  dot.classList.toggle('demo',!api);
   $('#modelLabel').textContent=modeLabel();
-  const userMode=$('#userMode');
-  userMode.textContent=api?'متصل (API)':'وضع تجريبي';
-  userMode.classList.toggle('demo',!api);
-  const badge=$('#modeBadge');
-  badge.textContent=api?'API':'تجريبي';
-  badge.classList.toggle('demo',!api);
+  $('#userMode').textContent=state.settings.api.key?'متصل عبر API':'إعداد API مطلوب';
   $('#apiBadge').style.display=state.settings.api.key?'inline-block':'none';
 }
 
 /* ---------- Model dropdown ---------- */
 function renderModelDropdown(){
   const dd=$('#modelDropdown');
-  const api=isApiMode();
   let html='';
-  html+=`<div class="dd-section-label">الوضع الحالي</div>`;
-  html+=`<button class="dd-item ${state.settings.appMode==='demo'?'selected':''}" data-mode="demo">
-    <span class="dd-ico">${ICON.theatre}</span>
-    <span class="dd-txt"><span class="dd-name">وضع تجريبي</span><span class="dd-desc">بدون مفتاح — ردود جاهزة</span></span>
-    <span class="dd-check">${ICON.check}</span>
-  </button>`;
-  html+=`<button class="dd-item ${state.settings.appMode==='api'?'selected':''}" data-mode="api">
-    <span class="dd-ico">${ICON.plug}</span>
-    <span class="dd-txt"><span class="dd-name">وضع API حقيقي</span><span class="dd-desc">${state.settings.api.key?'جاهز — '+state.settings.api.model.split('/').pop().replace(':free',''):'يتطلب مفتاح'}</span></span>
-    <span class="dd-check">${ICON.check}</span>
-  </button>`;
-
   const models=PROVIDERS[state.settings.api.provider]?.models||[];
   if(models.length){
     html+=`<div class="dd-section-label">موديلات ${state.settings.api.provider}</div>`;
@@ -1455,19 +1200,9 @@ function renderModelDropdown(){
   }
   dd.innerHTML=html;
 
-  dd.querySelectorAll('[data-mode]').forEach(b=>{
-    b.addEventListener('click',()=>{
-      state.settings.appMode=b.dataset.mode;
-      if(b.dataset.mode==='api'&&!state.settings.api.key){toast('أضف مفتاح API أولاً',true);openSettings();}
-      save();updateModeUI();renderModelDropdown();renderChat();
-      dd.classList.remove('show');
-      toast(b.dataset.mode==='api'?'وضع API مفعّل':'وضع تجريبي');
-    });
-  });
   dd.querySelectorAll('[data-model]').forEach(b=>{
     b.addEventListener('click',()=>{
       state.settings.api.model=b.dataset.model;
-      state.settings.appMode='api';
       $('#apiModel').value=b.dataset.model;
       save();updateModeUI();renderModelDropdown();renderChat();
       dd.classList.remove('show');
@@ -1491,7 +1226,6 @@ function openSettings(){syncSettingsUI();$('#settingsModal').classList.add('show
 function closeSettings(){$('#settingsModal').classList.remove('show');}
 function syncSettingsUI(){
   const s=state.settings;const a=s.api;
-  $('#appMode').value=s.appMode;
   $('#apiProvider').value=a.provider;
   $('#apiKey').value=a.key;
   $('#apiBaseUrl').value=a.baseUrl;
@@ -1639,13 +1373,6 @@ function init(){
     });
   });
 
-  /* Mode select */
-  $('#appMode').addEventListener('change',e=>{
-    state.settings.appMode=e.target.value;
-    save();updateModeUI();renderChat();
-    toast(e.target.value==='api'?'وضع API — تأكد من المفتاح':'وضع تجريبي');
-  });
-
   /* API provider */
   $('#apiProvider').addEventListener('change',e=>{
     const p=e.target.value;const cfg=PROVIDERS[p];
@@ -1758,7 +1485,7 @@ function init(){
   try{
     const manifest={
       name:'Yovia — مساعد ذكي',short_name:'Yovia',
-      description:'شات بوت حديث بوضع تجريبي وAPI حقيقي',
+      description:'مساعد ذكي للمحادثة والإنتاجية',
       start_url:location.pathname,scope:location.pathname,
       display:'standalone',orientation:'portrait',
       background_color:'#0d0e12',theme_color:'#0d0e12',
