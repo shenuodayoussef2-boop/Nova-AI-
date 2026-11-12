@@ -1,6 +1,5 @@
 
-const supabase = window.novaSupabase;
-
+const adminClient = window.novaSupabase;
 async function protectAdmin() {
     const status = document.querySelector(".status");
 
