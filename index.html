@@ -11,6 +11,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%235d7186'/%3E%3Cpath d='M8.5 8.2L12 13.5L15.5 8.2M12 13.5V20.2' stroke='%23fff' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3Ccircle cx='21.5' cy='10' r='2.4' fill='%23fff'/%3E%3C/svg%3E">
 <style>
 :root{
@@ -301,6 +302,36 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
 .btn.primary{background:var(--accent-grad);color:#fff;border-color:transparent}
 .modal-foot{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:14px 18px;border-top:1px solid var(--border);flex:0 0 auto}
 
+
+/* ---------- Subscriptions ---------- */
+.subs-modal{width:min(980px,100%);max-height:min(820px,92dvh)}
+.subs-intro{padding:18px 20px 8px;color:var(--text-dim);font-size:13px}
+.subs-period{display:flex;justify-content:center;gap:8px;padding:10px 18px 18px}
+.subs-period button{padding:8px 16px;border:1px solid var(--border-strong);border-radius:99px;color:var(--text-dim);font-size:12.5px}
+.subs-period button.active{background:var(--accent-soft);border-color:var(--brand-a);color:var(--text);font-weight:700}
+.subs-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:0 18px 18px;overflow:auto}
+.subs-card{border:1px solid var(--border-strong);background:var(--surface-2);border-radius:var(--r-md);padding:15px 13px;display:flex;flex-direction:column;min-width:0;position:relative}
+.subs-card.selected{border:2px solid var(--brand-a);padding:14px 12px;background:var(--accent-soft)}
+.subs-card h4{font-size:15px;margin-bottom:5px}
+.subs-price{font-size:22px;font-weight:700;line-height:1.4;margin:8px 0 2px}
+.subs-price small{font-size:11px;color:var(--text-mute);font-weight:400}
+.subs-card p{font-size:11.5px;color:var(--text-dim);line-height:1.55}
+.subs-features{list-style:none;margin:12px 0;display:grid;gap:7px;font-size:11.5px;color:var(--text-dim)}
+.subs-features li::before{content:"✓";color:var(--ok);font-weight:700;margin-inline-end:6px}
+.subs-select{margin-top:auto;width:100%;padding:8px 10px;border-radius:9px;background:var(--surface-3);font-size:12px;font-weight:600}
+.subs-card.selected .subs-select{background:var(--accent-grad);color:#fff}
+.subs-payment{padding:0 18px 18px}
+.subs-payment h4{font-size:13.5px;margin-bottom:9px}
+.subs-methods{display:flex;flex-wrap:wrap;gap:8px}
+.subs-methods button{padding:8px 12px;border:1px solid var(--border-strong);border-radius:9px;font-size:12px;color:var(--text-dim)}
+.subs-methods button.active{border-color:var(--brand-a);background:var(--accent-soft);color:var(--text)}
+.subs-note{margin:0 18px 16px;padding:10px 12px;border-radius:9px;background:rgba(201,161,74,.09);border:1px solid rgba(201,161,74,.22);color:var(--text-dim);font-size:11.5px;line-height:1.6}
+.subs-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 18px;border-top:1px solid var(--border)}
+.subs-total{font-size:13px;color:var(--text-dim)}
+.subs-total strong{color:var(--text);font-size:17px}
+@media(max-width:760px){.subs-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:430px){.subs-grid{grid-template-columns:1fr}.subs-card{padding:13px}.subs-card.selected{padding:12px}}
+
 /* Toast */
 .toast-wrap{position:fixed;bottom:calc(24px + var(--sab));inset-inline-start:50%;transform:translateX(50%);z-index:500;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
 .toast{display:flex;align-items:center;gap:9px;padding:11px 16px;border-radius:99px;background:var(--surface-3);border:1px solid var(--border-strong);color:var(--text);font-size:13px;font-weight:500;box-shadow:var(--shadow-lg);animation:toastIn .28s cubic-bezier(.22,1,.36,1) both;max-width:90vw}
@@ -377,6 +408,10 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
     </div>
     <div class="history" id="history"></div>
     <div class="side-bottom">
+      <button class="side-item" id="subscriptionsBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M3 12h18"/><rect x="3" y="3" width="18" height="18" rx="4"/></svg>
+        <span>الاشتراكات والباقات</span>
+      </button>
       <button class="side-item" id="settingsBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9c.14.35.44.62.83.74H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span>الإعدادات</span>
@@ -450,6 +485,67 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
   </main>
 </div>
 
+<!-- Subscriptions Modal -->
+<div class="modal-backdrop" id="subscriptionsModal">
+  <div class="modal subs-modal" role="dialog" aria-modal="true" aria-labelledby="subscriptionsTitle">
+    <div class="modal-head">
+      <h3 id="subscriptionsTitle">باقات Yovia AI</h3>
+      <button class="icon-btn" id="closeSubscriptions" aria-label="إغلاق">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <p class="subs-intro">اختر الباقة المناسبة لك واستمتع بحدود استخدام ومزايا أكبر.</p>
+    <div class="subs-period" aria-label="مدة الاشتراك">
+      <button type="button" class="active" data-period="monthly">شهري</button>
+      <button type="button" data-period="yearly">سنوي</button>
+    </div>
+    <div class="subs-grid">
+      <article class="subs-card selected" data-plan="FREE">
+        <h4>FREE</h4><p>للاستخدام اليومي الأساسي</p>
+        <div class="subs-price" data-monthly="0" data-yearly="0">0 <small>جنيه</small></div>
+        <p>مجانًا دائمًا</p>
+        <ul class="subs-features"><li>20 رسالة يوميًا</li><li>المزايا الأساسية</li></ul>
+        <button type="button" class="subs-select">الباقة الحالية</button>
+      </article>
+      <article class="subs-card" data-plan="GO">
+        <h4>GO</h4><p>استخدام أكثر وذاكرة موسعة</p>
+        <div class="subs-price" data-monthly="29" data-yearly="299">29 <small>جنيه / شهر</small></div>
+        <p>50 رسالة يوميًا</p>
+        <ul class="subs-features"><li>حد رسائل أعلى</li><li>ذاكرة موسعة</li><li>أولوية محسّنة</li></ul>
+        <button type="button" class="subs-select">اختيار GO</button>
+      </article>
+      <article class="subs-card" data-plan="PRO">
+        <h4>PRO</h4><p>للمهام والاستخدام المكثف</p>
+        <div class="subs-price" data-monthly="59" data-yearly="599">59 <small>جنيه / شهر</small></div>
+        <p>150 رسالة يوميًا</p>
+        <ul class="subs-features"><li>ذاكرة أكبر</li><li>أولوية أعلى</li><li>مزايا إضافية</li></ul>
+        <button type="button" class="subs-select">اختيار PRO</button>
+      </article>
+      <article class="subs-card" data-plan="ULTRA">
+        <h4>ULTRA</h4><p>كل الإمكانيات المتاحة</p>
+        <div class="subs-price" data-monthly="99" data-yearly="999.99">99 <small>جنيه / شهر</small></div>
+        <p>رسائل غير محدودة وفق سياسة الاستخدام العادل</p>
+        <ul class="subs-features"><li>ذاكرة موسعة</li><li>أعلى أولوية</li><li>كل المزايا المتاحة</li></ul>
+        <button type="button" class="subs-select">اختيار ULTRA</button>
+      </article>
+    </div>
+    <div class="subs-payment">
+      <h4>طريقة الدفع المفضلة</h4>
+      <div class="subs-methods">
+        <button type="button" class="active" data-method="vodafone">Vodafone Cash</button>
+        <button type="button" data-method="orange">Orange Cash</button>
+        <button type="button" data-method="etisalat">e&amp; money</button>
+        <button type="button" data-method="card">Visa / Mastercard</button>
+      </div>
+    </div>
+    <div class="subs-note">واجهة اختيار الباقة فقط: بيانات استقبال المدفوعات والتحقق منها لم تُضف بعد. لن يتم خصم أي مبلغ أو تفعيل اشتراك من هذه الصفحة حاليًا.</div>
+    <div class="subs-footer">
+      <div class="subs-total">الإجمالي: <strong id="subsTotal">0 جنيه</strong></div>
+      <button type="button" class="btn primary" id="continueSubscription">متابعة الاشتراك</button>
+    </div>
+  </div>
+</div>
+
 <!-- Settings Modal -->
 <div class="modal-backdrop" id="settingsModal">
   <div class="modal" role="dialog" aria-modal="true">
@@ -488,7 +584,7 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
         <!-- API -->
         <div class="panel active" data-panel="api">
           <div class="note-box">
-            🔒 <strong>خصوصيتك:</strong> المفتاح يُخزَّن في متصفحك فقط (localStorage) ولا يُرسل لأي سيرفر غير المزود الذي تختاره.
+            🔒 <strong>اتصال آمن:</strong> Yovia AI متصل بخادم مركزي. لا تحتاج لإضافة مفتاح API؛ مفاتيح الخدمة محفوظة على الخادم ولا تظهر في متصفحك.
           </div>
           <div class="field">
             <label class="field-label">مزود الخدمة</label>
@@ -706,6 +802,36 @@ let pendingFiles=[];
 let isGenerating=false;
 let abortController=null;
 
+// Supabase Anonymous Auth — لا يحتاج المستخدم إلى تسجيل دخول يدوي
+const YOVIA_SUPABASE_URL='https://zywftdjsqvaarzmcsuxj.supabase.co';
+const YOVIA_SUPABASE_PUBLISHABLE_KEY='sb_publishable_7iBzDFRA21wVb3R29C_K5w_jxVhVkHO';
+let yoviaSupabase=null;
+let yoviaAuthPromise=null;
+function getSupabaseClient(){
+  if(yoviaSupabase)return yoviaSupabase;
+  if(!window.supabase?.createClient)throw new Error('تعذّر تحميل مكتبة الاتصال الآمن. حدّث الصفحة وحاول مرة أخرى.');
+  yoviaSupabase=window.supabase.createClient(YOVIA_SUPABASE_URL,YOVIA_SUPABASE_PUBLISHABLE_KEY,{
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
+  });
+  return yoviaSupabase;
+}
+async function getYoviaAccessToken(){
+  if(yoviaAuthPromise)return yoviaAuthPromise;
+  yoviaAuthPromise=(async()=>{
+    const client=getSupabaseClient();
+    let {data,error}=await client.auth.getSession();
+    if(error)throw new Error('تعذّر استعادة جلسة المستخدم: '+error.message);
+    if(!data.session){
+      const signed=await client.auth.signInAnonymously();
+      if(signed.error)throw new Error('تعذّر إنشاء هوية مستخدم تلقائية: '+signed.error.message);
+      data={session:signed.data.session};
+    }
+    if(!data.session?.access_token)throw new Error('لم يتم إنشاء جلسة آمنة. أعد تحميل الصفحة.');
+    return data.session.access_token;
+  })();
+  try{return await yoviaAuthPromise;}finally{yoviaAuthPromise=null;}
+}
+
 /* ---------- Storage ---------- */
 function save(){ try{localStorage.setItem(STORE_KEY,JSON.stringify(state));}catch(e){} }
 function load(){
@@ -807,7 +933,7 @@ function applyTheme(){
 }
 
 /* ---------- Mode helpers ---------- */
-function isApiMode(){ return !!state.settings.api.key; }
+function isApiMode(){ return true; }
 function modeLabel(){ return state.settings.api.model.split('/').pop().replace(':free',''); }
 
 /* ---------- History ---------- */
@@ -925,7 +1051,7 @@ function welcomeNode(){
     <div class="welcome-logo">${ICON.bot}</div>
     <h2>${greet} 👋</h2>
     <p>أنا <strong>Yovia</strong> — مساعدك الذكي. اسألني أي شيء وسأساعدك.</p>
-    <div class="mode-pill">${ICON.plug}<span>${state.settings.api.key?'متصل: '+state.settings.api.model.split('/').pop().replace(':free',''):'أضف مفتاح API من الإعدادات للبدء'}</span></div>
+    <div class="mode-pill">${ICON.plug}<span>متصل عبر خادم Yovia</span></div>
     <div class="suggestions">
       ${suggestions.map(s=>`<button class="sugg" data-prompt="${esc(s.s)}"><span class="s-ico">${s.ico}</span><span><span class="s-title">${esc(s.t)}</span><span class="s-sub">${esc(s.s)}</span></span></button>`).join('')}
     </div>`;
@@ -991,7 +1117,9 @@ async function buildMessages(userText,files){
   const chat=currentChat();
   const sys=state.settings.api.systemPrompt||'أنت مساعد ذكي.';
   const msgs=[{role:'system',content:sys}];
-  const history=(chat.messages||[]).slice(-12);
+  const allHistory=chat.messages||[];
+  const last=allHistory[allHistory.length-1];
+  const history=(last&&last.role==='user'&&(last.text||'')===userText?allHistory.slice(0,-1):allHistory).slice(-12);
   history.forEach(m=>msgs.push({role:m.role,content:m.text||''}));
   let userContent=userText||'';
   if(files&&files.length){
@@ -1004,63 +1132,40 @@ async function buildMessages(userText,files){
 }
 
 async function streamChat(messages,handlers){
-  const api=state.settings.api;
-  const url=api.baseUrl.replace(/\/$/,'')+'/chat/completions';
-  const headers={'Content-Type':'application/json','Authorization':`Bearer ${api.key}`};
-  if(api.provider==='openrouter'){
-    headers['HTTP-Referer']=location.origin||'https://Yovia.app';
-    headers['X-Title']='Yovia';
-  }
-  const body={
-    model:api.model,messages,stream:true,
-    temperature:Number(state.settings.temperature),
-    max_tokens:Number(state.settings.maxTokens)
-  };
+  let token;
+  try{token=await getYoviaAccessToken();}
+  catch(e){throw e;}
   let res;
   try{
-    res=await fetch(url,{method:'POST',headers,body:JSON.stringify(body),signal:abortController.signal});
+    res=await fetch('/api/chat',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
+      body:JSON.stringify({
+        messages,
+        temperature:Number(state.settings.temperature),
+        max_tokens:Number(state.settings.maxTokens)
+      }),
+      signal:abortController.signal
+    });
   }catch(e){
     if(e.name==='AbortError'){handlers.onDone();return;}
-    throw new Error('تعذّر الاتصال — تحقق من الشبكة');
+    throw new Error('تعذّر الاتصال بخادم Yovia. تحقق من الإنترنت وحاول مرة أخرى.');
   }
+  let data;
+  try{data=await res.json();}
+  catch(e){throw new Error('استجابة غير مفهومة من خادم Yovia.');}
   if(!res.ok){
-    let msg=`HTTP ${res.status}`;
-    try{const err=await res.json();msg=err.error?.message||err.message||msg;}catch(e){try{msg=await res.text();}catch(_){}}
-    throw new Error(msg.slice(0,200));
-  }
-  if(!res.body||!res.body.getReader){
-    const data=await res.json();
-    const content=data.choices?.[0]?.message?.content||'';
-    handlers.onToken(content);handlers.onDone();return;
-  }
-  const reader=res.body.getReader();
-  const decoder=new TextDecoder();
-  let buffer='';
-  try{
-    while(true){
-      const {done,value}=await reader.read();
-      if(done)break;
-      buffer+=decoder.decode(value,{stream:true});
-      const lines=buffer.split('\n');
-      buffer=lines.pop();
-      for(const line of lines){
-        const trimmed=line.trim();
-        if(!trimmed)continue;
-        if(trimmed==='data: [DONE]'){handlers.onDone();return;}
-        if(!trimmed.startsWith('data: '))continue;
-        const jsonStr=trimmed.slice(6);
-        try{
-          const json=JSON.parse(jsonStr);
-          const delta=json.choices?.[0]?.delta?.content||json.choices?.[0]?.message?.content||'';
-          if(delta)handlers.onToken(delta);
-        }catch(e){}
-      }
+    const message=data.error||data.message||`HTTP ${res.status}`;
+    if(data.code==='LIMIT_REACHED'){
+      const reset=data.reset_at?` موعد التجديد: ${new Date(data.reset_at).toLocaleString('ar-EG')}`:'';
+      throw new Error('وصلت للحد اليومي لرسائلك.'+reset+' يمكنك الاشتراك أو بدء محادثة جديدة بعد التجديد.');
     }
-    handlers.onDone();
-  }catch(e){
-    if(e.name==='AbortError'){handlers.onDone();return;}
-    handlers.onError(e.message||'انقطع الاتصال');
+    throw new Error(message);
   }
+  const content=data.choices?.[0]?.message?.content||data.reply||'';
+  if(!content)throw new Error('لم يصل رد من Yovia. حاول مرة أخرى.');
+  handlers.onToken(content);
+  handlers.onDone();
 }
 
 /* ============================================================
@@ -1073,10 +1178,6 @@ async function sendMessage(){
   const files=pendingFiles.slice();
   if(!text&&!files.length)return;
 
-  if(!state.settings.api.key){
-    toast('أضف مفتاح API من الإعدادات أولاً',true);
-    openSettings();return;
-  }
 
   let chat=currentChat();
   if(!chat)chat=createChat();
@@ -1179,8 +1280,8 @@ function beep(){
 /* ---------- Mode UI ---------- */
 function updateModeUI(){
   $('#modelLabel').textContent=modeLabel();
-  $('#userMode').textContent=state.settings.api.key?'متصل عبر API':'إعداد API مطلوب';
-  $('#apiBadge').style.display=state.settings.api.key?'inline-block':'none';
+  $('#userMode').textContent='متصل عبر خادم Yovia';
+  $('#apiBadge').style.display='inline-block';
 }
 
 /* ---------- Model dropdown ---------- */
@@ -1219,6 +1320,79 @@ function openMobileSidebar(){
 function closeMobileSidebar(){
   $('#sidebar').classList.remove('open');
   $('#overlay').classList.remove('show');
+}
+
+/* ---------- Subscriptions ---------- */
+let selectedSubscriptionPlan='FREE';
+let selectedSubscriptionPeriod='monthly';
+let selectedSubscriptionMethod='vodafone';
+
+const subscriptionPrices={
+  FREE:{monthly:0,yearly:0},
+  GO:{monthly:29,yearly:299},
+  PRO:{monthly:59,yearly:599},
+  ULTRA:{monthly:99,yearly:999.99}
+};
+
+function updateSubscriptionUI(){
+  const cards=$$('.subs-card');
+  cards.forEach(card=>{
+    const plan=card.dataset.plan;
+    const price=subscriptionPrices[plan][selectedSubscriptionPeriod];
+    card.classList.toggle('selected',plan===selectedSubscriptionPlan);
+    const priceEl=card.querySelector('.subs-price');
+    priceEl.innerHTML=`${price} <small>جنيه${plan==='FREE'?'':selectedSubscriptionPeriod==='monthly'?' / شهر':' / سنة'}</small>`;
+    const button=card.querySelector('.subs-select');
+    button.textContent=plan===selectedSubscriptionPlan?(plan==='FREE'?'الباقة الحالية':'تم الاختيار'):`اختيار ${plan}`;
+  });
+  const total=subscriptionPrices[selectedSubscriptionPlan][selectedSubscriptionPeriod];
+  $('#subsTotal').textContent=`${total} جنيه`;
+  $$('.subs-period button').forEach(b=>b.classList.toggle('active',b.dataset.period===selectedSubscriptionPeriod));
+  $$('.subs-methods button').forEach(b=>b.classList.toggle('active',b.dataset.method===selectedSubscriptionMethod));
+}
+function openSubscriptions(){
+  selectedSubscriptionPlan='FREE';
+  selectedSubscriptionPeriod='monthly';
+  selectedSubscriptionMethod='vodafone';
+  updateSubscriptionUI();
+  $('#subscriptionsModal').classList.add('show');
+}
+function closeSubscriptions(){$('#subscriptionsModal').classList.remove('show');}
+
+function initSubscriptions(){
+  $('#subscriptionsBtn').addEventListener('click',()=>{
+    openSubscriptions();
+    closeMobileSidebar();
+  });
+  $('#closeSubscriptions').addEventListener('click',closeSubscriptions);
+  $('#subscriptionsModal').addEventListener('click',e=>{
+    if(e.target===$('#subscriptionsModal'))closeSubscriptions();
+  });
+  $$('.subs-card').forEach(card=>{
+    card.querySelector('.subs-select').addEventListener('click',()=>{
+      selectedSubscriptionPlan=card.dataset.plan;
+      updateSubscriptionUI();
+    });
+  });
+  $$('.subs-period button').forEach(button=>{
+    button.addEventListener('click',()=>{
+      selectedSubscriptionPeriod=button.dataset.period;
+      updateSubscriptionUI();
+    });
+  });
+  $$('.subs-methods button').forEach(button=>{
+    button.addEventListener('click',()=>{
+      selectedSubscriptionMethod=button.dataset.method;
+      updateSubscriptionUI();
+    });
+  });
+  $('#continueSubscription').addEventListener('click',()=>{
+    if(selectedSubscriptionPlan==='FREE'){
+      toast('أنت على الباقة المجانية بالفعل');
+      return;
+    }
+    toast('اختيارك محفوظ في الواجهة فقط؛ الدفع والتفعيل غير متاحين حتى إعداد بيانات الدفع والتحقق');
+  });
 }
 
 /* ---------- Settings ---------- */
@@ -1356,6 +1530,9 @@ function init(){
     applyTheme();syncSettingsUI();save();
   });
 
+  /* Subscriptions */
+  initSubscriptions();
+
   /* Settings */
   $('#settingsBtn').addEventListener('click',openSettings);
   $('#closeSettings').addEventListener('click',closeSettings);
@@ -1374,6 +1551,12 @@ function init(){
   });
 
   /* API provider */
+  // إعدادات المزود القديمة مخفية؛ الاتصال الآن يتم عبر خادم Yovia المركزي.
+  ['apiProvider','apiKey','apiBaseUrl','apiModel','loadModelsBtn'].forEach(id=>{
+    const el=$('#'+id);
+    if(el){const field=el.closest('.field');if(field)field.style.display='none';else el.style.display='none';}
+  });
+
   $('#apiProvider').addEventListener('change',e=>{
     const p=e.target.value;const cfg=PROVIDERS[p];
     state.settings.api.provider=p;
@@ -1411,20 +1594,14 @@ function init(){
   });
 
   $('#testConnectionBtn').addEventListener('click',async()=>{
-    const api=state.settings.api;
-    if(!api.key){toast('أضف مفتاحاً',true);return;}
     const btn=$('#testConnectionBtn');
     btn.disabled=true;const orig=btn.innerHTML;btn.innerHTML='...جاري الاختبار';
     try{
-      const res=await fetch(api.baseUrl.replace(/\/$/,'')+'/chat/completions',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','Authorization':`Bearer ${api.key}`},
-        body:JSON.stringify({model:api.model,messages:[{role:'user',content:'قل "تم"' }],max_tokens:10})
-      });
-      if(!res.ok){const txt=await res.text();throw new Error('HTTP '+res.status+': '+txt.slice(0,100));}
+      await getYoviaAccessToken();
+      const res=await fetch('/api/health',{headers:{'Authorization':`Bearer ${await getYoviaAccessToken()}`}});
       const data=await res.json();
-      const reply=data.choices?.[0]?.message?.content||'';
-      toast('✓ نجح: '+(reply.slice(0,40)||'OK'));
+      if(!res.ok)throw new Error(data.error||'تعذّر الاتصال بالخادم');
+      toast('✓ خادم Yovia جاهز');
     }catch(e){toast('فشل: '+e.message.slice(0,90),true);}
     finally{btn.disabled=false;btn.innerHTML=orig;}
   });
