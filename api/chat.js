@@ -324,20 +324,15 @@ module.exports = async function handler(req, res) {
 
           contents: geminiContents,
 
-          generationConfig: {
-            temperature:
-              typeof body.temperature === "number"
-                ? Math.max(0, Math.min(2, body.temperature))
-                : 0.7,
-
-            maxOutputTokens:
-              typeof body.max_tokens === "number"
-                ? Math.max(1, Math.min(8192, body.max_tokens))
-                : 2048
-          }
-        })
-      }
-    );
+generationConfig: {
+  maxOutputTokens:
+    typeof body.max_tokens === "number"
+      ? Math.max(1, Math.min(8192, body.max_tokens))
+      : 2048,
+  thinkingConfig: {
+    thinkingLevel: "low"
+  }
+}
 
     // ======================================
     // READ GEMINI RESPONSE
