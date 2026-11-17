@@ -1298,19 +1298,6 @@ async function streamChat(messages, handlers) {
   }
 }
 
-  // استخراج رد Yovia
-  const content =
-    data.choices?.[0]?.message?.content ||
-    data.reply ||
-    '';
-
-  if (!content) {
-    throw new Error('لم يصل رد من Yovia. حاول مرة أخرى.');
-  }
-
-  handlers.onToken(content);
-  handlers.onDone();
-}
 /* ============================================================
    Send Message — يوجّه حسب الوضع
    ============================================================ */
