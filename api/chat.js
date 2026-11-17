@@ -15,8 +15,7 @@ const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || '';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
-
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
 // ==========================================
 // SYSTEM PROMPT
 // ==========================================
