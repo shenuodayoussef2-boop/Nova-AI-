@@ -1,24 +1,25 @@
 
 'use strict';
 
-// ==========================================
+// ============================================================
 // YOVIA AI - CHAT API
 // Supabase Authentication + Daily Quotas
-// Centralized Gemini API
-// ==========================================
+// Gemini REAL STREAMING (SSE)
+// ============================================================
 
-// ==========================================
+// ============================================================
 // ENVIRONMENT
-// ==========================================
+// ============================================================
 
 const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || '';
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
-// ==========================================
+
+// ============================================================
 // SYSTEM PROMPT
-// ==========================================
+// ============================================================
 
 const SYSTEM_PROMPT = `
 أنت Yovia AI، مساعد ذكي متعدد اللغات.
@@ -33,26 +34,19 @@ const SYSTEM_PROMPT = `
 - كن واضحًا ومباشرًا.
 `;
 
-// ==========================================
-// RESPONSE HELPER
-// ==========================================
+// ============================================================
+// RESPONSE HELPERS
+// ============================================================
 
 function send(res, status, payload) {
   return res.status(status).json(payload);
 }
 
-// ==========================================
-// JSON HELPER
-// ==========================================
-
 async function readJSON(response) {
   const raw = await response.text();
 
   if (!raw) {
-    return {
-      raw: '',
-      data: null
-    };
+    return { raw: '', data: null };
   }
 
   try {
@@ -68,9 +62,9 @@ async function readJSON(response) {
   }
 }
 
-// ==========================================
-// NORMALIZE MESSAGES
-// ==========================================
+// ============================================================
+// MESSAGE NORMALIZATION
+// ============================================================
 
 function normalizeMessages(input) {
   if (!Array.isArray(input)) {
@@ -121,26 +115,39 @@ function normalizeMessages(input) {
 
       return {
         role,
-        parts: [
-          {
-            text: content
-          }
-        ]
+        parts: [{ text: content }]
       };
     })
     .filter(Boolean)
     .slice(-40);
 }
 
-// ==========================================
+// ============================================================
+// SSE HELPERS
+// ============================================================
+
+function sendSSE(res, payload) {
+  if (res.destroyed || res.writableEnded) {
+    return false;
+  }
+
+  return res.write(
+    `data: ${JSON.stringify(payload)}\n\n`
+  );
+}
+
+// ============================================================
 // MAIN HANDLER
-// ==========================================
+// ============================================================
 
 module.exports = async function handler(req, res) {
 
-  // ========================================
+  let stage = 'initialization';
+  let geminiReader = null;
+
+  // ==========================================================
   // CORS
-  // ========================================
+  // ==========================================================
 
   res.setHeader('Access-Control-Allow-Origin', '*');
 
@@ -165,14 +172,11 @@ module.exports = async function handler(req, res) {
     });
   }
 
-  // اسم المرحلة لتحديد مكان الخطأ
-  let stage = 'initialization';
-
   try {
 
-    // ======================================
+    // ========================================================
     // ENVIRONMENT CHECK
-    // ======================================
+    // ========================================================
 
     stage = 'environment';
 
@@ -190,9 +194,9 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // ======================================
+    // ========================================================
     // AUTHENTICATION HEADER
-    // ======================================
+    // ========================================================
 
     stage = 'authentication_header';
 
@@ -205,9 +209,9 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // ======================================
+    // ========================================================
     // REQUEST BODY
-    // ======================================
+    // ========================================================
 
     stage = 'request_body';
 
@@ -235,9 +239,9 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // ======================================
-    // VALIDATE SUPABASE SESSION
-    // ======================================
+    // ========================================================
+    // SUPABASE AUTHENTICATION
+    // ========================================================
 
     stage = 'supabase_auth';
 
@@ -269,9 +273,9 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // ======================================
-    // NORMALIZE USER MESSAGES
-    // ======================================
+    // ========================================================
+    // NORMALIZE MESSAGES
+    // ========================================================
 
     stage = 'messages';
 
@@ -288,11 +292,7 @@ module.exports = async function handler(req, res) {
       if (singleMessage) {
         messages.push({
           role: 'user',
-          parts: [
-            {
-              text: singleMessage
-            }
-          ]
+          parts: [{ text: singleMessage }]
         });
       }
     }
@@ -307,9 +307,9 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // ======================================
+    // ========================================================
     // DAILY MESSAGE QUOTA
-    // ======================================
+    // ========================================================
 
     stage = 'quota';
 
@@ -384,9 +384,9 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    // ======================================
+    // ========================================================
     // SYSTEM INSTRUCTION
-    // ======================================
+    // ========================================================
 
     stage = 'system_instruction';
 
@@ -409,9 +409,9 @@ module.exports = async function handler(req, res) {
       .filter(Boolean)
       .join('\n\n');
 
-    // ======================================
+    // ========================================================
     // GEMINI CONTENTS
-    // ======================================
+    // ========================================================
 
     stage = 'gemini_prepare';
 
@@ -420,20 +420,32 @@ module.exports = async function handler(req, res) {
       parts: message.parts
     }));
 
+    const requestedTokens = Number(body.max_tokens);
+
     const maxOutputTokens =
-      Number.isFinite(Number(body.max_tokens)) &&
-      Number(body.max_tokens) > 0
-        ? Math.min(8192, Math.max(1, Math.floor(Number(body.max_tokens))))
+      Number.isFinite(requestedTokens) &&
+      requestedTokens > 0
+        ? Math.min(
+            8192,
+            Math.max(1, Math.floor(requestedTokens))
+          )
         : 2048;
 
-    // ======================================
-    // GEMINI REQUEST
-    // ======================================
+    const requestedTemperature = Number(body.temperature);
+
+    const temperature =
+      Number.isFinite(requestedTemperature)
+        ? Math.min(2, Math.max(0, requestedTemperature))
+        : 0.7;
+
+    // ========================================================
+    // GEMINI STREAMING REQUEST
+    // ========================================================
 
     stage = 'gemini_request';
 
     const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:streamGenerateContent?alt=sse`,
       {
         method: 'POST',
 
@@ -445,120 +457,204 @@ module.exports = async function handler(req, res) {
         body: JSON.stringify({
           systemInstruction: {
             parts: [
-              {
-                text: systemInstruction
-              }
+              { text: systemInstruction }
             ]
           },
 
           contents: geminiContents,
 
           generationConfig: {
-            maxOutputTokens
+            maxOutputTokens,
+            temperature
           }
         })
       }
     );
 
-    // ======================================
-    // READ GEMINI RESPONSE
-    // ======================================
-
-    stage = 'gemini_response';
-
-    const geminiResult = await readJSON(geminiResponse);
-
-    const geminiData = geminiResult.data;
+    // ========================================================
+    // GEMINI ERROR
+    // ========================================================
 
     if (!geminiResponse.ok) {
-      const geminiError =
-        geminiData?.error?.message ||
+      const geminiResult = await readJSON(geminiResponse);
+
+      const details =
+        geminiResult.data?.error?.message ||
+        geminiResult.raw.slice(0, 1500) ||
         `Gemini HTTP ${geminiResponse.status}`;
 
       console.error(
         'Yovia Gemini API error:',
         geminiResponse.status,
-        geminiError
+        details
       );
 
       return send(res, 502, {
         error: 'تعذّر على Yovia الحصول على رد من النموذج حاليًا.',
         code: 'GEMINI_REQUEST_FAILED',
-        details: geminiError
+        details
       });
     }
 
-    if (!geminiData || typeof geminiData !== 'object') {
-      console.error(
-        'Yovia Gemini invalid response:',
-        geminiResult.raw.slice(0, 1500)
-      );
-
+    if (!geminiResponse.body) {
       return send(res, 502, {
-        error: 'وصل رد غير صالح من خدمة الذكاء الاصطناعي.',
-        code: 'GEMINI_INVALID_RESPONSE'
+        error: 'خدمة Gemini لم تُرجع تدفق بيانات.',
+        code: 'GEMINI_STREAM_UNAVAILABLE'
       });
     }
 
-    // ======================================
-    // EXTRACT ANSWER
-    // ======================================
+    // ========================================================
+    // START STREAM RESPONSE
+    // ========================================================
 
-    stage = 'gemini_extract';
+    stage = 'gemini_stream';
 
-    const candidate = geminiData.candidates?.[0];
+    res.statusCode = 200;
 
-    const answer = (
-      candidate?.content?.parts || []
-    )
-      .map(part =>
-        typeof part.text === 'string'
-          ? part.text
-          : ''
-      )
-      .join('')
-      .trim();
+    res.setHeader(
+      'Content-Type',
+      'text/event-stream; charset=utf-8'
+    );
 
-    if (!answer) {
-      console.error(
-        'Yovia empty Gemini response:',
-        JSON.stringify({
-          promptFeedback: geminiData.promptFeedback,
-          finishReason: candidate?.finishReason
-        })
-      );
+    res.setHeader(
+      'Cache-Control',
+      'no-cache, no-transform'
+    );
 
-      return send(res, 502, {
-        error: 'النموذج لم يُرجع نصًا. حاول مرة أخرى.',
-        code: 'EMPTY_MODEL_RESPONSE',
-        details: candidate?.finishReason || null
-      });
-    }
+    res.setHeader('Connection', 'keep-alive');
 
-    // ======================================
-    // SUCCESS RESPONSE
-    // OpenAI-compatible format
-    // ======================================
+    res.setHeader('X-Accel-Buffering', 'no');
 
-    stage = 'success_response';
+    res.flushHeaders?.();
 
-    return send(res, 200, {
-      id: `yovia-${Date.now()}`,
+    // ========================================================
+    // READ GEMINI SSE STREAM
+    // ========================================================
 
-      object: 'chat.completion',
+    geminiReader = geminiResponse.body.getReader();
 
-      choices: [
-        {
-          index: 0,
+    const decoder = new TextDecoder();
 
-          message: {
-            role: 'assistant',
-            content: answer
-          },
+    let buffer = '';
+    let totalText = '';
+    let streamError = null;
 
-          finish_reason: candidate?.finishReason || 'STOP'
+    function processEvent(eventBlock) {
+      const lines = eventBlock.split(/\r?\n/);
+
+      for (const line of lines) {
+        if (!line.startsWith('data:')) {
+          continue;
         }
-      ],
+
+        const raw = line.slice(5).trim();
+
+        if (!raw || raw === '[DONE]') {
+          continue;
+        }
+
+        let chunk;
+
+        try {
+          chunk = JSON.parse(raw);
+        } catch {
+          continue;
+        }
+
+        if (chunk.error) {
+          streamError =
+            chunk.error.message ||
+            'حدث خطأ أثناء توليد الرد.';
+
+          continue;
+        }
+
+        const parts =
+          chunk.candidates?.[0]?.content?.parts || [];
+
+        for (const part of parts) {
+          if (
+            typeof part.text !== 'string' ||
+            !part.text
+          ) {
+            continue;
+          }
+
+          totalText += part.text;
+
+          sendSSE(res, {
+            type: 'delta',
+            text: part.text
+          });
+        }
+      }
+    }
+
+    // ========================================================
+    // STREAM LOOP
+    // ========================================================
+
+    while (true) {
+      if (res.destroyed || res.writableEnded) {
+        await geminiReader.cancel().catch(() => {});
+        return;
+      }
+
+      const { value, done } = await geminiReader.read();
+
+      if (done) {
+        break;
+      }
+
+      buffer += decoder.decode(value, {
+        stream: true
+      });
+
+      const events = buffer.split(/\r?\n\r?\n/);
+
+      buffer = events.pop() || '';
+
+      for (const eventBlock of events) {
+        processEvent(eventBlock);
+      }
+    }
+
+    // Process remaining buffered data
+    buffer += decoder.decode();
+
+    if (buffer.trim()) {
+      processEvent(buffer);
+    }
+
+    // ========================================================
+    // STREAM RESULT
+    // ========================================================
+
+    if (streamError) {
+      sendSSE(res, {
+        type: 'error',
+        error: streamError
+      });
+
+      return res.end();
+    }
+
+    if (!totalText.trim()) {
+      sendSSE(res, {
+        type: 'error',
+        error: 'النموذج لم يُرجع نصًا. حاول مرة أخرى.',
+        code: 'EMPTY_MODEL_RESPONSE'
+      });
+
+      return res.end();
+    }
+
+    // ========================================================
+    // DONE EVENT
+    // ========================================================
+
+    sendSSE(res, {
+      type: 'done',
 
       model: GEMINI_MODEL,
 
@@ -571,17 +667,39 @@ module.exports = async function handler(req, res) {
       }
     });
 
+    return res.end();
+
   } catch (error) {
 
-    // ======================================
-    // INTERNAL ERROR
-    // ======================================
+    // ========================================================
+    // ERROR HANDLING
+    // ========================================================
 
     console.error('Yovia chat handler error:', {
       stage,
       name: error?.name || 'Error',
       message: error?.message || String(error)
     });
+
+    if (geminiReader) {
+      try {
+        await geminiReader.cancel();
+      } catch {}
+    }
+
+    if (res.headersSent) {
+      sendSSE(res, {
+        type: 'error',
+        error: 'حصل خطأ أثناء توليد الرد.',
+        code: 'YOVIA_STREAM_ERROR'
+      });
+
+      if (!res.writableEnded) {
+        res.end();
+      }
+
+      return;
+    }
 
     return send(res, 500, {
       error: 'حصل خطأ داخلي في Yovia AI.',
