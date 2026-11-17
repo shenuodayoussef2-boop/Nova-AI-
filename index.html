@@ -1189,23 +1189,23 @@ async function streamChat(messages, handlers) {
   }
 
   // معالجة أخطاء الخادم
-  if (!res.ok) {
-    const message = data.error || data.message || `HTTP ${res.status}`;
+if (!res.ok) {
+  const message = [
+    data.error || data.message || `HTTP ${res.status}`,
+    data.code ? `Code: ${data.code}` : '',
+    data.details ? `Details: ${data.details}` : ''
+  ].filter(Boolean).join('\n');
 
-    if (data.code === 'LIMIT_REACHED') {
-      const reset = data.reset_at
-        ? ` موعد التجديد: ${new Date(data.reset_at).toLocaleString('ar-EG')}`
-        : '';
+  if (data.code === 'LIMIT_REACHED') {
+    const reset = data.reset_at
+      ? ` موعد التجديد: ${new Date(data.reset_at).toLocaleString('ar-EG')}`
+      : '';
 
-      throw new Error(
-        'وصلت للحد اليومي لرسائلك.' +
-        reset +
-        ' يمكنك الاشتراك أو بدء محادثة جديدة بعد التجديد.'
-      );
-    }
-
-    throw new Error(message);
+    throw new Error('وصلت للحد اليومي لرسائلك.' + reset);
   }
+
+  throw new Error(message);
+}
 
   // استخراج رد Yovia
   const content =
