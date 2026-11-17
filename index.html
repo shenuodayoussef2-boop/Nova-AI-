@@ -1131,53 +1131,95 @@ async function buildMessages(userText,files){
   return msgs;
 }
 
-async function streamChat(messages,handlers){
+
+async function streamChat(messages, handlers) {
   let token;
-  try{token=await getYoviaAccessToken();}
-  catch(e){throw e;}
+
+  try {
+    token = await getYoviaAccessToken();
+  } catch (e) {
+    throw e;
+  }
+
   let res;
-  try{
-    res=await fetch('/api/chat',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
-      body:JSON.stringify({
+
+  try {
+    res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
         messages,
-        temperature:Number(state.settings.temperature),
-        max_tokens:Number(state.settings.maxTokens)
+        temperature: Number(state.settings.temperature),
+        max_tokens: Number(state.settings.maxTokens)
       }),
-      signal:abortController.signal
+      signal: abortController.signal
     });
-  }catch(e){
-    if(e.name==='AbortError'){handlers.onDone();return;}
-    throw new Error('تعذّر الاتصال بخادم Yovia. تحقق من الإنترنت وحاول مرة أخرى.');
-  }
-  let data;
-const responseText = await res.text();
-
-try {
-  data = JSON.parse(responseText);
-} catch (e) {
-  const preview = responseText
-    .replace(/<[^>]*>/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim()
-    .slice(0, 250);
-
-  throw new Error(
-    `رد غير صالح من الخادم (HTTP ${res.status}). ` +
-    `نوع المحتوى: ${res.headers.get('content-type') || 'غير معروف'}. ` +
-    `تفاصيل: ${preview || 'الرد فارغ'}`
-  );
-  }
+  } catch (e) {
+    if (e.name === 'AbortError') {
+      handlers.onDone();
+      return;
     }
+
+    throw new Error(
+      'تعذّر الاتصال بخادم Yovia. تحقق من الإنترنت وحاول مرة أخرى.'
+    );
+  }
+
+  // قراءة رد الخادم
+  const responseText = await res.text();
+  let data;
+
+  try {
+    data = JSON.parse(responseText);
+  } catch (e) {
+    const preview = responseText
+      .replace(/<[^>]*>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 250);
+
+    throw new Error(
+      `رد غير صالح من الخادم (HTTP ${res.status}). ` +
+      `نوع المحتوى: ${res.headers.get('content-type') || 'غير معروف'}. ` +
+      `تفاصيل: ${preview || 'الرد فارغ'}`
+    );
+  }
+
+  // معالجة أخطاء الخادم
+  if (!res.ok) {
+    const message = data.error || data.message || `HTTP ${res.status}`;
+
+    if (data.code === 'LIMIT_REACHED') {
+      const reset = data.reset_at
+        ? ` موعد التجديد: ${new Date(data.reset_at).toLocaleString('ar-EG')}`
+        : '';
+
+      throw new Error(
+        'وصلت للحد اليومي لرسائلك.' +
+        reset +
+        ' يمكنك الاشتراك أو بدء محادثة جديدة بعد التجديد.'
+      );
+    }
+
     throw new Error(message);
   }
-  const content=data.choices?.[0]?.message?.content||data.reply||'';
-  if(!content)throw new Error('لم يصل رد من Yovia. حاول مرة أخرى.');
+
+  // استخراج رد Yovia
+  const content =
+    data.choices?.[0]?.message?.content ||
+    data.reply ||
+    '';
+
+  if (!content) {
+    throw new Error('لم يصل رد من Yovia. حاول مرة أخرى.');
+  }
+
   handlers.onToken(content);
   handlers.onDone();
 }
-
 /* ============================================================
    Send Message — يوجّه حسب الوضع
    ============================================================ */
