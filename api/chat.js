@@ -1,7 +1,7 @@
 
 // ==========================================
 // YOVIA AI - CHAT API
-// Supabase Anonymous Auth + Daily Quotas
+// Supabase Authentication + Daily Quotas
 // Centralized Gemini API
 // ==========================================
 
@@ -11,8 +11,9 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
 
 const SYSTEM_PROMPT = `
-أنت Yovia AI، مساعد ذكي متعدد اللغات. اسمك Yovia.
+أنت Yovia AI، مساعد ذكي متعدد اللغات.
 
+- اسمك Yovia.
 - افهم لغة المستخدم ورد باللغة نفسها وبلهجته قدر الإمكان.
 - إذا سُئلت عن اسمك فقل: أنا Yovia.
 - إذا سُئلت عن مطوّر Yovia فقل: المطوّر هو يوسف.
@@ -83,7 +84,10 @@ module.exports = async function handler(req, res) {
   // CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
 
   if (req.method === "OPTIONS") {
     return res.status(204).end();
@@ -91,14 +95,15 @@ module.exports = async function handler(req, res) {
 
   if (req.method !== "POST") {
     return send(res, 405, {
-      error: "POST only"
+      error: "POST only",
+      code: "METHOD_NOT_ALLOWED"
     });
   }
 
   try {
 
     // ======================================
-    // CHECK ENVIRONMENT VARIABLES
+    // ENVIRONMENT CHECK
     // ======================================
 
     if (!SUPABASE_URL || !SUPABASE_KEY) {
@@ -138,12 +143,18 @@ module.exports = async function handler(req, res) {
       try {
         body = JSON.parse(body);
       } catch {
-        body = {};
+        return send(res, 400, {
+          error: "بيانات الطلب غير صالحة.",
+          code: "INVALID_JSON"
+        });
       }
     }
 
     if (!body || typeof body !== "object" || Array.isArray(body)) {
-      body = {};
+      return send(res, 400, {
+        error: "تنسيق الطلب غير صالح.",
+        code: "INVALID_BODY"
+      });
     }
 
     // ======================================
@@ -189,7 +200,10 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    if (!messages.length || !messages.some(m => m.role === "user")) {
+    if (
+      !messages.length ||
+      !messages.some(m => m.role === "user")
+    ) {
       return send(res, 400, {
         error: "اكتب رسالة أولًا.",
         code: "MISSING_MESSAGE"
@@ -218,9 +232,7 @@ module.exports = async function handler(req, res) {
     let quotaData;
 
     try {
-      quotaData = quotaRaw
-        ? JSON.parse(quotaRaw)
-        : null;
+      quotaData = quotaRaw ? JSON.parse(quotaRaw) : null;
     } catch {
       quotaData = null;
     }
@@ -256,7 +268,6 @@ module.exports = async function handler(req, res) {
       quota.status === "allowed";
 
     if (!allowed) {
-
       const reached =
         quota.code === "LIMIT_REACHED" ||
         quota.status === "limit_reached";
@@ -324,15 +335,15 @@ module.exports = async function handler(req, res) {
 
           contents: geminiContents,
 
-generationConfig: {
-  maxOutputTokens:
-    typeof body.max_tokens === "number"
-      ? Math.max(1, Math.min(8192, body.max_tokens))
-      : 2048,
-  thinkingConfig: {
-    thinkingLevel: "low"
-  }
-}
+          generationConfig: {
+            maxOutputTokens:
+              typeof body.max_tokens === "number"
+                ? Math.max(1, Math.min(8192, body.max_tokens))
+                : 2048
+          }
+        })
+      }
+    );
 
     // ======================================
     // READ GEMINI RESPONSE
@@ -370,8 +381,10 @@ generationConfig: {
     // EXTRACT ANSWER
     // ======================================
 
+    const candidate = geminiData?.candidates?.[0];
+
     const answer = (
-      geminiData?.candidates?.[0]?.content?.parts || []
+      candidate?.content?.parts || []
     )
       .map(part =>
         typeof part.text === "string"
@@ -382,6 +395,11 @@ generationConfig: {
       .trim();
 
     if (!answer) {
+      console.error(
+        "Yovia empty Gemini response:",
+        JSON.stringify(geminiData)
+      );
+
       return send(res, 502, {
         error: "النموذج لم يُرجع نصًا. حاول مرة أخرى.",
         code: "EMPTY_MODEL_RESPONSE"
@@ -394,6 +412,9 @@ generationConfig: {
     // ======================================
 
     return send(res, 200, {
+      id: `yovia-${Date.now()}`,
+      object: "chat.completion",
+
       choices: [
         {
           index: 0,
@@ -403,7 +424,7 @@ generationConfig: {
             content: answer
           },
 
-          finish_reason: "stop"
+          finish_reason: candidate?.finishReason || "STOP"
         }
       ],
 
@@ -414,6 +435,21 @@ generationConfig: {
         used: quota.used ?? null,
         limit: quota.limit ?? null,
         remaining: quota.remaining ?? null,
+        reset_at: quota.reset_at || null
+      }
+    });
+
+  } catch (error) {
+
+    console.error("Yovia chat handler error:", error);
+
+    return send(res, 500, {
+      error: "حصل خطأ داخلي في Yovia AI.",
+      code: "YOVIA_INTERNAL_ERROR"
+    });
+  }
+};
+aining: quota.remaining ?? null,
         reset_at: quota.reset_at || null
       }
     });
