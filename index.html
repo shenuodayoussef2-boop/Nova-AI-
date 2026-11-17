@@ -1132,13 +1132,14 @@ async function buildMessages(userText,files){
 }
 
 
+
 async function streamChat(messages, handlers) {
   let token;
 
   try {
     token = await getYoviaAccessToken();
-  } catch (e) {
-    throw e;
+  } catch (error) {
+    throw error;
   }
 
   let res;
@@ -1157,54 +1158,144 @@ async function streamChat(messages, handlers) {
       }),
       signal: abortController.signal
     });
-  } catch (e) {
-    if (e.name === 'AbortError') {
+  } catch (error) {
+    if (error.name === 'AbortError') {
       handlers.onDone();
       return;
     }
 
+    throw new Error('تعذّر الاتصال بخادم Yovia. تحقق من الإنترنت وحاول مرة أخرى.');
+  }
+
+  // معالجة أخطاء الخادم قبل بدء استقبال Streaming
+  if (!res.ok) {
+    const responseText = await res.text();
+    let data = {};
+
+    try {
+      data = JSON.parse(responseText);
+    } catch {}
+
+    if (data.code === 'LIMIT_REACHED') {
+      const reset = data.reset_at
+        ? ` موعد التجديد: ${new Date(data.reset_at).toLocaleString('ar-EG')}`
+        : '';
+
+      throw new Error('وصلت للحد اليومي لرسائلك.' + reset);
+    }
+
+    throw new Error([
+      data.error || data.message || `HTTP ${res.status}`,
+      data.code ? `Code: ${data.code}` : '',
+      data.details ? `Details: ${data.details}` : '',
+      !data.error && !data.message ? responseText.slice(0, 300) : ''
+    ].filter(Boolean).join('\n'));
+  }
+
+  const contentType = res.headers.get('content-type') || '';
+
+  if (!contentType.includes('text/event-stream')) {
+    const responseText = await res.text();
     throw new Error(
-      'تعذّر الاتصال بخادم Yovia. تحقق من الإنترنت وحاول مرة أخرى.'
+      'استجابة Streaming غير متوقعة: ' +
+      responseText.slice(0, 300)
     );
   }
 
-  // قراءة رد الخادم
-  const responseText = await res.text();
-  let data;
+  if (!res.body) {
+    throw new Error('المتصفح لا يدعم استقبال Streaming.');
+  }
+
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+
+  let buffer = '';
+  let receivedText = '';
+  let completed = false;
+
+  function processEvent(eventBlock) {
+    for (const line of eventBlock.split(/\r?\n/)) {
+      if (!line.startsWith('data:')) continue;
+
+      const raw = line.slice(5).trim();
+
+      if (!raw || raw === '[DONE]') continue;
+
+      let event;
+
+      try {
+        event = JSON.parse(raw);
+      } catch {
+        continue;
+      }
+
+      if (event.type === 'delta') {
+        if (typeof event.text === 'string') {
+          receivedText += event.text;
+          handlers.onToken(event.text);
+        }
+      }
+
+      if (event.type === 'error') {
+        throw new Error(
+          event.error || 'حدث خطأ أثناء توليد الرد.'
+        );
+      }
+
+      if (event.type === 'done') {
+        completed = true;
+      }
+    }
+  }
 
   try {
-    data = JSON.parse(responseText);
-  } catch (e) {
-    const preview = responseText
-      .replace(/<[^>]*>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim()
-      .slice(0, 250);
+    while (true) {
+      if (abortController.signal.aborted) {
+        await reader.cancel();
+        handlers.onDone();
+        return;
+      }
 
-    throw new Error(
-      `رد غير صالح من الخادم (HTTP ${res.status}). ` +
-      `نوع المحتوى: ${res.headers.get('content-type') || 'غير معروف'}. ` +
-      `تفاصيل: ${preview || 'الرد فارغ'}`
-    );
+      const { value, done } = await reader.read();
+
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+
+      const events = buffer.split(/\r?\n\r?\n/);
+      buffer = events.pop() || '';
+
+      for (const eventBlock of events) {
+        processEvent(eventBlock);
+      }
+    }
+
+    buffer += decoder.decode();
+
+    if (buffer.trim()) {
+      processEvent(buffer);
+    }
+
+    if (!receivedText.trim()) {
+      throw new Error('لم يصل أي نص من Yovia.');
+    }
+
+    if (!completed) {
+      throw new Error('انقطع تدفق الرد قبل اكتماله.');
+    }
+
+    handlers.onDone();
+
+  } catch (error) {
+    await reader.cancel().catch(() => {});
+
+    if (error.name === 'AbortError') {
+      handlers.onDone();
+      return;
+    }
+
+    throw error;
   }
-
-  // معالجة أخطاء الخادم
-if (!res.ok) {
-  const message = [
-    data.error || data.message || `HTTP ${res.status}`,
-    data.code ? `Code: ${data.code}` : '',
-    data.details ? `Details: ${data.details}` : ''
-  ].filter(Boolean).join('\n');
-
-  if (data.code === 'LIMIT_REACHED') {
-    const reset = data.reset_at
-      ? ` موعد التجديد: ${new Date(data.reset_at).toLocaleString('ar-EG')}`
-      : '';
-
-    throw new Error('وصلت للحد اليومي لرسائلك.' + reset);
-  }
-
-  throw new Error(message);
 }
 
   // استخراج رد Yovia
