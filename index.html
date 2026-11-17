@@ -1152,13 +1152,23 @@ async function streamChat(messages,handlers){
     throw new Error('تعذّر الاتصال بخادم Yovia. تحقق من الإنترنت وحاول مرة أخرى.');
   }
   let data;
-  try{data=await res.json();}
-  catch(e){throw new Error('استجابة غير مفهومة من خادم Yovia.');}
-  if(!res.ok){
-    const message=data.error||data.message||`HTTP ${res.status}`;
-    if(data.code==='LIMIT_REACHED'){
-      const reset=data.reset_at?` موعد التجديد: ${new Date(data.reset_at).toLocaleString('ar-EG')}`:'';
-      throw new Error('وصلت للحد اليومي لرسائلك.'+reset+' يمكنك الاشتراك أو بدء محادثة جديدة بعد التجديد.');
+const responseText = await res.text();
+
+try {
+  data = JSON.parse(responseText);
+} catch (e) {
+  const preview = responseText
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 250);
+
+  throw new Error(
+    `رد غير صالح من الخادم (HTTP ${res.status}). ` +
+    `نوع المحتوى: ${res.headers.get('content-type') || 'غير معروف'}. ` +
+    `تفاصيل: ${preview || 'الرد فارغ'}`
+  );
+  }
     }
     throw new Error(message);
   }
