@@ -433,6 +433,7 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
       <div id="authStepCode" style="display:none">
         <p class="auth-code-hint" id="authCodeHint"></p>
         <div class="auth-field"><label for="authCode">الكود</label><input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" id="authCode" autocomplete="one-time-code" placeholder="••••••"></div>
+        <div id="authTimer" style="text-align:center;font-size:13px;margin:6px 0;color:#888"></div>
         <button type="submit" class="auth-submit" id="authVerify">تأكيد الدخول</button>
         <button type="button" class="auth-link" id="authResend">إعادة إرسال الكود</button>
         <button type="button" class="auth-link" id="authBack">رجوع لتسجيل الدخول</button>
@@ -1916,6 +1917,20 @@ function setAuthMode(mode){
   AU('authForgot').style.display=signup||forgot?'none':'block';
   AU('authPassword').autocomplete=signup?'new-password':'current-password';
 }
+var codeTimerId=null;
+function startCodeTimer(){
+  clearInterval(codeTimerId);
+  var end=Date.now()+300000,el=document.getElementById('authTimer');
+  function tick(){
+    var left=Math.max(0,Math.round((end-Date.now())/1000));
+    if(!el)return;
+    if(left<=0){clearInterval(codeTimerId);el.style.color='#e5484d';el.textContent='الكود انتهى. اطلب كود جديد.';return;}
+    var m=Math.floor(left/60),r=left%60;
+    el.style.color='#888';
+    el.textContent='الكود صالح لمدة '+m+':'+(r<10?'0':'')+r;
+  }
+  tick();codeTimerId=setInterval(tick,1000);
+}
 function showCodeStep(type,email){
   authEmailPending=email;authCodeType=type;
   AU('authStepMain').style.display='none';
@@ -1923,8 +1938,8 @@ function showCodeStep(type,email){
   AU('authSwitchRow').style.display='none';
   AU('authTitle').textContent='أدخل الكود 📩';
   AU('authSubtitle').textContent=type==='signup'?'بقالك خطوة واحدة: أكد حسابك الجديد':'استرجاع الباسورد من غير ما تحتاج الباسورد القديم';
-  AU('authCodeHint').textContent='بعثنا كود من 6 أرقام على '+email+' — بص في الإيميل ولو مش لاقيه شوف الـ Spam.';
-  AU('authCode').value='';
+  AU('authCodeHint').textContent='بعثنا كود من 6 أرقام على '+email+' — بص في الإيميل ولو مش لاقيه شوف الـ Spam. الكود صالح 5 دقايق.';
+  AU('authCode').value='';startCodeTimer();
   setTimeout(()=>AU('authCode').focus(),50);
 }
 function applyUser(user){
@@ -1968,7 +1983,7 @@ async function authInit(){
         ? await c.auth.resend({type:'signup',email:authEmailPending})
         : await c.auth.resetPasswordForEmail(authEmailPending);
       if(error)throw error;
-      authMsg('الكود اتبعت تاني ✅','success');
+      startCodeTimer();authMsg('الكود اتبعت تاني ✅','success');
     }catch(e){authMsg(authError(e));}
     finally{setTimeout(()=>{btn.disabled=false;},30000);}
   });
