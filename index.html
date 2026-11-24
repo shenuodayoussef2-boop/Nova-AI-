@@ -1371,6 +1371,12 @@ async function sendMessage(){
   const text=input.value.trim();
   const files=pendingFiles.slice();
   if(!text&&!files.length)return;
+  if(!yoviaUser){
+    const GL=5,k='yovia_guest_'+new Date().toISOString().slice(0,10);
+    let n=0;try{n=Number(localStorage.getItem(k)||0);}catch(e){}
+    if(n>=GL){showAuth();setAuthMode('signup');authMsg('خلصت رسايلك المجانية النهارده كضيف. سجّل حساب مجاني وكمّل 🚀');return;}
+    try{localStorage.setItem(k,String(n+1));}catch(e){}
+  }
 
 
   let chat=currentChat();
