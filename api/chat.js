@@ -4,7 +4,7 @@
 // ============================================================
 // YOVIA AI - CHAT API
 // Supabase Authentication + Daily Quotas
-// Gemini REAL STREAMING (SSE)
+// Groq REAL STREAMING (SSE, OpenAI-compatible)
 // ============================================================
 
 // ============================================================
@@ -14,8 +14,9 @@
 const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || '';
 
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash';
+const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
+const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
 // ============================================================
 // SYSTEM PROMPT
@@ -28,7 +29,7 @@ const SYSTEM_PROMPT = `
 - افهم لغة المستخدم ورد باللغة نفسها وبلهجته قدر الإمكان.
 - إذا سُئلت عن اسمك فقل: أنا Yovia.
 - إذا سُئلت عن مطوّر Yovia فقل: المطوّر هو يوسف.
-- لا تقل إنك Nova أو Gemini أو Google.
+- لا تقل إنك Nova أو Gemini أو Google أو OpenAI أو Groq.
 - حافظ على سياق المحادثة.
 - لا تخترع معلومات أو تدّعي تنفيذ شيء لم تنفذه.
 - كن واضحًا ومباشرًا.
@@ -81,7 +82,7 @@ function normalizeMessages(input) {
       const role =
         message.role === 'assistant' ||
         message.role === 'model'
-          ? 'model'
+          ? 'assistant'
           : 'user';
 
       let content = '';
@@ -115,7 +116,7 @@ function normalizeMessages(input) {
 
       return {
         role,
-        parts: [{ text: content }]
+        content
       };
     })
     .filter(Boolean)
@@ -143,7 +144,7 @@ function sendSSE(res, payload) {
 module.exports = async function handler(req, res) {
 
   let stage = 'initialization';
-  let geminiReader = null;
+  let groqReader = null;
 
   // ==========================================================
   // CORS
@@ -187,10 +188,10 @@ module.exports = async function handler(req, res) {
       });
     }
 
-    if (!GEMINI_API_KEY) {
+    if (!GROQ_API_KEY) {
       return send(res, 500, {
-        error: 'مفتاح Gemini غير مضبوط على الخادم.',
-        code: 'MISSING_GEMINI_API_KEY'
+        error: 'مفتاح Groq غير مضبوط على الخادم.',
+        code: 'MISSING_GROQ_API_KEY'
       });
     }
 
@@ -292,7 +293,7 @@ module.exports = async function handler(req, res) {
       if (singleMessage) {
         messages.push({
           role: 'user',
-          parts: [{ text: singleMessage }]
+          content: singleMessage
         });
       }
     }
@@ -410,15 +411,18 @@ module.exports = async function handler(req, res) {
       .join('\n\n');
 
     // ========================================================
-    // GEMINI CONTENTS
+    // GROQ MESSAGES
     // ========================================================
 
-    stage = 'gemini_prepare';
+    stage = 'groq_prepare';
 
-    const geminiContents = messages.map(message => ({
-      role: message.role,
-      parts: message.parts
-    }));
+    const groqMessages = [
+      { role: 'system', content: systemInstruction },
+      ...messages.map(message => ({
+        role: message.role,
+        content: message.content
+      }))
+    ];
 
     const requestedTokens = Number(body.max_tokens);
 
@@ -426,7 +430,7 @@ module.exports = async function handler(req, res) {
       Number.isFinite(requestedTokens) &&
       requestedTokens > 0
         ? Math.min(
-            8192,
+            4096,
             Math.max(1, Math.floor(requestedTokens))
           )
         : 2048;
@@ -439,67 +443,61 @@ module.exports = async function handler(req, res) {
         : 0.7;
 
     // ========================================================
-    // GEMINI STREAMING REQUEST
+    // GROQ STREAMING REQUEST
     // ========================================================
 
-    stage = 'gemini_request';
+    stage = 'groq_request';
 
-    const geminiResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:streamGenerateContent?alt=sse`,
-      {
-        method: 'POST',
+    const groqPayload = {
+      model: GROQ_MODEL,
+      messages: groqMessages,
+      stream: true,
+      max_completion_tokens: maxOutputTokens,
+      temperature
+    };
 
-        headers: {
-          'Content-Type': 'application/json',
-          'x-goog-api-key': GEMINI_API_KEY
-        },
+    if (/gpt-oss/i.test(GROQ_MODEL)) {
+      groqPayload.reasoning_effort = 'low';
+    }
 
-        body: JSON.stringify({
-          systemInstruction: {
-            parts: [
-              { text: systemInstruction }
-            ]
-          },
-
-          contents: geminiContents,
-
-          generationConfig: {
-            maxOutputTokens,
-            temperature
-          }
-        })
-      }
-    );
+    const groqResponse = await fetch(GROQ_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${GROQ_API_KEY}`
+      },
+      body: JSON.stringify(groqPayload)
+    });
 
     // ========================================================
-    // GEMINI ERROR
+    // GROQ ERROR
     // ========================================================
 
-    if (!geminiResponse.ok) {
-      const geminiResult = await readJSON(geminiResponse);
+    if (!groqResponse.ok) {
+      const groqResult = await readJSON(groqResponse);
 
       const details =
-        geminiResult.data?.error?.message ||
-        geminiResult.raw.slice(0, 1500) ||
-        `Gemini HTTP ${geminiResponse.status}`;
+        groqResult.data?.error?.message ||
+        groqResult.raw.slice(0, 1500) ||
+        `Groq HTTP ${groqResponse.status}`;
 
       console.error(
-        'Yovia Gemini API error:',
-        geminiResponse.status,
+        'Yovia Groq API error:',
+        groqResponse.status,
         details
       );
 
       return send(res, 502, {
         error: 'تعذّر على Yovia الحصول على رد من النموذج حاليًا.',
-        code: 'GEMINI_REQUEST_FAILED',
+        code: 'GROQ_REQUEST_FAILED',
         details
       });
     }
 
-    if (!geminiResponse.body) {
+    if (!groqResponse.body) {
       return send(res, 502, {
-        error: 'خدمة Gemini لم تُرجع تدفق بيانات.',
-        code: 'GEMINI_STREAM_UNAVAILABLE'
+        error: 'خدمة النموذج لم تُرجع تدفق بيانات.',
+        code: 'GROQ_STREAM_UNAVAILABLE'
       });
     }
 
@@ -507,7 +505,7 @@ module.exports = async function handler(req, res) {
     // START STREAM RESPONSE
     // ========================================================
 
-    stage = 'gemini_stream';
+    stage = 'groq_stream';
 
     res.statusCode = 200;
 
@@ -528,10 +526,10 @@ module.exports = async function handler(req, res) {
     res.flushHeaders?.();
 
     // ========================================================
-    // READ GEMINI SSE STREAM
+    // READ GROQ SSE STREAM
     // ========================================================
 
-    geminiReader = geminiResponse.body.getReader();
+    groqReader = groqResponse.body.getReader();
 
     const decoder = new TextDecoder();
 
@@ -569,22 +567,14 @@ module.exports = async function handler(req, res) {
           continue;
         }
 
-        const parts =
-          chunk.candidates?.[0]?.content?.parts || [];
+        const piece = chunk.choices?.[0]?.delta?.content;
 
-        for (const part of parts) {
-          if (
-            typeof part.text !== 'string' ||
-            !part.text
-          ) {
-            continue;
-          }
-
-          totalText += part.text;
+        if (typeof piece === 'string' && piece) {
+          totalText += piece;
 
           sendSSE(res, {
             type: 'delta',
-            text: part.text
+            text: piece
           });
         }
       }
@@ -596,11 +586,11 @@ module.exports = async function handler(req, res) {
 
     while (true) {
       if (res.destroyed || res.writableEnded) {
-        await geminiReader.cancel().catch(() => {});
+        await groqReader.cancel().catch(() => {});
         return;
       }
 
-      const { value, done } = await geminiReader.read();
+      const { value, done } = await groqReader.read();
 
       if (done) {
         break;
@@ -656,7 +646,7 @@ module.exports = async function handler(req, res) {
     sendSSE(res, {
       type: 'done',
 
-      model: GEMINI_MODEL,
+      model: GROQ_MODEL,
 
       quota: {
         plan: quota.plan || null,
@@ -681,9 +671,9 @@ module.exports = async function handler(req, res) {
       message: error?.message || String(error)
     });
 
-    if (geminiReader) {
+    if (groqReader) {
       try {
-        await geminiReader.cancel();
+        await groqReader.cancel();
       } catch {}
     }
 
