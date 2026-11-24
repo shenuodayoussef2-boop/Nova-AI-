@@ -203,12 +203,8 @@ module.exports = async function handler(req, res) {
 
     const authHeader = req.headers.authorization || '';
 
-    if (!/^Bearer\s+\S+/i.test(authHeader)) {
-      return send(res, 401, {
-        error: 'جلسة المستخدم غير موجودة.',
-        code: 'UNAUTHENTICATED'
-      });
-    }
+    // الزائر (بدون تسجيل دخول) يقدر يستخدم الشات بدون توكن
+    const isGuest = !/^Bearer\s+\S+/i.test(authHeader);
 
     // ========================================================
     // REQUEST BODY
@@ -246,6 +242,8 @@ module.exports = async function handler(req, res) {
 
     stage = 'supabase_auth';
 
+    if (!isGuest) {
+
     const authResponse = await fetch(
       `${SUPABASE_URL}/auth/v1/user`,
       {
@@ -272,6 +270,8 @@ module.exports = async function handler(req, res) {
         error: 'جلسة Supabase غير صالحة. حدّث الصفحة وحاول مرة أخرى.',
         code: 'INVALID_SESSION'
       });
+    }
+
     }
 
     // ========================================================
@@ -313,6 +313,10 @@ module.exports = async function handler(req, res) {
     // ========================================================
 
     stage = 'quota';
+
+    let quota = null;
+
+    if (!isGuest) {
 
     const quotaResponse = await fetch(
       `${SUPABASE_URL}/rest/v1/rpc/yovia_consume_message`,
@@ -383,6 +387,8 @@ module.exports = async function handler(req, res) {
         remaining: quota.remaining ?? null,
         reset_at: quota.reset_at || null
       });
+    }
+
     }
 
     // ========================================================
@@ -648,13 +654,15 @@ module.exports = async function handler(req, res) {
 
       model: GROQ_MODEL,
 
-      quota: {
-        plan: quota.plan || null,
-        used: quota.used ?? null,
-        limit: quota.limit ?? null,
-        remaining: quota.remaining ?? null,
-        reset_at: quota.reset_at || null
-      }
+      quota: quota
+        ? {
+            plan: quota.plan || null,
+            used: quota.used ?? null,
+            limit: quota.limit ?? null,
+            remaining: quota.remaining ?? null,
+            reset_at: quota.reset_at || null
+          }
+        : null
     });
 
     return res.end();
