@@ -242,6 +242,9 @@ module.exports = async function handler(req, res) {
 
     stage = 'supabase_auth';
 
+    let isUnlimited = false;
+    const UNLIMITED_EMAILS = ['novaaicompany3@gmail.com', 'shenuodayoussef2@gmail.com', 'mariamshenuoda27@gmail.com'];
+
     if (!isGuest) {
 
     const authResponse = await fetch(
@@ -270,6 +273,12 @@ module.exports = async function handler(req, res) {
         error: 'جلسة Supabase غير صالحة. حدّث الصفحة وحاول مرة أخرى.',
         code: 'INVALID_SESSION'
       });
+    }
+
+    {
+      const me = await readJSON(authResponse);
+      const em = String((me.data && me.data.email) || '').toLowerCase();
+      isUnlimited = UNLIMITED_EMAILS.includes(em);
     }
 
     }
@@ -316,7 +325,7 @@ module.exports = async function handler(req, res) {
 
     let quota = null;
 
-    if (!isGuest) {
+    if (!isGuest && !isUnlimited) {
 
     const quotaResponse = await fetch(
       `${SUPABASE_URL}/rest/v1/rpc/yovia_consume_message`,
