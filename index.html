@@ -388,7 +388,7 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
 .auth-field label{display:block;font-size:.82em;color:var(--text-dim);margin-bottom:5px}
 .auth-field input{width:100%;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:var(--r-md);padding:11px 14px;outline:none;transition:border-color .2s}
 .auth-field input:focus{border-color:var(--brand-b)}
-.auth-field input[type=email]{direction:ltr;text-align:left}
+.auth-field input[type=email],.auth-field input[type=password]{direction:ltr;text-align:left}
 .auth-field input#authCode{direction:ltr;text-align:center;letter-spacing:10px;font-size:1.15em;font-weight:600;text-indent:10px}
 .auth-code-hint{text-align:center;color:var(--text-dim);font-size:.85em;margin:0 0 12px;line-height:1.6}
 .auth-submit{width:100%;margin-top:6px;padding:12px;border-radius:var(--r-md);background:var(--accent-grad);color:#fff;font-weight:600}
@@ -423,18 +423,22 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
     <p class="auth-sub" id="authSubtitle">سجّل دخولك وكمّل محادثاتك</p>
     <div class="auth-msg" id="authMessage"></div>
     <form id="authForm" novalidate>
-      <div id="authStepEmail">
+      <div id="authStepMain">
+        <div class="auth-field" id="authNameField" style="display:none"><label for="authName">الاسم</label><input type="text" id="authName" autocomplete="name" placeholder="اسمك"></div>
         <div class="auth-field"><label for="authEmail">الإيميل</label><input type="email" id="authEmail" autocomplete="email" placeholder="you@example.com"></div>
-        <button type="submit" class="auth-submit" id="authSubmit">ابعتلي كود الدخول</button>
+        <div class="auth-field" id="authPassField"><label for="authPassword">الباسورد</label><input type="password" id="authPassword" autocomplete="current-password" placeholder="••••••••"></div>
+        <button type="submit" class="auth-submit" id="authSubmit">تسجيل الدخول</button>
+        <button type="button" class="auth-link" id="authForgot">نسيت الباسورد؟</button>
       </div>
       <div id="authStepCode" style="display:none">
         <p class="auth-code-hint" id="authCodeHint"></p>
-        <div class="auth-field"><label for="authCode">كود الدخول</label><input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" id="authCode" autocomplete="one-time-code" placeholder="••••••"></div>
+        <div class="auth-field"><label for="authCode">الكود</label><input type="text" inputmode="numeric" pattern="[0-9]*" maxlength="6" id="authCode" autocomplete="one-time-code" placeholder="••••••"></div>
         <button type="submit" class="auth-submit" id="authVerify">تأكيد الدخول</button>
         <button type="button" class="auth-link" id="authResend">إعادة إرسال الكود</button>
-        <button type="button" class="auth-link" id="authChangeEmail">غيّر الإيميل</button>
+        <button type="button" class="auth-link" id="authBack">رجوع لتسجيل الدخول</button>
       </div>
     </form>
+    <div class="auth-switch" id="authSwitchRow"><span id="authSwitchText">معندكش حساب؟</span><button type="button" id="authSwitch">إنشاء حساب</button></div>
   </div>
 </div>
 
@@ -1877,30 +1881,51 @@ function init(){
 
 document.addEventListener('DOMContentLoaded',init);
 /* ---------- Auth UI ---------- */
+let authMode='login';
 let authEmailPending='';
+let authCodeType='recovery';
 const AU=id=>document.getElementById(id);
 function authMsg(t,type){const m=AU('authMessage');m.textContent=t||'';m.className=t?'auth-msg show '+(type||'error'):'auth-msg';}
-function showAuth(){AU('authOverlay').classList.add('show');showAuthStep('email');}
+function showAuth(){AU('authOverlay').classList.add('show');setAuthMode('login');}
 function hideAuth(){AU('authOverlay').classList.remove('show');}
-function showAuthStep(step){
-  authMsg('');
-  AU('authStepEmail').style.display=step==='code'?'none':'block';
-  AU('authStepCode').style.display=step==='code'?'block':'none';
-  if(step==='code'){
-    AU('authCodeHint').textContent='بعثنا كود من 6 أرقام على '+authEmailPending+' — بص في الإيميل ولو مش لاقيه شوف الـ Spam.';
-    AU('authCode').value='';
-    setTimeout(()=>AU('authCode').focus(),50);
-  }else{
-    setTimeout(()=>AU('authEmail').focus(),50);
-  }
-}
 function authError(e){
   const m=String(e&&e.message||'').toLowerCase();
+  if(m.includes('invalid login credentials'))return 'الإيميل أو الباسورد غلط.';
+  if(m.includes('email not confirmed'))return 'أكد إيميلك الأول من الرسالة اللي اتبعتتلك.';
+  if(m.includes('password')&&m.includes('at least'))return 'الباسورد لازم يكون 6 حروف أو أكتر.';
+  if(m.includes('already registered'))return 'الإيميل ده مسجل بالفعل، جرّب تسجيل الدخول.';
   if(m.includes('token has expired')||m.includes('otp expired')||(m.includes('invalid')&&m.includes('token')))return 'الكود غلط أو منتهي الصلاحية. اطلب كود جديد وجرب تاني.';
   if(m.includes('rate limit')||m.includes('too many'))return 'استنى شوية وجرب تاني.';
   if(m.includes('unable to validate')||m.includes('invalid email'))return 'الإيميل ده مش مظبوط، تأكد منه.';
   if(m.includes('signups not allowed')||m.includes('signups disabled'))return 'التسجيل مقفول حالياً.';
   return (e&&e.message)||'حصلت مشكلة، جرّب تاني.';
+}
+function setAuthMode(mode){
+  authMode=mode;authMsg('');
+  AU('authStepMain').style.display='block';
+  AU('authStepCode').style.display='none';
+  const signup=mode==='signup',forgot=mode==='forgot';
+  AU('authTitle').textContent=signup?'اعمل حساب جديد 🚀':forgot?'استرجاع الباسورد 🔑':'أهلاً بيك في Yovia 👋';
+  AU('authSubtitle').textContent=signup?'سجّل حسابك وابدأ تستخدم Yovia':forgot?'اكتب إيميلك وهنبعتلك كود دخول على طول':'سجّل دخولك وكمّل محادثاتك';
+  AU('authSubmit').textContent=signup?'إنشاء الحساب':forgot?'ابعتلي الكود':'تسجيل الدخول';
+  AU('authSwitchRow').style.display=forgot?'none':'block';
+  AU('authSwitchText').textContent=signup?'عندك حساب بالفعل؟':'معندكش حساب؟';
+  AU('authSwitch').textContent=signup?'تسجيل الدخول':'إنشاء حساب';
+  AU('authNameField').style.display=signup?'block':'none';
+  AU('authPassField').style.display=forgot?'none':'block';
+  AU('authForgot').style.display=signup||forgot?'none':'block';
+  AU('authPassword').autocomplete=signup?'new-password':'current-password';
+}
+function showCodeStep(type,email){
+  authEmailPending=email;authCodeType=type;
+  AU('authStepMain').style.display='none';
+  AU('authStepCode').style.display='block';
+  AU('authSwitchRow').style.display='none';
+  AU('authTitle').textContent='أدخل الكود 📩';
+  AU('authSubtitle').textContent=type==='signup'?'بقالك خطوة واحدة: أكد حسابك الجديد':'استرجاع الباسورد من غير ما تحتاج الباسورد القديم';
+  AU('authCodeHint').textContent='بعثنا كود من 6 أرقام على '+email+' — بص في الإيميل ولو مش لاقيه شوف الـ Spam.';
+  AU('authCode').value='';
+  setTimeout(()=>AU('authCode').focus(),50);
 }
 function applyUser(user){
   if(!user)return;
@@ -1929,47 +1954,76 @@ function maybeShowNudge(){
   const g=AU('loginNudge');if(g)g.classList.add('show');
 }
 async function authInit(){
-  AU('authForm').addEventListener('submit',async ev=>{
-    ev.preventDefault();authMsg('');
-    const codeStep=AU('authStepCode').style.display!=='none';
-    if(!codeStep){
-      const email=AU('authEmail').value.trim();
-      if(!email){authMsg('اكتب إيميلك الأول.');AU('authEmail').focus();return;}
-      const btn=AU('authSubmit');btn.disabled=true;btn.textContent='جاري إرسال الكود...';
-      try{
-        const {error}=await getSupabaseClient().auth.signInWithOtp({email,options:{shouldCreateUser:true}});
-        if(error)throw error;
-        authEmailPending=email;showAuthStep('code');
-        authMsg('الكود اتبعت ✅','success');
-      }catch(e){authMsg(authError(e));}
-      finally{btn.disabled=false;btn.textContent='ابعتلي كود الدخول';}
-    }else{
-      const token=AU('authCode').value.trim();
-      if(!/^\d{6}$/.test(token)){authMsg('اكتب الكود المكوّن من 6 أرقام.');AU('authCode').focus();return;}
-      const btn=AU('authVerify');btn.disabled=true;btn.textContent='جاري التأكيد...';
-      try{
-        const {data,error}=await getSupabaseClient().auth.verifyOtp({email:authEmailPending,token,type:'email'});
-        if(error)throw error;
-        if(!(data&&data.session))throw new Error('تم التأكيد لكن Session مش موجودة، جرّب تاني.');
-        AU('authCode').value='';authEmailPending='';showAuthStep('email');
-        applyUser(data.user);hideAuth();
-      }catch(e){authMsg(authError(e));}
-      finally{btn.disabled=false;btn.textContent='تأكيد الدخول';}
-    }
-  });
+  AU('authSwitch').addEventListener('click',()=>setAuthMode(authMode==='signup'?'login':'signup'));
+  AU('authForgot').addEventListener('click',()=>setAuthMode('forgot'));
+  AU('authBack').addEventListener('click',()=>{authEmailPending='';setAuthMode('login');});
+  AU('authCode').addEventListener('input',()=>{AU('authCode').value=AU('authCode').value.replace(/\D/g,'').slice(0,6);});
   AU('authResend').addEventListener('click',async()=>{
     if(!authEmailPending)return;
     authMsg('');
     const btn=AU('authResend');btn.disabled=true;
     try{
-      const {error}=await getSupabaseClient().auth.signInWithOtp({email:authEmailPending,options:{shouldCreateUser:true}});
+      const c=getSupabaseClient();
+      const {error}=authCodeType==='signup'
+        ? await c.auth.resend({type:'signup',email:authEmailPending})
+        : await c.auth.resetPasswordForEmail(authEmailPending);
       if(error)throw error;
       authMsg('الكود اتبعت تاني ✅','success');
     }catch(e){authMsg(authError(e));}
     finally{setTimeout(()=>{btn.disabled=false;},30000);}
   });
-  AU('authChangeEmail').addEventListener('click',()=>showAuthStep('email'));
-  AU('authCode').addEventListener('input',()=>{AU('authCode').value=AU('authCode').value.replace(/\D/g,'').slice(0,6);});
+  AU('authForm').addEventListener('submit',async ev=>{
+    ev.preventDefault();authMsg('');
+    if(AU('authStepCode').style.display!=='none'){
+      const token=AU('authCode').value.trim();
+      if(!/^\d{6}$/.test(token)){authMsg('اكتب الكود المكوّن من 6 أرقام.');AU('authCode').focus();return;}
+      const btn=AU('authVerify');btn.disabled=true;btn.textContent='جاري التأكيد...';
+      try{
+        const {data,error}=await getSupabaseClient().auth.verifyOtp({email:authEmailPending,token,type:authCodeType});
+        if(error)throw error;
+        if(!(data&&data.session))throw new Error('تم التأكيد لكن Session مش موجودة، جرّب تاني.');
+        const em=authEmailPending;
+        AU('authCode').value='';authEmailPending='';
+        applyUser(data.user);hideAuth();
+        setAuthMode('login');AU('authEmail').value=em;
+      }catch(e){authMsg(authError(e));}
+      finally{btn.disabled=false;btn.textContent='تأكيد الدخول';}
+      return;
+    }
+    const email=AU('authEmail').value.trim();
+    if(!email){authMsg('اكتب إيميلك الأول.');AU('authEmail').focus();return;}
+    const c=getSupabaseClient();
+    if(authMode==='forgot'){
+      const btn=AU('authSubmit');btn.disabled=true;btn.textContent='جاري إرسال الكود...';
+      try{
+        const {error}=await c.auth.resetPasswordForEmail(email);
+        if(error)throw error;
+        showCodeStep('recovery',email);
+        authMsg('الكود اتبعت ✅','success');
+      }catch(e){authMsg(authError(e));}
+      finally{btn.disabled=false;btn.textContent='ابعتلي الكود';}
+      return;
+    }
+    const password=AU('authPassword').value,name=AU('authName').value.trim();
+    if(!password){authMsg('اكتب الباسورد الأول.');AU('authPassword').focus();return;}
+    if(authMode==='signup'&&!name){authMsg('اكتب اسمك الأول.');AU('authName').focus();return;}
+    const btn=AU('authSubmit');btn.disabled=true;btn.textContent=authMode==='signup'?'جاري إنشاء الحساب...':'جاري تسجيل الدخول...';
+    try{
+      if(authMode==='signup'){
+        const {data,error}=await c.auth.signUp({email,password,options:{data:{name}}});
+        if(error)throw error;
+        if(!data.session){AU('authPassword').value='';showCodeStep('signup',email);authMsg('الحساب اتعمل ✅ أكده بالكود اللي اتبعت على إيميلك.','success');return;}
+        applyUser(data.user);hideAuth();
+      }else{
+        const {data,error}=await c.auth.signInWithPassword({email,password});
+        if(error)throw error;
+        if(!data.session)throw new Error('تم الدخول لكن Session مش موجودة.');
+        applyUser(data.user);hideAuth();
+      }
+      AU('authPassword').value='';
+    }catch(e){authMsg(authError(e));}
+    finally{btn.disabled=false;btn.textContent=authMode==='signup'?'إنشاء الحساب':'تسجيل الدخول';}
+  });
   AU('logoutBtn').addEventListener('click',async()=>{
     try{await getSupabaseClient().auth.signOut();}catch(e){}
     setGuestUI();
