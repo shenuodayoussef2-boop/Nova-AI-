@@ -375,9 +375,61 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
   .msg-avatar{width:30px;height:30px}
   .composer-hint{display:none}
 }
+
+/* ---------- Auth ---------- */
+.auth-overlay{position:fixed;inset:0;z-index:300;display:none;align-items:center;justify-content:center;padding:20px;background:var(--bg);overflow:auto}
+.auth-overlay.show{display:flex}
+.auth-card{position:relative;z-index:1;width:100%;max-width:400px;background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--r-xl);padding:30px 26px;box-shadow:var(--shadow-lg)}
+.auth-logo{display:flex;justify-content:center;margin-bottom:14px}
+.auth-logo svg{width:52px;height:52px}
+.auth-card h2{font-size:1.25em;text-align:center;font-weight:600}
+.auth-card .auth-sub{text-align:center;color:var(--text-dim);font-size:.9em;margin:4px 0 20px}
+.auth-field{margin-bottom:12px}
+.auth-field label{display:block;font-size:.82em;color:var(--text-dim);margin-bottom:5px}
+.auth-field input{width:100%;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:var(--r-md);padding:11px 14px;outline:none;transition:border-color .2s}
+.auth-field input:focus{border-color:var(--brand-b)}
+.auth-field input[type=email],.auth-field input[type=password]{direction:ltr;text-align:left}
+.auth-submit{width:100%;margin-top:6px;padding:12px;border-radius:var(--r-md);background:var(--accent-grad);color:#fff;font-weight:600}
+.auth-submit:disabled{opacity:.6;cursor:default}
+.auth-link{display:block;margin:12px auto 0;color:var(--text-dim);font-size:.86em;text-decoration:underline}
+.auth-switch{text-align:center;margin-top:16px;font-size:.88em;color:var(--text-dim)}
+.auth-switch button{color:var(--brand-b);font-weight:600;margin-inline-start:4px}
+.auth-msg{display:none;margin-bottom:12px;padding:10px 12px;border-radius:var(--r-sm);font-size:.86em}
+.auth-msg.show{display:block}
+.auth-msg.error{background:rgba(201,96,96,.14);color:var(--danger)}
+.auth-msg.success{background:rgba(77,158,122,.14);color:var(--ok)}
+.user-logout{margin-inline-start:auto;color:var(--text-mute);padding:6px;border-radius:var(--r-sm)}
+.user-logout:hover{color:var(--danger);background:var(--surface-2)}
+.user-logout svg{width:18px;height:18px}
+.user .avatar-sm{cursor:pointer}
+.login-nudge{position:fixed;bottom:calc(96px + var(--sab));inset-inline-start:50%;transform:translate(50%,20px);z-index:250;display:flex;align-items:center;gap:12px;width:min(92vw,430px);padding:12px 14px;border-radius:var(--r-lg);background:var(--surface);border:1px solid var(--border-strong);box-shadow:var(--shadow-lg);opacity:0;pointer-events:none;transition:opacity .3s ease,transform .3s cubic-bezier(.22,1,.36,1)}
+.login-nudge.show{opacity:1;transform:translate(50%,0);pointer-events:auto}
+.login-nudge-text{flex:1;min-width:0}
+.login-nudge-text strong{display:block;font-size:.92em}
+.login-nudge-text span{font-size:.8em;color:var(--text-dim)}
+.login-nudge-btn{padding:9px 16px;border-radius:var(--r-md);background:var(--accent-grad);color:#fff;font-weight:600;font-size:.86em;white-space:nowrap}
+.login-nudge-close{color:var(--text-mute);padding:6px;border-radius:var(--r-sm);font-size:13px;line-height:1}
+.login-nudge-close:hover{color:var(--danger);background:var(--surface-2)}
 </style>
 </head>
 <body>
+
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-card">
+    <div class="auth-logo"><svg viewBox="0 0 28 28" fill="none"><rect width="28" height="28" rx="8" fill="#5d7186"/><path d="M8.5 8.2L12 13.5L15.5 8.2M12 13.5V20.2" fill="none" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="19.5" cy="8.2" r="1.8" fill="white"/></svg></div>
+    <h2 id="authTitle">أهلاً بيك في Yovia 👋</h2>
+    <p class="auth-sub" id="authSubtitle">سجّل دخولك وكمّل محادثاتك</p>
+    <div class="auth-msg" id="authMessage"></div>
+    <form id="authForm" novalidate>
+      <div class="auth-field" id="authNameField" style="display:none"><label for="authName">الاسم</label><input type="text" id="authName" autocomplete="name" placeholder="اسمك"></div>
+      <div class="auth-field"><label for="authEmail">الإيميل</label><input type="email" id="authEmail" autocomplete="email" placeholder="you@example.com"></div>
+      <div class="auth-field"><label for="authPassword">الباسورد</label><input type="password" id="authPassword" autocomplete="current-password" placeholder="••••••••"></div>
+      <button type="submit" class="auth-submit" id="authSubmit">تسجيل الدخول</button>
+      <button type="button" class="auth-link" id="authForgot">هل نسيت كلمة المرور؟</button>
+    </form>
+    <div class="auth-switch"><span id="authSwitchText">معندكش حساب؟</span><button type="button" id="authSwitch">إنشاء حساب</button></div>
+  </div>
+</div>
 
 <div class="app">
   <aside class="sidebar" id="sidebar">
@@ -420,11 +472,12 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
         <span>الإعدادات</span>
       </button>
       <div class="user">
-        <div class="avatar-sm">م</div>
+        <div class="avatar-sm" id="userAvatar" title="تسجيل الدخول">م</div>
         <div class="user-info">
           <div class="user-name">مستخدم Yovia</div>
           <div class="user-plan" id="userMode">Yovia AI</div>
         </div>
+        <button class="user-logout" id="logoutBtn" title="تسجيل الخروج" aria-label="تسجيل الخروج"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg></button>
       </div>
     </div>
   </aside>
@@ -713,6 +766,15 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
 
 <div class="toast-wrap" id="toastWrap"></div>
 
+<div class="login-nudge" id="loginNudge">
+  <div class="login-nudge-text">
+    <strong>احفظ محادثاتك 💾</strong>
+    <span>سجّل دخولك عشان محادثاتك تفضل محفوظة في حسابك</span>
+  </div>
+  <button class="login-nudge-btn" id="nudgeLoginBtn">تسجيل الدخول</button>
+  <button class="login-nudge-close" id="nudgeCloseBtn" aria-label="إغلاق">✕</button>
+</div>
+
 <script>
 (function(){
 'use strict';
@@ -809,30 +871,23 @@ let abortController=null;
 const YOVIA_SUPABASE_URL='https://zywftdjsqvaarzmcsuxj.supabase.co';
 const YOVIA_SUPABASE_PUBLISHABLE_KEY='sb_publishable_7iBzDFRA21wVb3R29C_K5w_jxVhVkHO';
 let yoviaSupabase=null;
-let yoviaAuthPromise=null;
+let yoviaUser=null;
 function getSupabaseClient(){
   if(yoviaSupabase)return yoviaSupabase;
   if(!window.supabase?.createClient)throw new Error('تعذّر تحميل مكتبة الاتصال الآمن. حدّث الصفحة وحاول مرة أخرى.');
   yoviaSupabase=window.supabase.createClient(YOVIA_SUPABASE_URL,YOVIA_SUPABASE_PUBLISHABLE_KEY,{
-    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
+    auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}
   });
   return yoviaSupabase;
 }
 async function getYoviaAccessToken(){
-  if(yoviaAuthPromise)return yoviaAuthPromise;
-  yoviaAuthPromise=(async()=>{
-    const client=getSupabaseClient();
-    let {data,error}=await client.auth.getSession();
-    if(error)throw new Error('تعذّر استعادة جلسة المستخدم: '+error.message);
-    if(!data.session){
-      const signed=await client.auth.signInAnonymously();
-      if(signed.error)throw new Error('تعذّر إنشاء هوية مستخدم تلقائية: '+signed.error.message);
-      data={session:signed.data.session};
-    }
-    if(!data.session?.access_token)throw new Error('لم يتم إنشاء جلسة آمنة. أعد تحميل الصفحة.');
-    return data.session.access_token;
-  })();
-  try{return await yoviaAuthPromise;}finally{yoviaAuthPromise=null;}
+  try{
+    const {data,error}=await getSupabaseClient().auth.getSession();
+    if(error)return null;
+    const s=data&&data.session;
+    if(!s||(s.user&&s.user.is_anonymous))return null;
+    return s.access_token||null;
+  }catch(e){return null;}
 }
 
 /* ---------- Storage ---------- */
@@ -1137,23 +1192,17 @@ async function buildMessages(userText,files){
 
 
 async function streamChat(messages, handlers) {
-  let token;
-
-  try {
-    token = await getYoviaAccessToken();
-  } catch (error) {
-    throw error;
-  }
+  const token = await getYoviaAccessToken();
 
   let res;
 
   try {
     res = await fetch('/api/chat', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
+      headers: Object.assign(
+        { 'Content-Type': 'application/json' },
+        token ? { 'Authorization': `Bearer ${token}` } : {}
+      ),
       body: JSON.stringify({
         messages,
         temperature: Number(state.settings.temperature),
@@ -1319,6 +1368,7 @@ async function sendMessage(){
   chat.messages.push(userMsg);
   chat.updatedAt=Date.now();
   if(chat.messages.length===1)chat.title=text?text.slice(0,42):(files[0]?files[0].name:'محادثة');
+  if(chat.messages.length===1)setTimeout(maybeShowNudge,600);
 
   input.value='';autoResize(input);pendingFiles=[];renderAttachments();
   save();renderHistory($('#searchInput').value);
@@ -1740,8 +1790,8 @@ function init(){
     const btn=$('#testConnectionBtn');
     btn.disabled=true;const orig=btn.innerHTML;btn.innerHTML='...جاري الاختبار';
     try{
-      await getYoviaAccessToken();
-      const res=await fetch('/api/health',{headers:{'Authorization':`Bearer ${await getYoviaAccessToken()}`}});
+      const t=await getYoviaAccessToken();
+      const res=await fetch('/api/health',{headers:t?{'Authorization':`Bearer ${t}`}:{}});
       const data=await res.json();
       if(!res.ok)throw new Error(data.error||'تعذّر الاتصال بالخادم');
       toast('✓ خادم Yovia جاهز');
@@ -1819,6 +1869,115 @@ function init(){
 }
 
 document.addEventListener('DOMContentLoaded',init);
+/* ---------- Auth UI ---------- */
+let authSignup=false;
+const AU=id=>document.getElementById(id);
+function authMsg(t,type){const m=AU('authMessage');m.textContent=t||'';m.className=t?'auth-msg show '+(type||'error'):'auth-msg';}
+function showAuth(){AU('authOverlay').classList.add('show');}
+function hideAuth(){AU('authOverlay').classList.remove('show');}
+function authError(e){
+  const m=String(e&&e.message||'').toLowerCase();
+  if(m.includes('invalid login credentials'))return 'الإيميل أو الباسورد غلط.';
+  if(m.includes('email not confirmed'))return 'أكد إيميلك الأول من الرسالة اللي اتبعتتلك.';
+  if(m.includes('password')&&m.includes('at least'))return 'الباسورد لازم يكون 6 حروف أو أكتر.';
+  if(m.includes('already registered'))return 'الإيميل ده مسجل بالفعل، جرّب تسجيل الدخول.';
+  if(m.includes('rate limit'))return 'استنى شوية وجرب تاني.';
+  return (e&&e.message)||'حصلت مشكلة، جرّب تاني.';
+}
+function setAuthMode(signup){
+  authSignup=signup;authMsg('');
+  AU('authTitle').textContent=signup?'اعمل حساب جديد 🚀':'أهلاً بيك في Yovia 👋';
+  AU('authSubtitle').textContent=signup?'سجّل حسابك وابدأ تستخدم Yovia':'سجّل دخولك وكمّل محادثاتك';
+  AU('authSubmit').textContent=signup?'إنشاء الحساب':'تسجيل الدخول';
+  AU('authSwitchText').textContent=signup?'عندك حساب بالفعل؟':'معندكش حساب؟';
+  AU('authSwitch').textContent=signup?'تسجيل الدخول':'إنشاء حساب';
+  AU('authNameField').style.display=signup?'block':'none';
+  AU('authForgot').style.display=signup?'none':'block';
+  AU('authPassword').autocomplete=signup?'new-password':'current-password';
+}
+function applyUser(user){
+  if(!user)return;
+  yoviaUser=user;
+  const name=(user.user_metadata&&user.user_metadata.name)||(user.email||'').split('@')[0]||'مستخدم Yovia';
+  const n=document.querySelector('.user-name');if(n)n.textContent=name;
+  const a=document.querySelector('.avatar-sm');if(a)a.textContent=(name.trim()[0]||'م').toUpperCase();
+  const p=AU('userMode');if(p&&user.email)p.textContent=user.email;
+  const l=AU('logoutBtn');if(l)l.style.display='';
+  hideNudge();
+}
+function setGuestUI(){
+  yoviaUser=null;
+  const n=document.querySelector('.user-name');if(n)n.textContent='مستخدم Yovia';
+  const a=document.querySelector('.avatar-sm');if(a)a.textContent='م';
+  const p=AU('userMode');if(p)p.textContent='ضيف';
+  const l=AU('logoutBtn');if(l)l.style.display='none';
+}
+function hideNudge(sticky){
+  const g=AU('loginNudge');if(g)g.classList.remove('show');
+  if(sticky)try{localStorage.setItem('yovia_nudge_hide','1');}catch(e){}
+}
+function maybeShowNudge(){
+  if(yoviaUser)return;
+  try{if(localStorage.getItem('yovia_nudge_hide'))return;}catch(e){}
+  const g=AU('loginNudge');if(g)g.classList.add('show');
+}
+async function authInit(){
+  AU('authSwitch').addEventListener('click',()=>setAuthMode(!authSignup));
+  AU('authForgot').addEventListener('click',async()=>{
+    authMsg('');const email=AU('authEmail').value.trim();
+    if(!email){authMsg('اكتب بريدك الإلكتروني الأول.');AU('authEmail').focus();return;}
+    try{
+      const {error}=await getSupabaseClient().auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/reset-password.html'});
+      if(error)throw error;
+      authMsg('لو البريد مسجل، هتوصلك رسالة لإعادة تعيين كلمة المرور. راجع صندوق الوارد والرسائل غير المرغوب فيها.','success');
+    }catch(e){authMsg('حصلت مشكلة أثناء إرسال رابط استعادة كلمة المرور.');}
+  });
+  AU('authForm').addEventListener('submit',async ev=>{
+    ev.preventDefault();authMsg('');
+    const email=AU('authEmail').value.trim(),password=AU('authPassword').value,name=AU('authName').value.trim();
+    if(!email||!password){authMsg('اكتب الإيميل والباسورد الأول.');return;}
+    if(authSignup&&!name){authMsg('اكتب اسمك الأول.');return;}
+    const btn=AU('authSubmit');btn.disabled=true;btn.textContent=authSignup?'جاري إنشاء الحساب...':'جاري تسجيل الدخول...';
+    try{
+      const c=getSupabaseClient();
+      if(authSignup){
+        const {data,error}=await c.auth.signUp({email,password,options:{data:{name}}});
+        if(error)throw error;
+        if(!data.session){authMsg('الحساب اتعمل ✅ افتح إيميلك واضغط رابط التأكيد، وبعدها سجل دخول.','success');return;}
+        applyUser(data.user);hideAuth();
+      }else{
+        const {data,error}=await c.auth.signInWithPassword({email,password});
+        if(error)throw error;
+        if(!data.session)throw new Error('تم الدخول لكن Session مش موجودة.');
+        applyUser(data.user);hideAuth();
+      }
+      AU('authPassword').value='';
+    }catch(e){authMsg(authError(e));}
+    finally{btn.disabled=false;btn.textContent=authSignup?'إنشاء الحساب':'تسجيل الدخول';}
+  });
+  AU('logoutBtn').addEventListener('click',async()=>{
+    try{await getSupabaseClient().auth.signOut();}catch(e){}
+    setGuestUI();
+  });
+  AU('nudgeLoginBtn').addEventListener('click',()=>{hideNudge();showAuth();});
+  AU('nudgeCloseBtn').addEventListener('click',()=>hideNudge(true));
+  const av=AU('userAvatar');if(av)av.addEventListener('click',()=>{if(!yoviaUser)showAuth();});
+  try{
+    const c=getSupabaseClient();
+    const {data}=await c.auth.getSession();
+    const u=data&&data.session&&data.session.user;
+    if(!u||u.is_anonymous){
+      if(u){try{await c.auth.signOut();}catch(e){}}
+      setGuestUI();
+    }else{applyUser(u);}
+    c.auth.onAuthStateChange((ev,sess)=>{
+      if(ev==='SIGNED_OUT'||!sess)setGuestUI();
+      else if(sess.user&&!sess.user.is_anonymous){applyUser(sess.user);hideAuth();}
+    });
+  }catch(e){setGuestUI();}
+}
+document.addEventListener('DOMContentLoaded',authInit);
+
 })();
 </script>
 </body>
