@@ -177,6 +177,9 @@ a{color:var(--brand-a);text-decoration:none}
 .code-head{display:flex;align-items:center;justify-content:space-between;padding:7px 12px;background:rgba(255,255,255,.04);border-bottom:1px solid var(--border)}
 .code-lang{font-family:'JetBrains Mono',monospace;font-size:11px;color:#8b8fa4}
 .copy-code{font-size:11.5px;font-weight:500;color:#8b8fa4;padding:4px 10px;border-radius:6px;transition:background .15s,color .15s}
+.code-btns{display:flex;gap:4px}
+.open-code{font-size:11.5px;font-weight:500;color:#8b8fa4;padding:4px 10px;border-radius:6px;transition:background .15s,color .15s}
+.open-code:hover{background:rgba(255,255,255,.09);color:#fff}
 .copy-code:hover{background:rgba(255,255,255,.09);color:#fff}
 .code-block pre{margin:0;padding:14px 16px;overflow-x:auto;direction:ltr;text-align:left}
 .code-block code{font-family:'JetBrains Mono',monospace;font-size:12.8px;line-height:1.7;color:#d8dade;white-space:pre}
@@ -866,7 +869,7 @@ function renderMarkdown(src){
       const buf=[];i++;
       while(i<lines.length&&!/^```/.test(lines[i])){buf.push(lines[i]);i++;}
       i++;
-      out+=`<div class="code-block"><div class="code-head"><span class="code-lang">${esc(lang)||'code'}</span><button class="copy-code" type="button">نسخ</button></div><pre><code>${esc(buf.join('\n'))}</code></pre></div>`;
+      out+=`<div class="code-block"><div class="code-head"><span class="code-lang">${esc(lang)||'code'}</span><span class="code-btns">${/^(html?|svg|xhtml)$/i.test(lang)||/<(!doctype html|html|body|svg)[\s>]/i.test(buf.join('\n').slice(0,2000))?'<button class="open-code" type="button">فتح</button>':''}<button class="copy-code" type="button">نسخ</button></span></div><pre><code>${esc(buf.join('\n'))}</code></pre></div>`;
       continue;
     }
     if(/^\s*[-*+]\s+/.test(line)){
@@ -1613,6 +1616,16 @@ function init(){
 
   /* Message actions */
   $('#chatInner').addEventListener('click',e=>{
+    const openCode=e.target.closest('.open-code');
+    if(openCode){
+      let src=openCode.closest('.code-block').querySelector('code').textContent;
+      if(!/<html[\s>]|<!doctype/i.test(src))src='<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body>'+src+'</body></html>';
+      const url=URL.createObjectURL(new Blob([src],{type:'text/html;charset=utf-8'}));
+      const w=window.open(url,'_blank');
+      if(!w)toast('اسمح بالنوافذ المنبثقة عشان الصفحة تتفتح');
+      setTimeout(()=>URL.revokeObjectURL(url),60000);
+      return;
+    }
     const copyCode=e.target.closest('.copy-code');
     if(copyCode){
       const code=copyCode.closest('.code-block').querySelector('code').textContent;
@@ -1808,6 +1821,5 @@ function init(){
 document.addEventListener('DOMContentLoaded',init);
 })();
 </script>
-<script src="/yovia-media.js"></script>
 </body>
 </html>
