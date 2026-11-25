@@ -12,6 +12,24 @@ const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const MAX_STEPS = 4;
 
+const KB_KEY = process.env.SUPABASE_SERVICE_KEY || '';
+async function kbLookup(question) {
+  try {
+    if (!KB_KEY || !SUPABASE_URL || !question) return '';
+    const words = Array.from(new Set(String(question).toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter(w => w.length > 2))).slice(0, 8);
+    if (!words.length) return '';
+    const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/search_knowledge', {
+      method: 'POST',
+      headers: { apikey: KB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ q: words.join(' or '), n: 4 })
+    });
+    if (!r.ok) return '';
+    const rows = await r.json();
+    if (!Array.isArray(rows) || !rows.length) return '';
+    return '\n\nمعلومات من قاعدة معرفة Yovia (استخدمها لو مرتبطة بالسؤال وتجاهلها لو لا):\n' + rows.map(x => '- ' + String(x.content).slice(0, 700)).join('\n');
+  } catch { return ''; }
+}
+
 const SYSTEM = `أنت Yovia، وكيل ذكي ينفذ المهام بنفسه باستخدام الأدوات المتاحة.
 - إذا سُئلت من مؤسسك أو من صنعك أو من أسسك فقل بالضبط: أنا يوفيا من شركة Yovia AI التي أسسها Youssef Shenuoda.
 - المطوّر هو يوسف. لا تقل إنك Nova أو Gemini أو Google أو OpenAI أو Groq.
@@ -168,7 +186,9 @@ module.exports = async function handler(req, res) {
       .map(m => ({ role: m.role, content: m.content.slice(-2500) }));
     if (!history.length) return res.status(400).json({ error: 'لا توجد رسالة.' });
 
-    const messages = [{ role: 'system', content: SYSTEM }, ...history];
+    const lastU = [...history].reverse().find(m => m.role === 'user');
+    const kb = await kbLookup(lastU ? lastU.content : '');
+    const messages = [{ role: 'system', content: SYSTEM + kb }, ...history];
     const artifacts = [];
     let reply = '';
 
