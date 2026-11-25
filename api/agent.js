@@ -1,782 +1,196 @@
-
 'use strict';
 
-// ============================================================
-// YOVIA AI - CHAT API
-// Supabase Authentication + Daily Quotas
-// Groq REAL STREAMING (SSE, OpenAI-compatible)
-// ============================================================
-
-// ============================================================
-// ENVIRONMENT
-// ============================================================
+// Yovia AI - AGENT API (tool-calling). Put at api/agent.js
+// Tools: web_search, read_page, generate_image, build_website, exchange_rate, calculate
+// Optional env: TAVILY_API_KEY (free at tavily.com) for real web search
+// Needs: GROQ_API_KEY, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY (same as chat.js)
 
 const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
 const SUPABASE_KEY = process.env.SUPABASE_PUBLISHABLE_KEY || '';
-
 const GROQ_API_KEY = process.env.GROQ_API_KEY || '';
 const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b';
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const MAX_STEPS = 4;
 
-// ============================================================
-// SYSTEM PROMPT
-// ============================================================
-
-const SYSTEM_PROMPT = `
-أنت Yovia AI، مساعد ذكي متعدد اللغات.
-
-- اسمك Yovia.
-- افهم لغة المستخدم ورد باللغة نفسها وبلهجته قدر الإمكان.
-- إذا سُئلت عن اسمك فقل: أنا Yovia.
-- إذا سُئلت عن مطوّر Yovia فقل: المطوّر هو يوسف.
+const SYSTEM = `أنت Yovia، وكيل ذكي ينفذ المهام بنفسه باستخدام الأدوات المتاحة.
 - إذا سُئلت من مؤسسك أو من صنعك أو من أسسك فقل بالضبط: أنا يوفيا من شركة Yovia AI التي أسسها Youssef Shenuoda.
-- لا تقل إنك Nova أو Gemini أو Google أو OpenAI أو Groq.
-- حافظ على سياق المحادثة.
-- لا تخترع معلومات أو تدّعي تنفيذ شيء لم تنفذه.
-- كن واضحًا ومباشرًا.
+- المطوّر هو يوسف. لا تقل إنك Nova أو Gemini أو Google أو OpenAI أو Groq.
+- رد بلغة المستخدم ولهجته، وكن مختصرًا.
+- لو المستخدم طلب موقعًا أو صفحة أو تطبيقًا استخدم أداة build_website بملف HTML كامل (CSS وJS داخله) بتصميم احترافي حديث، RTL للعربي، متجاوب مع الموبايل، وكل زرار يعمل فعلاً، وصور حقيقية للمنتجات عبر https://loremflickr.com/600/400/KEYWORD?lock=N (KEYWORD كلمة إنجليزية، وN رقم مختلف) مع onerror يضع خلفية متدرجة.
+- لو طلب صورة استخدم generate_image بوصف إنجليزي مفصل.
+- لو يحتاج معلومة حديثة أو غير مؤكدة استخدم web_search ثم read_page عند الحاجة، واذكر المصادر.
+- لأسعار العملات استخدم exchange_rate (سعر رسمي عالمي، وقد يختلف عن سعر السوق المحلي، وضّح ذلك).
+- للحسابات استخدم calculate.
+- لا تخترع نتائج ولا تدّعي تنفيذ شيء لم تنفذه.`;
 
-عند طلب موقع أو صفحة أو تطبيق أو لعبة أو أي واجهة:
-- اكتب ملف HTML واحد كامل (HTML وCSS وJavaScript داخله) داخل كتلة كود واحدة، بدون اختصارات أو "باقي الكود هنا".
-- كل زرار وقائمة ونموذج لازم يشتغل فعلاً بـ JavaScript حقيقي. لا تكتب زرارًا بلا وظيفة. اربط الأحداث بـ addEventListener بعد تحميل الصفحة.
-- راجع الكود في ذهنك قبل الإرسال: كل id مستخدم في JavaScript موجود في HTML، وكل دالة معرّفة، ولا توجد أخطاء.
-- لا تستخدم مكتبات خارجية إلا لو ضرورية، ومن CDN موثوق.
-- التصميم لازم يكون بمستوى مواقع احترافية حديثة وليس بسيطًا:
-  * قسم رئيسي (Hero) كبير بخلفية متدرجة جذابة وعنوان ضخم وزر دعوة واضح.
-  * لوحة ألوان من لونين أساسيين ولون مميز، مع تدرجات (linear-gradient) وخلفيات بطابع زجاجي (glassmorphism) عند المناسبة.
-  * بطاقات (cards) بزوايا 16 إلى 24 بكسل وظلال ناعمة وحركة رفع عند المرور (hover).
-  * لكل منتج أو صنف صورة حقيقية تناسب نوع الموقع الذي طلبه المستخدم (كشري، ملابس، أجهزة، عقارات، أو غيره)، ولا تستخدم الإيموجي بديلًا للصورة إلا عند فشل التحميل فقط: استخدم الرابط https://loremflickr.com/600/400/KEYWORD?lock=N حيث KEYWORD كلمة إنجليزية واحدة تصف المنتج (مثل food أو rice أو shoes) وN رقم مختلف لكل صورة. اضبط الصورة بـ object-fit: cover وزوايا مدورة، وأضف onerror يستبدلها بخلفية متدرجة وإيموجي مناسب حتى لا تظهر صورة مكسورة.
-  * نمط تجربة الاستخدام المطلوب في المتاجر والمطاعم: رأس ثابت فيه الشعار وزر السلة بعداد، بطاقات منتجات فيها صورة حقيقية للمنتج نفسه (وليس إيموجي) داخل إطار بزوايا مدورة، وشارات مثل "الأكثر طلبًا"، وزر "أضف +" واضح، وسلة تنزلق من الأسفل (bottom sheet) فيها أزرار + و- وحذف وملخص (المجموع الفرعي والتوصيل والإجمالي)، ونموذج تأكيد فيه تحقق من الحقول المطلوبة ورسالة نجاح بعد الإرسال، ولوحة ألوان دافئة متناسقة.
-  * أيقونات وإيموجي معبرة بدل الفراغ، وصور من Unsplash أو أشكال SVG عند الحاجة.
-  * خط Cairo أو Tajawal من Google Fonts، مع تدرج واضح بين أحجام العناوين والنص.
-  * حركات دخول ناعمة (fade وslide) وانتقالات 0.3 ثانية على كل العناصر التفاعلية.
-  * أقسام متعددة: رأس ثابت، تعريف، مميزات، منتجات أو خدمات، آراء عملاء، تذييل.
-  * مساحات مريحة، وتباين ألوان جيد، وشكل مناسب للموبايل أولًا.
-- متجاوب مع الموبايل (meta viewport وflex/grid)، واجعل الاتجاه RTL عندما يكون المحتوى عربيًا.
-- استخدم محتوى واقعيًا بدل نصوص تجريبية.
-- بعد الكود اشرح في سطرين كيف يعمل.
-`;
+const TOOLS = [
+  { type: 'function', function: { name: 'web_search', description: 'Search the web. Returns titles, urls, snippets.', parameters: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'] } } },
+  { type: 'function', function: { name: 'read_page', description: 'Fetch a public web page and return its text.', parameters: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'] } } },
+  { type: 'function', function: { name: 'generate_image', description: 'Generate an image from an English prompt.', parameters: { type: 'object', properties: { prompt: { type: 'string' } }, required: ['prompt'] } } },
+  { type: 'function', function: { name: 'build_website', description: 'Deliver a complete single-file HTML website/app.', parameters: { type: 'object', properties: { title: { type: 'string' }, html: { type: 'string' } }, required: ['title', 'html'] } } },
+  { type: 'function', function: { name: 'exchange_rate', description: 'Live currency exchange rate, e.g. USD to EGP.', parameters: { type: 'object', properties: { base: { type: 'string' }, target: { type: 'string' } }, required: ['base', 'target'] } } },
+  { type: 'function', function: { name: 'calculate', description: 'Evaluate a math expression with + - * / ( ) numbers only.', parameters: { type: 'object', properties: { expression: { type: 'string' } }, required: ['expression'] } } }
+];
 
+function isPrivateHost(h) {
+  h = String(h || '').toLowerCase();
+  return !h || h === 'localhost' || h.endsWith('.local') || h.endsWith('.internal') ||
+    /^(127\.|10\.|192\.168\.|169\.254\.|0\.)/.test(h) || /^172\.(1[6-9]|2\d|3[01])\./.test(h) ||
+    h.includes(':') || h === '[::1]';
+}
 
-// ============================================================
-// KNOWLEDGE BASE (Supabase full-text search)
-// ============================================================
+function strip(html) {
+  return String(html)
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&')
+    .replace(/\s+/g, ' ').trim();
+}
 
-const KB_KEY = process.env.SUPABASE_SERVICE_KEY || '';
-
-async function kbLookup(question) {
-  try {
-    if (!KB_KEY || !SUPABASE_URL || !question) return '';
-    const words = Array.from(new Set(
-      String(question).toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ')
-        .split(/\s+/).filter(w => w.length > 2)
-    )).slice(0, 8);
-    if (!words.length) return '';
-    const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/search_knowledge', {
+async function webSearch(query) {
+  const key = process.env.TAVILY_API_KEY || '';
+  if (key) {
+    const r = await fetch('https://api.tavily.com/search', {
       method: 'POST',
-      headers: { apikey: KB_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ q: words.join(' or '), n: 4 })
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
+      body: JSON.stringify({ query, max_results: 5, include_answer: true })
     });
-    if (!r.ok) return '';
-    const rows = await r.json();
-    if (!Array.isArray(rows) || !rows.length) return '';
-    return 'معلومات من قاعدة معرفة Yovia (استخدمها لو مفيدة للسؤال، وتجاهلها لو غير مرتبطة):\n' +
-      rows.map(x => '- ' + String(x.content).slice(0, 700)).join('\n');
-  } catch { return ''; }
-}
-
-// ============================================================
-// RESPONSE HELPERS
-// ============================================================
-
-function send(res, status, payload) {
-  return res.status(status).json(payload);
-}
-
-async function readJSON(response) {
-  const raw = await response.text();
-
-  if (!raw) {
-    return { raw: '', data: null };
+    const j = await r.json().catch(() => ({}));
+    if (r.ok && Array.isArray(j.results)) {
+      return { answer: j.answer || '', results: j.results.map(x => ({ title: x.title, url: x.url, snippet: String(x.content || '').slice(0, 400) })) };
+    }
   }
+  // fallback without key: Wikipedia (Arabic then English)
+  const out = [];
+  for (const lang of ['ar', 'en']) {
+    const r = await fetch('https://' + lang + '.wikipedia.org/w/api.php?action=query&list=search&format=json&srlimit=3&srsearch=' + encodeURIComponent(query));
+    const j = await r.json().catch(() => ({}));
+    const items = (j.query && j.query.search) || [];
+    items.forEach(x => out.push({ title: x.title, url: 'https://' + lang + '.wikipedia.org/wiki/' + encodeURIComponent(x.title.replace(/ /g, '_')), snippet: strip(x.snippet) }));
+    if (out.length >= 3) break;
+  }
+  return out.length ? out : 'no results (web search key missing)';
+}
 
+async function exchangeRate(base, target) {
+  const b = String(base || 'USD').toUpperCase().slice(0, 3);
+  const t = String(target || 'EGP').toUpperCase().slice(0, 3);
+  const r = await fetch('https://open.er-api.com/v6/latest/' + b);
+  const j = await r.json().catch(() => ({}));
+  if (!j.rates || !j.rates[t]) return 'rate unavailable';
+  return { base: b, target: t, rate: j.rates[t], updated: j.time_last_update_utc };
+}
+
+async function readPage(url) {
+  let u;
+  try { u = new URL(url); } catch { return 'invalid url'; }
+  if (!/^https?:$/.test(u.protocol) || isPrivateHost(u.hostname)) return 'blocked url';
+  const r = await fetch(u.href, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; YoviaBot/1.0)' }, redirect: 'follow' });
+  const t = strip(await r.text());
+  return t.slice(0, 3500);
+}
+
+function calc(expr) {
+  const e = String(expr || '');
+  if (!/^[0-9+\-*/().\s%]+$/.test(e) || e.length > 200) return 'invalid expression';
+  try { return String(Function('"use strict";return (' + e + ')')()); } catch { return 'invalid expression'; }
+}
+
+async function runTool(name, args, artifacts) {
   try {
-    return {
-      raw,
-      data: JSON.parse(raw)
-    };
-  } catch {
-    return {
-      raw,
-      data: null
-    };
+    if (name === 'web_search') return await webSearch(String(args.query || '').slice(0, 200));
+    if (name === 'read_page') return await readPage(args.url);
+    if (name === 'exchange_rate') return await exchangeRate(args.base, args.target);
+    if (name === 'calculate') return calc(args.expression);
+    if (name === 'generate_image') {
+      const p = String(args.prompt || '').slice(0, 500);
+      const url = 'https://image.pollinations.ai/prompt/' + encodeURIComponent(p) + '?width=1024&height=1024&nologo=true&seed=' + Math.floor(Math.random() * 1e6);
+      artifacts.push({ type: 'image', url });
+      return 'image created and shown to the user';
+    }
+    if (name === 'build_website') {
+      artifacts.push({ type: 'html', title: String(args.title || 'موقع'), html: String(args.html || '') });
+      return 'website delivered to the user as a live preview';
+    }
+    return 'unknown tool';
+  } catch (e) {
+    return 'tool error: ' + (e && e.message ? e.message : 'failed');
   }
 }
 
-// ============================================================
-// MESSAGE NORMALIZATION
-// ============================================================
-
-function normalizeMessages(input) {
-  if (!Array.isArray(input)) {
-    return [];
-  }
-
-  return input
-    .filter(message =>
-      message &&
-      typeof message === 'object' &&
-      message.role !== 'system'
-    )
-    .map(message => {
-      const role =
-        message.role === 'assistant' ||
-        message.role === 'model'
-          ? 'assistant'
-          : 'user';
-
-      let content = '';
-
-      if (typeof message.content === 'string') {
-        content = message.content;
-      } else if (typeof message.text === 'string') {
-        content = message.text;
-      } else if (Array.isArray(message.content)) {
-        content = message.content
-          .map(part => {
-            if (typeof part === 'string') {
-              return part;
-            }
-
-            if (part && typeof part.text === 'string') {
-              return part.text;
-            }
-
-            return '';
-          })
-          .filter(Boolean)
-          .join('\n');
-      }
-
-      content = String(content || '').trim();
-
-      if (!content) {
-        return null;
-      }
-
-      return {
-        role,
-        content
-      };
+async function groq(messages) {
+  const r = await fetch(GROQ_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + GROQ_API_KEY },
+    body: JSON.stringify({
+      model: GROQ_MODEL,
+      messages,
+      tools: TOOLS,
+      tool_choice: 'auto',
+      max_completion_tokens: 3500,
+      temperature: 0.6,
+      reasoning_effort: 'low'
     })
-    .filter(Boolean)
-    .slice(-10)
-    .map(m => ({ role: m.role, content: m.content.length > 2500 ? m.content.slice(-2500) : m.content }));
-}
-
-// ============================================================
-// SSE HELPERS
-// ============================================================
-
-function sendSSE(res, payload) {
-  if (res.destroyed || res.writableEnded) {
-    return false;
+  });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    const err = new Error((j.error && j.error.message) || 'groq failed');
+    err.status = r.status;
+    throw err;
   }
-
-  return res.write(
-    `data: ${JSON.stringify(payload)}\n\n`
-  );
+  return j.choices && j.choices[0] && j.choices[0].message;
 }
-
-// ============================================================
-// MAIN HANDLER
-// ============================================================
 
 module.exports = async function handler(req, res) {
-
-  let stage = 'initialization';
-  let groqReader = null;
-
-  // ==========================================================
-  // CORS
-  // ==========================================================
-
-  res.setHeader('Access-Control-Allow-Origin', '*');
-
-  res.setHeader(
-    'Access-Control-Allow-Methods',
-    'POST, OPTIONS'
-  );
-
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'Content-Type, Authorization'
-  );
-
-  if (req.method === 'OPTIONS') {
-    return res.status(204).end();
-  }
-
-  if (req.method !== 'POST') {
-    return send(res, 405, {
-      error: 'POST only',
-      code: 'METHOD_NOT_ALLOWED'
-    });
-  }
-
+  if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   try {
-
-    // ========================================================
-    // ENVIRONMENT CHECK
-    // ========================================================
-
-    stage = 'environment';
-
-    if (!SUPABASE_URL || !SUPABASE_KEY) {
-      return send(res, 500, {
-        error: 'إعدادات Supabase ناقصة على الخادم.',
-        code: 'SUPABASE_CONFIG_ERROR'
-      });
+    const auth = req.headers.authorization || '';
+    if (auth) {
+      const who = await fetch(SUPABASE_URL + '/auth/v1/user', { headers: { apikey: SUPABASE_KEY, Authorization: auth } });
+      if (!who.ok) return res.status(401).json({ error: 'جلسة غير صالحة. حدّث الصفحة.' });
+    } else {
+      // زائر بدون تسجيل: مسموح بحد يومي بسيط لكل IP (best effort)
+      globalThis.__guestHits = globalThis.__guestHits || new Map();
+      const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'x';
+      const day = new Date().toISOString().slice(0, 10);
+      const key = ip + '|' + day;
+      const n = (globalThis.__guestHits.get(key) || 0) + 1;
+      globalThis.__guestHits.set(key, n);
+      if (globalThis.__guestHits.size > 5000) globalThis.__guestHits.clear();
+      if (n > 15) return res.status(429).json({ error: 'خلصت رسايلك المجانية كضيف. سجّل حساب مجاني وكمّل 🚀' });
     }
 
-    if (!GROQ_API_KEY) {
-      return send(res, 500, {
-        error: 'مفتاح Groq غير مضبوط على الخادم.',
-        code: 'MISSING_GROQ_API_KEY'
-      });
-    }
+    const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
+    const history = (Array.isArray(body.messages) ? body.messages : [])
+      .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string' && m.content.trim())
+      .slice(-8)
+      .map(m => ({ role: m.role, content: m.content.slice(-2500) }));
+    if (!history.length) return res.status(400).json({ error: 'لا توجد رسالة.' });
 
-    // ========================================================
-    // AUTHENTICATION HEADER
-    // ========================================================
+    const messages = [{ role: 'system', content: SYSTEM }, ...history];
+    const artifacts = [];
+    let reply = '';
 
-    stage = 'authentication_header';
-
-    const authHeader = req.headers.authorization || '';
-
-    // الزائر (بدون تسجيل دخول) يقدر يستخدم الشات بدون توكن
-    const isGuest = !/^Bearer\s+\S+/i.test(authHeader);
-
-    // ========================================================
-    // REQUEST BODY
-    // ========================================================
-
-    stage = 'request_body';
-
-    let body = req.body || {};
-
-    if (typeof body === 'string') {
-      try {
-        body = JSON.parse(body);
-      } catch {
-        return send(res, 400, {
-          error: 'بيانات الطلب غير صالحة.',
-          code: 'INVALID_JSON'
-        });
+    for (let step = 0; step < MAX_STEPS; step++) {
+      const msg = await groq(messages);
+      if (!msg) break;
+      const calls = msg.tool_calls || [];
+      if (!calls.length) { reply = (msg.content || '').trim(); break; }
+      messages.push({ role: 'assistant', content: msg.content || '', tool_calls: calls });
+      for (const c of calls) {
+        let args = {};
+        try { args = JSON.parse(c.function.arguments || '{}'); } catch {}
+        const result = await runTool(c.function.name, args, artifacts);
+        messages.push({ role: 'tool', tool_call_id: c.id, content: typeof result === 'string' ? result.slice(0, 3500) : JSON.stringify(result).slice(0, 3500) });
       }
     }
-
-    if (
-      !body ||
-      typeof body !== 'object' ||
-      Array.isArray(body)
-    ) {
-      return send(res, 400, {
-        error: 'تنسيق الطلب غير صالح.',
-        code: 'INVALID_BODY'
-      });
-    }
-
-    // ========================================================
-    // SUPABASE AUTHENTICATION
-    // ========================================================
-
-    stage = 'supabase_auth';
-
-    let isUnlimited = false;
-    const UNLIMITED_EMAILS = ['novaaicompany3@gmail.com', 'shenuodayoussef2@gmail.com', 'mariamshenuoda27@gmail.com'];
-
-    if (!isGuest) {
-
-    const authResponse = await fetch(
-      `${SUPABASE_URL}/auth/v1/user`,
-      {
-        method: 'GET',
-        headers: {
-          apikey: SUPABASE_KEY,
-          Authorization: authHeader
-        }
-      }
-    );
-
-    if (!authResponse.ok) {
-      const authResult = await readJSON(authResponse);
-
-      console.error(
-        'Yovia Supabase authentication failed:',
-        authResponse.status,
-        authResult.data?.msg ||
-        authResult.data?.message ||
-        'Authentication rejected'
-      );
-
-      return send(res, 401, {
-        error: 'جلسة Supabase غير صالحة. حدّث الصفحة وحاول مرة أخرى.',
-        code: 'INVALID_SESSION'
-      });
-    }
-
-    {
-      const me = await readJSON(authResponse);
-      const em = String((me.data && me.data.email) || '').toLowerCase();
-      isUnlimited = UNLIMITED_EMAILS.includes(em);
-    }
-
-    }
-
-    // ========================================================
-    // NORMALIZE MESSAGES
-    // ========================================================
-
-    stage = 'messages';
-
-    const messages = normalizeMessages(body.messages);
-
-    if (!messages.length) {
-      const singleMessage =
-        typeof body.message === 'string'
-          ? body.message.trim()
-          : typeof body.prompt === 'string'
-            ? body.prompt.trim()
-            : '';
-
-      if (singleMessage) {
-        messages.push({
-          role: 'user',
-          content: singleMessage
-        });
-      }
-    }
-
-    if (
-      !messages.length ||
-      !messages.some(message => message.role === 'user')
-    ) {
-      return send(res, 400, {
-        error: 'اكتب رسالة أولًا.',
-        code: 'MISSING_MESSAGE'
-      });
-    }
-
-    // ========================================================
-    // DAILY MESSAGE QUOTA
-    // ========================================================
-
-    stage = 'quota';
-
-    let quota = null;
-
-    if (!isGuest && !isUnlimited) {
-
-    const quotaResponse = await fetch(
-      `${SUPABASE_URL}/rest/v1/rpc/yovia_consume_message`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          apikey: SUPABASE_KEY,
-          Authorization: authHeader
-        },
-        body: '{}'
-      }
-    );
-
-    const quotaResult = await readJSON(quotaResponse);
-
-    if (!quotaResponse.ok) {
-      console.error(
-        'Yovia quota RPC error:',
-        quotaResponse.status,
-        quotaResult.raw.slice(0, 1500)
-      );
-
-      return send(res, 500, {
-        error: 'تعذّر التحقق من حد الرسائل.',
-        code: 'QUOTA_RPC_ERROR'
-      });
-    }
-
-    const quotaData = quotaResult.data;
-
-    const quota = Array.isArray(quotaData)
-      ? quotaData[0]
-      : quotaData;
-
-    if (!quota || typeof quota !== 'object') {
-      console.error(
-        'Yovia invalid quota response:',
-        quotaResult.raw.slice(0, 1000)
-      );
-
-      return send(res, 500, {
-        error: 'استجابة عداد الرسائل غير مفهومة.',
-        code: 'QUOTA_INVALID_RESPONSE'
-      });
-    }
-
-    const allowed =
-      quota.allowed === true ||
-      quota.status === 'allowed';
-
-    if (!allowed) {
-      const reached =
-        quota.code === 'LIMIT_REACHED' ||
-        quota.status === 'limit_reached';
-
-      return send(res, reached ? 429 : 403, {
-        error: reached
-          ? 'وصلت للحد اليومي من الرسائل. يمكنك المحاولة بعد إعادة ضبط الحد أو مراجعة الباقات.'
-          : 'تعذّر السماح بالرسالة حسب إعدادات الباقة.',
-
-        code:
-          quota.code ||
-          (reached ? 'LIMIT_REACHED' : 'QUOTA_DENIED'),
-
-        plan: quota.plan || null,
-        limit: quota.limit ?? null,
-        remaining: quota.remaining ?? null,
-        reset_at: quota.reset_at || null
-      });
-    }
-
-    }
-
-    // ========================================================
-    // SYSTEM INSTRUCTION
-    // ========================================================
-
-    stage = 'system_instruction';
-
-    const suppliedSystem = Array.isArray(body.messages)
-      ? body.messages
-          .filter(message =>
-            message &&
-            message.role === 'system' &&
-            typeof message.content === 'string'
-          )
-          .map(message => message.content.trim())
-          .filter(Boolean)
-          .join('\n\n')
-      : '';
-
-    const lastUser = [...messages].reverse().find(m => m.role === 'user');
-    const kbContext = await kbLookup(lastUser ? lastUser.content : '');
-
-    const systemInstruction = [
-      SYSTEM_PROMPT,
-      suppliedSystem,
-      kbContext
-    ]
-      .filter(Boolean)
-      .join('\n\n');
-
-    // ========================================================
-    // GROQ MESSAGES
-    // ========================================================
-
-    stage = 'groq_prepare';
-
-    const groqMessages = [
-      { role: 'system', content: systemInstruction },
-      ...messages.map(message => ({
-        role: message.role,
-        content: message.content
-      }))
-    ];
-
-    const requestedTokens = Number(body.max_tokens);
-
-    const maxOutputTokens =
-      Number.isFinite(requestedTokens) &&
-      requestedTokens > 0
-        ? Math.min(
-            3500,
-            Math.max(1, Math.floor(requestedTokens))
-          )
-        : 2000;
-
-    const requestedTemperature = Number(body.temperature);
-
-    const temperature =
-      Number.isFinite(requestedTemperature)
-        ? Math.min(2, Math.max(0, requestedTemperature))
-        : 0.7;
-
-    // ========================================================
-    // GROQ STREAMING REQUEST
-    // ========================================================
-
-    stage = 'groq_request';
-
-    const groqPayload = {
-      model: GROQ_MODEL,
-      messages: groqMessages,
-      stream: true,
-      max_completion_tokens: maxOutputTokens,
-      temperature
-    };
-
-    if (/gpt-oss/i.test(GROQ_MODEL)) {
-      groqPayload.reasoning_effort = 'low';
-    }
-
-    // ---- Multi-provider router: Groq -> Gemini -> OpenRouter (keys from env, missing ones are skipped)
-    const providers = [
-      { name: 'groq', url: GROQ_URL, key: GROQ_API_KEY, model: GROQ_MODEL },
-      { name: 'gemini', url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', key: process.env.GEMINI_API_KEY || '', model: process.env.GEMINI_MODEL || 'gemini-2.0-flash' },
-      { name: 'openrouter', url: 'https://openrouter.ai/api/v1/chat/completions', key: process.env.OPENROUTER_API_KEY || '', model: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free' }
-      ,{ name: 'cloudflare', url: `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID || ''}/ai/v1/chat/completions`, key: (process.env.CLOUDFLARE_ACCOUNT_ID && process.env.CLOUDFLARE_API_TOKEN) || '', model: process.env.CLOUDFLARE_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast' }
-    ].filter(p => p.key);
-    const cfp = providers.find(p => p.name === 'cloudflare');
-    if (cfp) cfp.key = process.env.CLOUDFLARE_API_TOKEN;
-
-    let groqResponse = null;
-    let lastDetails = '';
-    for (const p of providers) {
-      const payload = { ...groqPayload, model: p.model };
-      if (p.name === 'groq') {
-        if (!/gpt-oss/i.test(p.model)) delete payload.reasoning_effort;
-      } else {
-        delete payload.reasoning_effort;
-        payload.max_tokens = payload.max_completion_tokens;
-        delete payload.max_completion_tokens;
-      }
-      try {
-        const r = await fetch(p.url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${p.key}` },
-          body: JSON.stringify(payload)
-        });
-        if (r.ok && r.body) { groqResponse = r; break; }
-        const t = await r.text().catch(() => '');
-        lastDetails = `${p.name} ${r.status} ${t.slice(0, 500)}`;
-        console.error('Yovia provider failed:', lastDetails);
-      } catch (e) {
-        lastDetails = `${p.name} ${String(e && e.message || e)}`;
-        console.error('Yovia provider error:', lastDetails);
-      }
-    }
-
-    if (!groqResponse) {
-      return send(res, 502, {
-        error: 'تعذّر على Yovia الحصول على رد من النموذج حاليًا.',
-        code: 'ALL_PROVIDERS_FAILED',
-        details: lastDetails
-      });
-    }
-
-    if (!groqResponse.body) {
-      return send(res, 502, {
-        error: 'خدمة النموذج لم تُرجع تدفق بيانات.',
-        code: 'GROQ_STREAM_UNAVAILABLE'
-      });
-    }
-
-    // ========================================================
-    // START STREAM RESPONSE
-    // ========================================================
-
-    stage = 'groq_stream';
-
-    res.statusCode = 200;
-
-    res.setHeader(
-      'Content-Type',
-      'text/event-stream; charset=utf-8'
-    );
-
-    res.setHeader(
-      'Cache-Control',
-      'no-cache, no-transform'
-    );
-
-    res.setHeader('Connection', 'keep-alive');
-
-    res.setHeader('X-Accel-Buffering', 'no');
-
-    res.flushHeaders?.();
-
-    // ========================================================
-    // READ GROQ SSE STREAM
-    // ========================================================
-
-    groqReader = groqResponse.body.getReader();
-
-    const decoder = new TextDecoder();
-
-    let buffer = '';
-    let totalText = '';
-    let streamError = null;
-
-    function processEvent(eventBlock) {
-      const lines = eventBlock.split(/\r?\n/);
-
-      for (const line of lines) {
-        if (!line.startsWith('data:')) {
-          continue;
-        }
-
-        const raw = line.slice(5).trim();
-
-        if (!raw || raw === '[DONE]') {
-          continue;
-        }
-
-        let chunk;
-
-        try {
-          chunk = JSON.parse(raw);
-        } catch {
-          continue;
-        }
-
-        if (chunk.error) {
-          streamError =
-            chunk.error.message ||
-            'حدث خطأ أثناء توليد الرد.';
-
-          continue;
-        }
-
-        const piece = chunk.choices?.[0]?.delta?.content;
-
-        if (typeof piece === 'string' && piece) {
-          totalText += piece;
-
-          sendSSE(res, {
-            type: 'delta',
-            text: piece
-          });
-        }
-      }
-    }
-
-    // ========================================================
-    // STREAM LOOP
-    // ========================================================
-
-    while (true) {
-      if (res.destroyed || res.writableEnded) {
-        await groqReader.cancel().catch(() => {});
-        return;
-      }
-
-      const { value, done } = await groqReader.read();
-
-      if (done) {
-        break;
-      }
-
-      buffer += decoder.decode(value, {
-        stream: true
-      });
-
-      const events = buffer.split(/\r?\n\r?\n/);
-
-      buffer = events.pop() || '';
-
-      for (const eventBlock of events) {
-        processEvent(eventBlock);
-      }
-    }
-
-    // Process remaining buffered data
-    buffer += decoder.decode();
-
-    if (buffer.trim()) {
-      processEvent(buffer);
-    }
-
-    // ========================================================
-    // STREAM RESULT
-    // ========================================================
-
-    if (streamError) {
-      sendSSE(res, {
-        type: 'error',
-        error: streamError
-      });
-
-      return res.end();
-    }
-
-    if (!totalText.trim()) {
-      sendSSE(res, {
-        type: 'error',
-        error: 'النموذج لم يُرجع نصًا. حاول مرة أخرى.',
-        code: 'EMPTY_MODEL_RESPONSE'
-      });
-
-      return res.end();
-    }
-
-    // ========================================================
-    // DONE EVENT
-    // ========================================================
-
-    sendSSE(res, {
-      type: 'done',
-
-      model: GROQ_MODEL,
-
-      quota: quota
-        ? {
-            plan: quota.plan || null,
-            used: quota.used ?? null,
-            limit: quota.limit ?? null,
-            remaining: quota.remaining ?? null,
-            reset_at: quota.reset_at || null
-          }
-        : null
-    });
-
-    return res.end();
-
-  } catch (error) {
-
-    // ========================================================
-    // ERROR HANDLING
-    // ========================================================
-
-    console.error('Yovia chat handler error:', {
-      stage,
-      name: error?.name || 'Error',
-      message: error?.message || String(error)
-    });
-
-    if (groqReader) {
-      try {
-        await groqReader.cancel();
-      } catch {}
-    }
-
-    if (res.headersSent) {
-      sendSSE(res, {
-        type: 'error',
-        error: 'حصل خطأ أثناء توليد الرد.',
-        code: 'YOVIA_STREAM_ERROR'
-      });
-
-      if (!res.writableEnded) {
-        res.end();
-      }
-
-      return;
-    }
-
-    return send(res, 500, {
-      error: 'حصل خطأ داخلي في Yovia AI.',
-      code: 'YOVIA_INTERNAL_ERROR',
-      stage
-    });
+    if (!reply && artifacts.length) reply = 'تم، دي النتيجة:';
+    if (!reply) reply = 'معرفتش أكمل المهمة، جرب تاني بصياغة أبسط.';
+    return res.status(200).json({ reply, artifacts });
+  } catch (e) {
+    console.error('agent error', e && e.message);
+    const busy = e && e.status === 429;
+    return res.status(busy ? 429 : 500).json({ error: busy ? 'الضغط عالي، جرب بعد دقيقة.' : 'حصلت مشكلة، جرب تاني.' });
   }
 };
