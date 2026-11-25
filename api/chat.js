@@ -497,37 +497,48 @@ module.exports = async function handler(req, res) {
       groqPayload.reasoning_effort = 'low';
     }
 
-    const groqResponse = await fetch(GROQ_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${GROQ_API_KEY}`
-      },
-      body: JSON.stringify(groqPayload)
-    });
+    // ---- Multi-provider router: Groq -> Gemini -> OpenRouter (keys from env, missing ones are skipped)
+    const providers = [
+      { name: 'groq', url: GROQ_URL, key: GROQ_API_KEY, model: GROQ_MODEL },
+      { name: 'gemini', url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', key: process.env.GEMINI_API_KEY || '', model: process.env.GEMINI_MODEL || 'gemini-2.0-flash' },
+      { name: 'openrouter', url: 'https://openrouter.ai/api/v1/chat/completions', key: process.env.OPENROUTER_API_KEY || '', model: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free' }
+      ,{ name: 'cloudflare', url: `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID || ''}/ai/v1/chat/completions`, key: (process.env.CLOUDFLARE_ACCOUNT_ID && process.env.CLOUDFLARE_API_TOKEN) || '', model: process.env.CLOUDFLARE_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast' }
+    ].filter(p => p.key);
+    const cfp = providers.find(p => p.name === 'cloudflare');
+    if (cfp) cfp.key = process.env.CLOUDFLARE_API_TOKEN;
 
-    // ========================================================
-    // GROQ ERROR
-    // ========================================================
+    let groqResponse = null;
+    let lastDetails = '';
+    for (const p of providers) {
+      const payload = { ...groqPayload, model: p.model };
+      if (p.name === 'groq') {
+        if (!/gpt-oss/i.test(p.model)) delete payload.reasoning_effort;
+      } else {
+        delete payload.reasoning_effort;
+        payload.max_tokens = payload.max_completion_tokens;
+        delete payload.max_completion_tokens;
+      }
+      try {
+        const r = await fetch(p.url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${p.key}` },
+          body: JSON.stringify(payload)
+        });
+        if (r.ok && r.body) { groqResponse = r; break; }
+        const t = await r.text().catch(() => '');
+        lastDetails = `${p.name} ${r.status} ${t.slice(0, 500)}`;
+        console.error('Yovia provider failed:', lastDetails);
+      } catch (e) {
+        lastDetails = `${p.name} ${String(e && e.message || e)}`;
+        console.error('Yovia provider error:', lastDetails);
+      }
+    }
 
-    if (!groqResponse.ok) {
-      const groqResult = await readJSON(groqResponse);
-
-      const details =
-        groqResult.data?.error?.message ||
-        groqResult.raw.slice(0, 1500) ||
-        `Groq HTTP ${groqResponse.status}`;
-
-      console.error(
-        'Yovia Groq API error:',
-        groqResponse.status,
-        details
-      );
-
+    if (!groqResponse) {
       return send(res, 502, {
         error: 'تعذّر على Yovia الحصول على رد من النموذج حاليًا.',
-        code: 'GROQ_REQUEST_FAILED',
-        details
+        code: 'ALL_PROVIDERS_FAILED',
+        details: lastDetails
       });
     }
 
