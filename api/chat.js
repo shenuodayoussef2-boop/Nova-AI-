@@ -120,7 +120,8 @@ function normalizeMessages(input) {
       };
     })
     .filter(Boolean)
-    .slice(-40);
+    .slice(-10)
+    .map(m => ({ role: m.role, content: m.content.length > 2500 ? m.content.slice(-2500) : m.content }));
 }
 
 // ============================================================
@@ -445,10 +446,10 @@ module.exports = async function handler(req, res) {
       Number.isFinite(requestedTokens) &&
       requestedTokens > 0
         ? Math.min(
-            4096,
+            1500,
             Math.max(1, Math.floor(requestedTokens))
           )
-        : 2048;
+        : 1000;
 
     const requestedTemperature = Number(body.temperature);
 
