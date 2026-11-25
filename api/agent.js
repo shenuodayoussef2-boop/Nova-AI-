@@ -146,9 +146,20 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   try {
     const auth = req.headers.authorization || '';
-    if (!auth) return res.status(401).json({ error: 'سجل دخولك الأول.' });
-    const who = await fetch(SUPABASE_URL + '/auth/v1/user', { headers: { apikey: SUPABASE_KEY, Authorization: auth } });
-    if (!who.ok) return res.status(401).json({ error: 'جلسة غير صالحة. حدّث الصفحة.' });
+    if (auth) {
+      const who = await fetch(SUPABASE_URL + '/auth/v1/user', { headers: { apikey: SUPABASE_KEY, Authorization: auth } });
+      if (!who.ok) return res.status(401).json({ error: 'جلسة غير صالحة. حدّث الصفحة.' });
+    } else {
+      // زائر بدون تسجيل: مسموح بحد يومي بسيط لكل IP (best effort)
+      globalThis.__guestHits = globalThis.__guestHits || new Map();
+      const ip = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim() || 'x';
+      const day = new Date().toISOString().slice(0, 10);
+      const key = ip + '|' + day;
+      const n = (globalThis.__guestHits.get(key) || 0) + 1;
+      globalThis.__guestHits.set(key, n);
+      if (globalThis.__guestHits.size > 5000) globalThis.__guestHits.clear();
+      if (n > 15) return res.status(429).json({ error: 'خلصت رسايلك المجانية كضيف. سجّل حساب مجاني وكمّل 🚀' });
+    }
 
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
     const history = (Array.isArray(body.messages) ? body.messages : [])
