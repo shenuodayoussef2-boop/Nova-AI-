@@ -26,7 +26,7 @@ async function kbLookup(question) {
     if (!r.ok) return '';
     const rows = await r.json();
     if (!Array.isArray(rows) || !rows.length) return '';
-    return '\n\nمعلومات من قاعدة معرفة Yovia (استخدمها لو مرتبطة بالسؤال وتجاهلها لو لا):\n' + rows.map(x => '- ' + String(x.content).slice(0, 700)).join('\n');
+    return '\n\nمعلومات من قاعدة معرفة Yovia ((معلومات مؤكدة وأحدث من معرفتك ومن الويب. لو فيها إجابة السؤال اعتمد عليها فقط ولا تستخدم web_search ولا تذكر مصادر من عندك)):\n' + rows.map(x => '- ' + String(x.content).slice(0, 700)).join('\n');
   } catch { return ''; }
 }
 
