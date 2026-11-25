@@ -66,21 +66,22 @@ const KB_KEY = process.env.SUPABASE_SERVICE_KEY || '';
 async function kbLookup(question) {
   try {
     if (!KB_KEY || !SUPABASE_URL || !question) return '';
-    const words = Array.from(new Set(
-      String(question).toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ')
-        .split(/\s+/).filter(w => w.length > 2)
-    )).slice(0, 8);
+    const STOP = new Set(['مين','ايه','إيه','هو','هي','من','في','على','عن','كان','كانت','فاز','لما','امتى','متى','كام','ازاي','إزاي','what','who','the','is','of']);
+    const base = String(question).toLowerCase().replace(/[^\p{L}\p{N}\s]/gu, ' ').split(/\s+/).filter(w => w.length > 1 && !STOP.has(w));
+    const set = new Set();
+    for (const w of base) { set.add(w); const a2 = w.replace(/^(وال|بال|لل|ال)/, ''); if (a2.length > 1) set.add(a2); const b2 = w.replace(/^[بلوفك]/, ''); if (b2.length > 2) set.add(b2); const c2 = b2.replace(/^ال/, ''); if (c2.length > 1) set.add(c2); }
+    const words = Array.from(set).slice(0, 16);
     if (!words.length) return '';
     const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/search_knowledge', {
       method: 'POST',
       headers: { apikey: KB_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ q: words.join(' or '), n: 4 })
+      body: JSON.stringify({ q: words.join(' or '), n: 8 })
     });
     if (!r.ok) return '';
     const rows = await r.json();
     if (!Array.isArray(rows) || !rows.length) return '';
-    return 'معلومات من قاعدة معرفة Yovia (استخدمها لو مفيدة للسؤال، وتجاهلها لو غير مرتبطة):\n' +
-      rows.map(x => '- ' + String(x.content).slice(0, 700)).join('\n');
+    return 'معلومات من قاعدة معرفة Yovia (معلومات مؤكدة وأحدث من معرفتك. لو فيها إجابة السؤال اعتمد عليها فقط):\n' +
+      rows.map(x => '- ' + String(x.content).slice(0, 600)).join('\n');
   } catch { return ''; }
 }
 
