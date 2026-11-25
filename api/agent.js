@@ -1,7 +1,8 @@
 'use strict';
 
 // Yovia AI - AGENT API (tool-calling). Put at api/agent.js
-// Tools: web_search, read_page, generate_image, build_website, calculate
+// Tools: web_search, read_page, generate_image, build_website, exchange_rate, calculate
+// Optional env: TAVILY_API_KEY (free at tavily.com) for real web search
 // Needs: GROQ_API_KEY, SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY (same as chat.js)
 
 const SUPABASE_URL = (process.env.SUPABASE_URL || '').replace(/\/$/, '');
@@ -12,11 +13,13 @@ const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 const MAX_STEPS = 4;
 
 const SYSTEM = `أنت Yovia، وكيل ذكي ينفذ المهام بنفسه باستخدام الأدوات المتاحة.
+- إذا سُئلت من مؤسسك أو من صنعك أو من أسسك فقل بالضبط: أنا يوفيا من شركة Yovia AI التي أسسها Youssef Shenuoda.
 - المطوّر هو يوسف. لا تقل إنك Nova أو Gemini أو Google أو OpenAI أو Groq.
 - رد بلغة المستخدم ولهجته، وكن مختصرًا.
 - لو المستخدم طلب موقعًا أو صفحة أو تطبيقًا استخدم أداة build_website بملف HTML كامل (CSS وJS داخله) بتصميم احترافي حديث، RTL للعربي، متجاوب مع الموبايل، وكل زرار يعمل فعلاً، وصور حقيقية للمنتجات عبر https://loremflickr.com/600/400/KEYWORD?lock=N (KEYWORD كلمة إنجليزية، وN رقم مختلف) مع onerror يضع خلفية متدرجة.
 - لو طلب صورة استخدم generate_image بوصف إنجليزي مفصل.
 - لو يحتاج معلومة حديثة أو غير مؤكدة استخدم web_search ثم read_page عند الحاجة، واذكر المصادر.
+- لأسعار العملات استخدم exchange_rate (سعر رسمي عالمي، وقد يختلف عن سعر السوق المحلي، وضّح ذلك).
 - للحسابات استخدم calculate.
 - لا تخترع نتائج ولا تدّعي تنفيذ شيء لم تنفذه.`;
 
@@ -25,6 +28,7 @@ const TOOLS = [
   { type: 'function', function: { name: 'read_page', description: 'Fetch a public web page and return its text.', parameters: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'] } } },
   { type: 'function', function: { name: 'generate_image', description: 'Generate an image from an English prompt.', parameters: { type: 'object', properties: { prompt: { type: 'string' } }, required: ['prompt'] } } },
   { type: 'function', function: { name: 'build_website', description: 'Deliver a complete single-file HTML website/app.', parameters: { type: 'object', properties: { title: { type: 'string' }, html: { type: 'string' } }, required: ['title', 'html'] } } },
+  { type: 'function', function: { name: 'exchange_rate', description: 'Live currency exchange rate, e.g. USD to EGP.', parameters: { type: 'object', properties: { base: { type: 'string' }, target: { type: 'string' } }, required: ['base', 'target'] } } },
   { type: 'function', function: { name: 'calculate', description: 'Evaluate a math expression with + - * / ( ) numbers only.', parameters: { type: 'object', properties: { expression: { type: 'string' } }, required: ['expression'] } } }
 ];
 
@@ -45,20 +49,37 @@ function strip(html) {
 }
 
 async function webSearch(query) {
-  const r = await fetch('https://html.duckduckgo.com/html/?q=' + encodeURIComponent(query), {
-    headers: { 'User-Agent': 'Mozilla/5.0 (compatible; YoviaBot/1.0)' }
-  });
-  const html = await r.text();
-  const out = [];
-  const re = /<a[^>]*class="result__a"[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?<a[^>]*class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g;
-  let m;
-  while ((m = re.exec(html)) && out.length < 5) {
-    let url = m[1];
-    const u = url.match(/uddg=([^&]+)/);
-    if (u) url = decodeURIComponent(u[1]);
-    out.push({ title: strip(m[2]), url, snippet: strip(m[3]) });
+  const key = process.env.TAVILY_API_KEY || '';
+  if (key) {
+    const r = await fetch('https://api.tavily.com/search', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
+      body: JSON.stringify({ query, max_results: 5, include_answer: true })
+    });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok && Array.isArray(j.results)) {
+      return { answer: j.answer || '', results: j.results.map(x => ({ title: x.title, url: x.url, snippet: String(x.content || '').slice(0, 400) })) };
+    }
   }
-  return out.length ? out : 'no results';
+  // fallback without key: Wikipedia (Arabic then English)
+  const out = [];
+  for (const lang of ['ar', 'en']) {
+    const r = await fetch('https://' + lang + '.wikipedia.org/w/api.php?action=query&list=search&format=json&srlimit=3&srsearch=' + encodeURIComponent(query));
+    const j = await r.json().catch(() => ({}));
+    const items = (j.query && j.query.search) || [];
+    items.forEach(x => out.push({ title: x.title, url: 'https://' + lang + '.wikipedia.org/wiki/' + encodeURIComponent(x.title.replace(/ /g, '_')), snippet: strip(x.snippet) }));
+    if (out.length >= 3) break;
+  }
+  return out.length ? out : 'no results (web search key missing)';
+}
+
+async function exchangeRate(base, target) {
+  const b = String(base || 'USD').toUpperCase().slice(0, 3);
+  const t = String(target || 'EGP').toUpperCase().slice(0, 3);
+  const r = await fetch('https://open.er-api.com/v6/latest/' + b);
+  const j = await r.json().catch(() => ({}));
+  if (!j.rates || !j.rates[t]) return 'rate unavailable';
+  return { base: b, target: t, rate: j.rates[t], updated: j.time_last_update_utc };
 }
 
 async function readPage(url) {
@@ -80,6 +101,7 @@ async function runTool(name, args, artifacts) {
   try {
     if (name === 'web_search') return await webSearch(String(args.query || '').slice(0, 200));
     if (name === 'read_page') return await readPage(args.url);
+    if (name === 'exchange_rate') return await exchangeRate(args.base, args.target);
     if (name === 'calculate') return calc(args.expression);
     if (name === 'generate_image') {
       const p = String(args.prompt || '').slice(0, 500);
