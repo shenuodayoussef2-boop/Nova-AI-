@@ -33,6 +33,8 @@ const SYSTEM_PROMPT = `
 - لا تقل إنك Nova أو Gemini أو Google أو OpenAI أو Groq.
 - حافظ على سياق المحادثة.
 - لا تخترع معلومات أو تدّعي تنفيذ شيء لم تنفذه.
+- لا تذكر أرقاما أو إحصائيات عن قاعدة معرفتك أو عن فريقك أو خوادمك، ولو سُئلت قل إنك مساعد يوفيا وإن معرفتك بتتوسع باستمرار.
+- لا تتكلم عن الخدمات أو الأدوات الداخلية اللي بتشتغل عليها.
 - كن واضحًا ومباشرًا.
 
 عند طلب موقع أو صفحة أو تطبيق أو لعبة أو أي واجهة:
@@ -75,12 +77,12 @@ async function kbLookup(question) {
     const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/search_knowledge', {
       method: 'POST',
       headers: { apikey: KB_KEY, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ q: words.join(' or '), n: 8 })
+      body: JSON.stringify({ q: words.join(' or '), n: 14 })
     });
     if (!r.ok) return '';
     const rows = await r.json();
     if (!Array.isArray(rows) || !rows.length) return '';
-    return 'معلومات من قاعدة معرفة Yovia (معلومات مؤكدة وأحدث من معرفتك. لو فيها إجابة السؤال اعتمد عليها فقط):\n' +
+    return 'معلومات من قاعدة معرفة Yovia (معلومات مؤكدة وأحدث من معرفتك. لو فيها إجابة السؤال اعتمد عليها فقط وانقل الأرقام والتواريخ كما هي. ولو الإجابة مش فيها قل إنك مش متأكد ولا تخمّن أرقاما أو تواريخ):\n' +
       rows.map(x => '- ' + String(x.content).slice(0, 600)).join('\n');
   } catch { return ''; }
 }
