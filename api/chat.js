@@ -92,19 +92,12 @@ async function kbLookup(question) {
 // LIVE NEWS SEARCH (free, Google News RSS, no key)
 // ============================================================
 
-async function webLookup(question, kbFound) {
+async function fetchRss(url) {
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), 5000);
   try {
-    const q = String(question || '').trim();
-    if (!q) return '';
-    const newsy = /(حادث|حوادث|خبر|اخبار|أخبار|النهارده|النهاردة|انهارده|امبارح|إمبارح|اليوم|الليلة|دلوقتي|دلوقتى|الان|الآن|آخر|اخر|اخير|أخير|حصل|حصلت|عاجل|نتيجة|نتيجه|مباراة|ماتش|سعر|اسعار|أسعار|الدولار|الذهب|طقس|الطقس|2026|2025)/.test(q);
-    if (!newsy && kbFound) return '';
-    if (!newsy) return '';
-    const url = 'https://news.google.com/rss/search?q=' + encodeURIComponent(q.slice(0, 120)) + '&hl=ar&gl=EG&ceid=EG:ar';
-    const ctl = new AbortController();
-    const t = setTimeout(() => ctl.abort(), 4000);
-    const r = await fetch(url, { signal: ctl.signal, headers: { 'User-Agent': 'Mozilla/5.0' } });
-    clearTimeout(t);
-    if (!r.ok) return '';
+    const r = await fetch(url, { signal: ctl.signal, headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36', 'Accept-Language': 'ar,en;q=0.8' } });
+    if (!r.ok) { console.error('news rss status', r.status, url.slice(0, 40)); return []; }
     const xml = await r.text();
     const items = [];
     const re = /<item>([\s\S]*?)<\/item>/g;
@@ -112,12 +105,31 @@ async function webLookup(question, kbFound) {
     while ((m = re.exec(xml)) && items.length < 6) {
       const title = (/<title>([\s\S]*?)<\/title>/.exec(m[1]) || [])[1] || '';
       const date = (/<pubDate>([\s\S]*?)<\/pubDate>/.exec(m[1]) || [])[1] || '';
-      const clean = title.replace(/<!\[CDATA\[|\]\]>/g, '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim();
-      if (clean) items.push('- ' + clean + (date ? ' (' + date.slice(0, 16) + ')' : ''));
+      const desc = (/<description>([\s\S]*?)<\/description>/.exec(m[1]) || [])[1] || '';
+      const clean = x => x.replace(/<!\[CDATA\[|\]\]>/g, '').replace(/<[^>]+>/g, ' ').replace(/&lt;[^&]*&gt;/g, ' ').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/\s+/g, ' ').trim();
+      const ti = clean(title);
+      if (ti) items.push('- ' + ti + (date ? ' (' + date.slice(0, 16) + ')' : ''));
     }
-    if (!items.length) return '';
+    return items;
+  } catch (e) {
+    console.error('news rss error', String(e && e.message || e));
+    return [];
+  } finally { clearTimeout(t); }
+}
+
+async function webLookup(question, kbFound) {
+  try {
+    const q0 = String(question || '').trim();
+    if (!q0) return '';
+    const newsy = /(حادث|حوادث|خبر|اخبار|أخبار|النهارده|النهاردة|انهارده|امبارح|إمبارح|اليوم|الليلة|دلوقتي|دلوقتى|الان|الآن|آخر|اخر|اخير|أخير|حصل|حصلت|عاجل|نتيجة|نتيجه|مباراة|ماتش|سعر|اسعار|أسعار|الدولار|الذهب|طقس|الطقس|2026|2025|ابحث|دور|بحث)/.test(q0);
+    if (!newsy) return '';
+    const q = q0.replace(/(ابحثلي|ابحث لي|دورلي|دور لي|ابحث|دور|عن|اخبار|أخبار|خبر)/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 100) || q0.slice(0, 100);
+    const enc = encodeURIComponent(q);
+    let items = await fetchRss('https://news.google.com/rss/search?q=' + enc + '&hl=ar&gl=EG&ceid=EG:ar');
+    if (!items.length) items = await fetchRss('https://www.bing.com/news/search?q=' + enc + '&format=rss&setlang=ar&cc=EG');
+    if (!items.length) { console.error('webLookup: no results for', q); return ''; }
     return 'عناوين أخبار حديثة من بحث مباشر على الإنترنت. استخدمها للإجابة عن الأخبار الجديدة، واذكر إنها من عناوين الأخبار، ولا تضف تفاصيل مش موجودة فيها. لو العناوين مش كفاية قل إنك مش متأكد:\n' + items.join('\n');
-  } catch { return ''; }
+  } catch (e) { console.error('webLookup error', String(e && e.message || e)); return ''; }
 }
 
 // ============================================================
@@ -573,27 +585,4 @@ module.exports = async function handler(req, res) {
       { name: 'gemini', url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', key: process.env.GEMINI_API_KEY || '', model: process.env.GEMINI_MODEL || 'gemini-2.0-flash' },
       { name: 'openrouter', url: 'https://openrouter.ai/api/v1/chat/completions', key: process.env.OPENROUTER_API_KEY || '', model: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free' }
       ,{ name: 'cloudflare', url: `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID || ''}/ai/v1/chat/completions`, key: (process.env.CLOUDFLARE_ACCOUNT_ID && process.env.CLOUDFLARE_API_TOKEN) || '', model: process.env.CLOUDFLARE_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast' }
-    ].filter(p => p.key);
-    const cfp = providers.find(p => p.name === 'cloudflare');
-    if (cfp) cfp.key = process.env.CLOUDFLARE_API_TOKEN;
-
-    let groqResponse = null;
-    let lastDetails = '';
-    for (const p of providers) {
-      const payload = { ...groqPayload, model: p.model };
-      if (p.name === 'groq') {
-        if (!/gpt-oss/i.test(p.model)) delete payload.reasoning_effort;
-      } else {
-        delete payload.reasoning_effort;
-        payload.max_tokens = payload.max_completion_tokens;
-        delete payload.max_completion_tokens;
-      }
-      try {
-        const r = await fetch(p.url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${p.key}` },
-          body: JSON.stringify(payload)
-        });
-        if (r.ok && r.body) { groqResponse = r; break; }
-        const t = await r.text().catch(() => '');
-        lastDetails = `${p.name} ${r.status} ${t.slice
+    ].filter(p => 
