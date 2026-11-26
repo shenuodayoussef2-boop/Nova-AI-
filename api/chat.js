@@ -520,6 +520,18 @@ module.exports = async function handler(req, res) {
     const kbContext = await kbLookup(lastUser ? lastUser.content : '');
     const webContext = await webLookup(lastUser ? lastUser.content : '', !!kbContext);
 
+    // DEBUG: a message starting with "#بحث" shows the raw search/KB context instead of calling the model
+    if (lastUser && /^\s*#بحث/.test(lastUser.content)) {
+      const dbg = 'KB: ' + (kbContext ? kbContext.slice(0, 700) : 'لا يوجد') + '\n\nWEB: ' + (webContext || 'لا يوجد نتائج بحث');
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-transform');
+      res.flushHeaders?.();
+      sendSSE(res, { type: 'delta', text: dbg });
+      sendSSE(res, { type: 'done', model: 'debug', quota: null });
+      return res.end();
+    }
+
     const systemInstruction = [
       SYSTEM_PROMPT,
       suppliedSystem,
@@ -582,7 +594,4 @@ module.exports = async function handler(req, res) {
     // ---- Multi-provider router: Groq -> Gemini -> OpenRouter (keys from env, missing ones are skipped)
     const providers = [
       { name: 'groq', url: GROQ_URL, key: GROQ_API_KEY, model: GROQ_MODEL },
-      { name: 'gemini', url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', key: process.env.GEMINI_API_KEY || '', model: process.env.GEMINI_MODEL || 'gemini-2.0-flash' },
-      { name: 'openrouter', url: 'https://openrouter.ai/api/v1/chat/completions', key: process.env.OPENROUTER_API_KEY || '', model: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free' }
-      ,{ name: 'cloudflare', url: `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID || ''}/ai/v1/chat/completions`, key: (process.env.CLOUDFLARE_ACCOUNT_ID && process.env.CLOUDFLARE_API_TOKEN) || '', model: process.env.CLOUDFLARE_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast' }
-    ].filter(p => 
+      { name: 'gemini', url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', key:
