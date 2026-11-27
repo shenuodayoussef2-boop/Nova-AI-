@@ -117,6 +117,10 @@ async function fetchRss(url) {
   } finally { clearTimeout(t); }
 }
 
+function isNewsQ(q) {
+  return /(حادث|حوادث|خبر|اخبار|أخبار|النهارده|النهاردة|انهارده|امبارح|إمبارح|اليوم|الليلة|دلوقتي|دلوقتى|الان|الآن|آخر|اخر|اخير|أخير|حصل|حصلت|عاجل|نتيجة|نتيجه|مباراة|ماتش|سعر|اسعار|أسعار|الدولار|الذهب|طقس|الطقس|ابحث|دور|بحث)/.test(String(q || ''));
+}
+
 async function webLookup(question, kbFound) {
   try {
     const q0 = String(question || '').trim();
@@ -520,8 +524,23 @@ module.exports = async function handler(req, res) {
     const kbContext = await kbLookup(lastUser ? lastUser.content : '');
     const webContext = await webLookup(lastUser ? lastUser.content : '', !!kbContext);
 
+    const highStakes = !!(lastUser && /(حادث|حوادث|حريق|وفاة|وفيات|ضحايا|انفجار|عاجل|اخبار|أخبار|خبر|مباراة|نتيجة)/.test(lastUser.content));
+    if (highStakes && !webContext && !(lastUser && /^\s*#بحث/.test(lastUser.content))) {
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
+      res.setHeader('Cache-Control', 'no-cache, no-transform');
+      res.flushHeaders?.();
+      sendSSE(res, { type: 'delta', text: 'مش قادر أتأكد من الخبر ده دلوقتي، ومش عايز أديك تفاصيل ممكن تطلع غلط. تابع مصدر إخباري موثوق، وجرب تسألني تاني بعد شوية.' });
+      sendSSE(res, { type: 'done', model: 'guard', quota: null });
+      return res.end();
+    }
+    const noLiveNews = !!(lastUser && isNewsQ(lastUser.content) && !webContext);
+    const noLiveNewsRule = noLiveNews
+      ? 'تنبيه صارم: السؤال عن حدث أو خبر حالي ولم تتوفر نتائج بحث مباشر. ممنوع تماما اختراع أي تفاصيل عن الحدث (أماكن، أسباب، أرقام، ضحايا، تصريحات). قل بوضوح إنك مش قادر تتأكد من الخبر دلوقتي وانصح بمتابعة مصدر إخباري موثوق. ولا تدّعي إنك بتبحث في جوجل.'
+      : '';
+
     // DEBUG: a message starting with "#بحث" shows the raw search/KB context instead of calling the model
-    if (lastUser && /^\s*#بحث/.test(lastUser.content)) {
+    if (process.env.DEBUG_SEARCH === '1' && lastUser && /^\s*#بحث/.test(lastUser.content)) {
       const dbg = 'KB: ' + (kbContext ? kbContext.slice(0, 700) : 'لا يوجد') + '\n\nWEB: ' + (webContext || 'لا يوجد نتائج بحث');
       res.statusCode = 200;
       res.setHeader('Content-Type', 'text/event-stream; charset=utf-8');
@@ -536,7 +555,8 @@ module.exports = async function handler(req, res) {
       SYSTEM_PROMPT,
       suppliedSystem,
       kbContext,
-      webContext
+      webContext,
+      noLiveNewsRule
     ]
       .filter(Boolean)
       .join('\n\n');
@@ -594,4 +614,251 @@ module.exports = async function handler(req, res) {
     // ---- Multi-provider router: Groq -> Gemini -> OpenRouter (keys from env, missing ones are skipped)
     const providers = [
       { name: 'groq', url: GROQ_URL, key: GROQ_API_KEY, model: GROQ_MODEL },
-      { name: 'gemini', url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', key:
+      { name: 'gemini', url: 'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', key: process.env.GEMINI_API_KEY || '', model: process.env.GEMINI_MODEL || 'gemini-2.0-flash' },
+      { name: 'openrouter', url: 'https://openrouter.ai/api/v1/chat/completions', key: process.env.OPENROUTER_API_KEY || '', model: process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.3-70b-instruct:free' }
+      ,{ name: 'cloudflare', url: `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID || ''}/ai/v1/chat/completions`, key: (process.env.CLOUDFLARE_ACCOUNT_ID && process.env.CLOUDFLARE_API_TOKEN) || '', model: process.env.CLOUDFLARE_MODEL || '@cf/meta/llama-3.3-70b-instruct-fp8-fast' }
+    ].filter(p => p.key);
+    const cfp = providers.find(p => p.name === 'cloudflare');
+    if (cfp) cfp.key = process.env.CLOUDFLARE_API_TOKEN;
+
+    let groqResponse = null;
+    let lastDetails = '';
+    for (const p of providers) {
+      const payload = { ...groqPayload, model: p.model };
+      if (p.name === 'groq') {
+        if (!/gpt-oss/i.test(p.model)) delete payload.reasoning_effort;
+      } else {
+        delete payload.reasoning_effort;
+        payload.max_tokens = payload.max_completion_tokens;
+        delete payload.max_completion_tokens;
+      }
+      try {
+        const r = await fetch(p.url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${p.key}` },
+          body: JSON.stringify(payload)
+        });
+        if (r.ok && r.body) { groqResponse = r; break; }
+        const t = await r.text().catch(() => '');
+        lastDetails = `${p.name} ${r.status} ${t.slice(0, 500)}`;
+        console.error('Yovia provider failed:', lastDetails);
+      } catch (e) {
+        lastDetails = `${p.name} ${String(e && e.message || e)}`;
+        console.error('Yovia provider error:', lastDetails);
+      }
+    }
+
+    if (!groqResponse) {
+      return send(res, 502, {
+        error: 'تعذّر على Yovia الحصول على رد من النموذج حاليًا.',
+        code: 'ALL_PROVIDERS_FAILED',
+        details: lastDetails
+      });
+    }
+
+    if (!groqResponse.body) {
+      return send(res, 502, {
+        error: 'خدمة النموذج لم تُرجع تدفق بيانات.',
+        code: 'GROQ_STREAM_UNAVAILABLE'
+      });
+    }
+
+    // ========================================================
+    // START STREAM RESPONSE
+    // ========================================================
+
+    stage = 'groq_stream';
+
+    res.statusCode = 200;
+
+    res.setHeader(
+      'Content-Type',
+      'text/event-stream; charset=utf-8'
+    );
+
+    res.setHeader(
+      'Cache-Control',
+      'no-cache, no-transform'
+    );
+
+    res.setHeader('Connection', 'keep-alive');
+
+    res.setHeader('X-Accel-Buffering', 'no');
+
+    res.flushHeaders?.();
+
+    // ========================================================
+    // READ GROQ SSE STREAM
+    // ========================================================
+
+    groqReader = groqResponse.body.getReader();
+
+    const decoder = new TextDecoder();
+
+    let buffer = '';
+    let totalText = '';
+    let streamError = null;
+
+    function processEvent(eventBlock) {
+      const lines = eventBlock.split(/\r?\n/);
+
+      for (const line of lines) {
+        if (!line.startsWith('data:')) {
+          continue;
+        }
+
+        const raw = line.slice(5).trim();
+
+        if (!raw || raw === '[DONE]') {
+          continue;
+        }
+
+        let chunk;
+
+        try {
+          chunk = JSON.parse(raw);
+        } catch {
+          continue;
+        }
+
+        if (chunk.error) {
+          streamError =
+            chunk.error.message ||
+            'حدث خطأ أثناء توليد الرد.';
+
+          continue;
+        }
+
+        const piece = chunk.choices?.[0]?.delta?.content;
+
+        if (typeof piece === 'string' && piece) {
+          totalText += piece;
+
+          sendSSE(res, {
+            type: 'delta',
+            text: piece
+          });
+        }
+      }
+    }
+
+    // ========================================================
+    // STREAM LOOP
+    // ========================================================
+
+    while (true) {
+      if (res.destroyed || res.writableEnded) {
+        await groqReader.cancel().catch(() => {});
+        return;
+      }
+
+      const { value, done } = await groqReader.read();
+
+      if (done) {
+        break;
+      }
+
+      buffer += decoder.decode(value, {
+        stream: true
+      });
+
+      const events = buffer.split(/\r?\n\r?\n/);
+
+      buffer = events.pop() || '';
+
+      for (const eventBlock of events) {
+        processEvent(eventBlock);
+      }
+    }
+
+    // Process remaining buffered data
+    buffer += decoder.decode();
+
+    if (buffer.trim()) {
+      processEvent(buffer);
+    }
+
+    // ========================================================
+    // STREAM RESULT
+    // ========================================================
+
+    if (streamError) {
+      sendSSE(res, {
+        type: 'error',
+        error: streamError
+      });
+
+      return res.end();
+    }
+
+    if (!totalText.trim()) {
+      sendSSE(res, {
+        type: 'error',
+        error: 'النموذج لم يُرجع نصًا. حاول مرة أخرى.',
+        code: 'EMPTY_MODEL_RESPONSE'
+      });
+
+      return res.end();
+    }
+
+    // ========================================================
+    // DONE EVENT
+    // ========================================================
+
+    sendSSE(res, {
+      type: 'done',
+
+      model: GROQ_MODEL,
+
+      quota: quota
+        ? {
+            plan: quota.plan || null,
+            used: quota.used ?? null,
+            limit: quota.limit ?? null,
+            remaining: quota.remaining ?? null,
+            reset_at: quota.reset_at || null
+          }
+        : null
+    });
+
+    return res.end();
+
+  } catch (error) {
+
+    // ========================================================
+    // ERROR HANDLING
+    // ========================================================
+
+    console.error('Yovia chat handler error:', {
+      stage,
+      name: error?.name || 'Error',
+      message: error?.message || String(error)
+    });
+
+    if (groqReader) {
+      try {
+        await groqReader.cancel();
+      } catch {}
+    }
+
+    if (res.headersSent) {
+      sendSSE(res, {
+        type: 'error',
+        error: 'حصل خطأ أثناء توليد الرد.',
+        code: 'YOVIA_STREAM_ERROR'
+      });
+
+      if (!res.writableEnded) {
+        res.end();
+      }
+
+      return;
+    }
+
+    return send(res, 500, {
+      error: 'حصل خطأ داخلي في Yovia AI.',
+      code: 'YOVIA_INTERNAL_ERROR',
+      stage
+    });
+  }
+};
