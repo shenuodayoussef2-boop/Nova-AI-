@@ -40,13 +40,15 @@ const SYSTEM = `أنت Yovia، وكيل ذكي ينفذ المهام بنفسه 
 - رد بلغة المستخدم ولهجته، وكن مختصرًا.
 - لو المستخدم طلب موقعًا أو صفحة أو تطبيقًا استخدم أداة build_website بملف HTML كامل (CSS وJS داخله) بتصميم احترافي حديث، RTL للعربي، متجاوب مع الموبايل، وكل زرار يعمل فعلاً، وصور حقيقية للمنتجات عبر https://loremflickr.com/600/400/KEYWORD?lock=N (KEYWORD كلمة إنجليزية، وN رقم مختلف) مع onerror يضع خلفية متدرجة.
 - لو طلب صورة استخدم generate_image بوصف إنجليزي مفصل.
-- لو يحتاج معلومة حديثة أو غير مؤكدة استخدم web_search ثم read_page عند الحاجة، واذكر المصادر.
-- لأسعار العملات استخدم exchange_rate (سعر رسمي عالمي، وقد يختلف عن سعر السوق المحلي، وضّح ذلك).
+- لو يحتاج معلومة حديثة أو غير مؤكدة أو خبر استخدم web_search مرة واحدة ثم أجب، واذكر المصادر وتاريخ الخبر.
+- لا تذكر في إجابتك أي خبر أو رقم أو تفصيلة لم تظهر في نتائج البحث. لو النتائج فارغة أو غير مرتبطة قل بصراحة: لم أجد تقارير موثوقة عن ذلك.
+- لأخبار الحوادث والوفيات والضحايا والحرائق: اذكر فقط ما كتبته المصادر حرفيًا، ولا تضف أعدادًا أو أسبابًا من عندك.
+- لأسعار العملات استخدم exchange_rate (سعر رسمي عالمي، وقد يختلف عن سعر البنك المركزي المصري وعن السوق المحلي، وضّح ذلك ولا تنسبه للبنك المركزي).
 - للحسابات استخدم calculate.
 - لا تخترع نتائج ولا تدّعي تنفيذ شيء لم تنفذه.`;
 
 const TOOLS = [
-  { type: 'function', function: { name: 'web_search', description: 'Search the web. Returns titles, urls, snippets.', parameters: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'] } } },
+  { type: 'function', function: { name: 'web_search', description: 'Search the web and news. Returns titles, urls, snippets.', parameters: { type: 'object', properties: { query: { type: 'string' } }, required: ['query'] } } },
   { type: 'function', function: { name: 'read_page', description: 'Fetch a public web page and return its text.', parameters: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'] } } },
   { type: 'function', function: { name: 'generate_image', description: 'Generate an image from an English prompt.', parameters: { type: 'object', properties: { prompt: { type: 'string' } }, required: ['prompt'] } } },
   { type: 'function', function: { name: 'build_website', description: 'Deliver a complete single-file HTML website/app.', parameters: { type: 'object', properties: { title: { type: 'string' }, html: { type: 'string' } }, required: ['title', 'html'] } } },
@@ -70,29 +72,72 @@ function strip(html) {
     .replace(/\s+/g, ' ').trim();
 }
 
+function decodeXml(s) {
+  return String(s || '')
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+    .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&')
+    .trim();
+}
+
+function parseRss(xml, limit) {
+  const out = [];
+  const items = String(xml).match(/<item>[\s\S]*?<\/item>/g) || [];
+  for (const it of items) {
+    const pick = (tag) => { const m = it.match(new RegExp('<' + tag + '[^>]*>([\\s\\S]*?)</' + tag + '>')); return m ? decodeXml(m[1]) : ''; };
+    const title = pick('title');
+    if (!title) continue;
+    out.push({ title, url: pick('link'), snippet: strip(decodeXml(pick('description'))).slice(0, 200), date: pick('pubDate'), source: pick('source') });
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+async function newsSearch(query) {
+  const q = encodeURIComponent(query);
+  const feeds = [
+    'https://news.google.com/rss/search?q=' + q + '&hl=ar&gl=EG&ceid=EG:ar',
+    'https://www.bing.com/news/search?q=' + q + '&format=rss&setlang=ar'
+  ];
+  for (const f of feeds) {
+    try {
+      const r = await fetch(f, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; YoviaBot/1.0)' }, signal: AbortSignal.timeout(4000) });
+      if (!r.ok) continue;
+      const items = parseRss(await r.text(), 6);
+      if (items.length) return items;
+    } catch {}
+  }
+  return [];
+}
+
 async function webSearch(query) {
   const key = process.env.TAVILY_API_KEY || '';
   if (key) {
-    const r = await fetch('https://api.tavily.com/search', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
-      body: JSON.stringify({ query, max_results: 5, include_answer: true })
-    });
-    const j = await r.json().catch(() => ({}));
-    if (r.ok && Array.isArray(j.results)) {
-      return { answer: j.answer || '', results: j.results.map(x => ({ title: x.title, url: x.url, snippet: String(x.content || '').slice(0, 400) })) };
-    }
+    try {
+      const r = await fetch('https://api.tavily.com/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + key },
+        body: JSON.stringify({ query, max_results: 5, include_answer: true })
+      });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok && Array.isArray(j.results) && j.results.length) {
+        return { answer: j.answer || '', results: j.results.map(x => ({ title: x.title, url: x.url, snippet: String(x.content || '').slice(0, 400) })) };
+      }
+    } catch {}
   }
-  // fallback without key: Wikipedia (Arabic then English)
+  // no key: live news RSS first, then Wikipedia (Arabic then English)
+  const news = await newsSearch(query);
+  if (news.length) return { note: 'نتائج أخبار حية. اذكر فقط ما في العناوين مع المصدر والتاريخ.', results: news };
   const out = [];
   for (const lang of ['ar', 'en']) {
-    const r = await fetch('https://' + lang + '.wikipedia.org/w/api.php?action=query&list=search&format=json&srlimit=3&srsearch=' + encodeURIComponent(query));
-    const j = await r.json().catch(() => ({}));
-    const items = (j.query && j.query.search) || [];
-    items.forEach(x => out.push({ title: x.title, url: 'https://' + lang + '.wikipedia.org/wiki/' + encodeURIComponent(x.title.replace(/ /g, '_')), snippet: strip(x.snippet) }));
+    try {
+      const r = await fetch('https://' + lang + '.wikipedia.org/w/api.php?action=query&list=search&format=json&srlimit=3&srsearch=' + encodeURIComponent(query), { signal: AbortSignal.timeout(4000) });
+      const j = await r.json().catch(() => ({}));
+      const items = (j.query && j.query.search) || [];
+      items.forEach(x => out.push({ title: x.title, url: 'https://' + lang + '.wikipedia.org/wiki/' + encodeURIComponent(x.title.replace(/ /g, '_')), snippet: strip(x.snippet) }));
+    } catch {}
     if (out.length >= 3) break;
   }
-  return out.length ? out : 'no results (web search key missing)';
+  return out.length ? { note: 'ويكيبيديا فقط، لا تصلح للأخبار الحديثة.', results: out } : 'NO RESULTS. Tell the user you could not find reliable reports. Do not invent anything.';
 }
 
 async function exchangeRate(base, target) {
@@ -101,14 +146,14 @@ async function exchangeRate(base, target) {
   const r = await fetch('https://open.er-api.com/v6/latest/' + b);
   const j = await r.json().catch(() => ({}));
   if (!j.rates || !j.rates[t]) return 'rate unavailable';
-  return { base: b, target: t, rate: j.rates[t], updated: j.time_last_update_utc };
+  return { base: b, target: t, rate: j.rates[t], updated: j.time_last_update_utc, note: 'global market rate, not the Central Bank of Egypt rate' };
 }
 
 async function readPage(url) {
   let u;
   try { u = new URL(url); } catch { return 'invalid url'; }
   if (!/^https?:$/.test(u.protocol) || isPrivateHost(u.hostname)) return 'blocked url';
-  const r = await fetch(u.href, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; YoviaBot/1.0)' }, redirect: 'follow' });
+  const r = await fetch(u.href, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; YoviaBot/1.0)' }, redirect: 'follow', signal: AbortSignal.timeout(5000) });
   const t = strip(await r.text());
   return t.slice(0, 3500);
 }
@@ -141,19 +186,19 @@ async function runTool(name, args, artifacts) {
   }
 }
 
-async function groq(messages) {
+async function groq(messages, allowTools) {
+  const payload = {
+    model: GROQ_MODEL,
+    messages,
+    max_completion_tokens: 3500,
+    temperature: 0.6,
+    reasoning_effort: 'low'
+  };
+  if (allowTools) { payload.tools = TOOLS; payload.tool_choice = 'auto'; }
   const r = await fetch(GROQ_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + GROQ_API_KEY },
-    body: JSON.stringify({
-      model: GROQ_MODEL,
-      messages,
-      tools: TOOLS,
-      tool_choice: 'auto',
-      max_completion_tokens: 3500,
-      temperature: 0.6,
-      reasoning_effort: 'low'
-    })
+    body: JSON.stringify(payload)
   });
   const j = await r.json().catch(() => ({}));
   if (!r.ok) {
@@ -197,7 +242,8 @@ module.exports = async function handler(req, res) {
     let reply = '';
 
     for (let step = 0; step < MAX_STEPS; step++) {
-      const msg = await groq(messages);
+      const last = step === MAX_STEPS - 1;
+      const msg = await groq(messages, !last);
       if (!msg) break;
       const calls = msg.tool_calls || [];
       if (!calls.length) { reply = (msg.content || '').trim(); break; }
@@ -208,6 +254,13 @@ module.exports = async function handler(req, res) {
         const result = await runTool(c.function.name, args, artifacts);
         messages.push({ role: 'tool', tool_call_id: c.id, content: typeof result === 'string' ? result.slice(0, 3500) : JSON.stringify(result).slice(0, 3500) });
       }
+    }
+    if (!reply && !artifacts.length) {
+      // آخر محاولة: إجابة نهائية بدون أدوات من اللي اتجمع
+      try {
+        const fin = await groq([...messages, { role: 'user', content: 'أجب الآن مباشرة بناءً على نتائج الأدوات فقط، بدون أي أداة جديدة.' }], false);
+        reply = ((fin && fin.content) || '').trim();
+      } catch {}
     }
     if (!reply && artifacts.length) reply = 'تم، دي النتيجة:';
     if (!reply) reply = 'معرفتش أكمل المهمة، جرب تاني بصياغة أبسط.';
