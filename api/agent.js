@@ -295,6 +295,22 @@ async function groq(messages, allowTools, tools) {
   return j.choices && j.choices[0] && j.choices[0].message;
 }
 
+// ---------- حدود الباقة اليومية (المستخدمين المسجلين) ----------
+// بيستخدم SUPABASE_SERVICE_KEY الموجود، من غير متغيرات جديدة.
+// لو الفحص نفسه وقع (مشكلة اتصال) بنعدّي الرسالة عادي عشان الخدمة متقفش.
+async function planLimitCheck(userId) {
+  try {
+    if (!KB_KEY || !SUPABASE_URL || !userId) return null;
+    const r = await fetch(SUPABASE_URL + '/rest/v1/rpc/check_message_limit', {
+      method: 'POST',
+      headers: { apikey: KB_KEY, Authorization: 'Bearer ' + KB_KEY, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_user_id: userId })
+    });
+    if (!r.ok) { console.error('plan limit rpc', r.status); return null; }
+    return await r.json().catch(() => null);
+  } catch (e) { console.error('plan limit', e && e.message); return null; }
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   try {
@@ -315,6 +331,14 @@ module.exports = async function handler(req, res) {
       globalThis.__guestHits.set(key, n);
       if (globalThis.__guestHits.size > 5000) globalThis.__guestHits.clear();
       if (n > 15) return res.status(429).json({ error: 'خلصت رسايلك المجانية كضيف. سجّل حساب مجاني وكمّل 🚀' });
+    }
+
+    // فحص حد الباقة للمسجلين (الضيوف لهم منطقهم فوق)
+    if (userId) {
+      const lim = await planLimitCheck(userId);
+      if (lim && lim.ok === false) {
+        return res.status(429).json({ error: lim.error || 'وصلت للحد اليومي لباقتك. الحد بيتجدد بكرة.' });
+      }
     }
 
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : (req.body || {});
