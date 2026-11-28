@@ -34,6 +34,39 @@ async function kbLookup(question) {
   } catch { return ''; }
 }
 
+// ---------- Long-term memory (per signed-in user) ----------
+// يستخدم SUPABASE_SERVICE_KEY الموجود أصلاً، بدون أي متغيرات جديدة
+async function memLoad(userId) {
+  try {
+    if (!KB_KEY || !SUPABASE_URL || !userId) return [];
+    const r = await fetch(SUPABASE_URL + '/rest/v1/user_memory?select=key,value&user_id=eq.' + encodeURIComponent(userId) + '&order=updated_at.desc&limit=50', { headers: { apikey: KB_KEY } });
+    if (!r.ok) return [];
+    const rows = await r.json().catch(() => []);
+    return Array.isArray(rows) ? rows : [];
+  } catch { return []; }
+}
+async function memSave(userId, key, value) {
+  try {
+    if (!KB_KEY || !SUPABASE_URL || !userId) return 'memory off';
+    key = String(key || '').toLowerCase().replace(/[^a-z0-9_\u0600-\u06FF-]/g, '_').slice(0, 40);
+    value = String(value || '').slice(0, 300);
+    if (!key || !value) return 'nothing to save';
+    const r = await fetch(SUPABASE_URL + '/rest/v1/user_memory', {
+      method: 'POST',
+      headers: { apikey: KB_KEY, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({ user_id: userId, key, value, updated_at: new Date().toISOString() })
+    });
+    return r.ok ? 'saved' : 'save failed';
+  } catch { return 'save failed'; }
+}
+async function memForget(userId) {
+  try {
+    if (!KB_KEY || !SUPABASE_URL || !userId) return 'memory off';
+    const r = await fetch(SUPABASE_URL + '/rest/v1/user_memory?user_id=eq.' + encodeURIComponent(userId), { method: 'DELETE', headers: { apikey: KB_KEY } });
+    return r.ok ? 'forgotten' : 'forget failed';
+  } catch { return 'forget failed'; }
+}
+
 const SYSTEM = `أنت Yovia، وكيل ذكي ينفذ المهام بنفسه باستخدام الأدوات المتاحة.
 - إذا سُئلت من مؤسسك أو من صنعك أو من أسسك فقل بالضبط: أنا يوفيا من شركة Yovia AI التي أسسها Youssef Shenuoda.
 - المطوّر هو يوسف. لا تقل إنك Nova أو Gemini أو Google أو OpenAI أو Groq.
@@ -54,6 +87,11 @@ const TOOLS = [
   { type: 'function', function: { name: 'build_website', description: 'Deliver a complete single-file HTML website/app.', parameters: { type: 'object', properties: { title: { type: 'string' }, html: { type: 'string' } }, required: ['title', 'html'] } } },
   { type: 'function', function: { name: 'exchange_rate', description: 'Live currency exchange rate, e.g. USD to EGP.', parameters: { type: 'object', properties: { base: { type: 'string' }, target: { type: 'string' } }, required: ['base', 'target'] } } },
   { type: 'function', function: { name: 'calculate', description: 'Evaluate a math expression with + - * / ( ) numbers only.', parameters: { type: 'object', properties: { expression: { type: 'string' } }, required: ['expression'] } } }
+];
+
+const MEMORY_TOOLS = [
+  { type: 'function', function: { name: 'remember', description: 'Save one lasting fact about the current signed-in user (name, job, city, age, interests, preferences, projects). key: short snake_case, value: the fact in the user language.', parameters: { type: 'object', properties: { key: { type: 'string' }, value: { type: 'string' } }, required: ['key', 'value'] } } },
+  { type: 'function', function: { name: 'forget_all_memory', description: 'Delete every saved fact about the current user. Use only when they ask you to forget them.', parameters: { type: 'object', properties: {} } } }
 ];
 
 function isPrivateHost(h) {
@@ -164,7 +202,7 @@ function calc(expr) {
   try { return String(Function('"use strict";return (' + e + ')')()); } catch { return 'invalid expression'; }
 }
 
-async function runTool(name, args, artifacts) {
+async function runTool(name, args, artifacts, userId) {
   try {
     if (name === 'web_search') return await webSearch(String(args.query || '').slice(0, 200));
     if (name === 'read_page') return await readPage(args.url);
@@ -180,13 +218,15 @@ async function runTool(name, args, artifacts) {
       artifacts.push({ type: 'html', title: String(args.title || 'موقع'), html: String(args.html || '') });
       return 'website delivered to the user as a live preview';
     }
+    if (name === 'remember') return userId ? await memSave(userId, args.key, args.value) : 'memory needs login';
+    if (name === 'forget_all_memory') return userId ? await memForget(userId) : 'memory needs login';
     return 'unknown tool';
   } catch (e) {
     return 'tool error: ' + (e && e.message ? e.message : 'failed');
   }
 }
 
-async function groq(messages, allowTools) {
+async function groq(messages, allowTools, tools) {
   const payload = {
     model: GROQ_MODEL,
     messages,
@@ -194,7 +234,7 @@ async function groq(messages, allowTools) {
     temperature: 0.6,
     reasoning_effort: 'low'
   };
-  if (allowTools) { payload.tools = TOOLS; payload.tool_choice = 'auto'; }
+  if (allowTools) { payload.tools = tools || TOOLS; payload.tool_choice = 'auto'; }
   const r = await fetch(GROQ_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + GROQ_API_KEY },
@@ -213,9 +253,12 @@ module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
   try {
     const auth = req.headers.authorization || '';
+    let userId = '';
     if (auth) {
       const who = await fetch(SUPABASE_URL + '/auth/v1/user', { headers: { apikey: SUPABASE_KEY, Authorization: auth } });
       if (!who.ok) return res.status(401).json({ error: 'جلسة غير صالحة. حدّث الصفحة.' });
+      const whoJson = await who.json().catch(() => ({}));
+      userId = (whoJson && whoJson.id) || '';
     } else {
       // زائر بدون تسجيل: مسموح بحد يومي بسيط لكل IP (best effort)
       globalThis.__guestHits = globalThis.__guestHits || new Map();
@@ -237,13 +280,21 @@ module.exports = async function handler(req, res) {
 
     const lastU = [...history].reverse().find(m => m.role === 'user');
     const kb = await kbLookup(lastU ? lastU.content : '');
-    const messages = [{ role: 'system', content: SYSTEM + kb }, ...history];
+    let memBlock = '';
+    if (userId) {
+      const facts = await memLoad(userId);
+      memBlock = '\n\nذاكرة طويلة المدى لهذا المستخدم (معلومات حفظتها عنه من محادثات سابقة، استخدمها بشكل طبيعي ولا تذكر أبدًا إنك قريتها من مكان):\n' +
+        (facts.length ? facts.map(f => '- ' + f.key + ': ' + f.value).join('\n') : '(لا توجد معلومات محفوظة بعد)') +
+        '\nقواعد الذاكرة: لو المستخدم ذكر معلومة دائمة عن نفسه (اسمه، شغله، مدينته، سنّه، اهتماماته، تفضيلاته، مشاريعه) احفظها فورًا بأداة remember بمفتاح قصير، وحدّث نفس المفتاح لو المعلومة اتغيرت. لا تحفظ أسئلة أو كلام مؤقت أو أخبار أو طلبات. لو طلب ينسى كل ما تعرفه عنه استخدم forget_all_memory وأكد له أنك نسيت.';
+    }
+    const messages = [{ role: 'system', content: SYSTEM + memBlock + kb }, ...history];
     const artifacts = [];
+    const tools = userId ? TOOLS.concat(MEMORY_TOOLS) : TOOLS;
     let reply = '';
 
     for (let step = 0; step < MAX_STEPS; step++) {
       const last = step === MAX_STEPS - 1;
-      const msg = await groq(messages, !last);
+      const msg = await groq(messages, !last, tools);
       if (!msg) break;
       const calls = msg.tool_calls || [];
       if (!calls.length) { reply = (msg.content || '').trim(); break; }
@@ -251,7 +302,7 @@ module.exports = async function handler(req, res) {
       for (const c of calls) {
         let args = {};
         try { args = JSON.parse(c.function.arguments || '{}'); } catch {}
-        const result = await runTool(c.function.name, args, artifacts);
+        const result = await runTool(c.function.name, args, artifacts, userId);
         messages.push({ role: 'tool', tool_call_id: c.id, content: typeof result === 'string' ? result.slice(0, 3500) : JSON.stringify(result).slice(0, 3500) });
       }
     }
