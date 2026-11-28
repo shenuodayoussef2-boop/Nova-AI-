@@ -1595,9 +1595,9 @@ const subscriptionPrices={
 
 /* ←←← حط أرقام محافظك هنا (بدل 01XXXXXXXXXX) */
 const subscriptionPaymentNumbers={
-  vodafone:'01229010082',
-  orange:'01229010082',
-  etisalat:'01229010082',
+  vodafone:'01XXXXXXXXXX',
+  orange:'01XXXXXXXXXX',
+  etisalat:'01XXXXXXXXXX',
   card:''
 };
 const subscriptionMethodNames={vodafone:'Vodafone Cash',orange:'Orange Cash',etisalat:'e& money',card:'Visa / Mastercard'};
@@ -1698,7 +1698,7 @@ function initSubscriptions(){
     if(!t){toast('سجّل دخولك الأول عشان تفعّل الباقة');return;}
     $('#redeemCodeBtn').disabled=true;
     try{
-      const r=await fetch('/api/redeem',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t},body:JSON.stringify({code:code})});
+      const r=await fetch('/api/plan',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t},body:JSON.stringify({code:code})});
       const d=await r.json().catch(()=>({}));
       if(!r.ok){
         toast(d.error||'حصل خطأ، جرب تاني');
