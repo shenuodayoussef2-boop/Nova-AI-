@@ -307,12 +307,12 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
 
 
 /* ---------- Subscriptions ---------- */
-.subs-modal{width:min(980px,100%);max-height:min(820px,92dvh)}
+.subs-modal{width:min(980px,100%);max-height:min(820px,92dvh);overflow-y:auto}
 .subs-intro{padding:18px 20px 8px;color:var(--text-dim);font-size:13px}
 .subs-period{display:flex;justify-content:center;gap:8px;padding:10px 18px 18px}
 .subs-period button{padding:8px 16px;border:1px solid var(--border-strong);border-radius:99px;color:var(--text-dim);font-size:12.5px}
 .subs-period button.active{background:var(--accent-soft);border-color:var(--brand-a);color:var(--text);font-weight:700}
-.subs-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:0 18px 18px;overflow:auto}
+.subs-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;padding:0 18px 18px;flex:none}
 .subs-card{border:1px solid var(--border-strong);background:var(--surface-2);border-radius:var(--r-md);padding:15px 13px;display:flex;flex-direction:column;min-width:0;position:relative}
 .subs-card.selected{border:2px solid var(--brand-a);padding:14px 12px;background:var(--accent-soft)}
 .subs-card h4{font-size:15px;margin-bottom:5px}
@@ -1595,10 +1595,10 @@ const subscriptionPrices={
 
 /* ←←← حط أرقام محافظك هنا (بدل 01XXXXXXXXXX) */
 const subscriptionPaymentNumbers={
-  vodafone:'01XXXXXXXXXX',
-  orange:'01XXXXXXXXXX',
-  etisalat:'01XXXXXXXXXX',
-  card:''
+  vodafone:'01229010082',
+  orange:'01229010082',
+  etisalat:'01229010082',
+  card:'01229010082'
 };
 const subscriptionMethodNames={vodafone:'Vodafone Cash',orange:'Orange Cash',etisalat:'e& money',card:'Visa / Mastercard'};
 
