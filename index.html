@@ -553,6 +553,17 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
   </main>
 </div>
 
+<style>
+.subs-activate{margin-top:14px;border-top:1px solid var(--border);padding-top:14px}
+.subs-activate h4{margin:0 0 6px;font-size:14px}
+.subs-activate-note{font-size:13px;color:var(--text-dim);margin:0 0 10px;line-height:1.7}
+.subs-activate-note b{color:var(--text);direction:ltr;display:inline-block;unicode-bidi:embed}
+.subs-code-row{display:flex;gap:8px}
+.subs-code-row input{flex:1;background:var(--surface-2);border:1px solid var(--border-strong);border-radius:var(--r-sm);color:var(--text);padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:14px;letter-spacing:1px;min-width:0}
+.subs-code-row input:focus{outline:none;border-color:var(--brand-a)}
+.subs-current{font-size:12px;color:var(--ok);margin:10px 0 0}
+</style>
+
 <!-- Subscriptions Modal -->
 <div class="modal-backdrop" id="subscriptionsModal">
   <div class="modal subs-modal" role="dialog" aria-modal="true" aria-labelledby="subscriptionsTitle">
@@ -563,6 +574,7 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
       </button>
     </div>
     <p class="subs-intro">اختر الباقة المناسبة لك واستمتع بحدود استخدام ومزايا أكبر.</p>
+    <p class="subs-current" id="subsCurrent" style="display:none"></p>
     <div class="subs-period" aria-label="مدة الاشتراك">
       <button type="button" class="active" data-period="monthly">شهري</button>
       <button type="button" data-period="yearly">سنوي</button>
@@ -606,7 +618,15 @@ input[type="range"]::-moz-range-thumb{width:19px;height:19px;border-radius:50%;b
         <button type="button" data-method="card">Visa / Mastercard</button>
       </div>
     </div>
-    <div class="subs-note">واجهة اختيار الباقة فقط: بيانات استقبال المدفوعات والتحقق منها لم تُضف بعد. لن يتم خصم أي مبلغ أو تفعيل اشتراك من هذه الصفحة حاليًا.</div>
+    <div class="subs-note">اختار الباقة وطريقة الدفع واضغط "متابعة الاشتراك"، هتظهرلك بيانات التحويل. بعد ما تحوّل هيوصلك كود تفعيل تكتبه تحت.</div>
+    <div class="subs-activate" id="subsActivate" style="display:none">
+      <h4>تفعيل الباقة</h4>
+      <p class="subs-activate-note" id="payInstructions"></p>
+      <div class="subs-code-row">
+        <input type="text" id="activationCodeInput" placeholder="YOVIA-XXXX-XXXX" dir="ltr" autocomplete="off" />
+        <button type="button" class="btn primary" id="redeemCodeBtn">تفعيل</button>
+      </div>
+    </div>
     <div class="subs-footer">
       <div class="subs-total">الإجمالي: <strong id="subsTotal">0 جنيه</strong></div>
       <button type="button" class="btn primary" id="continueSubscription">متابعة الاشتراك</button>
@@ -1573,6 +1593,15 @@ const subscriptionPrices={
   ULTRA:{monthly:99,yearly:999.99}
 };
 
+/* ←←← حط أرقام محافظك هنا (بدل 01XXXXXXXXXX) */
+const subscriptionPaymentNumbers={
+  vodafone:'01XXXXXXXXXX',
+  orange:'01XXXXXXXXXX',
+  etisalat:'01XXXXXXXXXX',
+  card:''
+};
+const subscriptionMethodNames={vodafone:'Vodafone Cash',orange:'Orange Cash',etisalat:'e& money',card:'Visa / Mastercard'};
+
 function updateSubscriptionUI(){
   const cards=$$('.subs-card');
   cards.forEach(card=>{
@@ -1582,7 +1611,7 @@ function updateSubscriptionUI(){
     const priceEl=card.querySelector('.subs-price');
     priceEl.innerHTML=`${price} <small>جنيه${plan==='FREE'?'':selectedSubscriptionPeriod==='monthly'?' / شهر':' / سنة'}</small>`;
     const button=card.querySelector('.subs-select');
-    button.textContent=plan===selectedSubscriptionPlan?(plan==='FREE'?'الباقة الحالية':'تم الاختيار'):`اختيار ${plan}`;
+    button.textContent=plan===(window.yoviaCurrentPlan||'FREE')?'الباقة الحالية':(plan===selectedSubscriptionPlan?'تم الاختيار':`اختيار ${plan}`);
   });
   const total=subscriptionPrices[selectedSubscriptionPlan][selectedSubscriptionPeriod];
   $('#subsTotal').textContent=`${total} جنيه`;
@@ -1597,6 +1626,27 @@ function openSubscriptions(){
   $('#subscriptionsModal').classList.add('show');
 }
 function closeSubscriptions(){$('#subscriptionsModal').classList.remove('show');}
+
+async function refreshCurrentPlan(){
+  try{
+    const t=await getYoviaAccessToken();
+    if(!t){window.yoviaCurrentPlan='FREE';return;}
+    const r=await fetch('/api/plan',{headers:{'Authorization':'Bearer '+t}});
+    if(!r.ok)return;
+    const d=await r.json();
+    window.yoviaCurrentPlan=d.plan||'FREE';
+    const p=$('#userMode');if(p)p.textContent='باقة '+window.yoviaCurrentPlan;
+    const cur=$('#subsCurrent');
+    if(cur){
+      if(window.yoviaCurrentPlan==='FREE'){cur.style.display='none';}
+      else{
+        let txt='باقتك الحالية: '+window.yoviaCurrentPlan;
+        if(d.expires_at)txt+=' — بتنتهي في '+new Date(d.expires_at).toLocaleDateString('ar-EG');
+        cur.textContent=txt;cur.style.display='block';
+      }
+    }
+  }catch(e){}
+}
 
 function initSubscriptions(){
   $('#subscriptionsBtn').addEventListener('click',()=>{
@@ -1630,7 +1680,38 @@ function initSubscriptions(){
       toast('أنت على الباقة المجانية بالفعل');
       return;
     }
-    toast('اختيارك محفوظ في الواجهة فقط؛ الدفع والتفعيل غير متاحين حتى إعداد بيانات الدفع والتحقق');
+    if(selectedSubscriptionPlan===(window.yoviaCurrentPlan||'FREE')){
+      toast('دي باقتك الحالية بالفعل');
+      return;
+    }
+    const num=subscriptionPaymentNumbers[selectedSubscriptionMethod];
+    if(!num){toast('طريقة الدفع دي مش متاحة حاليًا، اختار محفظة موبايل');return;}
+    const total=subscriptionPrices[selectedSubscriptionPlan][selectedSubscriptionPeriod];
+    const period=selectedSubscriptionPeriod==='monthly'?'شهر':'سنة';
+    $('#payInstructions').innerHTML=`حوّل <b>${total} جنيه</b> على ${subscriptionMethodNames[selectedSubscriptionMethod]}: <b>${num}</b> (باقة ${selectedSubscriptionPlan} لمدة ${period}). بعد التحويل هيوصلك كود تفعيل، اكتبه تحت واضغط تفعيل.`;
+    $('#subsActivate').style.display='block';
+  });
+  $('#redeemCodeBtn').addEventListener('click',async()=>{
+    const code=$('#activationCodeInput').value.trim();
+    if(!code){toast('اكتب الكود الأول');return;}
+    const t=await getYoviaAccessToken();
+    if(!t){toast('سجّل دخولك الأول عشان تفعّل الباقة');return;}
+    $('#redeemCodeBtn').disabled=true;
+    try{
+      const r=await fetch('/api/redeem',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+t},body:JSON.stringify({code:code})});
+      const d=await r.json().catch(()=>({}));
+      if(!r.ok){
+        toast(d.error||'حصل خطأ، جرب تاني');
+      }else{
+        window.yoviaCurrentPlan=d.plan||'FREE';
+        toast('تم تفعيل باقة '+window.yoviaCurrentPlan+' بنجاح');
+        $('#subsActivate').style.display='none';
+        $('#activationCodeInput').value='';
+        closeSubscriptions();
+        await refreshCurrentPlan();
+      }
+    }catch(e){toast('مشكلة في الاتصال، جرب تاني');}
+    $('#redeemCodeBtn').disabled=false;
   });
 }
 
@@ -1781,6 +1862,7 @@ function init(){
 
   /* Subscriptions */
   initSubscriptions();
+  refreshCurrentPlan();
 
   /* Settings */
   $('#settingsBtn').addEventListener('click',openSettings);
