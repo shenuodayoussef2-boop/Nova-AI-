@@ -163,6 +163,13 @@ a{color:var(--brand-a);text-decoration:none}
 .msg-content{font-size:14.5px;color:var(--text);word-wrap:break-word;overflow-wrap:anywhere;line-height:1.75}
 .msg-user .msg-content{background:var(--surface-2);border:1px solid var(--border);padding:11px 15px;border-radius:var(--r-md);border-start-start-radius:4px;white-space:pre-wrap;display:inline-block;max-width:100%}
 .msg-content p{margin:0 0 .8em}
+.gov-list{margin:.7em 0 1em;padding:10px;border:1px solid var(--border);background:var(--surface-2);border-radius:16px;display:flex;flex-direction:column;gap:8px}
+.gov-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border:1px solid var(--border);background:var(--surface);border-radius:12px;cursor:pointer;user-select:none;line-height:1.6}
+.gov-box{flex:0 0 auto;width:22px;height:22px;border-radius:7px;border:2px solid var(--text-mute);display:grid;place-items:center;font-size:13px;color:#fff;transition:background .15s,border-color .15s}
+.gov-item.done .gov-box{background:var(--accent-grad);border-color:transparent}
+.gov-item.done .gov-box::after{content:"\2713"}
+.gov-item.done .gov-txt{text-decoration:line-through;color:var(--text-mute)}
+.gov-prog{font-size:12px;color:var(--text-mute);padding:0 4px}
 .msg-content p:last-child{margin-bottom:0}
 .msg-content h2,.msg-content h3,.msg-content h4{margin:1em 0 .5em;font-weight:700;line-height:1.4}
 .msg-content h2{font-size:19px}
@@ -938,10 +945,24 @@ function load(){
 }
 
 /* ---------- Markdown ---------- */
+const GOV_CHK=/^\s*[-*+]\s+\[[ xX]\]\s+/;
+function govKey(t){let h=0;for(let k=0;k<t.length;k++)h=(h*31+t.charCodeAt(k))|0;return 'yv_chk_'+h;}
+function govGet(t){try{return localStorage.getItem(govKey(t))==='1';}catch(e){return false;}}
+function govProg(list){
+  const all=list.querySelectorAll('.gov-item'),d=list.querySelectorAll('.gov-item.done');
+  const p=list.querySelector('.gov-prog');if(p)p.textContent=d.length+' / '+all.length;
+}
+document.addEventListener('click',function(e){
+  const it=e.target.closest&&e.target.closest('.gov-item');if(!it)return;
+  const on=!it.classList.contains('done');
+  it.classList.toggle('done',on);
+  try{localStorage.setItem(govKey(it.getAttribute('data-gov')),on?'1':'0');}catch(err){}
+  govProg(it.closest('.gov-list'));
+});
 function inlineFmt(s){
   s=esc(s);
   s=s.replace(/`([^`]+)`/g,'<code class="ic">$1</code>');
-  s=s.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>');
+  s=s.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
   s=s.replace(/(^|[^*])\*([^*\n]+)\*/g,'$1<em>$2</em>');
   s=s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g,'<a href="$2" target="_blank" rel="noopener">$1</a>');
   return s;
@@ -959,9 +980,18 @@ function renderMarkdown(src){
       out+=`<div class="code-block"><div class="code-head"><span class="code-lang">${esc(lang)||'code'}</span><span class="code-btns">${/^(html?|svg|xhtml)$/i.test(lang)||/<(!doctype html|html|body|svg)[\s>]/i.test(buf.join('\n').slice(0,2000))?'<button class="open-code" type="button">فتح</button>':''}<button class="copy-code" type="button">نسخ</button></span></div><pre><code>${esc(buf.join('\n'))}</code></pre></div>`;
       continue;
     }
+    if(GOV_CHK.test(line)){
+      const items=[];let nd=0;
+      while(i<lines.length&&GOV_CHK.test(lines[i])){
+        const t=lines[i].replace(GOV_CHK,'').trim();
+        const done=govGet(t);if(done)nd++;
+        items.push(`<div class="gov-item${done?' done':''}" data-gov="${esc(t)}"><span class="gov-box"></span><span class="gov-txt">${inlineFmt(t)}</span></div>`);i++;
+      }
+      out+='<div class="gov-list">'+items.join('')+'<div class="gov-prog">'+nd+' / '+items.length+'</div></div>';continue;
+    }
     if(/^\s*[-*+]\s+/.test(line)){
       const items=[];
-      while(i<lines.length&&/^\s*[-*+]\s+/.test(lines[i])){
+      while(i<lines.length&&/^\s*[-*+]\s+/.test(lines[i])&&!GOV_CHK.test(lines[i])){
         items.push('<li>'+inlineFmt(lines[i].replace(/^\s*[-*+]\s+/,''))+'</li>');i++;
       }
       out+='<ul>'+items.join('')+'</ul>';continue;
@@ -1598,7 +1628,7 @@ const subscriptionPaymentNumbers={
   vodafone:'01229010082',
   orange:'01229010082',
   etisalat:'01229010082',
-  card:'01229010082'
+  card:''
 };
 const subscriptionMethodNames={vodafone:'Vodafone Cash',orange:'Orange Cash',etisalat:'e& money',card:'Visa / Mastercard'};
 
