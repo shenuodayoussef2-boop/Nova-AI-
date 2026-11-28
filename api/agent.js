@@ -36,14 +36,25 @@ async function kbLookup(question) {
 
 // ---------- Long-term memory (per signed-in user) ----------
 // يستخدم SUPABASE_SERVICE_KEY الموجود أصلاً، بدون أي متغيرات جديدة
+const MEM_DEBUG = { errors: [] };
+function memHeaders(extra) {
+  return Object.assign({ apikey: KB_KEY, Authorization: 'Bearer ' + KB_KEY }, extra || {});
+}
+async function memErr(where, r) {
+  let t = '';
+  try { t = (await r.text()).slice(0, 300); } catch {}
+  const m = where + ' ' + r.status + ' ' + t;
+  console.error('memory error:', m);
+  MEM_DEBUG.errors.push(m);
+}
 async function memLoad(userId) {
   try {
-    if (!KB_KEY || !SUPABASE_URL || !userId) return [];
-    const r = await fetch(SUPABASE_URL + '/rest/v1/user_memory?select=key,value&user_id=eq.' + encodeURIComponent(userId) + '&order=updated_at.desc&limit=50', { headers: { apikey: KB_KEY } });
-    if (!r.ok) return [];
+    if (!KB_KEY || !SUPABASE_URL || !userId) { MEM_DEBUG.errors.push('missing env or user'); return []; }
+    const r = await fetch(SUPABASE_URL + '/rest/v1/user_memory?select=key,value&user_id=eq.' + encodeURIComponent(userId) + '&order=updated_at.desc&limit=50', { headers: memHeaders() });
+    if (!r.ok) { await memErr('load', r); return []; }
     const rows = await r.json().catch(() => []);
     return Array.isArray(rows) ? rows : [];
-  } catch { return []; }
+  } catch (e) { console.error('memory load', e && e.message); MEM_DEBUG.errors.push('load ' + (e && e.message)); return []; }
 }
 async function memSave(userId, key, value) {
   try {
@@ -51,20 +62,55 @@ async function memSave(userId, key, value) {
     key = String(key || '').toLowerCase().replace(/[^a-z0-9_\u0600-\u06FF-]/g, '_').slice(0, 40);
     value = String(value || '').slice(0, 300);
     if (!key || !value) return 'nothing to save';
-    const r = await fetch(SUPABASE_URL + '/rest/v1/user_memory', {
+    const r = await fetch(SUPABASE_URL + '/rest/v1/user_memory?on_conflict=user_id,key', {
       method: 'POST',
-      headers: { apikey: KB_KEY, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' },
+      headers: memHeaders({ 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' }),
       body: JSON.stringify({ user_id: userId, key, value, updated_at: new Date().toISOString() })
     });
-    return r.ok ? 'saved' : 'save failed';
-  } catch { return 'save failed'; }
+    if (!r.ok) { await memErr('save', r); return 'save failed'; }
+    return 'saved';
+  } catch (e) { console.error('memory save', e && e.message); MEM_DEBUG.errors.push('save ' + (e && e.message)); return 'save failed'; }
 }
 async function memForget(userId) {
   try {
     if (!KB_KEY || !SUPABASE_URL || !userId) return 'memory off';
-    const r = await fetch(SUPABASE_URL + '/rest/v1/user_memory?user_id=eq.' + encodeURIComponent(userId), { method: 'DELETE', headers: { apikey: KB_KEY } });
-    return r.ok ? 'forgotten' : 'forget failed';
+    const r = await fetch(SUPABASE_URL + '/rest/v1/user_memory?user_id=eq.' + encodeURIComponent(userId), { method: 'DELETE', headers: memHeaders() });
+    if (!r.ok) { await memErr('forget', r); return 'forget failed'; }
+    return 'forgotten';
   } catch { return 'forget failed'; }
+}
+// استخراج تلقائي من السيرفر: مش معتمد على إن الموديل يستدعي الأداة
+async function memExtract(userId, history, existing) {
+  try {
+    const lastU = [...history].reverse().find(m => m.role === 'user');
+    if (!lastU || lastU.content.trim().length < 4) return [];
+    const ctx = history.slice(-4).map(m => (m.role === 'user' ? 'المستخدم: ' : 'يوفيا: ') + m.content.slice(0, 500)).join('\n');
+    const known = existing.length ? existing.map(f => f.key + ': ' + f.value).join('\n') : '(لا شيء)';
+    const sys = 'استخرج من آخر رسالة للمستخدم أي معلومات دائمة عنه شخصيًا (الاسم، الشغل، الدراسة، المدينة، السن، الاهتمامات، التفضيلات، المشاريع، العائلة). تجاهل الأسئلة والطلبات والأخبار والكلام المؤقت. المعلومات المحفوظة حاليًا:\n' + known + '\nلو معلومة جديدة تغيّر معلومة محفوظة استخدم نفس المفتاح. المفاتيح إنجليزية قصيرة مثل name, job, city, age, interests, projects, likes. القيم قصيرة وبنفس لغة المستخدم. ردّ JSON فقط بهذا الشكل: {"facts":[{"key":"name","value":"..."}]} ولو مفيش شيء: {"facts":[]}';
+    const r = await fetch(GROQ_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + GROQ_API_KEY },
+      body: JSON.stringify({
+        model: process.env.GROQ_MEMORY_MODEL || 'llama-3.1-8b-instant',
+        messages: [{ role: 'system', content: sys }, { role: 'user', content: ctx }],
+        temperature: 0,
+        max_tokens: 400,
+        response_format: { type: 'json_object' }
+      })
+    });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) { console.error('memory extract groq', r.status, JSON.stringify(j).slice(0, 200)); MEM_DEBUG.errors.push('extract groq ' + r.status); return []; }
+    const txt = (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || '{}';
+    const parsed = JSON.parse(txt);
+    const facts = Array.isArray(parsed.facts) ? parsed.facts.slice(0, 6) : [];
+    const saved = [];
+    for (const f of facts) {
+      if (!f || !f.key || !f.value) continue;
+      const res = await memSave(userId, f.key, typeof f.value === 'string' ? f.value : JSON.stringify(f.value));
+      if (res === 'saved') saved.push(f.key);
+    }
+    return saved;
+  } catch (e) { console.error('memory extract', e && e.message); MEM_DEBUG.errors.push('extract ' + (e && e.message)); return []; }
 }
 
 const SYSTEM = `أنت Yovia، وكيل ذكي ينفذ المهام بنفسه باستخدام الأدوات المتاحة.
@@ -281,8 +327,10 @@ module.exports = async function handler(req, res) {
     const lastU = [...history].reverse().find(m => m.role === 'user');
     const kb = await kbLookup(lastU ? lastU.content : '');
     let memBlock = '';
+    let facts = [];
+    MEM_DEBUG.errors = [];
     if (userId) {
-      const facts = await memLoad(userId);
+      facts = await memLoad(userId);
       memBlock = '\n\nذاكرة طويلة المدى لهذا المستخدم (معلومات حفظتها عنه من محادثات سابقة، استخدمها بشكل طبيعي ولا تذكر أبدًا إنك قريتها من مكان):\n' +
         (facts.length ? facts.map(f => '- ' + f.key + ': ' + f.value).join('\n') : '(لا توجد معلومات محفوظة بعد)') +
         '\nقواعد الذاكرة: لو المستخدم ذكر معلومة دائمة عن نفسه (اسمه، شغله، مدينته، سنّه، اهتماماته، تفضيلاته، مشاريعه) احفظها فورًا بأداة remember بمفتاح قصير، وحدّث نفس المفتاح لو المعلومة اتغيرت. لا تحفظ أسئلة أو كلام مؤقت أو أخبار أو طلبات. لو طلب ينسى كل ما تعرفه عنه استخدم forget_all_memory وأكد له أنك نسيت.';
@@ -315,7 +363,11 @@ module.exports = async function handler(req, res) {
     }
     if (!reply && artifacts.length) reply = 'تم، دي النتيجة:';
     if (!reply) reply = 'معرفتش أكمل المهمة، جرب تاني بصياغة أبسط.';
-    return res.status(200).json({ reply, artifacts });
+    let savedKeys = [];
+    if (userId) savedKeys = await memExtract(userId, history, facts);
+    const out = { reply, artifacts };
+    if (userId && body.debug_memory) out.memory_debug = { user: userId.slice(0, 8), loaded: facts.length, saved: savedKeys, errors: MEM_DEBUG.errors };
+    return res.status(200).json(out);
   } catch (e) {
     console.error('agent error', e && e.message);
     const busy = e && e.status === 429;
